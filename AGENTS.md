@@ -54,6 +54,8 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 - State lives on disk, not in chat: progress → `docs/state/STATE.md`, decisions →
   `docs/decisions/`, debt → `defer:` markers (below) + `docs/state/DEBT.md`.
 - Large explorations: delegate to a subagent that returns a short summary, if your tool has them.
+- Non-Markdown documents (PDF, Office, images, audio, data files): convert to Markdown with the
+  `ingest` skill before reading. Content, not binary bulk, is what should cost tokens.
 - Deliberate simplification? Mark it at the site, so it is grep-recoverable and auditable:
   `// defer: <what was simplified>. ceiling: <where it breaks>. upgrade-when: <trigger>.`
 
@@ -97,6 +99,7 @@ trigger applies. The library:
 | `handover` | Making the project transferable to another human or agent |
 | `skill-author` | The project needs a new skill: how to write one correctly |
 | `comply` | Compliance review (GDPR/AVG, EU AI Act, accessibility, licensing) |
+| `ingest` | Convert a PDF/Office/image/data file to Markdown before reading, to save tokens |
 
 ## Conflict rule
 
