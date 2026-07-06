@@ -1,4 +1,4 @@
-# Groundwork runs on LF everywhere — CRLF checkouts would break the checks and skills (B1).
+# Groundwork runs on LF everywhere; CRLF checkouts would break the checks and skills (B1).
 * text=auto eol=lf
 *.png binary
 *.jpg binary

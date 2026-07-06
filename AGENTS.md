@@ -1,6 +1,6 @@
-# Groundwork — the operating system for this project
+# Groundwork: the operating system for this project
 
-Groundwork tells any AI agent — in any IDE, on any model — how to take this project from first
+Groundwork tells any AI agent (in any IDE, on any model) how to take this project from first
 idea to delivered, maintained software at enterprise quality. This file is always loaded and is
 the single source of rules. Everything else loads on demand via the routing table below.
 
@@ -9,13 +9,13 @@ the single source of rules. Everything else loads on demand via the routing tabl
 ## Session protocol
 
 1. Read the handoff block at the top of `docs/state/STATE.md` before anything else. Do not
-   re-derive project state from the codebase — that is what the file is for.
-2. Work one task at a time. When you finish, propose exactly **one** best next step — no menus.
+   re-derive project state from the codebase. That is what the file is for.
+2. Work one task at a time. When you finish, propose exactly **one** best next step, no menus.
 3. Before ending a session or after completing significant work: update `docs/state/STATE.md`.
-   One fact, one place — update only the file that owns the fact.
+   One fact, one place: update only the file that owns the fact.
 4. End every message with ⚓ to confirm these rules are loaded.
 
-## Decision ladder — run before writing anything
+## Decision ladder: run before writing anything
 
 Stop at the first rung that holds:
 
@@ -24,24 +24,27 @@ Stop at the first rung that holds:
 3. **Does the platform, stdlib, or an installed dependency do it?** Use that.
 4. Only then: build the **minimum that works**, to the standards in `docs/standards/`.
 
-Understanding comes before the ladder. A small diff you don't understand is not efficiency —
-read enough to know the root cause, then fix the cause once, not the symptom everywhere.
+Understanding comes before the ladder. A small diff you don't understand is not efficiency.
+Read enough to know the root cause, then fix the cause once, not the symptom everywhere.
 
 ## Hard rules
 
 - **Scope.** All work must trace to `docs/product/BRIEF.md` or an explicit request. Out-of-scope
-  findings and ideas go to `docs/state/INTAKE.md` — record them, don't build them.
+  findings and ideas go to `docs/state/INTAKE.md`: record them, don't build them.
 - **Done is done.** Stable, tested, in scope = finished. No gold-plating, no unrequested
   refactors, no "while I'm here". There is always something to improve; that is not a reason to.
 - **Never bypass a gate.** No `--no-verify`, no skipping hooks, no commenting out or weakening a
-  check to make it pass. A red gate is information. If a gate is wrong, fix the gate — visibly.
-- **Security floor — never simplify away:** input validation at trust boundaries, authorization
+  check to make it pass. A red gate is information. If a gate is wrong, fix the gate in the open.
+- **Security floor (never simplify away):** input validation at trust boundaries, authorization
   checks, error handling that prevents data loss, secrets out of code and logs, accessibility.
 - **Honesty.** Report failures as failures, with output. Never claim something works that you
   did not verify. No reassuring the user against the evidence.
 - **Verify before "done".** Exercise the change end-to-end, not just the type checker. What you
   cannot verify, you flag. Details: skill `verify`.
-- **Language.** All governance text, code, comments, and commits in English. Product-facing
+- **Language.** All governance text, code, comments, and commits in English. Write plainly: no em
+  dashes, en dashes, curly quotes or ellipsis characters, and none of the AI-boilerplate phrasing
+  banned in `docs/design/VOICE.md`. This holds for every file in this repo and every product built
+  on Groundwork; `checks/check.mjs` (prose-style) enforces the mechanical part. Product-facing
   language is set per project in `docs/design/VOICE.md`.
 
 ## Efficiency
@@ -72,7 +75,7 @@ read enough to know the root cause, then fix the cause once, not the symptom eve
 | Automated checks (run: `node checks/check.mjs`) | `checks/` |
 | Full docs manifest | `docs/README.md` |
 
-## Skills — expert methods, loaded on demand
+## Skills: expert methods, loaded on demand
 
 Skills live in `.agents/skills/` (open Agent Skills standard; `.claude/skills` is a symlink to
 it). If your tool does not auto-load skills, read the skill's `SKILL.md` yourself when its
@@ -80,11 +83,11 @@ trigger applies. The library:
 
 | Skill | Load when |
 |---|---|
-| `begin` | Starting a freshly copied project — intake, setup, first commit |
+| `begin` | Starting a freshly copied project: intake, setup, first commit |
 | `scope` | Defining or changing scope; triaging INTAKE.md |
-| `spec` | Before building anything non-trivial — right-sized spec method |
+| `spec` | Before building anything non-trivial: right-sized spec method |
 | `stack` | Choosing the tech stack; generates `docs/standards/<stack>.md` and wires gates |
-| `architect` | System design before building — boundaries, data, contracts, threats |
+| `architect` | System design before building: boundaries, data, contracts, threats |
 | `design` | Standing up the project's design & voice system |
 | `scope-guard` | Before calling work done or proposing a commit |
 | `design-guard` | Before delivering any UI or user-facing output |
@@ -92,7 +95,7 @@ trigger applies. The library:
 | `deliver` | Releasing, deploying, or handing over a milestone |
 | `maintain` | Post-launch work: monitoring, updates, incidents, debt harvest |
 | `handover` | Making the project transferable to another human or agent |
-| `skill-author` | The project needs a new skill — how to write one correctly |
+| `skill-author` | The project needs a new skill: how to write one correctly |
 | `comply` | Compliance review (GDPR/AVG, EU AI Act, accessibility, licensing) |
 
 ## Conflict rule

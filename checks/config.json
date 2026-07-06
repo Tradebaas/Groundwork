@@ -1,6 +1,16 @@
 {
-  "_doc": "Configuration for checks/check.mjs. denylist: retired facts that may never return in any scanned text file — add the OLD wording whenever a fact changes (see AGENTS.md conflict rule). Each entry: pattern (JS regex source, case-insensitive), why (shown on failure), optional exclude (path substrings to skip). docs/decisions/, archives and checks/ are never scanned — decision records may quote retired wording. extraTextExtensions/extraCodeExtensions: the stack skill adds this ecosystem's file types here. skipSymlinkCheck: set true only on Windows without symlink support.",
+  "_doc": "Configuration for checks/check.mjs. denylist: retired facts that may never return in any scanned text file, add the OLD wording whenever a fact changes (see AGENTS.md conflict rule). Each entry: pattern (JS regex source, case-insensitive), why (shown on failure), optional exclude (path substrings to skip). docs/decisions/, archives and checks/ are never scanned by the denylist (decision records may quote retired wording). styleBans: AI-boilerplate phrases banned in all text (prose-style check, decision 0008); same shape as denylist, seeded with high-confidence tells, extend per project. The prose-style check also bans AI typography (em dash, en dash, ellipsis and curly quotes) with no config needed; escape a deliberate case with checks:allow-style on the line. extraTextExtensions/extraCodeExtensions: the stack skill adds this ecosystem's file types here. skipSymlinkCheck: set true only on Windows without symlink support.",
   "denylist": [],
+  "styleBans": [
+    { "pattern": "\\bdelve(s|d|ing)?\\b", "why": "AI-tell verb; say 'look at', 'go into' or just state the point" },
+    { "pattern": "\\bseamless(ly)?\\b", "why": "marketing filler; describe what actually happens" },
+    { "pattern": "\\bin today's [a-z-]+ (world|landscape|era)\\b", "why": "empty scene-setting; delete it" },
+    { "pattern": "\\bit'?s (important|worth) (to )?not(e|ing) that\\b", "why": "filler throat-clearing; state the fact directly" },
+    { "pattern": "\\bat the end of the day\\b", "why": "filler; cut it or say what you mean" },
+    { "pattern": "\\bgame[- ]?changer\\b", "why": "hype word; state the concrete effect" },
+    { "pattern": "\\ba testament to\\b", "why": "AI-tell flourish; say what it shows" },
+    { "pattern": "\\bunlock(s|ing)? the (power|potential)\\b", "why": "hype phrasing; describe the capability plainly" }
+  ],
   "extraTextExtensions": [],
   "extraCodeExtensions": [],
   "skipSymlinkCheck": false,

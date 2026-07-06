@@ -15,7 +15,7 @@ dist/
 build/
 coverage/
 
-# Secrets — never in the repo, no exceptions
+# Secrets: never in the repo, no exceptions
 .env
 .env.*
 !.env.example

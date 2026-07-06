@@ -1,5 +1,5 @@
 #!/bin/sh
-# Groundwork gate — versioned in the repo (checks/hooks), wired via `git config core.hooksPath`.
+# Groundwork gate, versioned in the repo (checks/hooks), wired via `git config core.hooksPath`.
 # Never bypass (--no-verify is banned by AGENTS.md). The `stack` skill appends fast stack
 # checks (format, lint-staged) below the Groundwork line; keep cheap checks first.
 node checks/check.mjs || exit 1

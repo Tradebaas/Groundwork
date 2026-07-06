@@ -1,12 +1,12 @@
 ---
 name: architect
-description: Design the system before building it — module boundaries, data model, integration contracts, environments, threat model. Use after stack choice and before the first build session, and again when a change would cross or move a boundary. Produces docs/product/ARCHITECTURE.md and decision records.
+description: Design the system before building it: module boundaries, data model, integration contracts, environments, threat model. Use after stack choice and before the first build session, and again when a change would cross or move a boundary. Produces docs/product/ARCHITECTURE.md and decision records.
 ---
 
-# architect — decide the shape once, before the code hardens it
+# architect: decide the shape once, before the code hardens it
 
 Architecture is the set of decisions that are expensive to reverse. Make them deliberately,
-record them, and keep the map current. Scale the depth to the project — a small tool needs a
+record them, and keep the map current. Scale the depth to the project: a small tool needs a
 page; a platform needs the full pass.
 
 ## The pass
@@ -14,7 +14,7 @@ page; a platform needs the full pass.
 1. **Boundaries.** Cut the system into modules along the domain's natural seams (what changes
    together lives together). Per module: what it owns, what it exposes, what it may never reach
    into. These rules become mechanically enforced when the stack's tooling allows (import
-   restrictions — wire via `stack`).
+   restrictions: wire via `stack`).
 2. **Data.** The core entities, who owns each, where truth lives, what is derived. Personal
    data flagged per entity (feeds the compliance register). Retention and deletion are schema
    decisions, not afterthoughts.
@@ -32,11 +32,11 @@ page; a platform needs the full pass.
 ## Record
 
 - The map goes in `docs/product/ARCHITECTURE.md`: modules, data ownership, contracts,
-  environments — current state, one page if possible, diagrams as text (Mermaid) so any tool
+  environments. Current state, one page if possible, diagrams as text (Mermaid) so any tool
   renders and diffs them.
 - Each expensive-to-reverse choice gets a decision record (options, why). Boundary rules that
   tooling can enforce get wired by `stack`; the rest are checked by `scope-guard`'s ladder.
 - STATE.md updated; next step is usually `design` (visual system) or the first spec.
 
-When a later change moves a boundary: update the map in the same change — an architecture doc
+When a later change moves a boundary: update the map in the same change. An architecture doc
 that describes the old system is worse than none (denylist the retired shape). ⚓

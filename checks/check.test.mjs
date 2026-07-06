@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Self-test for checks/check.mjs. Every check must prove it FAILS on a real violation
-// and stays quiet on a clean repo — an untested gate is false confidence (decision 0005).
+// and stays quiet on a clean repo: an untested gate is false confidence (decision 0005).
 // Run: node checks/check.test.mjs
 
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, unlinkSync } from 'node:fs';
@@ -100,6 +100,18 @@ expectFail('skills-symlink', ({ root }) =>
 expectFail('secrets', ({ put }) =>
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ demo\n- key AKIAIOSFODNN7EXAMPLE\n')); // checks:allow-secret
 
+expectFail('prose-style', ({ put }) =>
+  put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ ship it — fast\n')); // em dash
+
+expectFail('prose-style', ({ root, put }) => { // config-driven phrase ban
+  put('checks/config.json', JSON.stringify({
+    denylist: [], styleBans: [{ pattern: '\\bseamless(ly)?\\b', why: 'filler' }],
+    budgets: { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024 },
+    allowedEmptyDirs: [], secretScanExclude: ['checks/'],
+  }));
+  put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ a seamlessly integrated flow\n');
+});
+
 expectFail('defer-markers', ({ put }) =>
   put('src/app.js', 'export const x = 1;\n// defer: global lock. ceiling: 100 users.\n'));
 
@@ -146,6 +158,9 @@ expectClean('denylist-exclude', ({ put }) => {
 expectClean('gitkeep-is-intentional', ({ put }) =>
   put('docs/state/log/.gitkeep', ''));
 
+expectClean('prose-style-allow-escape', ({ put }) =>
+  put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ quote the source verbatim — as written checks:allow-style\n'));
+
 expectClean('manifest-glob-classes', ({ put }) => {
   put('docs/README.md', '# manifest\n\n| `state/STATE.md` | LIVE | state |\n| `decisions/[0-9]*.md` | REF | records |\n| `specs/[0-9]*/**` | LIVE | specs |\n');
   put('docs/decisions/0001-demo.md', '# 0001\n');
@@ -173,4 +188,4 @@ if (failedTests.length) {
   console.error(`\n${passed} passed, ${failedTests.length} failed.`);
   process.exit(1);
 }
-console.log(`OK — ${passed} self-tests passed: every gate fails when it should.`);
+console.log(`OK: ${passed} self-tests passed: every gate fails when it should.`);

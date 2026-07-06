@@ -1,16 +1,16 @@
-# STATE — live project state
+# STATE: live project state
 
-<!-- TEMPLATE — filled by the `begin` skill, then maintained every session (AGENTS.md session
+<!-- TEMPLATE: filled by the `begin` skill, then maintained every session (AGENTS.md session
      protocol). This is the ONLY live planning document; no other file tracks current work. -->
 
-## Handoff — read this first
+## Handoff: read this first
 
-- **Status:** NOT STARTED — fresh copy of Groundwork. Load the `begin` skill.
-- **Phase:** — <!-- prepare | design | build | verify | deliver | maintain -->
-- **Branch / HEAD:** —
-- **Gates:** — <!-- e.g. "checks green, tests 42/42, CI green @ <sha>" -->
+- **Status:** NOT STARTED. Fresh copy of Groundwork. Load the `begin` skill.
+- **Phase:** TBD <!-- prepare | design | build | verify | deliver | maintain -->
+- **Branch / HEAD:** TBD
+- **Gates:** TBD <!-- e.g. "checks green, tests 42/42, CI green @ <sha>" -->
 - **Now ▶** run `begin`
-- **Blocked on:** —
+- **Blocked on:** TBD
 
 ## Log
 

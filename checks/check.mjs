@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Groundwork checks — zero-token enforcement of repo hygiene.
+// Groundwork checks: zero-token enforcement of repo hygiene.
 // Run: node checks/check.mjs        (also wired as pre-commit hook and CI stage)
 //      node checks/check.mjs --install-hooks
 // Every rule here is deterministic. Rules that need judgment live in skills, not here.
-// A check that crashes counts as FAILED — a silent gate is worse than none (decision 0005).
+// A check that crashes counts as FAILED: a silent gate is worse than none (decision 0005).
 // Self-test: node checks/check.test.mjs (every check must prove it fails on a violation).
 
 import {
@@ -77,14 +77,14 @@ export function runChecks(root) {
     'budget-agents'() {
       const n = lines(join(root, 'AGENTS.md')).length;
       if (n > cfg.budgets.agentsMdLines) {
-        fail(`AGENTS.md is ${n} lines (budget ${cfg.budgets.agentsMdLines}). Every line must earn its place — move detail into a skill or docs/.`);
+        fail(`AGENTS.md is ${n} lines (budget ${cfg.budgets.agentsMdLines}). Every line must earn its place: move detail into a skill or docs/.`);
       }
     },
 
     'bridge-claude'() {
       const body = read(join(root, 'CLAUDE.md')).trim();
       if (body !== '@AGENTS.md') {
-        fail('CLAUDE.md must contain exactly "@AGENTS.md". Rules belong in AGENTS.md — one rulebook (decision 0001).');
+        fail('CLAUDE.md must contain exactly "@AGENTS.md". Rules belong in AGENTS.md, one rulebook (decision 0001).');
       }
     },
 
@@ -107,7 +107,7 @@ export function runChecks(root) {
         if (!r.startsWith('docs/') || r === 'docs/README.md' || r.endsWith('.gitkeep')) continue;
         const inDocs = r.slice('docs/'.length);
         if (!literals.has(inDocs) && !patterns.some((re) => re.test(inDocs))) {
-          fail(`${r} is not listed in docs/README.md — every docs file needs a manifest row.`);
+          fail(`${r} is not listed in docs/README.md: every docs file needs a manifest row.`);
         }
       }
     },
@@ -120,7 +120,7 @@ export function runChecks(root) {
           const target = m[1].split('#')[0];
           if (!target || /^(https?:|mailto:)/.test(target) || isAbsolute(target)) continue;
           if (!existsSync(resolve(dirname(f), decodeURI(target)))) {
-            fail(`${rel(root, f)}: broken link → ${m[1]}`);
+            fail(`${rel(root, f)}: broken link to ${m[1]}`);
           }
         }
       }
@@ -137,9 +137,49 @@ export function runChecks(root) {
         for (const e of entries) {
           if ((e.exclude || []).some((x) => r.includes(x))) continue;
           content.forEach((line, i) => {
-            if (e.re.test(line)) fail(`${r}:${i + 1} matches retired fact /${e.pattern}/ — ${e.why}`);
+            if (e.re.test(line)) fail(`${r}:${i + 1} matches retired fact /${e.pattern}/: ${e.why}`);
           });
         }
+      }
+    },
+
+    'prose-style'() {
+      // AI-tell typography that may never appear in any text (AGENTS.md Language rule, decision 0008).
+      // Deterministic characters only; judgment tells (cliche phrasing) live in VOICE.md + design-guard.
+      // checks:allow-style on a line is the escape hatch (e.g. a spec quoting source text verbatim).
+      const chars = [
+        ['—', 'em dash', 'rewrite with a period, comma, colon, or parentheses'],
+        ['–', 'en dash', 'use a hyphen, or "to" for a number range'],
+        ['…', 'ellipsis character', 'type three periods (...)'],
+        ['‘', 'curly quote', 'use a straight quote'],
+        ['’', 'curly quote', 'use a straight quote'],
+        ['“', 'curly quote', 'use a straight quote'],
+        ['”', 'curly quote', 'use a straight quote'],
+      ];
+      const phrases = (cfg.styleBans || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
+      // The phrase bans skip the files that legitimately name the tells (VOICE.md defines them,
+      // decision records and archives may quote them), same idiom as the denylist. Typography is
+      // banned everywhere but checks/, which must hold the literal characters to detect them.
+      const phraseSkip = (r) => r.startsWith('checks/') || r.startsWith('docs/decisions/')
+        || r.startsWith('docs/specs/archive/') || r.startsWith('docs/state/log/')
+        || r === 'docs/design/VOICE.md';
+      for (const f of textFiles) {
+        const r = rel(root, f);
+        if (r.startsWith('checks/')) continue;
+        const scanPhrases = !phraseSkip(r);
+        lines(f).forEach((line, i) => {
+          if (line.includes('checks:allow-style')) return;
+          for (const [ch, what, fix] of chars) {
+            if (line.includes(ch)) {
+              fail(`${r}:${i + 1} contains a ${what}: ${fix}. Deliberate (quoting source text)? Append "checks:allow-style" to that line.`);
+            }
+          }
+          if (scanPhrases) {
+            for (const e of phrases) {
+              if (e.re.test(line)) fail(`${r}:${i + 1} reads as AI boilerplate (/${e.pattern}/): ${e.why}`);
+            }
+          }
+        });
       }
     },
 
@@ -148,10 +188,10 @@ export function runChecks(root) {
       const body = read(p);
       const n = body.split('\n').length;
       if (n > cfg.budgets.stateMdLines) {
-        fail(`STATE.md is ${n} lines (budget ${cfg.budgets.stateMdLines}) — rotate old log entries to docs/state/log/.`);
+        fail(`STATE.md is ${n} lines (budget ${cfg.budgets.stateMdLines}): rotate old log entries to docs/state/log/.`);
       }
       if (!body.includes('## Handoff')) fail('STATE.md is missing its "## Handoff" block.');
-      if (!body.includes('Now ▶')) fail('STATE.md is missing its "Now ▶" line — the single next step.');
+      if (!body.includes('Now ▶')) fail('STATE.md is missing its "Now ▶" line: the single next step.');
     },
 
     'skills'() {
@@ -171,7 +211,7 @@ export function runChecks(root) {
         if (!desc) fail(`skill "${entry.name}": description is required (it is the load trigger)`);
         else if (desc.length > cfg.budgets.skillDescriptionChars) fail(`skill "${entry.name}": description exceeds ${cfg.budgets.skillDescriptionChars} chars`);
         const bodyLines = body.split('\n').length;
-        if (bodyLines > cfg.budgets.skillMdLines) fail(`skill "${entry.name}": ${bodyLines} lines (budget ${cfg.budgets.skillMdLines}) — move reference material to files next to SKILL.md`);
+        if (bodyLines > cfg.budgets.skillMdLines) fail(`skill "${entry.name}": ${bodyLines} lines (budget ${cfg.budgets.skillMdLines}): move reference material to files next to SKILL.md`);
         if (!agents.includes(`\`${entry.name}\``)) fail(`skill "${entry.name}" is not registered in the AGENTS.md skills table`);
       }
     },
@@ -184,7 +224,7 @@ export function runChecks(root) {
           fail('.claude/skills must be a symlink to ../.agents/skills (decision 0002).');
         }
       } catch {
-        fail('.claude/skills symlink is missing or not a symlink → run: ln -sfn ../.agents/skills .claude/skills. No symlink support (Windows without Developer Mode)? Set "skipSymlinkCheck": true in checks/config.json and point your tool at .agents/skills directly.');
+        fail('.claude/skills symlink is missing or not a symlink. Run: ln -sfn ../.agents/skills .claude/skills. No symlink support (Windows without Developer Mode)? Set "skipSymlinkCheck": true in checks/config.json and point your tool at .agents/skills directly.');
       }
     },
 
@@ -216,7 +256,7 @@ export function runChecks(root) {
           // A wrapped marker may carry its trigger on the next line or two.
           const vicinity = content.slice(i, i + 3).join(' ');
           if (/(\/\/|#|<!--)\s*defer:/i.test(line) && !/upgrade-when:/i.test(vicinity)) {
-            fail(`${r}:${i + 1} defer: marker without "upgrade-when:" — untriggered deferrals rot silently (AGENTS.md format).`);
+            fail(`${r}:${i + 1} defer: marker without "upgrade-when:": untriggered deferrals rot silently (AGENTS.md format).`);
           }
         });
       }
@@ -230,7 +270,7 @@ export function runChecks(root) {
         let run = 0;
         lines(f).forEach((line, i) => {
           run = looksLikeCode.test(line) ? run + 1 : 0;
-          if (run === 3) fail(`${r}:${i - 1} 3+ consecutive lines of commented-out code — delete it; git remembers.`);
+          if (run === 3) fail(`${r}:${i - 1} 3+ consecutive lines of commented-out code: delete it; git remembers.`);
         });
       }
     },
@@ -240,7 +280,7 @@ export function runChecks(root) {
       for (const d of tree.dirs) {
         const entries = readdirSync(d);
         if (entries.length === 0 && !(cfg.allowedEmptyDirs || []).includes(rel(root, d))) {
-          fail(`${rel(root, d)}/ is empty — delete it, or add a .gitkeep if it must exist.`);
+          fail(`${rel(root, d)}/ is empty: delete it, or add a .gitkeep if it must exist.`);
         }
       }
     },
@@ -253,7 +293,7 @@ export function runChecks(root) {
     try {
       fn();
     } catch (e) {
-      failures.push({ check: name, msg: `check crashed (${e.message}) — a crashed gate is a failed gate.` });
+      failures.push({ check: name, msg: `check crashed (${e.message}): a crashed gate is a failed gate.` });
     }
   }
   return failures;
@@ -261,10 +301,10 @@ export function runChecks(root) {
 
 export function installHooks(root) {
   // Hooks live versioned in checks/hooks/ so every clone gets them; this only wires the path.
-  if (!existsSync(join(root, '.git'))) throw new Error('no .git directory — run git init first');
+  if (!existsSync(join(root, '.git'))) throw new Error('no .git directory: run git init first');
   chmodSync(join(root, 'checks', 'hooks', 'pre-commit'), 0o755);
   execSync('git config core.hooksPath checks/hooks', { cwd: root });
-  return 'core.hooksPath → checks/hooks (re-run after every fresh clone)';
+  return 'core.hooksPath -> checks/hooks (re-run after every fresh clone)';
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -276,8 +316,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const failures = runChecks(root);
   if (failures.length) {
     for (const f of failures) console.error(`FAIL [${f.check}] ${f.msg}`);
-    console.error(`\n${failures.length} finding(s). Fix the cause — never weaken the gate.`);
+    console.error(`\n${failures.length} finding(s). Fix the cause; never weaken the gate.`);
     process.exit(1);
   }
-  console.log('OK — all checks passed.');
+  console.log('OK: all checks passed.');
 }

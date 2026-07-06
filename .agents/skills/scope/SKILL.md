@@ -1,9 +1,9 @@
 ---
 name: scope
-description: Define, sharpen, or change project scope, and triage docs/state/INTAKE.md. Use when scope is unclear or contested, when new wishes/feedback arrive, when the owner asks for "more" mid-build, or when work doesn't trace to BRIEF.md. Scope changes only happen here — never silently during a build task.
+description: Define, sharpen, or change project scope, and triage docs/state/INTAKE.md. Use when scope is unclear or contested, when new wishes/feedback arrive, when the owner asks for "more" mid-build, or when work doesn't trace to BRIEF.md. Scope changes only happen here, never silently during a build task.
 ---
 
-# scope — the boundary is a decision, not a feeling
+# scope: the boundary is a decision, not a feeling
 
 `docs/product/BRIEF.md` is the single measuring stick. This skill is the only path that changes it.
 
@@ -13,13 +13,13 @@ For each candidate capability, make it earn its place:
 
 1. Which user, in which situation, is blocked without it?
 2. Does an existing capability (SC-item), a platform feature, or an off-the-shelf product
-   already cover it? (Decision ladder — don't rebuild what exists.)
+   already cover it? (Decision ladder: don't rebuild what exists.)
 3. Can version one ship without it? If yes, it goes to *Out of scope* or INTAKE with a trigger.
 
 Write results as numbered, testable SC-items. Vague scope ("a dashboard") is not scope; scope
 says what the user can *do* ("SC-3: owner sees per-project hours, filterable by month").
 
-## Triage — INTAKE.md
+## Triage: INTAKE.md
 
 Nothing is built from INTAKE. Per item, propose one of:
 
@@ -36,7 +36,7 @@ Present triage as a batch with your recommendation per item; the owner decides, 
 - A scope change during a build task means: **stop the task**, run this skill, then resume.
 - Every widening gets named as such, with its cost (time, complexity, risk) stated before the
   owner decides. Silent widening is the failure mode this skill exists to prevent.
-- Narrowing is allowed and healthy — move the dropped SC-item to out-of-scope with the reason,
+- Narrowing is allowed and healthy. Move the dropped SC-item to out-of-scope with the reason,
   archive its spec as `dropped`.
 
 ## Record

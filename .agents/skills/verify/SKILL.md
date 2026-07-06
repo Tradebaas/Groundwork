@@ -1,9 +1,9 @@
 ---
 name: verify
-description: Prove a change actually works before it counts as done. Use after building any non-trivial change, before deliver, and whenever claiming something works. Exercises real behavior end-to-end — green tools alone are not verification.
+description: Prove a change actually works before it counts as done. Use after building any non-trivial change, before deliver, and whenever claiming something works. Exercises real behavior end-to-end. Green tools alone are not verification.
 ---
 
-# verify — evidence, not confidence
+# verify: evidence, not confidence
 
 A change is verified when its observable behavior matches its acceptance criteria, and you have
 seen that behavior yourself. "Should work", "compiles", "tests pass" are not that.
@@ -11,7 +11,7 @@ seen that behavior yourself. "Should work", "compiles", "tests pass" are not tha
 ## 1. The floor: every gate green
 
 Run the full chain and paste real results, not summaries of results:
-`node checks/check.mjs`, then the stack gates (typecheck, lint, tests, build — commands are in
+`node checks/check.mjs`, then the stack gates (typecheck, lint, tests, build; commands are in
 `docs/standards/<stack>.md`). Red gate → stop, fix, rerun. Never weaken a gate to pass it.
 
 ## 2. The point: exercise the change
@@ -28,7 +28,7 @@ Run the full chain and paste real results, not summaries of results:
 ## 3. What you cannot verify
 
 Some things this environment can't exercise (production data, real payment, app-store review).
-Name them explicitly: "verified: A, B; not verifiable here: C — needs <what> — tracked in
+Name them explicitly: "verified: A, B; not verifiable here: C, needs <what>, tracked in
 STATE.md". Unverifiable-and-silent is how "works on my machine" ships.
 
 ## 4. Converge and record
@@ -38,5 +38,5 @@ STATE.md". Unverifiable-and-silent is how "works on my machine" ships.
 - STATE.md: gates line updated with the evidence summary ("checks green, tests 61/61, criteria
   4/4 exercised"), Now ▶ next step.
 
-Report format — per criterion one line: `✓/✗ <criterion> — <what was observed>`, then the
+Report format, per criterion one line: `✓/✗ <criterion>: <what was observed>`, then the
 gates line, then anything unverifiable. No prose padding. ⚓

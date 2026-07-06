@@ -1,4 +1,4 @@
-# Groundwork CI — the unbypassable authority. Local hooks are convenience; this is the gate.
+# Groundwork CI: the unbypassable authority. Local hooks are convenience; this is the gate.
 # The `stack` skill extends this file with the stack's own gates when the stack is chosen.
 name: ci
 
@@ -24,7 +24,7 @@ jobs:
         run: node checks/check.mjs
 
       # --- Stack gates (added by the `stack` skill; keep the order: cheap → expensive) ---
-      # - name: Typecheck (strict — the top catcher of AI slips)
+      # - name: Typecheck (strict: the top catcher of AI slips)
       # - name: Lint & format
       # - name: Tests
       # - name: Dependency audit (fail on high/critical)
