@@ -1,55 +1,60 @@
-# DESIGN — the design system
+# DESIGN: the design system
 
-<!-- TEMPLATE — §1–2 are durable and ship with Groundwork; §3 is filled per project by the
-     `design` skill and mirrors the tokens implemented in code (code is the SSOT). -->
+<!-- TEMPLATE: sections 1-2 are durable and ship with Groundwork; section 3 is filled per
+     project by the `design` skill and mirrors the tokens implemented in code (code is the SSOT). -->
 
-## 1. Principles — why things look right
+## 1. Principles: why things look right
 
 1. **Whitespace is the structure.** Grouping, hierarchy, and calm come from space on a
-   consistent ladder — never from boxes, lines, or color added to compensate.
+   consistent ladder, never from boxes, lines, or color added to compensate.
 2. **Monochrome carries the interface; one accent earns attention.** Ink tones (a near-black
    plus two muted steps) do all everyday work. The single accent appears only where the user
-   must look — one primary action per view, active state, a key highlight. If everything is
+   must look: one primary action per view, active state, a key highlight. If everything is
    highlighted, nothing is.
 3. **Flat surfaces, hairline edges.** Cards and panels sit flush: surface color + a faint
    1px border. Shadow is reserved for things that actually float (menus, dialogs, toasts).
 4. **One type family, few weights.** A single variable font, regular/medium/semibold. Hierarchy
-   comes from size and color before weight. Label and value share size and weight — the
+   comes from size and color before weight. Label and value share size and weight; the
    difference is color only.
 5. **Radius is one decision.** One radius for containers, one smaller for controls inside them,
    full for pills/avatars. Never mixed per whim.
 6. **States are designed, not inherited.** Hover, visible focus, disabled, loading, empty,
-   error — every component ships with all of them. Empty states say what to do, not just "no data".
-7. **Motion is physics, not decoration.** 120–200ms ease-out on state changes; nothing bounces,
+   error: every component ships with all of them. Empty states say what to do, not just "no data".
+7. **Motion is physics, not decoration.** 120-200ms ease-out on state changes; nothing bounces,
    nothing autoplays, nothing moves that the user didn't cause.
-8. **Accessible by construction.** Contrast ≥ 4.5:1 for text, focus always visible, touch
-   targets ≥ 44px, semantics before ARIA. WCAG 2.1 AA is the legal floor, not the ambition.
+8. **Accessible by construction.** Contrast of at least 4.5:1 for text, focus always visible,
+   touch targets at least 44px, semantics before ARIA. WCAG 2.1 AA is the legal floor, not the
+   ambition.
 
-## 2. Standing default direction (the owner's taste — seed, not straitjacket)
+## 2. Standing default direction (the owner's taste: seed, not straitjacket)
 
-Captured 2026-07-06: **strak & minimaal** — clean, generous whitespace, Swiss/Scandinavian
+Captured 2026-07-06: **strak & minimaal**. Clean, generous whitespace, Swiss/Scandinavian
 precision; the register of Linear, Stripe, Notion. Light, near-white canvas; near-black ink;
 cool neutrals; one restrained accent (the owner's production system uses a deep teal `#2F6664`
-with dark ink `#222228` — a proven starting pair, re-derive per brand). Flat cards, hairline
-borders, soft-but-adult radius (12–16px containers). Confirm this direction per project with
+with dark ink `#222228`, a proven starting pair, re-derive per brand). Flat cards, hairline
+borders, soft-but-adult radius (12-16px containers). Confirm this direction per project with
 the `design` skill; deviate only on the owner's say-so.
 
-## 3. Tokens — THIS PROJECT <!-- filled by `design`; mirrors the code SSOT -->
+## 3. Tokens: THIS PROJECT <!-- filled by `design`; mirrors the code SSOT -->
+
+- **UI foundation:** TBD <!-- set by `design`: component library name + major version, or
+     "bespoke". Compare options in design/reference/ui-library-showcase.html; record the choice
+     as a decision record (pattern: decisions/0009). One foundation per project. -->
 
 | Role | Token | Value | Notes |
 |---|---|---|---|
-| Canvas | `--color-canvas` | — | page background |
-| Surface | `--color-surface` | — | cards, panels |
-| Ink | `--color-ink` | — | primary text |
-| Ink muted | `--color-ink-muted` | — | labels, secondary |
-| Border | `--color-border` | — | hairlines |
-| Accent | `--color-accent` | — | one family, sparingly |
-| Danger / Warning / Success / Info | `--color-…` | — | used via opacity only |
+| Canvas | `--color-canvas` | TBD | page background |
+| Surface | `--color-surface` | TBD | cards, panels |
+| Ink | `--color-ink` | TBD | primary text |
+| Ink muted | `--color-ink-muted` | TBD | labels, secondary |
+| Border | `--color-border` | TBD | hairlines |
+| Accent | `--color-accent` | TBD | one family, sparingly |
+| Danger / Warning / Success / Info | `--color-...` | TBD | used via opacity only |
 
-- **Type scale:** — <!-- e.g. 32/24/18/16/14 + line heights; font family + weights -->
-- **Spacing ladder:** — <!-- e.g. 4 / 8 / 12 / 16 / 24 / 32 / 48 -->
-- **Radius:** — <!-- container / control / pill -->
-- **Elevation:** — <!-- flat + hairline; shadow only for floating layers -->
-- **Component inventory:** — <!-- list as they're built; each with all states -->
+- **Type scale:** TBD <!-- e.g. 32/24/18/16/14 + line heights; font family + weights -->
+- **Spacing ladder:** TBD <!-- e.g. 4 / 8 / 12 / 16 / 24 / 32 / 48 -->
+- **Radius:** TBD <!-- container / control / pill -->
+- **Elevation:** TBD <!-- flat + hairline; shadow only for floating layers -->
+- **Component inventory:** TBD <!-- list as they're built; each with all states -->
 
-Code SSOT location: — <!-- e.g. src/styles/tokens.css — set by `design`, checked for drift -->
+Code SSOT location: TBD <!-- e.g. src/styles/tokens.css, set by `design`, checked for drift -->

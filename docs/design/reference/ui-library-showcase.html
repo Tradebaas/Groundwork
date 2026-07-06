@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI foundation showcase - Groundwork</title>
+<style>
+/* ============================================================
+   Groundwork shell: strak & minimaal. The shell follows the
+   Groundwork design principles; each demo page deliberately
+   mimics the look of one UI library so the owner can compare
+   real, working components before choosing a foundation.
+   Self-contained: no CDN, no external fonts, works offline.
+   ============================================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gw-canvas: #fafaf9;
+  --gw-surface: #ffffff;
+  --gw-ink: #222228;
+  --gw-ink-muted: #6b6b74;
+  --gw-border: #e6e6e3;
+  --gw-accent: #2f6664;
+  --gw-radius: 12px;
+  --gw-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--gw-font);
+  background: var(--gw-canvas);
+  color: var(--gw-ink);
+  display: flex;
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.55;
+}
+button { font: inherit; cursor: pointer; }
+input, select { font: inherit; }
+:focus-visible { outline: 2px solid var(--gw-accent); outline-offset: 2px; }
+
+/* ---- sidebar ---- */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--gw-surface);
+  border-right: 1px solid var(--gw-border);
+  padding: 24px 12px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.sidebar h1 { font-size: 15px; font-weight: 600; padding: 0 12px 4px; }
+.sidebar .sub { font-size: 12px; color: var(--gw-ink-muted); padding: 0 12px 16px; }
+.sidebar .group { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--gw-ink-muted); padding: 16px 12px 6px; }
+.nav-btn {
+  display: block; width: 100%; text-align: left;
+  padding: 7px 12px; border: 0; background: none;
+  border-radius: 8px; color: var(--gw-ink); font-size: 14px;
+}
+.nav-btn:hover { background: #f0f0ee; }
+.nav-btn[aria-current="page"] { background: var(--gw-accent); color: #fff; font-weight: 500; }
+
+/* ---- main / pages ---- */
+main { flex: 1; min-width: 0; }
+.page { display: none; }
+.page.active { display: block; animation: pagein .18s ease-out; }
+@keyframes pagein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.page-head { padding: 40px 48px 24px; border-bottom: 1px solid var(--gw-border); background: var(--gw-surface); }
+.page-head h2 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; }
+.page-head p.lede { color: var(--gw-ink-muted); max-width: 640px; margin-top: 6px; }
+.meta-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.chip { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--gw-border); background: var(--gw-canvas); color: var(--gw-ink-muted); }
+.page-body { padding: 32px 48px 64px; }
+.disclaimer { font-size: 12.5px; color: var(--gw-ink-muted); border: 1px solid var(--gw-border); border-radius: var(--gw-radius); padding: 10px 14px; margin-top: 28px; background: var(--gw-surface); }
+.disclaimer strong { color: var(--gw-ink); }
+
+/* ============================================================
+   Demo component system. One markup structure, restyled per
+   library through CSS variables on .demo[data-lib=...] plus a
+   few signature flourishes. Everything is live: hover, focus,
+   disabled, loading, tabs, modal, toast, validation.
+   ============================================================ */
+.demo {
+  --bg: #ffffff; --fg: #18181b; --muted: #71717a;
+  --card: #ffffff; --border: #e4e4e7;
+  --p: #18181b; --p-fg: #ffffff; --p-hover: #3f3f46;
+  --danger: #dc2626; --ok: #16a34a;
+  --r: 8px; --r-ctl: 8px;
+  --shadow: 0 1px 2px rgba(0,0,0,.05);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --btn-weight: 500; --btn-case: none; --btn-track: 0;
+  font-family: var(--font);
+  background: var(--bg); color: var(--fg);
+  border: 1px solid var(--gw-border); border-radius: 14px;
+  padding: 32px; position: relative; overflow: hidden;
+}
+.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.dcard {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); box-shadow: var(--shadow); padding: 20px;
+}
+.dcard h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 14px; }
+
+/* buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: var(--r-ctl);
+  border: 1px solid transparent; font-size: 14px;
+  font-weight: var(--btn-weight); text-transform: var(--btn-case); letter-spacing: var(--btn-track);
+  background: var(--p); color: var(--p-fg);
+  transition: background .15s, box-shadow .15s, transform .1s, border-color .15s, color .15s;
+  position: relative; overflow: hidden;
+}
+.btn:hover:not(:disabled) { background: var(--p-hover); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.secondary { background: transparent; color: var(--fg); border-color: var(--border); }
+.btn.secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+.btn.danger { background: var(--danger); }
+.btn.danger:hover:not(:disabled) { background: color-mix(in srgb, var(--danger) 85%, black); }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid currentColor; border-top-color: transparent;
+  animation: spin .7s linear infinite; display: none;
+}
+.btn.busy .spinner { display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* form */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 13.5px; font-weight: 500; margin-bottom: 6px; }
+.input, .select {
+  width: 100%; padding: 8px 12px; font-size: 14px;
+  border: 1px solid var(--border); border-radius: var(--r-ctl);
+  background: var(--card); color: var(--fg);
+  transition: border-color .15s, box-shadow .15s;
+}
+.input:focus, .select:focus { outline: none; border-color: var(--p); box-shadow: 0 0 0 3px color-mix(in srgb, var(--p) 20%, transparent); }
+.input.invalid { border-color: var(--danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 15%, transparent); }
+.err { display: none; font-size: 12.5px; color: var(--danger); margin-top: 5px; }
+.field.has-error .err { display: block; }
+.check-row { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 12px; }
+.check-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--p); }
+
+/* switch */
+.switch { position: relative; display: inline-flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.track {
+  width: 38px; height: 22px; border-radius: 999px;
+  background: color-mix(in srgb, var(--fg) 20%, var(--card));
+  transition: background .18s; flex-shrink: 0; position: relative;
+}
+.track::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .18s;
+}
+.switch input:checked + .track { background: var(--p); }
+.switch input:checked + .track::after { transform: translateX(16px); }
+.switch input:focus-visible + .track { outline: 2px solid var(--p); outline-offset: 2px; }
+
+/* tabs */
+.tabs { border-bottom: 1px solid var(--border); display: flex; gap: 4px; margin-bottom: 14px; }
+.tab {
+  background: none; border: 0; padding: 8px 14px; font-size: 14px;
+  color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
+  border-radius: var(--r-ctl) var(--r-ctl) 0 0; transition: color .15s, border-color .15s;
+}
+.tab:hover { color: var(--fg); }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--p); font-weight: 500; }
+.tabpanel { display: none; font-size: 14px; color: var(--muted); }
+.tabpanel.active { display: block; }
+
+/* badges, stats, progress */
+.badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 999px; background: color-mix(in srgb, var(--p) 12%, var(--card)); color: var(--p); }
+.badge.ok { background: color-mix(in srgb, var(--ok) 12%, var(--card)); color: var(--ok); }
+.stat { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+.stat-label { font-size: 13px; color: var(--muted); }
+.progress { height: 8px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 10%, var(--card)); overflow: hidden; margin-top: 12px; }
+.progress .bar { height: 100%; width: 0; background: var(--p); border-radius: inherit; transition: width .9s ease-out; }
+
+/* modal */
+dialog.modal {
+  border: 1px solid var(--border); border-radius: var(--r);
+  background: var(--card); color: var(--fg); font-family: var(--font);
+  padding: 24px; max-width: 420px; width: calc(100% - 48px);
+  box-shadow: 0 20px 50px rgba(0,0,0,.25);
+}
+dialog.modal::backdrop { background: rgba(0,0,0,.45); }
+dialog.modal h5 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+dialog.modal p { font-size: 14px; color: var(--muted); margin-bottom: 18px; }
+dialog.modal .btn-row { justify-content: flex-end; }
+
+/* toast */
+.toast-region { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+.toast {
+  background: var(--fg); color: var(--bg); font-family: var(--font);
+  padding: 10px 16px; border-radius: 10px; font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25); display: flex; gap: 10px; align-items: center;
+  animation: toastin .22s ease-out;
+}
+@keyframes toastin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.toast.out { opacity: 0; transform: translateY(8px); transition: all .25s; }
+
+/* ============================================================
+   Library skins. Each block only changes variables and adds
+   the library's signature flourish.
+   ============================================================ */
+
+/* 1. shadcn/ui: zinc neutrals, near-black primary, quiet borders */
+.demo[data-lib="shadcn"] {
+  --bg: #fafafa; --fg: #09090b; --muted: #71717a;
+  --card: #ffffff; --border: #e4e4e7;
+  --p: #18181b; --p-fg: #fafafa; --p-hover: #27272a;
+  --r: 10px; --r-ctl: 8px;
+  --shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+
+/* 2. Material UI: Material blue, uppercase buttons, elevation, ripple */
+.demo[data-lib="mui"] {
+  --bg: #fafafa; --fg: rgba(0,0,0,.87); --muted: rgba(0,0,0,.6);
+  --card: #ffffff; --border: rgba(0,0,0,.12);
+  --p: #1976d2; --p-fg: #ffffff; --p-hover: #1565c0;
+  --r: 4px; --r-ctl: 4px;
+  --shadow: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14);
+  --font: Roboto, "Helvetica Neue", Arial, sans-serif;
+  --btn-case: uppercase; --btn-track: .04em;
+}
+.demo[data-lib="mui"] .btn { box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14); }
+.demo[data-lib="mui"] .btn.secondary, .demo[data-lib="mui"] .tab { box-shadow: none; }
+.demo[data-lib="mui"] .btn.secondary { color: var(--p); border-color: rgba(25,118,210,.5); }
+.ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.5); transform: scale(0); animation: rip .5s ease-out forwards; pointer-events: none; }
+@keyframes rip { to { transform: scale(3); opacity: 0; } }
+
+/* 3. Chakra UI: teal accent, friendly radius, bold focus ring */
+.demo[data-lib="chakra"] {
+  --bg: #ffffff; --fg: #1a202c; --muted: #4a5568;
+  --card: #ffffff; --border: #e2e8f0;
+  --p: #319795; --p-fg: #ffffff; --p-hover: #2c7a7b;
+  --r: 8px; --r-ctl: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.demo[data-lib="chakra"] .input:focus, .demo[data-lib="chakra"] .select:focus { border-color: #3182ce; box-shadow: 0 0 0 1px #3182ce; }
+
+/* 4. Magic UI: light, shimmer button, animated gradient headline */
+.demo[data-lib="magic"] {
+  --bg: #ffffff; --fg: #09090b; --muted: #71717a;
+  --card: #ffffff; --border: #e4e4e7;
+  --p: #111113; --p-fg: #ffffff; --p-hover: #27272a;
+  --r: 14px; --r-ctl: 10px;
+}
+.gradient-text {
+  background: linear-gradient(90deg, #6366f1, #ec4899, #f59e0b, #6366f1);
+  background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+  color: transparent; animation: gflow 5s linear infinite;
+  font-weight: 700; font-size: 22px;
+}
+@keyframes gflow { to { background-position: 300% 0; } }
+.btn.shimmer { background: linear-gradient(110deg, #111113 45%, #4b4b57 55%, #111113 65%); background-size: 200% 100%; animation: shimmer 2.4s linear infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* 5. Aceternity UI: dark, glow, moving gradient border, spotlight card */
+.demo[data-lib="aceternity"] {
+  --bg: #0a0a12; --fg: #ededf2; --muted: #9a9ab0;
+  --card: #12121d; --border: #26263a;
+  --p: #6d5df0; --p-fg: #ffffff; --p-hover: #5b4bdb;
+  --r: 14px; --r-ctl: 10px;
+  --shadow: 0 0 24px rgba(109,93,240,.12);
+}
+.demo[data-lib="aceternity"] .track { background: #2c2c44; }
+.moving-border { position: relative; border: 0 !important; z-index: 0; }
+.moving-border::before {
+  content: ""; position: absolute; inset: -2px; z-index: -1; border-radius: inherit;
+  background: conic-gradient(from var(--mb, 0deg), #6d5df0, #ec4899, #22d3ee, #6d5df0);
+  animation: mb 3s linear infinite;
+}
+.moving-border::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--card); margin: 2px; }
+@property --mb { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes mb { to { --mb: 360deg; } }
+.demo[data-lib="aceternity"] .dcard:hover { border-color: #6d5df0; box-shadow: 0 0 32px rgba(109,93,240,.25); transition: all .25s; }
+
+/* 6. Nyxhora UI: shadcn base with a violet startup accent and gradient CTA */
+.demo[data-lib="nyxhora"] {
+  --bg: #fcfcfd; --fg: #0f0f14; --muted: #6f6f7c;
+  --card: #ffffff; --border: #e7e7ec;
+  --p: #7c3aed; --p-fg: #ffffff; --p-hover: #6d28d9;
+  --r: 12px; --r-ctl: 9px;
+}
+.btn.grad-cta { background: linear-gradient(135deg, #7c3aed, #db2777); }
+.btn.grad-cta:hover:not(:disabled) { filter: brightness(1.08); background: linear-gradient(135deg, #7c3aed, #db2777); }
+
+/* 7. React-Bootstrap: classic Bootstrap 5 */
+.demo[data-lib="bootstrap"] {
+  --bg: #ffffff; --fg: #212529; --muted: #6c757d;
+  --card: #ffffff; --border: #dee2e6;
+  --p: #0d6efd; --p-fg: #ffffff; --p-hover: #0b5ed7;
+  --r: 6px; --r-ctl: 6px;
+  --shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+  --btn-weight: 400;
+}
+.demo[data-lib="bootstrap"] .btn.secondary { background: #6c757d; color: #fff; border-color: #6c757d; }
+.demo[data-lib="bootstrap"] .btn.secondary:hover:not(:disabled) { background: #5c636a; }
+.bs-alert { border: 1px solid #b6d4fe; background: #cfe2ff; color: #084298; border-radius: 6px; padding: 10px 14px; font-size: 14px; margin-bottom: 14px; }
+
+/* 8. React Bits: dark playground, animated text bits */
+.demo[data-lib="reactbits"] {
+  --bg: #060606; --fg: #f4f4f5; --muted: #8f8f98;
+  --card: #101012; --border: #27272a;
+  --p: #f4f4f5; --p-fg: #0a0a0a; --p-hover: #d4d4d8;
+  --r: 16px; --r-ctl: 10px;
+}
+.demo[data-lib="reactbits"] .track { background: #2f2f36; }
+.typewriter { font-size: 21px; font-weight: 700; }
+.typewriter .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--fg); vertical-align: -0.15em; animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.hover-lift { transition: transform .2s, box-shadow .2s; }
+.hover-lift:hover { transform: translateY(-4px) rotate(-.4deg); box-shadow: 0 14px 34px rgba(0,0,0,.5); }
+
+/* 9. Mantine: bright blue, clean and dense */
+.demo[data-lib="mantine"] {
+  --bg: #ffffff; --fg: #212529; --muted: #868e96;
+  --card: #ffffff; --border: #dee2e6;
+  --p: #228be6; --p-fg: #ffffff; --p-hover: #1c7ed6;
+  --r: 8px; --r-ctl: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.05);
+  --btn-weight: 600;
+}
+
+/* 10. HeroUI: dark friendly, pill buttons, soft glow */
+.demo[data-lib="heroui"] {
+  --bg: #000000; --fg: #ecedee; --muted: #889096;
+  --card: #18181b; --border: #3f3f46;
+  --p: #006fee; --p-fg: #ffffff; --p-hover: #338ef7;
+  --r: 14px; --r-ctl: 999px;
+  --shadow: 0 4px 14px rgba(0,111,238,.15);
+}
+.demo[data-lib="heroui"] .btn { padding: 9px 20px; }
+.demo[data-lib="heroui"] .track { background: #3f3f46; }
+.demo[data-lib="heroui"] .tab { border-radius: 999px; border-bottom: 0; margin-bottom: 4px; }
+.demo[data-lib="heroui"] .tabs { border-bottom: 0; background: #18181b; border-radius: 999px; padding: 4px; display: inline-flex; }
+.demo[data-lib="heroui"] .tab[aria-selected="true"] { background: #3f3f46; }
+
+/* 11. Custom / bespoke: Groundwork's own default tokens as proof */
+.demo[data-lib="custom"] {
+  --bg: #fafaf9; --fg: #222228; --muted: #6b6b74;
+  --card: #ffffff; --border: #e6e6e3;
+  --p: #2f6664; --p-fg: #ffffff; --p-hover: #275654;
+  --r: 14px; --r-ctl: 10px;
+  --shadow: none;
+}
+
+/* overview page extras */
+.compare { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--gw-surface); border: 1px solid var(--gw-border); border-radius: var(--gw-radius); overflow: hidden; }
+.compare th, .compare td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--gw-border); vertical-align: top; }
+.compare th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--gw-ink-muted); background: var(--gw-canvas); }
+.compare tr:last-child td { border-bottom: 0; }
+.compare a { color: var(--gw-accent); }
+.path-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 20px 0 32px; }
+.path-card { background: var(--gw-surface); border: 1px solid var(--gw-border); border-radius: var(--gw-radius); padding: 20px; }
+.path-card h3 { font-size: 16px; margin-bottom: 8px; }
+.path-card p { font-size: 14px; color: var(--gw-ink-muted); }
+.path-card .step-num { display: inline-flex; width: 24px; height: 24px; border-radius: 50%; background: var(--gw-accent); color: #fff; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.overview-note { max-width: 720px; }
+.overview-note h3 { font-size: 17px; margin: 28px 0 8px; }
+.overview-note p, .overview-note li { color: var(--gw-ink-muted); font-size: 14.5px; }
+.overview-note ul { padding-left: 20px; margin-top: 6px; }
+.overview-note strong { color: var(--gw-ink); }
+
+@media (max-width: 860px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; display: flex; flex-wrap: wrap; gap: 2px; padding: 12px; }
+  .sidebar h1, .sidebar .sub, .sidebar .group { width: 100%; }
+  .nav-btn { width: auto; }
+  .page-head, .page-body { padding-left: 20px; padding-right: 20px; }
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar" aria-label="Showcase navigation">
+  <h1>UI foundation showcase</h1>
+  <p class="sub">Compare working demos, then choose your project's UI source of truth.</p>
+  <nav>
+    <button class="nav-btn" data-page="overview" aria-current="page">How to choose</button>
+    <div class="group">Component libraries</div>
+    <button class="nav-btn" data-page="shadcn">shadcn/ui</button>
+    <button class="nav-btn" data-page="mui">Material UI</button>
+    <button class="nav-btn" data-page="chakra">Chakra UI</button>
+    <button class="nav-btn" data-page="magic">Magic UI</button>
+    <button class="nav-btn" data-page="aceternity">Aceternity UI</button>
+    <button class="nav-btn" data-page="nyxhora">Nyxhora UI</button>
+    <button class="nav-btn" data-page="bootstrap">React-Bootstrap</button>
+    <button class="nav-btn" data-page="reactbits">React Bits</button>
+    <button class="nav-btn" data-page="mantine">Mantine</button>
+    <button class="nav-btn" data-page="heroui">HeroUI</button>
+    <div class="group">Your own system</div>
+    <button class="nav-btn" data-page="custom">Custom / bespoke</button>
+  </nav>
+</aside>
+
+<main>
+
+<!-- ================= OVERVIEW ================= -->
+<section class="page active" id="page-overview">
+  <div class="page-head">
+    <h2>Choose your UI foundation</h2>
+    <p class="lede">Every Groundwork project picks exactly one UI source of truth before the first
+    screen is built: an existing component library, or a bespoke system designed with the
+    <code>design</code> skill. This page explains the choice; every other page is a live,
+    clickable impression of one option.</p>
+  </div>
+  <div class="page-body">
+    <div class="path-cards">
+      <div class="path-card">
+        <span class="step-num">1</span>
+        <h3>Bring your brand, or build it here</h3>
+        <p>Have a brand guide (colors, fonts, logo)? The <code>design</code> skill imports it and
+        maps it onto tokens. No brand yet? The same skill interviews you and derives one with you,
+        so you are never blocked on "we have no designer".</p>
+      </div>
+      <div class="path-card">
+        <span class="step-num">2</span>
+        <h3>Pick one foundation</h3>
+        <p>Browse the pages on the left. Every demo uses the same components (buttons, form, tabs,
+        modal, toast) so you compare style, not content. Interact with everything: it behaves as
+        it would in a real app.</p>
+      </div>
+      <div class="path-card">
+        <span class="step-num">3</span>
+        <h3>Record it, then theme it</h3>
+        <p>The choice becomes a decision record. Your brand tokens are applied through the
+        library's own theming layer (or your token file, if bespoke). From then on the agent may
+        only build UI through that foundation.</p>
+      </div>
+    </div>
+
+    <table class="compare">
+      <thead><tr><th>Option</th><th>Best when</th><th>Trade-off</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Component library</strong> (pages on the left)</td>
+            <td>You want speed, tested accessibility, and a coherent look with little design effort. Theme it with your brand colors and fonts.</td>
+            <td>Your app looks like the library's family unless you theme deliberately. You inherit its dependencies and upgrade cycle.</td></tr>
+        <tr><td><strong>Custom / bespoke</strong> (last page)</td>
+            <td>The look is part of the product's value, you have strong brand requirements, or you want zero UI dependencies.</td>
+            <td>More design decisions up front. The <code>design</code> skill carries you through them, but budget real time for it.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="overview-note">
+      <h3>How the choice lands in the process</h3>
+      <ul>
+        <li><strong>When:</strong> during the <code>design</code> skill, after the stack is chosen. The stack constrains the menu (most libraries below target React; other stacks have their own equivalents, which the <code>stack</code> skill researches live).</li>
+        <li><strong>What gets recorded:</strong> a decision record in <code>docs/decisions/</code> naming the foundation and why; the token mapping in <code>docs/design/DESIGN.md</code> section 3; the theme file in code as the SSOT.</li>
+        <li><strong>What it enforces:</strong> one foundation per project. Mixing libraries, or dropping to raw CSS beside a library, needs a new decision record first.</li>
+        <li><strong>Your brand always wins:</strong> the library provides structure and behavior; your colors, type, and radius come from your tokens. A themed shadcn app and a themed Mantine app can both carry your brand.</li>
+      </ul>
+      <h3>Honest caveats</h3>
+      <ul>
+        <li>These demos are hand-built impressions in plain CSS, not the libraries' real code. They show the style register, not pixel truth.</li>
+        <li>Library facts (popularity, maintenance, license) age fast. Before deciding, the <code>stack</code> skill verifies the current state from the official docs; never decide from memory or from this page alone.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LIBRARY PAGES ================= -->
+<!-- Each page uses identical demo markup so styles compare fairly.
+     Generated per library by the script at the bottom, except for
+     each library's signature block which is authored here. -->
+
+<section class="page" id="page-shadcn" data-title="shadcn/ui"
+  data-desc="Copy-paste components you own in your repo, built on Tailwind CSS and Radix primitives. The current default for React apps that want a clean, neutral, professional look."
+  data-chips="React|Tailwind CSS|Components live in your codebase|MIT"
+  data-link="https://ui.shadcn.com"></section>
+
+<section class="page" id="page-mui" data-title="Material UI"
+  data-desc="Google's Material Design as a mature, batteries-included React component suite. Huge component coverage, strong docs, enterprise track record."
+  data-chips="React|CSS-in-JS (Emotion)|Material Design|MIT core"
+  data-link="https://mui.com"></section>
+
+<section class="page" id="page-chakra" data-title="Chakra UI"
+  data-desc="Developer-friendly React components with accessibility built in and a simple style-props model. Friendly, rounded, approachable by default."
+  data-chips="React|Style props / theme object|Accessibility-first|MIT"
+  data-link="https://chakra-ui.com"></section>
+
+<section class="page" id="page-magic" data-title="Magic UI"
+  data-desc="Animated components for design engineers: shimmer buttons, gradient text, border beams. Pairs with shadcn/ui for marketing pages that need motion."
+  data-chips="React|Tailwind CSS + motion|Landing pages, hero sections|MIT"
+  data-link="https://magicui.design"></section>
+
+<section class="page" id="page-aceternity" data-title="Aceternity UI"
+  data-desc="Motion-heavy, dark, glowing components for portfolios and product landing pages. Spotlight cards, moving borders, dramatic hover states."
+  data-chips="React|Tailwind CSS + Framer Motion|Dark, cinematic|Check license per component"
+  data-link="https://ui.aceternity.com"></section>
+
+<section class="page" id="page-nyxhora" data-title="Nyxhora UI"
+  data-desc="A young library building on Tailwind CSS and shadcn/ui conventions, aimed at startups that want a polished look fast. Small community: verify maintenance before committing."
+  data-chips="React|Tailwind CSS|shadcn-based|Young project: verify status"
+  data-link=""></section>
+
+<section class="page" id="page-bootstrap" data-title="React-Bootstrap"
+  data-desc="Bootstrap 5 rebuilt as real React components. The most widely recognized UI language on the web: conventional, dependable, instantly familiar to users and developers."
+  data-chips="React|Bootstrap 5 CSS|Conventional enterprise look|MIT"
+  data-link="https://react-bootstrap.netlify.app"></section>
+
+<section class="page" id="page-reactbits" data-title="React Bits"
+  data-desc="A collection of animated, memorable components: text effects, hover interactions, playful details. For products where personality is the point."
+  data-chips="React|Copy-paste snippets|Animated text and interactions|MIT"
+  data-link="https://reactbits.dev"></section>
+
+<section class="page" id="page-mantine" data-title="Mantine"
+  data-desc="120+ components and 70+ hooks with full TypeScript support and dark mode out of the box. Dense, practical, excellent for dashboards and internal tools."
+  data-chips="React|CSS modules + theme|Dashboards, data-heavy apps|MIT"
+  data-link="https://mantine.dev"></section>
+
+<section class="page" id="page-heroui" data-title="HeroUI"
+  data-desc="Formerly NextUI. Modern, rounded, dark-mode-first components on Tailwind CSS and React Aria. Polished consumer feel with strong accessibility underneath."
+  data-chips="React|Tailwind CSS + React Aria|Dark-first, pill shapes|MIT"
+  data-link="https://heroui.com"></section>
+
+<section class="page" id="page-custom" data-title="Custom / bespoke"
+  data-desc="No library: your own token file and components, designed with the design skill. You describe the feel (or hand over references and a brand guide) and the agent derives and builds the system. This demo runs on Groundwork's own default tokens as proof."
+  data-chips="Any stack|Your tokens are the SSOT|Zero UI dependencies|Guided by the design skill"
+  data-link=""></section>
+
+</main>
+
+<div class="toast-region" id="toast-region" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ---------- shared demo markup, injected per library page ---------- */
+function demoHTML(lib) {
+  var signature = SIGNATURES[lib] || "";
+  return '' +
+  '<div class="demo" data-lib="' + lib + '">' +
+    signature +
+    '<div class="demo-grid">' +
+
+      '<div class="dcard"><h4>Buttons</h4>' +
+        '<div class="btn-row">' +
+          '<button class="btn" data-busy data-toast="Changes saved."><span class="spinner"></span><span class="btn-label">Save changes</span></button>' +
+          '<button class="btn secondary" data-toast="Draft stored.">Secondary</button>' +
+          '<button class="btn danger" data-modal-open="modal-' + lib + '">Delete</button>' +
+          '<button class="btn" disabled>Disabled</button>' +
+        '</div>' +
+        '<div class="btn-row" style="margin-top:14px">' +
+          '<span class="badge">Beta</span><span class="badge ok">Active</span>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="dcard"><h4>Form</h4>' +
+        '<div class="field" data-email-field>' +
+          '<label for="email-' + lib + '">Work email</label>' +
+          '<input class="input" id="email-' + lib + '" type="email" placeholder="you@company.com" autocomplete="off">' +
+          '<p class="err">Enter a valid email address.</p>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label for="role-' + lib + '">Role</label>' +
+          '<select class="select" id="role-' + lib + '"><option>Owner</option><option>Editor</option><option>Viewer</option></select>' +
+        '</div>' +
+        '<label class="check-row"><input type="checkbox" checked> Email me a weekly summary</label>' +
+        '<label class="switch"><input type="checkbox" data-switch><span class="track"></span><span>Enable notifications</span></label>' +
+      '</div>' +
+
+      '<div class="dcard"><h4>Tabs</h4>' +
+        '<div class="tabs" role="tablist" data-tabs>' +
+          '<button class="tab" role="tab" aria-selected="true">Overview</button>' +
+          '<button class="tab" role="tab" aria-selected="false">Members</button>' +
+          '<button class="tab" role="tab" aria-selected="false">Billing</button>' +
+        '</div>' +
+        '<div class="tabpanel active">All systems normal. 3 deploys this week, 0 incidents.</div>' +
+        '<div class="tabpanel">12 members, 2 pending invitations.</div>' +
+        '<div class="tabpanel">Current plan: Team. Next invoice on the 1st.</div>' +
+      '</div>' +
+
+      '<div class="dcard"><h4>Usage</h4>' +
+        '<div class="stat">18.240</div>' +
+        '<div class="stat-label">API calls this month</div>' +
+        '<div class="progress"><div class="bar" data-progress="72"></div></div>' +
+        '<div class="stat-label" style="margin-top:6px">72% of plan used</div>' +
+      '</div>' +
+
+    '</div>' +
+    '<dialog class="modal" id="modal-' + lib + '">' +
+      '<h5>Delete project?</h5>' +
+      '<p>This removes the project and all of its data. This action cannot be undone.</p>' +
+      '<div class="btn-row">' +
+        '<button class="btn secondary" data-modal-close>Cancel</button>' +
+        '<button class="btn danger" data-modal-close data-toast="Project deleted.">Delete</button>' +
+      '</div>' +
+    '</dialog>' +
+  '</div>' +
+  '<p class="disclaimer"><strong>Note:</strong> this is a hand-built impression of the library\'s ' +
+  'style in plain CSS, not its real code. It shows the register, not pixel truth. Verify current ' +
+  'facts (maintenance, license, stack fit) via the official docs and the <code>stack</code> skill ' +
+  'before deciding.</p>';
+}
+
+/* per-library signature flourishes, shown above the shared demo grid */
+var SIGNATURES = {
+  magic: '<div style="margin-bottom:20px"><span class="gradient-text">Ship something magical</span><div class="btn-row" style="margin-top:12px"><button class="btn shimmer" data-toast="Sparkles deployed.">Shimmer button</button></div></div>',
+  aceternity: '<div style="margin-bottom:20px" class="btn-row"><button class="btn moving-border" data-toast="Border is still moving.">Moving border</button><span style="color:var(--muted);font-size:13px">Hover the cards below for the glow.</span></div>',
+  bootstrap: '<div class="bs-alert">A classic Bootstrap alert. Familiar to every user on the web since 2011.</div>',
+  reactbits: '<div style="margin-bottom:20px"><div class="typewriter"><span data-typewriter="Build interfaces with personality."></span><span class="caret"></span></div><p style="color:var(--muted);font-size:13px;margin-top:6px">Hover the cards below: they lift and tilt.</p></div>',
+  nyxhora: '<div style="margin-bottom:20px" class="btn-row"><button class="btn grad-cta" data-toast="Welcome aboard.">Start free trial</button><span style="color:var(--muted);font-size:13px">The startup gradient CTA, one per view.</span></div>',
+  custom: '<div style="margin-bottom:20px;font-size:14px;color:var(--muted);max-width:560px">These tokens are Groundwork\'s standing default (near-white canvas, ink, one teal accent). With the <code>design</code> skill you replace them with your brand\'s values, or design new ones together. Everything below is 100% your own code.</div>'
+};
+
+/* ---------- build library pages from their data attributes ---------- */
+document.querySelectorAll(".page[data-title]").forEach(function (page) {
+  var lib = page.id.replace("page-", "");
+  var chips = (page.dataset.chips || "").split("|").map(function (c) {
+    return '<span class="chip">' + c + '</span>';
+  }).join("");
+  var link = page.dataset.link
+    ? '<span class="chip"><a href="' + page.dataset.link + '" target="_blank" rel="noopener" style="color:inherit">official docs</a></span>' : "";
+  page.innerHTML =
+    '<div class="page-head"><h2>' + page.dataset.title + '</h2>' +
+    '<p class="lede">' + page.dataset.desc + '</p>' +
+    '<div class="meta-chips">' + chips + link + '</div></div>' +
+    '<div class="page-body">' + demoHTML(lib) + '</div>';
+});
+
+/* ---------- navigation (hash-routed) ---------- */
+var navBtns = document.querySelectorAll(".nav-btn");
+function showPage(id) {
+  var target = document.getElementById("page-" + id) ? id : "overview";
+  document.querySelectorAll(".page").forEach(function (p) {
+    p.classList.toggle("active", p.id === "page-" + target);
+  });
+  navBtns.forEach(function (b) {
+    if (b.dataset.page === target) { b.setAttribute("aria-current", "page"); }
+    else { b.removeAttribute("aria-current"); }
+  });
+  window.scrollTo(0, 0);
+  startProgress(document.getElementById("page-" + target));
+  startTypewriter(document.getElementById("page-" + target));
+}
+navBtns.forEach(function (b) {
+  b.addEventListener("click", function () {
+    location.hash = b.dataset.page;
+    showPage(b.dataset.page); /* switch now; the hashchange event is async and idempotent */
+  });
+});
+window.addEventListener("hashchange", function () { showPage(location.hash.slice(1)); });
+
+/* ---------- toast ---------- */
+function toast(msg) {
+  var region = document.getElementById("toast-region");
+  var t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  region.appendChild(t);
+  setTimeout(function () { t.classList.add("out"); }, 2600);
+  setTimeout(function () { t.remove(); }, 2900);
+}
+
+/* ---------- delegated interactions ---------- */
+document.addEventListener("click", function (e) {
+  var el;
+
+  /* tabs */
+  el = e.target.closest("[data-tabs] .tab");
+  if (el) {
+    var tabs = el.parentElement;
+    var idx = Array.prototype.indexOf.call(tabs.children, el);
+    tabs.querySelectorAll(".tab").forEach(function (t, i) {
+      t.setAttribute("aria-selected", i === idx ? "true" : "false");
+    });
+    var panels = tabs.parentElement.querySelectorAll(".tabpanel");
+    panels.forEach(function (p, i) { p.classList.toggle("active", i === idx); });
+    return;
+  }
+
+  /* modal open/close */
+  el = e.target.closest("[data-modal-open]");
+  if (el) { document.getElementById(el.dataset.modalOpen).showModal(); }
+  el = e.target.closest("[data-modal-close]");
+  if (el) { el.closest("dialog").close(); }
+
+  /* busy button: spinner, then toast */
+  el = e.target.closest("[data-busy]");
+  if (el && !el.classList.contains("busy")) {
+    el.classList.add("busy");
+    el.disabled = true;
+    var label = el.querySelector(".btn-label");
+    var original = label.textContent;
+    label.textContent = "Saving";
+    setTimeout(function () {
+      el.classList.remove("busy");
+      el.disabled = false;
+      label.textContent = original;
+      if (el.dataset.toast) { toast(el.dataset.toast); }
+    }, 1100);
+    rippleIfMui(el, e);
+    return;
+  }
+
+  /* plain toast trigger */
+  el = e.target.closest("[data-toast]:not([data-busy])");
+  if (el) { toast(el.dataset.toast); }
+
+  /* MUI ripple */
+  el = e.target.closest(".demo[data-lib='mui'] .btn");
+  if (el) { rippleIfMui(el, e); }
+});
+
+/* close dialog when clicking the backdrop */
+document.addEventListener("click", function (e) {
+  if (e.target.tagName === "DIALOG") {
+    var r = e.target.getBoundingClientRect();
+    var inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    if (!inside) { e.target.close(); }
+  }
+});
+
+function rippleIfMui(btn, e) {
+  if (!btn.closest(".demo[data-lib='mui']")) { return; }
+  var r = btn.getBoundingClientRect();
+  var s = document.createElement("span");
+  var size = Math.max(r.width, r.height);
+  s.className = "ripple";
+  s.style.width = s.style.height = size + "px";
+  s.style.left = (e.clientX - r.left - size / 2) + "px";
+  s.style.top = (e.clientY - r.top - size / 2) + "px";
+  btn.appendChild(s);
+  setTimeout(function () { s.remove(); }, 500);
+}
+
+/* switch toast feedback */
+document.addEventListener("change", function (e) {
+  if (e.target.matches("[data-switch]")) {
+    toast(e.target.checked ? "Notifications on." : "Notifications off.");
+  }
+});
+
+/* live email validation */
+document.addEventListener("blur", function (e) {
+  if (!e.target.matches("[data-email-field] .input")) { return; }
+  var field = e.target.closest(".field");
+  var bad = e.target.value !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value);
+  field.classList.toggle("has-error", bad);
+  e.target.classList.toggle("invalid", bad);
+}, true);
+document.addEventListener("input", function (e) {
+  if (!e.target.matches("[data-email-field] .input")) { return; }
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value)) {
+    e.target.closest(".field").classList.remove("has-error");
+    e.target.classList.remove("invalid");
+  }
+});
+
+/* animate progress bars when a page becomes visible */
+function startProgress(page) {
+  if (!page) { return; }
+  page.querySelectorAll("[data-progress]").forEach(function (bar) {
+    bar.style.width = "0";
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { bar.style.width = bar.dataset.progress + "%"; });
+    });
+  });
+}
+
+/* typewriter effect (React Bits page) */
+var twTimer = null;
+function startTypewriter(page) {
+  if (twTimer) { clearInterval(twTimer); twTimer = null; }
+  if (!page) { return; }
+  var el = page.querySelector("[data-typewriter]");
+  if (!el) { return; }
+  var full = el.dataset.typewriter;
+  var i = 0;
+  el.textContent = "";
+  twTimer = setInterval(function () {
+    i += 1;
+    el.textContent = full.slice(0, i);
+    if (i >= full.length) { clearInterval(twTimer); twTimer = null; }
+  }, 45);
+}
+
+/* initial route */
+showPage(location.hash.slice(1) || "overview");
+</script>
+</body>
+</html>
