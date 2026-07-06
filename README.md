@@ -5,6 +5,19 @@ coding agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI, Windsurf, JetBrai
 build enterprise-grade software from first idea to delivery and maintenance. The system carries
 everything a project needs to begin correctly, before the first line of product code exists.
 
+## See what it can be
+
+An interactive explainer ships with the repo. Open
+[groundwork-explained.html](groundwork-explained.html) in any browser for the full thing: light
+and dark themes, six color palettes, six fonts, and smooth scroll motion. The preview below
+follows your GitHub theme.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/design/reference/explainer-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/design/reference/explainer-light.png">
+  <img alt="Groundwork interactive explainer, hero section" src="docs/design/reference/explainer-dark.png" width="100%">
+</picture>
+
 ## Start a project
 
 1. **Copy** this folder to a new location and rename it after your project.

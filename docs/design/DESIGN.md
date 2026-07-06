@@ -25,6 +25,16 @@
 8. **Accessible by construction.** Contrast of at least 4.5:1 for text, focus always visible,
    touch targets at least 44px, semantics before ARIA. WCAG 2.1 AA is the legal floor, not the
    ambition.
+9. **One icon set, consistent.** Default to Lucide: uniform stroke icons, one weight, sized on
+   the scale, colored by ink or the accent (never their own colors). Never emoji as UI icons,
+   never a grab-bag of styles. A wordmark is text unless the owner supplies a real logo. A button
+   carries a text label or a single icon, never both by default (a disclosure control, like an
+   accordion chevron, is the one exception: there the icon is the state, not decoration).
+10. **No stock-AI look.** Solid fills and solid text by default. The generic blue-to-purple
+    gradient, and blue or purple as a reflex accent, are banned as defaults; pick the project's
+    own accent (seed: the owner's deep teal). A gradient is only ever a small, deliberate,
+    owner-approved accent, never the baseline. Any background motion stays subtle and secondary
+    to reading; usability wins over decoration.
 
 ## 2. Standing default direction (the owner's taste: seed, not straitjacket)
 
