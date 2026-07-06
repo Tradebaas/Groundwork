@@ -1,0 +1,23 @@
+{
+  "_doc": "Configuration for checks/check.mjs. denylist: retired facts that may never return in any scanned text file — add the OLD wording whenever a fact changes (see AGENTS.md conflict rule). Each entry: pattern (JS regex source, case-insensitive), why (shown on failure), optional exclude (path substrings to skip). docs/decisions/, archives and checks/ are never scanned — decision records may quote retired wording. extraTextExtensions/extraCodeExtensions: the stack skill adds this ecosystem's file types here. skipSymlinkCheck: set true only on Windows without symlink support.",
+  "denylist": [],
+  "extraTextExtensions": [],
+  "extraCodeExtensions": [],
+  "skipSymlinkCheck": false,
+  "budgets": {
+    "agentsMdLines": 150,
+    "stateMdLines": 150,
+    "skillMdLines": 500,
+    "skillDescriptionChars": 1024
+  },
+  "allowedEmptyDirs": [
+    "docs/specs/archive",
+    "docs/state/log",
+    "docs/operations",
+    "docs/design/reference"
+  ],
+  "secretScanExclude": [
+    "checks/",
+    ".env.example"
+  ]
+}

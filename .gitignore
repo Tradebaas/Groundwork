@@ -1,0 +1,23 @@
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor/agent local state (personal, never shared)
+CLAUDE.local.md
+*.local.md
+.idea/
+.vscode/*
+!.vscode/settings.json
+
+# Dependencies & build output (extend per stack via the `stack` skill)
+node_modules/
+dist/
+build/
+coverage/
+
+# Secrets — never in the repo, no exceptions
+.env
+.env.*
+!.env.example
+*.pem
+*.key

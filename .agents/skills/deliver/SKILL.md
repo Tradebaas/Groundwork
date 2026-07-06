@@ -1,0 +1,44 @@
+---
+name: deliver
+description: Release, deploy, or hand over a milestone in a disciplined, repeatable way. Use when shipping to users, deploying to an environment, tagging a release, or closing out a milestone. Nothing ships that verify hasn't passed.
+---
+
+# deliver — shipping is a procedure, not an event
+
+## 0. Entry conditions — all of them
+
+- `verify` passed on everything in this release (evidence in STATE.md, not memory).
+- `scope-guard` clean; specs in this release at status `done`.
+- CI green on the exact commit being shipped. Local green is not CI green. No CI yet (no
+  remote/host)? Wire it now — first delivery is the moment. Genuinely impossible? Run the full
+  gate chain on a fresh clean checkout and record that explicit exception in STATE.md.
+- The product holds persistent data → `docs/operations/backup-restore.md` exists and the
+  restore has been performed once, for real. An untested restore is a hope, not a backup.
+- Compliance register (`docs/compliance/COMPLIANCE.md`) has no open blocking item — for a first
+  release or new data/AI processing, run `comply` first.
+
+## 1. The release
+
+1. Version it: semantic version derived from Conventional Commits (breaking → major, feat →
+   minor, fix → patch). Tag: `vX.Y.Z`.
+2. Changelog: generate from commits since the last tag, edit for a human reader — what changed
+   *for the user*, in the product's voice.
+3. Deploy **only** via the runbook `docs/operations/deploy.md`. First delivery? Write that
+   runbook now (target, credentials location — never in the repo, steps, verification URL,
+   rollback procedure) and test it by following it literally, from a clean state.
+4. Post-deploy verification: the runbook's smoke checks against the real environment — the
+   critical flows, not a browse-around. Record results.
+5. Rollback is part of delivery: before shipping, know the one command/procedure that undoes
+   this release, and that it works.
+
+## 2. Milestone handover
+
+Deliverable milestone for a client/owner → run `handover` so the repo is cold-start complete,
+and demo against BRIEF's success criteria: per SC-item in this milestone, show it working.
+
+## 3. Record
+
+STATE.md: phase (`maintain` after first production release), release line (version, date, sha,
+environment), Now ▶. Deferred-but-shipped debt: DEBT.md rows checked against what shipped.
+New operational facts (URLs, dashboards, schedules) → `docs/operations/`, listed in the
+manifest. Report: version, where it now runs, evidence of the smoke checks, one next step. ⚓

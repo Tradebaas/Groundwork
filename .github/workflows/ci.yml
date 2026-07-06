@@ -1,0 +1,32 @@
+# Groundwork CI — the unbypassable authority. Local hooks are convenience; this is the gate.
+# The `stack` skill extends this file with the stack's own gates when the stack is chosen.
+name: ci
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Checks must prove themselves first
+        run: node checks/check.test.mjs
+
+      - name: Groundwork checks
+        run: node checks/check.mjs
+
+      # --- Stack gates (added by the `stack` skill; keep the order: cheap → expensive) ---
+      # - name: Typecheck (strict — the top catcher of AI slips)
+      # - name: Lint & format
+      # - name: Tests
+      # - name: Dependency audit (fail on high/critical)
+      # - name: Secret scan (gitleaks or equivalent)
+      # - name: Build
