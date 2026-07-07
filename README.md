@@ -7,10 +7,11 @@ everything a project needs to begin correctly, before the first line of product 
 
 ## See what it can be
 
-An interactive explainer ships with the repo. Open
-[groundwork-explained.html](groundwork-explained.html) in any browser for the full thing: light
-and dark themes, six color palettes, six fonts, and smooth scroll motion. The preview below
-follows your GitHub theme.
+An interactive explainer ships with the repo. See it live at
+**https://tradebaas.github.io/Groundwork/groundwork-explained.html**, or open
+[groundwork-explained.html](groundwork-explained.html) in any browser: light and dark themes,
+six color palettes, six fonts, and smooth scroll motion. The preview below follows your GitHub
+theme.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/design/reference/explainer-dark.png">
