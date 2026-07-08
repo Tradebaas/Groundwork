@@ -18,6 +18,15 @@
      decision), what is next. Keep this file under 150 lines: when it grows past that, move the
      oldest entries to docs/state/log/YYYY-MM.md (the manifest pattern already covers those). -->
 
+### 2026-07-08 - hard cap: any AGENTS.md/CLAUDE.md never past 200 lines
+
+- Added the `agent-file-cap` check: every file named `AGENTS.md` or `CLAUDE.md` anywhere in the
+  tree (including products built on Groundwork) is hard-capped at 200 lines (`budgets.agentFileHardCapLines`).
+  The root AGENTS.md keeps its stricter 150 budget (`budget-agents`); this is the universal backstop.
+- Self-test added; `node checks/check.mjs` and the test suite (29) are green.
+- Same rule set globally in `~/.claude/CLAUDE.md` (out of repo, noted here for the handover audit)
+  so it also holds outside Groundwork projects.
+
 ### 2026-07-08 - token-saving: checkpoint skill + context-usage nudge
 
 - Added the `checkpoint` skill (flush a lean mid-session handoff into this file, then `/clear` to

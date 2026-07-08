@@ -10,7 +10,7 @@ import {
   readFileSync, readdirSync, existsSync, readlinkSync, chmodSync,
 } from 'node:fs';
 import { execSync } from 'node:child_process';
-import { join, dirname, resolve, relative, extname, isAbsolute } from 'node:path';
+import { join, dirname, resolve, relative, extname, isAbsolute, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const TEXT_EXT = new Set([
@@ -78,6 +78,22 @@ export function runChecks(root) {
       const n = lines(join(root, 'AGENTS.md')).length;
       if (n > cfg.budgets.agentsMdLines) {
         fail(`AGENTS.md is ${n} lines (budget ${cfg.budgets.agentsMdLines}). Every line must earn its place: move detail into a skill or docs/.`);
+      }
+    },
+
+    'agent-file-cap'() {
+      // Hard ceiling for EVERY AGENTS.md / CLAUDE.md anywhere in the tree, including products
+      // built on Groundwork: past this length an agent rulebook stops being loaded in full, so
+      // it silently stops governing. The root AGENTS.md has a stricter budget (budget-agents);
+      // this is the universal backstop. Older configs without the key fall back to 200.
+      const cap = cfg.budgets.agentFileHardCapLines ?? 200;
+      for (const f of tree.files) {
+        const base = basename(f);
+        if (base !== 'AGENTS.md' && base !== 'CLAUDE.md') continue;
+        const n = lines(f).length;
+        if (n > cap) {
+          fail(`${rel(root, f)} is ${n} lines (hard cap ${cap}): an AGENTS.md/CLAUDE.md past ${cap} lines stops being read in full. Move detail into a skill or docs/.`);
+        }
       }
     },
 
