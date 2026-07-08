@@ -41,6 +41,10 @@ Do **not** ask about stack (that's the `stack` skill, argued on merit) or design
 
 ## 4. Set up the machinery
 
+First, if a `.git/` directory exists the copy still carries Groundwork's commit history (it was
+cloned, not made with "Use this template", `degit`, or a ZIP). The project must start from its own
+root, so remove it: `rm -rf .git`. Skip this only if that `.git` already holds the owner's own work.
+
 ```bash
 git init -b main
 node checks/check.mjs --install-hooks   # wires core.hooksPath → checks/hooks (versioned)
