@@ -17,3 +17,14 @@
 <!-- Newest first. Per session one short dated entry: what changed, what was decided (link the
      decision), what is next. Keep this file under 150 lines: when it grows past that, move the
      oldest entries to docs/state/log/YYYY-MM.md (the manifest pattern already covers those). -->
+
+### 2026-07-08 - token-saving: checkpoint skill + context-usage nudge
+
+- Added the `checkpoint` skill (flush a lean mid-session handoff into this file, then `/clear` to
+  resume in a fresh, cheaper context) and registered it in `AGENTS.md`.
+- Out-of-repo helper, noted here for the handover audit: a Claude Code Stop hook at
+  `~/.claude/hooks/checkpoint-reminder.mjs` (wired in `~/.claude/settings.json`) nudges the user
+  once a session passes ~150k context tokens. It only ever suggests, fails safe (silent no-op if
+  the transcript format changes), and is global, so it is NOT under version control here.
+- Declined the token tools from the viral thread (third-party MCP servers / proxies): the trust
+  surface and risk of silent context loss outweigh the savings for a repo this small.

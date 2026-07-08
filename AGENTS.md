@@ -98,6 +98,7 @@ trigger applies. The library:
 | `deliver` | Releasing, deploying, or handing over a milestone |
 | `maintain` | Post-launch work: monitoring, updates, incidents, debt harvest |
 | `handover` | Making the project transferable to another human or agent |
+| `checkpoint` | Session used ~12-15% of context: flush a lean handoff to STATE.md, then `/clear` |
 | `skill-author` | The project needs a new skill: how to write one correctly |
 | `comply` | Compliance review (GDPR/AVG, EU AI Act, accessibility, licensing) |
 | `ingest` | Convert a PDF/Office/image/data file to Markdown before reading, to save tokens |
