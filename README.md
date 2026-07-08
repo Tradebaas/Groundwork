@@ -13,9 +13,9 @@ light and dark themes, six color palettes, six fonts, and smooth scroll motion. 
 follows your GitHub theme.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/design/reference/explainer-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/design/reference/explainer-light.png">
-  <img alt="Groundwork interactive explainer, hero section" src="docs/design/reference/explainer-dark.png" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/design/reference/explainer-hero-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/design/reference/explainer-hero-light.png">
+  <img alt="Groundwork interactive explainer, hero section" src="docs/design/reference/explainer-hero-dark.png" width="100%">
 </picture>
 
 ## Start a project
