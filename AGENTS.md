@@ -9,7 +9,9 @@ the single source of rules. Everything else loads on demand via the routing tabl
 ## Session protocol
 
 1. Read the handoff block at the top of `docs/state/STATE.md` before anything else. Do not
-   re-derive project state from the codebase. That is what the file is for.
+   re-derive project state from the codebase. That is what the file is for. (Developing Groundwork
+   itself? If `docs/state/STATE.local.md` exists it is the real live state: use it everywhere this
+   protocol says STATE.md; the tracked STATE.md stays a blank template so copies start clean.)
 2. Work one task at a time. When you finish, propose exactly **one** best next step, no menus.
 3. Before ending a session or after completing significant work: update `docs/state/STATE.md`.
    One fact, one place: update only the file that owns the fact.

@@ -71,6 +71,10 @@ export function runChecks(root) {
   for (const e of cfg.extraTextExtensions || []) TEXT_EXT.add(e);
   for (const e of cfg.extraCodeExtensions || []) CODE_EXT.add(e);
   const tree = walk(root);
+  // *.local.md is personal, never shared (.gitignore). The checks walk the working tree, not the
+  // git index, so without this they would gate gitignored files: a maintainer's CLAUDE.local.md or
+  // STATE.local.md could fail the pre-commit hook. Drop them from every file-based check.
+  tree.files = tree.files.filter((f) => !basename(f).endsWith('.local.md'));
   const textFiles = tree.files.filter((f) => TEXT_EXT.has(extname(f)) || f.endsWith('.gitignore'));
 
   const checks = {

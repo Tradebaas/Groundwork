@@ -9,8 +9,9 @@ Run this once. When it's done, STATE.md carries real state and this skill never 
 
 ## 1. Clean the copy
 
-- If `MASTER_PROMPT.md` exists at the root: it is the brief that built Groundwork, not part of
-  any project. Delete it.
+- If a `MASTER_PROMPT.md` or `MASTER_PROMPT.local.md` exists at the root: it is Groundwork's own
+  origin brief, not part of any project. Delete it. (Fresh copies no longer carry it: it is
+  gitignored at source. This clears it from older copies made while it was still tracked.)
 - Verify prerequisites: `git --version` and `node --version` (Node ≥ 20). Missing → tell the
   owner exactly what to install, then stop.
 
