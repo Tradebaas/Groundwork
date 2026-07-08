@@ -96,7 +96,7 @@ window.GW={
   .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;letter-spacing:.14em;
     line-height:1;text-transform:uppercase;color:var(--ink2);border:1px solid var(--line);
     background:var(--surface);padding:9px 15px 8px;border-radius:999px}
-  .eyebrow svg{color:var(--accent);width:14px;height:14px}
+  .eyebrow svg{color:var(--accent);width:14px;height:14px;transform:translateY(-0.5px)}
   .sec-head{max-width:64ch;margin-bottom:52px}
   h2{font-size:clamp(27px,4vw,40px);line-height:1.14;letter-spacing:-.02em;font-weight:700;margin:22px 0 18px}
   h3{font-size:18px;font-weight:600;letter-spacing:-.01em}
@@ -443,7 +443,12 @@ var fine=matchMedia('(hover: hover) and (pointer: fine)').matches;
 (function(){
   var tools=['Claude Code','Cursor','GitHub Copilot','Codex','Gemini CLI','Windsurf','JetBrains'];
   var one=tools.map(function(t){return '<span>'+t+'</span>'}).join('');
-  document.getElementById('mtrack').innerHTML=one+one; /* duplicated for the loop */
+  var track=document.getElementById('mtrack');
+  var half=one;
+  track.innerHTML=half;
+  /* repeat the list until one half fills the viewport, so the loop never exposes empty space */
+  while(track.scrollWidth<window.innerWidth){half+=one;track.innerHTML=half;}
+  track.innerHTML=half+half; /* two identical halves: at translateX(-50%) the second sits where the first began, so it repeats with no visible jump */
 })();
 
 /* ---------- theme (light/dark) ---------- */
