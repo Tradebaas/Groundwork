@@ -16,6 +16,7 @@
   "skipSymlinkCheck": false,
   "budgets": {
     "agentsMdLines": 150,
+    "agentFileHardCapLines": 200,
     "stateMdLines": 150,
     "skillMdLines": 500,
     "skillDescriptionChars": 1024

@@ -64,6 +64,9 @@ expectClean();
 expectFail('budget-agents', ({ put }) =>
   put('AGENTS.md', `# rules\n\nskills: \`demo\`\n${'filler line\n'.repeat(160)}`));
 
+expectFail('agent-file-cap', ({ put }) =>
+  put('product/AGENTS.md', `# rules\n${'filler line\n'.repeat(205)}`));
+
 expectFail('bridge-claude', ({ put }) =>
   put('CLAUDE.md', '@AGENTS.md\n\nAlso: always use tabs.\n'));
 
