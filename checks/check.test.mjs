@@ -161,6 +161,9 @@ expectClean('denylist-exclude', ({ put }) => {
 expectClean('gitkeep-is-intentional', ({ put }) =>
   put('docs/state/log/.gitkeep', ''));
 
+expectClean('local-files-are-exempt', ({ put }) => // personal, never shared: no manifest, no style gate
+  put('docs/state/STATE.local.md', '# local — maintainer notes with an em dash\n'));
+
 expectClean('prose-style-allow-escape', ({ put }) =>
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ quote the source verbatim — as written checks:allow-style\n'));
 

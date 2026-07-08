@@ -20,11 +20,23 @@ follows your GitHub theme.
 
 ## Start a project
 
-1. **Copy** this folder to a new location and rename it after your project.
-2. **Open it** in your IDE / agent of choice.
-3. **Say `begin`** (or tell the agent to load the `begin` skill). It will interview you about
-   scope and goals, set up git, fill in the templates, and propose the first real step.
-   (Design taste comes later, when the `design` skill needs it.)
+Start from a clean copy that carries **none of Groundwork's git history**: your project deserves
+its own first commit, not ours. Pick one:
+
+- **On GitHub (best):** click **Use this template**, then **Create a new repository**. You get a
+  fresh repo with a single initial commit and no Groundwork history.
+- **From the CLI:** `npx degit Tradebaas/Groundwork my-project` copies the latest snapshot with no
+  history.
+- **Or:** download the ZIP from the green **Code** button and unzip it (see the symlink note under
+  Requirements).
+
+Avoid a plain `git clone` for this: it drags Groundwork's entire commit history, and our
+development choices, into your project. If you cloned anyway, `begin` resets git so your first
+commit is a true root.
+
+Then open the folder in your IDE / agent and say **`begin`** (or load the `begin` skill). It
+interviews you about scope and goals, sets up git and the hooks, fills the templates, and proposes
+the first real step. (Design taste comes later, when the `design` skill needs it.)
 
 That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) tell it how.
 

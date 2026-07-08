@@ -9,8 +9,9 @@ Run this once. When it's done, STATE.md carries real state and this skill never 
 
 ## 1. Clean the copy
 
-- If `MASTER_PROMPT.md` exists at the root: it is the brief that built Groundwork, not part of
-  any project. Delete it.
+- If a `MASTER_PROMPT.md` or `MASTER_PROMPT.local.md` exists at the root: it is Groundwork's own
+  origin brief, not part of any project. Delete it. (Fresh copies no longer carry it: it is
+  gitignored at source. This clears it from older copies made while it was still tracked.)
 - Verify prerequisites: `git --version` and `node --version` (Node ≥ 20). Missing → tell the
   owner exactly what to install, then stop.
 
@@ -39,6 +40,10 @@ Do **not** ask about stack (that's the `stack` skill, argued on merit) or design
   exists); keep the "How it works" system section and this table intact for successors.
 
 ## 4. Set up the machinery
+
+First, if a `.git/` directory exists the copy still carries Groundwork's commit history (it was
+cloned, not made with "Use this template", `degit`, or a ZIP). The project must start from its own
+root, so remove it: `rm -rf .git`. Skip this only if that `.git` already holds the owner's own work.
 
 ```bash
 git init -b main
