@@ -46,16 +46,17 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
   [agents.md](https://agents.md) standard that all major agent tools read. `CLAUDE.md` (Claude
   Code) and `.gemini/settings.json` (Gemini CLI) are one-line bridges to it. Never edit those.
 - **[.agents/skills/](.agents/skills/)** holds the expert methods (scoping, spec, stack choice,
-  design, verification, delivery, maintenance, compliance ...) in the open
+  design, verification, code review, delivery, maintenance, compliance ...) in the open
   [Agent Skills](https://agentskills.io) format. They load on demand, so they cost no context
   until needed. `.claude/skills` is a symlink to this directory.
 - **[docs/](docs/)** is the project's externalized memory: live state and session handoff,
   scope, specs, decisions, standards, design system, compliance register. Agents read state from
   disk instead of re-deriving it every session. [docs/README.md](docs/README.md) is the manifest.
 - **[checks/](checks/)** enforces hygiene mechanically: `node checks/check.mjs` validates the
-  docs manifest, link integrity, retired-fact denylist, file budgets, skill format, secrets, and
-  more: zero model tokens spent. CI runs it on every push. The checks test themselves
-  (`node checks/check.test.mjs`): a gate that isn't tested is false confidence.
+  docs manifest, link integrity, retired-fact denylist, file and source-code budgets, spec-ticket
+  integrity, skill format, secrets, and more: zero model tokens spent. CI runs it on every push.
+  The checks test themselves (`node checks/check.test.mjs`): a gate that isn't tested is false
+  confidence.
 
 ## Requirements
 

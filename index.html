@@ -291,9 +291,9 @@ window.GW={
     <a class="btn ghost" href="#eerlijk">Wat het niet is</a>
   </div>
   <div class="stats reveal">
-    <div class="stat"><div class="n" data-count="17">0</div><div class="l">Skills op afroep</div></div>
-    <div class="stat"><div class="n" data-count="14">0</div><div class="l">Automatische poorten</div></div>
-    <div class="stat"><div class="n" data-count="10">0</div><div class="l">Vastgelegde besluiten</div></div>
+    <div class="stat"><div class="n" data-count="18">0</div><div class="l">Skills op afroep</div></div>
+    <div class="stat"><div class="n" data-count="17">0</div><div class="l">Automatische poorten</div></div>
+    <div class="stat"><div class="n" data-count="11">0</div><div class="l">Vastgelegde besluiten</div></div>
     <div class="stat"><div class="n" data-count="1">0</div><div class="l">Rulebook, alle tools</div></div>
     <div class="stat"><div class="n" data-count="0">0</div><div class="l">Tokens voor de poorten</div></div>
   </div>
@@ -336,7 +336,7 @@ window.GW={
 <section id="skills" class="wrap">
   <div class="sec-head reveal">
     <span class="eyebrow">De gereedschapskist</span>
-    <h2>17 skills, elk een expert voor <span class="accent">e&eacute;n</span> taak</h2>
+    <h2>18 skills, elk een expert voor <span class="accent">e&eacute;n</span> taak</h2>
     <p class="lead">Een skill is een uitgeschreven werkwijze die de assistent erbij pakt op het
       juiste moment. Klik op een kaart voor de uitleg in gewone taal.</p>
   </div>
@@ -542,7 +542,7 @@ mount('gates',[
   ['pen','Schrijfstijl','Typische AI-tekens en holle frasen worden geblokkeerd, zodat tekst niet leest als door een model geschreven.'],
   ['link','Dode links','Elke verwijzing tussen documenten moet echt bestaan, anders faalt de controle.'],
   ['clipboard','Documentregister','Elk document staat in de inhoudsopgave. Geen zwevende, vergeten bestanden.'],
-  ['ruler','Budgetten','De regelset blijft klein en leesbaar. Groeit iets te groot, dan wordt het gesplitst.'],
+  ['ruler','Budgetten','Regels, documenten en codebestanden blijven binnen hun budget. Groeit iets te groot, dan wordt het gesplitst.'],
   ['code','Dode code','Uitgecommentarieerde brokken code worden opgeruimd. Git onthoudt de historie wel.'],
   ['scale','Zelf-test','De poorten testen zichzelf: een controle die niet bewijst dat hij werkt, telt niet mee.'],
   ['wrench','En meer','Structuur, koppelingen tussen tools en uitgestelde keuzes worden allemaal bewaakt.'],
@@ -552,7 +552,7 @@ var why=[
   {k:'Bij elk project',t:'Werkt met elke editor, elk model, elk project',
    how:['E&eacute;n rulebook in de open AGENTS.md-standaard die alle grote AI-tools lezen','Geen binding aan e&eacute;n leverancier of programma','Begeleidt de hele route: van idee tot onderhoud, niet alleen het bouwen','Kopieer de map, zeg "begin", en je bent onderweg']},
   {k:'Zuinig met tokens',t:'Effici&euml;nt door ontwerp, niet door een truc',
-   how:['Skills laden alleen wanneer ze nodig zijn, niet allemaal tegelijk','Verwijzen in plaats van kopi&euml;ren: e&eacute;n feit op e&eacute;n plek','De projectstand staat op schijf, dus niets wordt elke sessie opnieuw afgeleid','De ingest-skill zet PDF en Office om naar compacte tekst; de poorten kosten nul tokens']},
+   how:['Skills laden alleen wanneer ze nodig zijn, niet allemaal tegelijk','Verwijzen in plaats van kopi&euml;ren: e&eacute;n feit op e&eacute;n plek','De projectstand staat op schijf, dus niets wordt elke sessie opnieuw afgeleid','Groot werk wordt geknipt in tickets van precies e&eacute;n verse sessie','De ingest-skill zet PDF en Office om naar compacte tekst; de poorten kosten nul tokens']},
   {k:'Actuele code',t:'Feiten live opgezocht, nooit uit verouderd geheugen',
    how:['De stack- en comply-skills eisen live onderzoek, nooit kennis uit het model zelf','Elke keuze wordt vastgelegd als besluit, met datum en reden','Onderhoud controleert regelmatig op verouderde afhankelijkheden','Klopt de code niet met een document, dan is de code het feit en wordt het document bijgewerkt']},
   {k:'Veilig',t:'Een beveiligingsvloer die nooit wordt weggesimplificeerd',
@@ -586,6 +586,7 @@ var skills=[
   ['scope-guard','De laatste check voordat werk "af" heet: is er niets extra gebouwd dat niemand vroeg?'],
   ['design-guard','De laatste check op schermen en teksten voordat ze de deur uit gaan.'],
   ['verify','Bewijst dat een wijziging echt werkt, van begin tot eind. Groene tests alleen zijn geen bewijs.'],
+  ['code-review','Beoordeelt de wijziging met frisse ogen langs twee assen: voldoet de code aan de standaarden, en doet hij precies wat de spec vraagt?'],
   ['deliver','Levert een release gecontroleerd en herhaalbaar op. Niets gaat de deur uit dat niet geverifieerd is.'],
   ['maintain','Houdt een live product gezond: updates, incidenten, opgebouwde schuld en periodieke controles.'],
   ['handover','Maakt het project overdraagbaar aan een ander mens of AI, zonder mondelinge uitleg.'],
@@ -608,7 +609,7 @@ var phases=[
   ['Architectuur','De opbouw wordt ontworpen: grenzen, gegevens en bedreigingen.','architect'],
   ['Ontwerp','Het uiterlijk en de toon worden vastgelegd, afgestemd op jouw smaak.','design'],
   ['Bouwen','Er wordt gebouwd volgens de beslis-ladder: alleen het minimum dat werkt.','spec'],
-  ['Verifi&euml;ren','Er wordt bewezen dat het echt werkt, van begin tot eind.','verify'],
+  ['Verifi&euml;ren','Er wordt bewezen dat het echt werkt, en de wijziging wordt met frisse ogen beoordeeld.','verify'],
   ['Opleveren','De release gaat gecontroleerd en herhaalbaar de deur uit.','deliver'],
   ['Onderhouden','Het product blijft gezond: updates, incidenten en overdracht.','maintain']
 ];
