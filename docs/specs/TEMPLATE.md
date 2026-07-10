@@ -19,7 +19,8 @@ Right-sizing (details in the `spec` skill, never more ceremony than the change d
 
 - **Status:** draft | approved | building | done | dropped
 - **Traces to:** BRIEF SC-<n> / explicit request: <link or quote>
-- **Owner sign-off:** TBD <!-- required before building starts -->
+- **Owner sign-off:** TBD <!-- the interview's shared-understanding confirmation: date plus the
+  owner's words. Required before building starts; a bare "approved" is not it. -->
 
 ## Why
 
