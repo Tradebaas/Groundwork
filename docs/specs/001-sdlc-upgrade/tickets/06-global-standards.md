@@ -1,7 +1,7 @@
 # 06: GLOBAL.md standards upgrade
 
 - **Blocked by:** none
-- **Status:** ready
+- **Status:** done
 
 **What to build:** A developer (or agent) reading `docs/standards/GLOBAL.md` finds numbers,
 not only adjectives: the code-file cap (500 lines, and aim well under it), function-length
@@ -12,7 +12,7 @@ to the review stage, never mixed into the implementing diff.
 
 **Acceptance:**
 
-- [ ] GLOBAL.md names the file cap and points at the `code-file-cap` check as enforcement
-- [ ] Deep-modules principle stated in two or three plain sentences
-- [ ] Red-before-green at pre-agreed seams stated; refactor-at-review stated
-- [ ] File stays lean (under 60 lines) and `node checks/check.mjs` green
+- [x] GLOBAL.md names the file cap and points at the `code-file-cap` check as enforcement
+- [x] Deep-modules principle stated in two or three plain sentences
+- [x] Red-before-green at pre-agreed seams stated; refactor-at-review stated
+- [x] File stays lean (under 60 lines) and `node checks/check.mjs` green
