@@ -1,7 +1,7 @@
 # 08: CONTEXT.md domain glossary
 
 - **Blocked by:** 04-spec-interview
-- **Status:** ready
+- **Status:** done
 
 **What to build:** Every project gets a shared vocabulary that compresses tokens session after
 session: a `docs/product/CONTEXT.md` glossary (term in bold, one-to-two-line definition, an
@@ -12,7 +12,7 @@ batched. The glossary stays free of implementation detail; it defines language, 
 
 **Acceptance:**
 
-- [ ] `docs/product/CONTEXT.md` template exists, with a manifest row in `docs/README.md`
-- [ ] `begin`, `scope`, and `spec` skills each carry their glossary duty in one or two lines
-- [ ] The template shows one worked example term with an Avoid list
-- [ ] `node checks/check.mjs` green
+- [x] `docs/product/CONTEXT.md` template exists, with a manifest row in `docs/README.md`
+- [x] `begin`, `scope`, and `spec` skills each carry their glossary duty in one or two lines
+- [x] The template shows one worked example term with an Avoid list
+- [x] `node checks/check.mjs` green

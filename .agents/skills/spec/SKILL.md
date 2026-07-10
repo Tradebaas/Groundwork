@@ -29,6 +29,8 @@ Tier S is exempt: a bugfix gets no interview. Four rules:
   you answer yourself before asking anything.
 - **Decisions are put to the owner, never assumed.** Scope, trade-offs, and preferences are
   the owner's; surface each one as a question, however obvious the answer seems.
+- **Pin fuzzy terms as they surface.** A word with two possible meanings goes into the glossary
+  `docs/product/CONTEXT.md` right then, so the spec uses one word for one thing.
 - **Write only after confirmation.** Close the interview by playing back your understanding in
   a few lines and asking the owner to confirm it. Only then start writing. Record the
   confirmation (date plus the owner's words) in the spec's sign-off line; it replaces a bare
