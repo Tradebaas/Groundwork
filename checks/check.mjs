@@ -295,6 +295,32 @@ export function runChecks(root) {
       }
     },
 
+    'tickets'() {
+      // Ticket files carry the build frontier (spec skill, docs/specs/TEMPLATE-TICKET.md). A
+      // typo'd status or a Blocked-by naming a missing sibling silently corrupts the frontier
+      // rule, so the machine-read fields are gated. Archived specs are history, not live work.
+      const STATUSES = ['ready', 'building', 'done'];
+      for (const f of tree.files) {
+        const r = rel(root, f);
+        if (!/^docs\/specs\/.+\/tickets\/[^/]+\.md$/.test(r) || r.startsWith('docs/specs/archive/')) continue;
+        const body = read(f);
+        const status = (body.match(/^- \*\*Status:\*\*\s*(\S+)/m) || [])[1];
+        if (!status) fail(`${r}: missing "- **Status:**" line (${STATUSES.join(' | ')}).`);
+        else if (!STATUSES.includes(status)) fail(`${r}: status "${status}" is not one of ${STATUSES.join(' | ')}.`);
+        const blocked = (body.match(/^- \*\*Blocked by:\*\*\s*(.+)$/m) || [])[1]?.trim();
+        if (!blocked) fail(`${r}: missing "- **Blocked by:**" line (sibling ticket names, or "none").`);
+        else if (blocked !== 'none') {
+          for (const entry of blocked.split(',').map((s) => s.trim()).filter(Boolean)) {
+            const sibling = join(dirname(f), entry.endsWith('.md') ? entry : `${entry}.md`);
+            if (!existsSync(sibling)) fail(`${r}: Blocked-by "${entry}" names no sibling ticket file.`);
+          }
+        }
+        if (!/^\*\*What to build:\*\*/m.test(body)) {
+          fail(`${r}: missing "**What to build:**" line: a ticket without behavior is not buildable.`);
+        }
+      }
+    },
+
     'empty-dirs'() {
       // A dir with only a .gitkeep is intentionally kept; a truly empty dir is clutter.
       for (const d of tree.dirs) {

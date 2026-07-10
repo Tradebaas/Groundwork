@@ -124,6 +124,21 @@ expectFail('zombie-code', ({ put }) =>
 expectFail('empty-dirs', ({ root }) =>
   mkdirSync(join(root, 'src', 'hollow'), { recursive: true }));
 
+// Ticket fixtures need a manifest row so docs-manifest stays quiet and only 'tickets' speaks.
+const ticketManifest = '# manifest\n\n| `state/STATE.md` | LIVE | state |\n| `specs/**` | LIVE | specs |\n';
+
+expectFail('tickets', ({ put }) => { // invalid status value
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/tickets/01-a.md',
+    '# 01: A\n\n- **Blocked by:** none\n- **Status:** shipped\n\n**What to build:** demo.\n');
+});
+
+expectFail('tickets', ({ put }) => { // Blocked-by names a missing sibling
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/tickets/01-a.md',
+    '# 01: A\n\n- **Blocked by:** 99-ghost\n- **Status:** ready\n\n**What to build:** demo.\n');
+});
+
 // --- sub-rules that the one-violation-per-check pass above does not reach ---
 
 expectFail('state-file', ({ put }) =>
@@ -131,6 +146,16 @@ expectFail('state-file', ({ put }) =>
 
 expectFail('skills', ({ put }) =>
   put('.agents/skills/demo/SKILL.md', '---\nname: demo\n---\n\n# no description\n'));
+
+expectFail('tickets', ({ put }) => { // no Status line at all
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/tickets/01-a.md', '# 01: A\n\n- **Blocked by:** none\n\n**What to build:** demo.\n');
+});
+
+expectFail('tickets', ({ put }) => { // no What to build line
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/tickets/01-a.md', '# 01: A\n\n- **Blocked by:** none\n- **Status:** ready\n');
+});
 
 expectFail('skills', ({ put }) =>
   put('.agents/skills/demo/SKILL.md',
@@ -166,6 +191,19 @@ expectClean('local-files-are-exempt', ({ put }) => // personal, never shared: no
 
 expectClean('prose-style-allow-escape', ({ put }) =>
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ quote the source verbatim — as written checks:allow-style\n'));
+
+expectClean('tickets-valid', ({ put }) => {
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/tickets/01-a.md',
+    '# 01: A\n\n- **Blocked by:** none\n- **Status:** done\n\n**What to build:** demo.\n');
+  put('docs/specs/001-demo/tickets/02-b.md',
+    '# 02: B\n\n- **Blocked by:** 01-a\n- **Status:** ready <!-- ready | building | done -->\n\n**What to build:** demo.\n');
+});
+
+expectClean('tickets-archive-skipped', ({ put }) => {
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/archive/001-old/tickets/01-a.md', '# 01: A\n\n- **Status:** shipped\n');
+});
 
 expectClean('manifest-glob-classes', ({ put }) => {
   put('docs/README.md', '# manifest\n\n| `state/STATE.md` | LIVE | state |\n| `decisions/[0-9]*.md` | REF | records |\n| `specs/[0-9]*/**` | LIVE | specs |\n');
