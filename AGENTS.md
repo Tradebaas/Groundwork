@@ -51,6 +51,11 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 
 ## Efficiency
 
+- One ticket per fresh session. Finish the ticket, update state, then clear context before the
+  next one; a stale context costs more than a cold start against STATE.md.
+- Checkpoint (skill `checkpoint`) activates at ~15% of the context window. Stretching to at most
+  ~40% is the owner's call, and only when finishing the current unit of work first is clearly
+  better. Past ~40%, always checkpoint.
 - Read only what the task needs. Before each file read, ask: does this answer the current question?
 - Prefer pointers over copies. Link to the owning file; never restate its content elsewhere.
 - State lives on disk, not in chat: progress → `docs/state/STATE.md`, decisions →
@@ -101,7 +106,7 @@ trigger applies. The library:
 | `deliver` | Releasing, deploying, or handing over a milestone |
 | `maintain` | Post-launch work: monitoring, updates, incidents, debt harvest |
 | `handover` | Making the project transferable to another human or agent |
-| `checkpoint` | Session used ~12-15% of context: flush a lean handoff to STATE.md, then `/clear` |
+| `checkpoint` | Session used ~15% of context: flush a lean handoff to STATE.md, then `/clear` |
 | `skill-author` | The project needs a new skill: how to write one correctly |
 | `comply` | Compliance review (GDPR/AVG, EU AI Act, accessibility, licensing) |
 | `ingest` | Convert a PDF/Office/image/data file to Markdown before reading, to save tokens |

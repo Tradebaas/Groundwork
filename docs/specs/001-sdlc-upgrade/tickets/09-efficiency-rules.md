@@ -1,7 +1,7 @@
 # 09: Efficiency rules in AGENTS.md and checkpoint
 
 - **Blocked by:** 01-ticket-format
-- **Status:** ready
+- **Status:** done
 
 **What to build:** The always-loaded rulebook carries the two session-economy rules the field
 converged on. AGENTS.md efficiency section states: one ticket per fresh session, clear context
@@ -13,7 +13,7 @@ lines, never by weakening `budget-agents`.
 
 **Acceptance:**
 
-- [ ] AGENTS.md states one-ticket-per-fresh-session and the 15/40 checkpoint rule
-- [ ] The repo `checkpoint` skill trigger and body match the 15/40 rule
-- [ ] `budget-agents` still passes at 150 lines
-- [ ] `node checks/check.mjs` green
+- [x] AGENTS.md states one-ticket-per-fresh-session and the 15/40 checkpoint rule
+- [x] The repo `checkpoint` skill trigger and body match the 15/40 rule
+- [x] `budget-agents` still passes at 150 lines
+- [x] `node checks/check.mjs` green
