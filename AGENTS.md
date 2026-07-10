@@ -97,6 +97,7 @@ trigger applies. The library:
 | `scope-guard` | Before calling work done or proposing a commit |
 | `design-guard` | Before delivering any UI or user-facing output |
 | `verify` | Verifying a change actually works, end to end |
+| `code-review` | After `verify`, before committing substantial work: two-axis review of the diff |
 | `deliver` | Releasing, deploying, or handing over a milestone |
 | `maintain` | Post-launch work: monitoring, updates, incidents, debt harvest |
 | `handover` | Making the project transferable to another human or agent |

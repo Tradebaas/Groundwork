@@ -1,7 +1,7 @@
 # 07: code-review skill
 
 - **Blocked by:** 06-global-standards
-- **Status:** ready
+- **Status:** done
 
 **What to build:** Before substantial work is committed, the diff gets reviewed on two
 independent axes, each with fresh eyes (subagents where the tool has them, sequential fresh
@@ -15,7 +15,7 @@ tooling already enforces.
 
 **Acceptance:**
 
-- [ ] `.agents/skills/code-review/SKILL.md` exists and is registered in AGENTS.md
-- [ ] Both axes, the smell baseline, and the never-merge rule are in the skill
-- [ ] The skill states when it runs: before committing substantial work, after `verify`
-- [ ] `node checks/check.mjs` green (skills check validates registration)
+- [x] `.agents/skills/code-review/SKILL.md` exists and is registered in AGENTS.md
+- [x] Both axes, the smell baseline, and the never-merge rule are in the skill
+- [x] The skill states when it runs: before committing substantial work, after `verify`
+- [x] `node checks/check.mjs` green (skills check validates registration)
