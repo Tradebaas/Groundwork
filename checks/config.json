@@ -1,6 +1,8 @@
 {
   "_doc": "Configuration for checks/check.mjs. denylist: retired facts that may never return in any scanned text file, add the OLD wording whenever a fact changes (see AGENTS.md conflict rule). Each entry: pattern (JS regex source, case-insensitive), why (shown on failure), optional exclude (path substrings to skip). docs/decisions/, archives and checks/ are never scanned by the denylist (decision records may quote retired wording). styleBans: AI-boilerplate phrases banned in all text (prose-style check, decision 0008); same shape as denylist, seeded with high-confidence tells, extend per project. The prose-style check also bans AI typography (em dash, en dash, ellipsis and curly quotes) with no config needed; escape a deliberate case with checks:allow-style on the line. extraTextExtensions/extraCodeExtensions: the stack skill adds this ecosystem's file types here. codeFileCapExclude: path prefixes/suffixes the code-file-cap check skips (generated or vendored code); a checks:allow-length: <reason> line inside the file works too. skipSymlinkCheck: set true only on Windows without symlink support.",
-  "denylist": [],
+  "denylist": [
+    { "pattern": "0001-0008 are Groundwork's own", "why": "retired manifest wording; the decision-record note no longer carries a number range (it went stale at 0009)" }
+  ],
   "styleBans": [
     { "pattern": "\\bdelve(s|d|ing)?\\b", "why": "AI-tell verb; say 'look at', 'go into' or just state the point" },
     { "pattern": "\\bseamless(ly)?\\b", "why": "marketing filler; describe what actually happens" },

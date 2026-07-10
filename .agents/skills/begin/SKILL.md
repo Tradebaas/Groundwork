@@ -12,6 +12,9 @@ Run this once. When it's done, STATE.md carries real state and this skill never 
 - If a `MASTER_PROMPT.md` or `MASTER_PROMPT.local.md` exists at the root: it is Groundwork's own
   origin brief, not part of any project. Delete it. (Fresh copies no longer carry it: it is
   gitignored at source. This clears it from older copies made while it was still tracked.)
+- Delete any non-archived spec folder: `docs/specs/[0-9]*` directories are in-flight Groundwork
+  maintainer work, never the new owner's. Keep `docs/specs/archive/` (it holds the worked
+  example) and the `TEMPLATE*.md` files.
 - Verify prerequisites: `git --version` and `node --version` (Node ≥ 20). Missing → tell the
   owner exactly what to install, then stop.
 
