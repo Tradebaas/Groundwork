@@ -1,14 +1,17 @@
 # Spec template: copy per change
 
 <!-- The `spec` skill decides the tier; this file is the skeleton for tiers M and L.
-     Location: docs/specs/<NNN>-<slug>/spec.md (plus plan.md for tier L). -->
+     Location: docs/specs/<NNN>-<slug>/spec.md (tier L adds plan.md from TEMPLATE-PLAN.md).
+     Anti-staleness rule: no source-code paths or line numbers in a spec; they go stale the
+     moment code moves. Describe observable behavior, never a layer-by-layer implementation. -->
 
 Right-sizing (details in the `spec` skill, never more ceremony than the change deserves):
 
 - **S: no spec.** Small, clear, reversible (bugfix, copy change, config tweak). Build it
   directly; the commit message and tests are the record.
 - **M: this file only.** A feature or change touching one area. Fill Spec; skip Plan.
-- **L: this file + plan.md.** Multi-session, multi-area, risky, or contested work.
+- **L: this file + plan.md.** Multi-session, multi-area, risky, or contested work. Copy
+  `TEMPLATE-PLAN.md` for the plan and cut tickets from `TEMPLATE-TICKET.md`.
 
 ---
 
@@ -24,9 +27,16 @@ Right-sizing (details in the `spec` skill, never more ceremony than the change d
 
 ## What: acceptance criteria
 
-<!-- Numbered, testable statements. "Done" means all of these demonstrably hold. -->
+<!-- Numbered, testable statements. "Done" means all of these demonstrably hold. Where it
+     fits, use EARS phrasing: WHEN <condition> THE SYSTEM SHALL <behavior>. A suggestion for
+     precision, not a mandate. -->
 
 1. TBD
+
+## Testing seams
+
+<!-- The stable interfaces the change is tested at, agreed before building starts. Tests
+     written at a seam survive refactors; tests written against internals go stale. -->
 
 ## Not in this change
 

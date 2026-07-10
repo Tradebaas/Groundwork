@@ -15,6 +15,7 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `product/BRIEF.md` | LIVE | Scope: what this project is and is not |
 | `product/ARCHITECTURE.md` | REF | System map: modules, data, contracts, environments (made by `architect`) |
 | `specs/TEMPLATE.md` | REF | Spec skeleton + tier rules (S/M/L) |
+| `specs/TEMPLATE-PLAN.md` | REF | Plan skeleton for tier L: build order, seams, rollback, verification |
 | `specs/TEMPLATE-TICKET.md` | REF | Ticket skeleton: one vertical slice per file, session-sized |
 | `specs/[0-9]*/**` ◆ | LIVE | Specs for changes being built (spec.md, plan.md, notes, fixtures) |
 | `specs/archive/**` ◆ | ARCHIVE | Shipped or dropped specs |

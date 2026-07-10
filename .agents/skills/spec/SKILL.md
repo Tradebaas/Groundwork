@@ -11,8 +11,9 @@ description: Right-size and write the spec before building any change. Use befor
   change with obvious behavior. The commit message and a test are the record. If you're
   explaining the tier choice in more than a sentence, it isn't S.
 - **M: spec.md only.** A feature or change in one area, buildable in a session or two.
-- **L: spec.md + plan.md.** Multi-session, multi-area, risky, or contested. plan.md adds:
-  build order, seams/interfaces touched, migration/rollback, verification approach.
+- **L: spec.md + plan.md.** Multi-session, multi-area, risky, or contested. Copy
+  `docs/specs/TEMPLATE-PLAN.md` to plan.md: build order (owned by the ticket graph),
+  seams/interfaces touched, migration/rollback, verification approach.
 
 Two honest tests: *Would a senior write this down first?* and *Will anyone need to know why in
 three months?* Yes to either → at least M.
