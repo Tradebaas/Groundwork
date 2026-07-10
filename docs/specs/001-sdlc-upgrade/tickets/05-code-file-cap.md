@@ -1,7 +1,7 @@
 # 05: Code-file line cap check
 
 - **Blocked by:** none
-- **Status:** ready
+- **Status:** done
 
 **What to build:** A source file that grows past its budget turns the gate red before it turns
 the codebase unreadable. A new `code-file-cap` check in `checks/check.mjs` walks CODE_EXT
@@ -12,7 +12,7 @@ discipline.
 
 **Acceptance:**
 
-- [ ] A 501-line code file fails; the failure names the file, count, and budget
-- [ ] The escape marker and configured excludes suppress the failure
-- [ ] `checks/check.test.mjs` proves failure, escape, and passing cases
-- [ ] `checks/config.json` gains `codeFileMaxLines`; existing budgets unchanged
+- [x] A 501-line code file fails; the failure names the file, count, and budget
+- [x] The escape marker and configured excludes suppress the failure
+- [x] `checks/check.test.mjs` proves failure, escape, and passing cases
+- [x] `checks/config.json` gains `codeFileMaxLines`; existing budgets unchanged

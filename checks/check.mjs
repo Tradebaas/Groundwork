@@ -295,6 +295,29 @@ export function runChecks(root) {
       }
     },
 
+    'code-file-cap'() {
+      // A source file past this size stops fitting in one read for a reviewer or an agent, so
+      // the gate turns red before the file turns unreadable. Rare legitimate case (generated
+      // files, vendored code): a "checks:allow-length: <reason>" line in the file, or a
+      // codeFileCapExclude path in config, mirroring the secrets-check exclude discipline.
+      // Older configs without the key fall back to 500.
+      const cap = cfg.budgets.codeFileMaxLines ?? 500;
+      for (const f of tree.files.filter((x) => CODE_EXT.has(extname(x)))) {
+        const r = rel(root, f);
+        if ((cfg.codeFileCapExclude || []).some((x) => r.startsWith(x) || r.endsWith(x))) continue;
+        const content = lines(f);
+        if (content.length <= cap) continue;
+        const marker = content.find((l) => l.includes('checks:allow-length'));
+        if (marker) {
+          if (!/checks:allow-length\s*:?\s*\S/.test(marker)) {
+            fail(`${r}: checks:allow-length needs a reason (e.g. "checks:allow-length: generated file"), so the exception stays auditable.`);
+          }
+          continue;
+        }
+        fail(`${r} is ${content.length} lines (budget ${cap}): split it by responsibility. Generated or vendored? Add "checks:allow-length: <reason>" in the file or a codeFileCapExclude entry in checks/config.json.`);
+      }
+    },
+
     'tickets'() {
       // Ticket files carry the build frontier (spec skill, docs/specs/TEMPLATE-TICKET.md). A
       // typo'd status or a Blocked-by naming a missing sibling silently corrupts the frontier
