@@ -28,12 +28,28 @@ The parts that matter most:
 - **Not in this change**: the adjacent work you are deliberately not doing. This line is what
   keeps "while I'm here" out of the diff.
 
-## 3. Sign-off and build
+## 3. Tier L (and multi-session M): cut tickets
+
+When the work will not fit one session, decompose the spec into tickets before building. Copy
+`docs/specs/TEMPLATE-TICKET.md` to `tickets/<NN>-<slug>.md` inside the spec folder, one file
+per slice, numbered in rough build order.
+
+- **Slice vertically.** Each ticket cuts a narrow but complete path through every layer
+  involved and is demoable or verifiable on its own. Never one layer per ticket.
+- **Size to one fresh agent session.** Too big to finish with context to spare? Split it.
+- **Declare edges.** `Blocked by:` names the sibling tickets that must be `done` first; the
+  ticket graph owns the build order.
+- **Build on the frontier.** Work the lowest-numbered ticket whose blockers are all `done`,
+  one ticket per fresh session, clear context between tickets. STATE.md `Now ▶` points at the
+  frontier ticket. Statuses: `ready | building | done`.
+
+## 4. Sign-off and build
 
 M and L need owner sign-off before building starts (a one-line "approved" is enough; record it
-in the spec). Set spec status `building`, note it in STATE.md, build one criterion at a time.
+in the spec). Set spec status `building`, note it in STATE.md, build one criterion at a time
+(one ticket at a time when the spec has tickets).
 
-## 4. Converge when it ships
+## 5. Converge when it ships
 
 On done (with `verify` green): status `done`; reconcile every doc the change made stale: update
 the owning file, add retired wording to the denylist in `checks/config.json`; move the folder to
