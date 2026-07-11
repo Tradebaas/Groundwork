@@ -1,6 +1,6 @@
 ---
 name: checkpoint
-description: Flush a lean mid-session handoff into STATE.md so you can /clear and resume the same work in a fresh, cheap context. Load when one chat session has used roughly 12-15% of the context window, when the session feels long or slow, or when the user says "checkpoint", "handoff", "samenvatting", "tokens sparen", "verse sessie" or "/clear en verder". Not for milestones or transfer to another person: that is `handover`.
+description: Flush a lean mid-session handoff into STATE.md so you can /clear and resume the same work in a fresh, cheap context. Load when one chat session has used roughly 15% of the context window (the activation point; past ~40% it is urgent), when the session feels long or slow, or when the user says "checkpoint", "handoff", "samenvatting", "tokens sparen", "verse sessie" or "/clear en verder". Not for milestones or transfer to another person: that is `handover`.
 ---
 
 # checkpoint: reset the context, keep the thread
@@ -18,18 +18,19 @@ milestone is closing, use `handover` instead.
 
 ## When to fire
 
-- Roughly 12-15% of the context window is spent in this session, or the session is long and
+- Roughly 15% of the context window is spent in this session, or the session is long and
   every turn feels heavy. Fire *before* the harness auto-summarizes, so the handoff is yours and
   accurate, not a lossy machine summary.
 - The user asks for it, or is about to `/clear`.
 - Do not fire for a two-message session: there is nothing to save and the checkpoint itself costs
   tokens.
 
-The 12-15% is a baseline nudge, never a hard stop. If the session is mid-flow and worth carrying
-further, keep going: the extra context is fine. Whether and when to check point is always the
-user's call. Suggest it, do not force it, and never run `/clear` on their behalf. An optional
-global Stop hook (`~/.claude/hooks/checkpoint-reminder.mjs`) surfaces this reminder automatically
-once context crosses the threshold; it only ever suggests.
+The 15% mark is the activation point: propose the checkpoint there by default. Stretching past it
+to at most ~40% is the user's call, and only when finishing the current unit of work first is
+clearly better than parking it. Past ~40%, always checkpoint: advise it urgently, before quality
+degrades and the handoff turns lossy. Suggest, do not force, and never run `/clear` on the
+user's behalf. An optional global Stop hook (`~/.claude/hooks/checkpoint-reminder.mjs`) surfaces
+this reminder automatically once context crosses the threshold; it only ever suggests.
 
 ## The method (do it from context you already have; do not re-read the repo)
 

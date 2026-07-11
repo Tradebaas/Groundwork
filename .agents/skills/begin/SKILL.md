@@ -12,6 +12,9 @@ Run this once. When it's done, STATE.md carries real state and this skill never 
 - If a `MASTER_PROMPT.md` or `MASTER_PROMPT.local.md` exists at the root: it is Groundwork's own
   origin brief, not part of any project. Delete it. (Fresh copies no longer carry it: it is
   gitignored at source. This clears it from older copies made while it was still tracked.)
+- Delete any non-archived spec folder: `docs/specs/[0-9]*` directories are in-flight Groundwork
+  maintainer work, never the new owner's. Keep `docs/specs/archive/` (it holds the worked
+  example) and the `TEMPLATE*.md` files.
 - Verify prerequisites: `git --version` and `node --version` (Node ≥ 20). Missing → tell the
   owner exactly what to install, then stop.
 
@@ -34,6 +37,8 @@ Do **not** ask about stack (that's the `stack` skill, argued on merit) or design
 ## 3. Write it down
 
 - Fill `docs/product/BRIEF.md`: numbered SC-items, explicit out-of-scope, constraints.
+- Seed the glossary `docs/product/CONTEXT.md` with the domain terms the interview surfaced;
+  the file's template comment defines the entry format.
 - Fill the handoff block in `docs/state/STATE.md`: status active, phase `prepare`, Now ▶ next step.
 - If personal data or AI features: add a dated line to `docs/compliance/COMPLIANCE.md` triggers.
 - Rewrite `README.md`'s top half to describe *this product* (what, for whom, how to run once it

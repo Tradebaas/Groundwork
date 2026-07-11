@@ -19,6 +19,9 @@ For each candidate capability, make it earn its place:
 Write results as numbered, testable SC-items. Vague scope ("a dashboard") is not scope; scope
 says what the user can *do* ("SC-3: owner sees per-project hours, filterable by month").
 
+A fuzzy word in any answer ("you said account: the Customer or the User?") gets pinned in the
+glossary `docs/product/CONTEXT.md` the moment it surfaces.
+
 ## Triage: INTAKE.md
 
 Nothing is built from INTAKE. Per item, propose one of:
