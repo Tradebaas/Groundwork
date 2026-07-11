@@ -1,22 +1,29 @@
 # Groundwork
 
-A copy-before-you-start engineering system. Duplicate this folder, open it with any capable AI
-coding agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI, Windsurf, JetBrains, any), and
-build enterprise-grade software from first idea to delivery and maintenance. The system carries
-everything a project needs to begin correctly, before the first line of product code exists.
+Groundwork is the operating system for AI-assisted software projects. It is a folder you copy
+before your project exists. Open the copy with any capable AI coding agent (Claude Code, Cursor,
+Copilot, Codex, Gemini CLI, Windsurf, JetBrains, any) and it tells that agent how to take your
+idea from first conversation to delivered, maintained software, at a quality level a large
+company would accept.
 
-## See what it can be
+## The value it adds
 
-An interactive explainer ships with the repo. See it live at
-**https://tradebaas.github.io/Groundwork/**, or open [index.html](index.html) in any browser:
-light and dark themes, six color palettes, six fonts, and smooth scroll motion. The preview below
-follows your GitHub theme.
+An AI agent without structure has predictable failure modes: every session starts with amnesia,
+scope drifts, quality depends on the day, and tokens burn on re-explaining the project.
+Groundwork removes those failure modes by design:
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/design/reference/explainer-hero-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/design/reference/explainer-hero-light.png">
-  <img alt="Groundwork interactive explainer, hero section" src="docs/design/reference/explainer-hero-dark.png" width="100%">
-</picture>
+- **Memory on disk.** State, scope, decisions and standards live in files. A new session reads
+  where the last one stopped instead of re-deriving the project in chat.
+- **Discipline built in.** One always-loaded rulebook, an on-demand skill library covering every
+  phase (scope, spec, architecture, design, verification, code review, delivery, maintenance,
+  compliance), and automated checks that gate every commit at zero token cost.
+- **Token efficiency by design.** Skills load only when needed, large work is cut into
+  one-session tickets, and every fact lives in one file that everything else points to.
+- **No lock-in.** Plain Markdown and open standards, readable by any agent, any model, any
+  editor, today and after the next tool switch.
+
+Want the full story first? An interactive explainer ships with the repo: see it live at
+**https://tradebaas.github.io/Groundwork/**, or open [index.html](index.html) in any browser.
 
 ## Start a project
 
