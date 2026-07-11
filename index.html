@@ -37,7 +37,8 @@ window.GW={
         m=this.mode(), c=m==="light"?a.light:a.dark;
     r.style.setProperty("--accent",c[0]);
     r.style.setProperty("--accent-ink",c[1]);
-    r.style.setProperty("--glow",c[0]+"1a");
+    r.style.setProperty("--glow",c[0]+"14");
+    r.style.setProperty("--tint",c[0]+"0d");
     r.style.setProperty("--font",f.stack);
     dispatchEvent(new CustomEvent("gw-look"));
   }
@@ -49,24 +50,24 @@ window.GW={
     --bg:#0a0b0b; --surface:rgba(255,255,255,.025); --surface2:rgba(255,255,255,.05);
     --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.15);
     --ink:#f2f3f1; --ink2:#c3c6c0; --muted:#84887f;
-    --accent:#3fae9f; --accent-ink:#04110e; --glow:#3fae9f1a;
-    --spot:rgba(255,255,255,.045); --header:rgba(10,11,11,.62); --sheet:#121413;
+    --accent:#3fae9f; --accent-ink:#04110e; --glow:#3fae9f14; --tint:#3fae9f0d;
+    --header:rgba(10,11,11,.62); --sheet:#121413;
     --font:"Josefin Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     --r:14px; --rs:10px; --maxw:1060px; --pad:28px;
   }
   @media(prefers-color-scheme:light){:root:not([data-theme]){
-    --bg:#f6f7f6; --surface:#ffffff; --surface2:#eef1ef;
+    --bg:#f6f7f6; --surface:#fdfdfc; --surface2:#eef1ef;
     --line:rgba(0,0,0,.10); --line2:rgba(0,0,0,.20);
     --ink:#15181a; --ink2:#454b47; --muted:#6d726c;
-    --accent:#2f6664; --accent-ink:#ffffff; --glow:#2f66641a;
-    --spot:rgba(0,0,0,.03); --header:rgba(246,247,246,.72); --sheet:#ffffff;
+    --accent:#2f6664; --accent-ink:#ffffff; --glow:#2f666414; --tint:#2f66640d;
+    --header:rgba(246,247,246,.72); --sheet:#fdfdfc;
   }}
   :root[data-theme="light"]{
-    --bg:#f6f7f6; --surface:#ffffff; --surface2:#eef1ef;
+    --bg:#f6f7f6; --surface:#fdfdfc; --surface2:#eef1ef;
     --line:rgba(0,0,0,.10); --line2:rgba(0,0,0,.20);
     --ink:#15181a; --ink2:#454b47; --muted:#6d726c;
-    --accent:#2f6664; --accent-ink:#ffffff; --glow:#2f66641a;
-    --spot:rgba(0,0,0,.03); --header:rgba(246,247,246,.72); --sheet:#ffffff;
+    --accent:#2f6664; --accent-ink:#ffffff; --glow:#2f666414; --tint:#2f66640d;
+    --header:rgba(246,247,246,.72); --sheet:#fdfdfc;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -76,29 +77,22 @@ window.GW={
     transition:background .35s,color .35s}
   ::view-transition-old(root),::view-transition-new(root){animation-duration:.35s}
 
-  #fx{position:fixed;inset:0;z-index:-3;pointer-events:none}
-  .grid-bg{position:fixed;inset:0;z-index:-4;opacity:.5;
-    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-    background-size:74px 74px;mask-image:radial-gradient(ellipse 90% 55% at 50% 0%,#000 25%,transparent 70%)}
-  .glow{position:fixed;z-index:-3;width:64vw;height:64vw;left:50%;top:-24vw;border-radius:50%;
-    transform:translateX(-50%);filter:blur(55px);pointer-events:none;
-    background:radial-gradient(circle,var(--glow),transparent 62%);animation:drift 28s ease-in-out infinite}
-  @keyframes drift{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-44%) translateY(3vh)}}
-  .spot{position:fixed;inset:0;z-index:-1;pointer-events:none;
-    background:radial-gradient(360px circle at var(--mx,50%) var(--my,12%),var(--spot),transparent 70%)}
-  #progress{position:fixed;top:0;left:0;height:2px;width:100%;z-index:60;
-    background:var(--accent);transform-origin:0 50%;transform:scaleX(0)}
+  /* one static accent wash behind the hero: brand tint, no motion, no grid decoration */
+  .glow{position:fixed;z-index:-3;width:70vw;height:46vw;left:58%;top:-16vw;border-radius:50%;
+    transform:translateX(-50%);filter:blur(60px);pointer-events:none;
+    background:radial-gradient(circle,var(--glow),transparent 62%)}
 
   .wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
-  section{padding-top:112px;padding-bottom:112px}
-  @media(max-width:640px){section{padding-top:78px;padding-bottom:78px}:root{--pad:20px}}
+  section{padding-top:104px;padding-bottom:104px}
+  @media(max-width:640px){section{padding-top:72px;padding-bottom:72px}:root{--pad:20px}
+    .eyebrow{font-size:11px;letter-spacing:.09em;line-height:1.5}}
 
   .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;letter-spacing:.14em;
     line-height:1;text-transform:uppercase;color:var(--ink2);border:1px solid var(--line);
     background:var(--surface);padding:9px 15px 8px;border-radius:999px}
   .eyebrow svg{color:var(--accent);width:14px;height:14px;transform:translateY(-0.5px)}
-  .sec-head{max-width:64ch;margin-bottom:52px}
-  h2{font-size:clamp(27px,4vw,40px);line-height:1.14;letter-spacing:-.02em;font-weight:700;margin:22px 0 18px}
+  .sec-head{max-width:64ch;margin-bottom:48px}
+  h2{font-size:clamp(27px,4vw,40px);line-height:1.14;letter-spacing:-.02em;font-weight:700;margin:0 0 18px}
   h3{font-size:18px;font-weight:600;letter-spacing:-.01em}
   .lead{color:var(--ink2);font-size:clamp(15.5px,1.7vw,18px);max-width:62ch}
   .accent{color:var(--accent)}
@@ -114,24 +108,47 @@ window.GW={
   .iconbtn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);
     color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:border-color .2s,transform .18s}
   .iconbtn:hover{border-color:var(--line2);transform:translateY(-1px)}
+  .iconbtn:active{transform:translateY(1px)}
   .iconbtn svg{width:18px;height:18px}
   @media(max-width:780px){.navlinks{display:none}}
 
-  .hero{padding-top:104px;padding-bottom:56px;text-align:center}
-  .hero .eyebrow{margin-bottom:30px}
-  .hero h1{font-size:clamp(46px,9vw,92px);font-weight:700;letter-spacing:-.03em;line-height:1;
-    margin:0 0 26px;overflow-wrap:anywhere}
-  .hero h1 .ltr{display:inline-block;will-change:transform}
-  .hero .lead{margin:0 auto}
-  .cta{display:inline-flex;gap:14px;margin-top:38px;flex-wrap:wrap;justify-content:center}
+  /* hero: asymmetric split, text left, the real rulebook right */
+  .hero{padding-top:88px;padding-bottom:64px;display:grid;grid-template-columns:7fr 5fr;
+    gap:56px;align-items:center;text-align:left}
+  .hero .eyebrow{margin-bottom:28px}
+  .hero h1{font-size:clamp(44px,6.5vw,76px);font-weight:700;letter-spacing:-.03em;line-height:1.02;
+    margin:0 0 22px}
+  .hero .lead{margin:0}
+  .cta{display:inline-flex;gap:14px;margin-top:34px;flex-wrap:wrap}
   .btn{display:inline-flex;align-items:center;padding:13px 24px;border-radius:var(--rs);
     font-weight:600;font-size:15px;text-decoration:none;cursor:pointer;border:1px solid transparent;
-    transition:transform .18s,border-color .2s;will-change:transform}
+    transition:transform .18s,border-color .2s}
+  .btn:active{transform:translateY(1px) scale(.98)}
   .btn.primary{background:var(--accent);color:var(--accent-ink)}
+  .btn.primary:hover{transform:translateY(-1px)}
   .btn.ghost{border-color:var(--line2);color:var(--ink);background:var(--surface)}
   .btn.ghost:hover{border-color:var(--ink2)}
+  .rulebook{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .rulebook .rb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface2)}
+  .rulebook .rb-bar strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;font-weight:600}
+  .rulebook .rb-bar span{font-size:11.5px;color:var(--muted)}
+  .rulebook pre{margin:0;padding:20px 18px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:12.5px;line-height:1.75;color:var(--ink2);white-space:pre-wrap;overflow-x:auto}
+  .rulebook pre b{color:var(--ink);font-weight:600}
+  .rulebook pre .cm{color:var(--muted)}
+  .rulebook pre .ac{color:var(--accent)}
+  .rb-cap{font-size:12.5px;color:var(--muted);margin-top:12px}
+  @media(max-width:880px){.hero{grid-template-columns:1fr;gap:40px;padding-top:64px}}
 
-  .marquee{margin-top:70px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  /* hero entrance: one rise cascade on load, CSS only */
+  @media(prefers-reduced-motion:no-preference){
+    .rise{opacity:0;transform:translateY(16px);animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+    .rise.d1{animation-delay:.08s}.rise.d2{animation-delay:.16s}.rise.d3{animation-delay:.24s}.rise.d4{animation-delay:.34s}
+    @keyframes rise{to{opacity:1;transform:none}}
+  }
+
+  .marquee{border-top:1px solid var(--line);border-bottom:1px solid var(--line);
     overflow:hidden;padding:16px 0;position:relative}
   .marquee .track{display:flex;gap:0;width:max-content;animation:slide 30s linear infinite}
   .marquee:hover .track{animation-play-state:paused}
@@ -139,25 +156,50 @@ window.GW={
     text-transform:uppercase;padding:0 28px;border-right:1px solid var(--line)}
   @keyframes slide{to{transform:translateX(-50%)}}
 
-  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:70px}
-  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
-  .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px 18px;text-align:center}
-  .stat .n{font-size:clamp(30px,4.5vw,42px);font-weight:700;letter-spacing:-.02em}
-  .stat .l{font-size:12.5px;color:var(--muted);margin-top:8px}
+  /* stats: a quiet hairline strip, real numbers, no boxes and no counting */
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);padding-top:44px;padding-bottom:0}
+  .stat{padding:6px 18px;border-left:1px solid var(--line)}
+  .stat:first-child{border-left:0;padding-left:0}
+  .stat .n{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.02em}
+  .stat .n em{font-style:normal;color:var(--accent)}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr);row-gap:26px}
+    .stat:nth-child(odd){border-left:0;padding-left:0}}
 
+  /* problems: definition rows on hairlines, no cards */
+  .rows{border-top:1px solid var(--line)}
+  .row{display:grid;grid-template-columns:minmax(180px,4fr) 8fr;gap:28px;
+    padding:30px 0;border-bottom:1px solid var(--line)}
+  .row .rt{display:flex;gap:14px;align-items:flex-start;font-weight:600}
+  .row .rt svg{width:20px;height:20px;color:var(--accent);flex:none;margin-top:3px}
+  .row p{color:var(--ink2);font-size:15px;max-width:62ch}
+  @media(max-width:680px){.row{grid-template-columns:1fr;gap:10px}}
+
+  /* how it works: one bento, varied cells, two tinted */
+  .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+  .cell{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px;
+    transition:border-color .2s}
+  .cell:hover{border-color:var(--line2)}
+  .cell.s7{grid-column:span 7}.cell.s5{grid-column:span 5}.cell.s4{grid-column:span 4}.cell.s12{grid-column:span 12}
+  .cell.tinted{background:linear-gradient(0deg,var(--tint),var(--tint)),var(--surface)}
+  .cell .chip{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+    background:var(--surface2);border:1px solid var(--line);margin-bottom:20px;color:var(--ink)}
+  .cell .chip svg{width:22px;height:22px}
+  .cell p{color:var(--ink2);font-size:14.5px;margin-top:10px;max-width:58ch}
+  .cell.s12{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+  .cell.s12 .chip{margin-bottom:0}
+  @media(max-width:900px){.cell.s7,.cell.s5,.cell.s4{grid-column:span 6}}
+  @media(max-width:600px){.cell.s7,.cell.s5,.cell.s4,.cell.s12{grid-column:span 12}
+    .cell.s12{grid-template-columns:1fr;gap:14px}}
+
+  /* skills: the one card grid on the page */
   .cards{display:grid;gap:24px}
-  .c4{grid-template-columns:repeat(4,1fr)} .c3{grid-template-columns:repeat(3,1fr)}
-  @media(max-width:900px){.c4,.c3{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:600px){.c4,.c3{grid-template-columns:1fr}}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px;
-    transition:border-color .2s,transform .15s;transform-style:preserve-3d;will-change:transform}
+  .c3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:900px){.c3{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.c3{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px;
+    transition:border-color .2s}
   .card:hover{border-color:var(--line2)}
-  .chip{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
-    background:var(--surface2);border:1px solid var(--line);margin-bottom:22px;color:var(--ink)}
-  .chip svg{width:22px;height:22px}
-  .card p{color:var(--ink2);font-size:14.5px;margin-top:10px}
-  .card h3 small{display:block;color:var(--muted);font-weight:500;font-size:11.5px;
-    letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
 
   .reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s cubic-bezier(.2,.7,.2,1)}
   .reveal.vis{opacity:1;transform:none}
@@ -192,13 +234,19 @@ window.GW={
     background:var(--surface);text-align:center;cursor:pointer;font-size:13.5px;font-weight:600;
     color:var(--ink2);transition:all .18s;font-family:inherit}
   .step[aria-selected="true"]{color:var(--accent-ink);background:var(--accent);border-color:transparent}
-  .step[aria-selected="true"] .num{color:var(--accent-ink);opacity:.8}
   .step:hover:not([aria-selected="true"]){color:var(--ink);border-color:var(--line2)}
-  .step .num{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
   .stepbody{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:32px;min-height:130px}
   .stepbody h3{margin-bottom:10px}
   .stepbody .sk{display:inline-block;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--accent);
     border:1px solid var(--line);border-radius:8px;padding:4px 11px;margin-top:16px}
+
+  /* gates: grouped two-column list on hairlines, no boxes */
+  .gatelist{display:grid;grid-template-columns:1fr 1fr;column-gap:56px}
+  .gate{display:flex;gap:16px;align-items:flex-start;padding:22px 0;border-top:1px solid var(--line)}
+  .gate svg{width:20px;height:20px;color:var(--accent);flex:none;margin-top:3px}
+  .gate h3{font-size:15.5px;margin-bottom:4px}
+  .gate p{color:var(--ink2);font-size:14px}
+  @media(max-width:680px){.gatelist{grid-template-columns:1fr}}
 
   .acc{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px;background:var(--surface)}
   .acc button{width:100%;text-align:left;padding:22px 24px;background:none;border:0;color:var(--ink);
@@ -214,7 +262,9 @@ window.GW={
   /* customizer */
   .fab{position:fixed;right:22px;bottom:22px;z-index:70;width:52px;height:52px;border-radius:16px;
     border:1px solid var(--line2);background:var(--accent);color:var(--accent-ink);cursor:pointer;
-    display:grid;place-items:center;transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.25);will-change:transform}
+    display:grid;place-items:center;transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .fab:hover{transform:translateY(-2px)}
+  .fab:active{transform:translateY(0) scale(.98)}
   .fab svg{width:22px;height:22px}
   .sheet{position:fixed;right:22px;bottom:88px;z-index:70;width:min(340px,calc(100vw - 44px));
     background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:24px;
@@ -252,16 +302,13 @@ window.GW={
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
     .reveal{opacity:1;transform:none}
+    .rise{opacity:1;transform:none}
     .marquee .track{animation:none!important}
   }
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
-<canvas id="fx" aria-hidden="true"></canvas>
-<div class="glow"></div>
-<div class="spot"></div>
-<div id="progress" aria-hidden="true"></div>
+<div class="glow" aria-hidden="true"></div>
 
 <header>
   <nav class="wrap">
@@ -281,50 +328,66 @@ window.GW={
 </header>
 
 <section class="hero wrap">
-  <span class="eyebrow" id="hero-eyebrow">Het besturingssysteem voor je projecten</span>
-  <h1 id="title" aria-label="Groundwork"><span aria-hidden="true"></span></h1>
-  <p class="lead">Het vertelt elke AI-assistent, in elke editor en op elk model, hoe je van een
-    eerste idee naar afgeleverde en onderhouden software komt. Op een niveau dat een groot bedrijf
-    zou accepteren. Kopieer de map, zeg "begin", en de assistent doet de rest binnen strakke regels.</p>
-  <div class="cta">
-    <a class="btn primary" href="#hoe">Zie hoe het werkt</a>
-    <a class="btn ghost" href="#eerlijk">Wat het niet is</a>
+  <div>
+    <span class="eyebrow rise" id="hero-eyebrow">Het besturingssysteem voor je projecten</span>
+    <h1 class="rise d1">Groundwork</h1>
+    <p class="lead rise d2">E&eacute;n map met regels die elke AI-assistent van eerste idee naar
+      geleverde, onderhouden software leidt. Op enterprise-niveau.</p>
+    <div class="cta rise d3">
+      <a class="btn primary" href="#hoe">Hoe het werkt</a>
+      <a class="btn ghost" href="#eerlijk">De grenzen</a>
+    </div>
   </div>
-  <div class="stats reveal">
-    <div class="stat"><div class="n" data-count="18">0</div><div class="l">Skills op afroep</div></div>
-    <div class="stat"><div class="n" data-count="17">0</div><div class="l">Automatische poorten</div></div>
-    <div class="stat"><div class="n" data-count="11">0</div><div class="l">Vastgelegde besluiten</div></div>
-    <div class="stat"><div class="n" data-count="1">0</div><div class="l">Rulebook, alle tools</div></div>
-    <div class="stat"><div class="n" data-count="0">0</div><div class="l">Tokens voor de poorten</div></div>
+  <div class="rise d4">
+    <div class="rulebook" aria-label="Fragment uit het echte rulebook AGENTS.md">
+      <div class="rb-bar"><strong>AGENTS.md</strong><span>het rulebook dat elke assistent leest</span></div>
+      <pre><span class="cm">## Session protocol</span>
+
+<b>1.</b> Read the handoff block at the
+   top of <span class="ac">docs/state/STATE.md</span>
+   before anything else.
+<b>2.</b> Work one task at a time.
+   Propose exactly <b>one</b> next step.
+<b>3.</b> Before ending a session:
+   update STATE.md.
+<b>4.</b> End every message with <span class="ac">&#9875;</span> to
+   confirm these rules are loaded.</pre>
+    </div>
+    <p class="rb-cap">Echt fragment. Kopieer de map, zeg "begin", en dit protocol stuurt elke sessie.</p>
   </div>
 </section>
 
 <div class="marquee reveal" aria-hidden="true"><div class="track" id="mtrack"></div></div>
 
+<div class="stats wrap reveal">
+  <div class="stat"><div class="n">19</div><div class="l">Skills op afroep</div></div>
+  <div class="stat"><div class="n">17</div><div class="l">Automatische poorten</div></div>
+  <div class="stat"><div class="n">12</div><div class="l">Vastgelegde besluiten</div></div>
+  <div class="stat"><div class="n">1</div><div class="l">Rulebook, alle tools</div></div>
+  <div class="stat"><div class="n"><em>0</em></div><div class="l">Tokens voor de poorten</div></div>
+</div>
+
 <section id="probleem" class="wrap">
   <div class="sec-head reveal">
-    <span class="eyebrow">Waarom dit nodig is</span>
     <h2>AI is krachtig, maar zonder structuur bouwt het rommel</h2>
     <p class="lead">Een AI-assistent schrijft snel code. Maar hij vergeet wat er gisteren gebeurde,
       gokt soms op verouderde kennis, dwaalt af naar dingen die niemand vroeg, en kan per ongeluk
       je gegevens laten rondslingeren. Groundwork lost precies die vier dingen op.</p>
   </div>
-  <div class="cards c4" id="problems"></div>
+  <div class="rows" id="problems"></div>
 </section>
 
 <section id="hoe" class="wrap">
   <div class="sec-head reveal">
-    <span class="eyebrow">Hoe het werkt</span>
     <h2>Vijf eenvoudige onderdelen die samenwerken</h2>
     <p class="lead">Je hoeft geen regel code te begrijpen. Groundwork is in de kern een set
       afspraken en automatische controles die de assistent dwingen netjes en veilig te werken.</p>
   </div>
-  <div class="cards c3" id="hows"></div>
+  <div class="bento" id="hows"></div>
 </section>
 
 <section id="waarom" class="wrap">
   <div class="sec-head reveal">
-    <span class="eyebrow">Waarom het zo goed is</span>
     <h2>Zes redenen, eerlijk uitgelegd</h2>
     <p class="lead">Klik op een reden om te zien wat het betekent en hoe Groundwork het echt
       waarmaakt. Geen beloftes, alleen ingebouwde werkwijzen.</p>
@@ -335,8 +398,7 @@ window.GW={
 
 <section id="skills" class="wrap">
   <div class="sec-head reveal">
-    <span class="eyebrow">De gereedschapskist</span>
-    <h2>18 skills, elk een expert voor <span class="accent">e&eacute;n</span> taak</h2>
+    <h2>19 skills, elk een expert voor <span class="accent">e&eacute;n</span> taak</h2>
     <p class="lead">Een skill is een uitgeschreven werkwijze die de assistent erbij pakt op het
       juiste moment. Klik op een kaart voor de uitleg in gewone taal.</p>
   </div>
@@ -345,7 +407,6 @@ window.GW={
 
 <section id="cyclus" class="wrap">
   <div class="sec-head reveal">
-    <span class="eyebrow">Van idee tot onderhoud</span>
     <h2>E<span class="accent">&eacute;</span>n doorlopende route</h2>
     <p class="lead">Groundwork begeleidt het hele leven van een product, niet alleen het bouwen.
       Klik op een fase.</p>
@@ -356,17 +417,15 @@ window.GW={
 
 <section class="wrap">
   <div class="sec-head reveal">
-    <span class="eyebrow">De poorten van dichtbij</span>
     <h2>14 controles die niets laten passeren</h2>
     <p class="lead">Deze draaien automatisch bij elke opslag en publicatie. Ze kosten geen tokens
       en kunnen niet stiekem worden uitgezet: een dichte poort is informatie, geen obstakel.</p>
   </div>
-  <div class="cards c4" id="gates"></div>
+  <div class="gatelist" id="gates"></div>
 </section>
 
 <section id="eerlijk" class="wrap">
   <div class="sec-head reveal">
-    <span class="eyebrow">Eerlijk is eerlijk</span>
     <h2>Wat Groundwork <span class="accent">niet</span> is</h2>
     <p class="lead">Vertrouwen ontstaat door eerlijkheid. Dit zijn de grenzen, ronduit benoemd.</p>
   </div>
@@ -395,8 +454,6 @@ window.GW={
   <p class="hint">Je keuzes worden op dit apparaat onthouden.</p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
 <script>
 /* ---------- Lucide icons (MIT), inlined ---------- */
 var P={
@@ -430,14 +487,6 @@ function ic(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor
 document.getElementById('hero-eyebrow').insertAdjacentHTML('afterbegin',ic('anchor'));
 
 var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-var fine=matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-/* ---------- hero title letters ---------- */
-(function(){
-  var host=document.querySelector('#title span'),word='Groundwork',html='';
-  for(var i=0;i<word.length;i++)html+='<span class="ltr">'+word[i]+'</span>';
-  host.innerHTML=html;
-})();
 
 /* ---------- marquee ---------- */
 (function(){
@@ -466,76 +515,39 @@ matchMedia('(prefers-color-scheme: light)').addEventListener('change',function()
 });
 paintToggle();
 
-/* ---------- spotlight ---------- */
-var spot=document.querySelector('.spot');
-addEventListener('pointermove',function(e){
-  spot.style.setProperty('--mx',e.clientX+'px');spot.style.setProperty('--my',e.clientY+'px');
-},{passive:true});
-
-/* ---------- scroll progress ---------- */
-var prog=document.getElementById('progress'),ticking=false;
-function onScroll(){
-  if(ticking)return;ticking=true;
-  requestAnimationFrame(function(){
-    var h=document.documentElement.scrollHeight-innerHeight;
-    prog.style.transform='scaleX('+(h>0?scrollY/h:0)+')';ticking=false;
-  });
-}
-addEventListener('scroll',onScroll,{passive:true});onScroll();
-
-/* ---------- reveals: GSAP if available, IntersectionObserver otherwise ---------- */
-var io;
+/* ---------- reveals: content enters when the reader reaches it ---------- */
+var io=('IntersectionObserver' in window)
+  ?new IntersectionObserver(function(es){es.forEach(function(x){
+      if(x.isIntersecting){x.target.classList.add('vis');io.unobserve(x.target);}});},{threshold:.12})
+  :{observe:function(el){el.classList.add('vis');},unobserve:function(){}};
 function watch(el){io.observe(el);}
-if(window.gsap && window.ScrollTrigger && !reduced){
-  gsap.registerPlugin(ScrollTrigger);
-  io={observe:function(el){
-    ScrollTrigger.create({trigger:el,start:'top 88%',once:true,
-      onEnter:function(){el.classList.add('vis');}});
-  }};
-  gsap.from('#title .ltr',{yPercent:70,opacity:0,duration:.8,ease:'power3.out',stagger:.045,delay:.05});
-  gsap.from('.hero .eyebrow, .hero .lead, .hero .cta',{y:18,opacity:0,duration:.7,ease:'power2.out',stagger:.12,delay:.3});
-}else{
-  io=('IntersectionObserver' in window)
-    ?new IntersectionObserver(function(es){es.forEach(function(x){
-        if(x.isIntersecting){x.target.classList.add('vis');io.unobserve(x.target);}});},{threshold:.12})
-    :{observe:function(el){el.classList.add('vis');},unobserve:function(){}};
-}
 document.querySelectorAll('.reveal').forEach(watch);
 
-/* ---------- counters ---------- */
-var cio=('IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(x){
-  if(!x.isIntersecting)return;var el=x.target,to=+el.dataset.count,n=0;
-  var step=Math.max(1,Math.round(to/26));
-  var t=setInterval(function(){n+=step;if(n>=to){n=to;clearInterval(t);}el.textContent=n;},26);
-  cio.unobserve(el);
-});},{threshold:.5}):null;
-document.querySelectorAll('[data-count]').forEach(function(el){
-  if(cio)cio.observe(el);else el.textContent=el.dataset.count;
-});
-
 /* ---------- content ---------- */
-function card(icon,title,text,sub){
-  return '<div class="card reveal"><div class="chip">'+ic(icon)+'</div><h3>'+(sub?'<small>'+sub+'</small>':'')+title+'</h3><p>'+text+'</p></div>';
-}
 function mount(id,html){
   var el=document.getElementById(id);el.innerHTML=html;
   el.querySelectorAll('.reveal').forEach(watch);
 }
+
 mount('problems',[
   ['brain','Geheugenverlies','Elke nieuwe sessie begint de assistent vaak blanco en verzint de stand van zaken opnieuw.'],
   ['history','Verouderde kennis','Een model weet alleen wat het ooit leerde. Zonder controle gebruikt het oude, onveilige manieren.'],
   ['shuffle','Rommel en afdwaling','Zonder grenzen bouwt het dingen die niemand vroeg, en ontstaat code die niemand meer begrijpt.'],
   ['key','Lekken','Geheimen in de code, persoonsgegevens op de verkeerde plek. Makkelijk gedaan, moeilijk terug te draaien.'],
-].map(function(a){return card(a[0],a[1],a[2]);}).join(''));
+].map(function(a){
+  return '<div class="row reveal"><div class="rt">'+ic(a[0])+'<span>'+a[1]+'</span></div><p>'+a[2]+'</p></div>';
+}).join(''));
 
 mount('hows',[
-  ['book','E&eacute;n rulebook','E&eacute;n bestand met alle regels dat elke AI-tool leest, in elke editor. Geen losse versies per programma.','Onderdeel 01'],
-  ['puzzle','Skills op afroep','Expertmethodes die alleen inladen op het moment dat ze nodig zijn. Dat scheelt tokens en houdt de aandacht scherp.','Onderdeel 02'],
-  ['database','Extern geheugen','De stand van het project leeft in bestanden op schijf, niet in het gesprek. Een sessie leest verder waar de vorige stopte.','Onderdeel 03'],
-  ['shield','Automatische poorten','Mechanische controles draaien bij elke opslag. Klopt iets niet, dan gaat de poort dicht. Nul tokens nodig.','Onderdeel 04'],
-  ['checks','De beslis-ladder','Is het nodig? Bestaat het al? Doet een bestaand onderdeel dit? Pas daarna bouwen, en alleen het minimum dat werkt.','Onderdeel 05'],
-  ['anchor','Samen: rust en controle','De assistent werkt hard, maar binnen kaders die jou beschermen en het project begrijpelijk houden.','Onderdeel 06'],
-].map(function(a){return card(a[0],a[1],a[2],a[3]);}).join(''));
+  ['book','E&eacute;n rulebook','E&eacute;n bestand met alle regels dat elke AI-tool leest, in elke editor. Geen losse versies per programma.','s7 tinted'],
+  ['puzzle','Skills op afroep','Expertmethodes die alleen inladen op het moment dat ze nodig zijn. Dat scheelt tokens en houdt de aandacht scherp.','s5'],
+  ['database','Extern geheugen','De stand van het project leeft in bestanden op schijf, niet in het gesprek. Een sessie leest verder waar de vorige stopte.','s4'],
+  ['shield','Automatische poorten','Mechanische controles draaien bij elke opslag. Klopt iets niet, dan gaat de poort dicht. Nul tokens nodig.','s4'],
+  ['checks','De beslis-ladder','Is het nodig? Bestaat het al? Doet een bestaand onderdeel dit? Pas daarna bouwen, en alleen het minimum dat werkt.','s4'],
+  ['anchor','Samen: rust en controle','De assistent werkt hard, maar binnen kaders die jou beschermen en het project begrijpelijk houden.','s12 tinted'],
+].map(function(a){
+  return '<div class="cell reveal '+a[3]+'"><div class="chip">'+ic(a[0])+'</div><div><h3>'+a[1]+'</h3><p>'+a[2]+'</p></div></div>';
+}).join(''));
 
 mount('gates',[
   ['key','Geheimen-scan','Wachtwoorden, sleutels en tokens worden geweigerd voordat ze in de code belanden.'],
@@ -546,7 +558,9 @@ mount('gates',[
   ['code','Dode code','Uitgecommentarieerde brokken code worden opgeruimd. Git onthoudt de historie wel.'],
   ['scale','Zelf-test','De poorten testen zichzelf: een controle die niet bewijst dat hij werkt, telt niet mee.'],
   ['wrench','En meer','Structuur, koppelingen tussen tools en uitgestelde keuzes worden allemaal bewaakt.'],
-].map(function(a){return card(a[0],a[1],a[2]);}).join(''));
+].map(function(a){
+  return '<div class="gate reveal">'+ic(a[0])+'<div><h3>'+a[1]+'</h3><p>'+a[2]+'</p></div></div>';
+}).join(''));
 
 var why=[
   {k:'Bij elk project',t:'Werkt met elke editor, elk model, elk project',
@@ -583,6 +597,7 @@ var skills=[
   ['stack','Kiest de techniek en zoekt live op wat vandaag de juiste, veilige manier is voor die keuze.'],
   ['architect','Ontwerpt het systeem: de grenzen, de gegevens, de koppelingen en de mogelijke bedreigingen.'],
   ['design','Zet het visuele systeem en de schrijfstijl op, afgestemd op jouw smaak en publiek.'],
+  ['taste','Bouwregels tegen de standaard AI-look voor landingssites, marketing en portfolio: eerst de opdracht lezen, dan voorbij de sjablonen ontwerpen.'],
   ['scope-guard','De laatste check voordat werk "af" heet: is er niets extra gebouwd dat niemand vroeg?'],
   ['design-guard','De laatste check op schermen en teksten voordat ze de deur uit gaan.'],
   ['verify','Bewijst dat een wijziging echt werkt, van begin tot eind. Groene tests alleen zijn geen bewijs.'],
@@ -616,7 +631,7 @@ var phases=[
 var se=document.getElementById('steps'),sb=document.getElementById('stepbody');
 phases.forEach(function(p,i){
   var b=document.createElement('button');b.className='step';b.setAttribute('role','tab');b.setAttribute('aria-selected',i===0);
-  b.innerHTML='<span class="num">0'+(i+1)+'</span>'+p[0];b.onclick=function(){selStep(i);};se.appendChild(b);
+  b.innerHTML=p[0];b.onclick=function(){selStep(i);};se.appendChild(b);
 });
 function selStep(i){
   Array.prototype.forEach.call(se.children,function(s,j){s.setAttribute('aria-selected',j===i);});
@@ -638,57 +653,6 @@ faq.forEach(function(f){
   d.innerHTML='<button>'+f[0]+'<span class="chev">'+ic('chevron')+'</span></button><div class="a-body"><div class="a-inner">'+f[1]+'</div></div>';
   d.querySelector('button').onclick=function(){d.classList.toggle('open');};fq.appendChild(d);
 });
-
-/* ---------- 3D tilt on cards (React Bits register) ---------- */
-if(fine && !reduced){
-  document.addEventListener('pointermove',function(e){
-    var c=e.target.closest('.card');if(!c)return;
-    var r=c.getBoundingClientRect(),
-        rx=((e.clientY-r.top)/r.height-.5)*-5,
-        ry=((e.clientX-r.left)/r.width-.5)*5;
-    c.style.transform='perspective(700px) rotateX('+rx.toFixed(2)+'deg) rotateY('+ry.toFixed(2)+'deg)';
-  },{passive:true});
-  document.addEventListener('pointerout',function(e){
-    var c=e.target.closest('.card');if(c && !c.contains(e.relatedTarget))c.style.transform='';
-  },{passive:true});
-}
-
-/* ---------- particle field (theme-aware, lightweight) ---------- */
-(function(){
-  if(reduced)return;
-  var cv=document.getElementById('fx'),ctx=cv.getContext('2d'),pts=[],W,H,DPR,acc='#3fae9f',run=true;
-  function color(){acc=getComputedStyle(root).getPropertyValue('--accent').trim()||acc;}
-  addEventListener('gw-look',color);color();
-  function size(){
-    DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;
-    cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    var n=Math.min(64,Math.round(W*H/26000));
-    pts=[];for(var i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,
-      vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28});
-  }
-  addEventListener('resize',size);size();
-  document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run)tick();});
-  function tick(){
-    if(!run)return;
-    ctx.clearRect(0,0,W,H);
-    for(var i=0;i<pts.length;i++){
-      var p=pts[i];p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-      ctx.globalAlpha=.32;ctx.fillStyle=acc;
-      ctx.beginPath();ctx.arc(p.x,p.y,1.4,0,6.2832);ctx.fill();
-      for(var j=i+1;j<pts.length;j++){
-        var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=dx*dx+dy*dy;
-        if(d<12100){
-          ctx.globalAlpha=(1-d/12100)*.12;ctx.strokeStyle=acc;ctx.lineWidth=1;
-          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
 
 /* ---------- customizer ---------- */
 var fab=document.getElementById('fab'),sheet=document.getElementById('sheet'),
@@ -744,19 +708,6 @@ Object.keys(GW.fonts).forEach(function(key){
   };
   fl.appendChild(b);
 });
-
-/* magnetic FAB + primary button (subtle) */
-if(fine && !reduced){
-  [fab,document.querySelector('.btn.primary')].forEach(function(el){
-    if(!el)return;
-    el.addEventListener('pointermove',function(e){
-      var r=el.getBoundingClientRect(),
-          x=(e.clientX-r.left-r.width/2)*.14,y=(e.clientY-r.top-r.height/2)*.14;
-      el.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
-    });
-    el.addEventListener('pointerleave',function(){el.style.transform='';});
-  });
-}
 </script>
 </body>
 </html>

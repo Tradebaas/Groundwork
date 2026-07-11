@@ -99,6 +99,7 @@ trigger applies. The library:
 | `stack` | Choosing the tech stack; generates `docs/standards/<stack>.md` and wires gates |
 | `architect` | System design before building: boundaries, data, contracts, threats |
 | `design` | Standing up the project's design & voice system |
+| `taste` | Building or redesigning a landing page, marketing site, portfolio or explainer |
 | `scope-guard` | Before calling work done or proposing a commit |
 | `design-guard` | Before delivering any UI or user-facing output |
 | `verify` | Verifying a change actually works, end to end |

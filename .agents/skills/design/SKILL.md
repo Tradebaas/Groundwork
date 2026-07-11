@@ -62,7 +62,14 @@ file, theme object, or the chosen library's theming layer, per `docs/standards/<
 Code is the SSOT; DESIGN.md mirrors it (names + values), and the mirror is what `design-guard`
 and future checks validate against.
 
-## 4. Prove it
+## 4. Set the taste dials
+
+For pages meant to persuade (landing, marketing, portfolio, explainer), skill `taste` carries
+the per-page execution rules. Set its three dials (VARIANCE / MOTION / DENSITY) here, from the
+direction the owner just confirmed, and record them in DESIGN.md section 3 so every later page
+build starts from the same read.
+
+## 5. Prove it
 
 Build one real screen (or document/email template, whatever this product ships first) in the
 system, screenshot it into `docs/design/reference/`, and review it with the owner **before**
@@ -70,7 +77,7 @@ building more. Adjust tokens from that reaction, not from theory. When the stack
 mechanical token check (raw hex ban, palette-bypass ban, via `stack`), prove it fails on a
 violation.
 
-## 5. Record
+## 6. Record
 
 DESIGN.md + VOICE.md filled (TEMPLATE markers removed), tokens in code, decision records for the
 chosen UI foundation and direction, STATE.md updated. Owner answers captured verbatim where

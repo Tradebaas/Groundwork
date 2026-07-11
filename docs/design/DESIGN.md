@@ -34,7 +34,10 @@
     gradient, and blue or purple as a reflex accent, are banned as defaults; pick the project's
     own accent (seed: the owner's deep teal). A gradient is only ever a small, deliberate,
     owner-approved accent, never the baseline. Any background motion stays subtle and secondary
-    to reading; usability wins over decoration.
+    to reading; usability wins over decoration. For pages meant to persuade (landing, marketing,
+    portfolio, explainer) the full anti-slop rulebook is skill `taste`: brief read first, three
+    dials, layout and motion rules, forbidden tells. There a deliberately higher motion level
+    may override principle 7, within `taste`'s reduced-motion and motivation rules.
 
 ## 2. Standing default direction (the owner's taste: seed, not straitjacket)
 
@@ -61,6 +64,8 @@ the `design` skill; deviate only on the owner's say-so.
 | Accent | `--color-accent` | TBD | one family, sparingly |
 | Danger / Warning / Success / Info | `--color-...` | TBD | used via opacity only |
 
+- **Taste dials:** TBD <!-- VARIANCE / MOTION / DENSITY, 1-10, set by `design` step 4 with
+     skill `taste`, e.g. 5 / 3 / 3 for a minimal register. Governs persuasion pages. -->
 - **Type scale:** TBD <!-- e.g. 32/24/18/16/14 + line heights; font family + weights -->
 - **Spacing ladder:** TBD <!-- e.g. 4 / 8 / 12 / 16 / 24 / 32 / 48 -->
 - **Radius:** TBD <!-- container / control / pill -->
