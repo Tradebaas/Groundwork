@@ -4,9 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Groundwork, uitgelegd</title>
+<meta name="description" content="Groundwork is een map met regels die elke AI-assistent van eerste idee naar geleverde, onderhouden software leidt. Open source, zonder lock-in.">
+<meta property="og:title" content="Groundwork, uitgelegd">
+<meta property="og:description" content="Een map met regels die elke AI-assistent van eerste idee naar geleverde, onderhouden software leidt.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tradebaas.github.io/Groundwork/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233fae9f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6v16'/%3E%3Cpath d='m19 13 2-1a9 9 0 0 1-18 0l2 1'/%3E%3Cpath d='M9 11h6'/%3E%3Ccircle cx='12' cy='4' r='2'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Inter:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Manrope:wght@400;600;700&family=Sora:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Inter:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Manrope:wght@400;600;700&family=Sora:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>.reveal,.rise{opacity:1!important;transform:none!important}</style></noscript>
 <script>
 /* bootstrap: apply saved look before first paint (no flash). Single source of truth: window.GW */
 window.GW={
@@ -37,9 +46,10 @@ window.GW={
         m=this.mode(), c=m==="light"?a.light:a.dark;
     r.style.setProperty("--accent",c[0]);
     r.style.setProperty("--accent-ink",c[1]);
-    r.style.setProperty("--glow",c[0]+"14");
-    r.style.setProperty("--tint",c[0]+"0d");
-    r.style.setProperty("--font",f.stack);
+    /* the wash and tint need more alpha on the dark canvas to stay visible */
+    r.style.setProperty("--glow",c[0]+(m==="light"?"14":"1f"));
+    r.style.setProperty("--tint",c[0]+(m==="light"?"0f":"17"));
+    r.style.setProperty("--font-display",f.stack);
     dispatchEvent(new CustomEvent("gw-look"));
   }
 };
@@ -50,30 +60,31 @@ window.GW={
     --bg:#0a0b0b; --surface:rgba(255,255,255,.025); --surface2:rgba(255,255,255,.05);
     --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.15);
     --ink:#f2f3f1; --ink2:#c3c6c0; --muted:#84887f;
-    --accent:#3fae9f; --accent-ink:#04110e; --glow:#3fae9f14; --tint:#3fae9f0d;
+    --accent:#3fae9f; --accent-ink:#04110e; --glow:#3fae9f1f; --tint:#3fae9f17;
     --header:rgba(10,11,11,.62); --sheet:#121413;
-    --font:"Josefin Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Josefin Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     --r:14px; --rs:10px; --maxw:1060px; --pad:28px;
   }
   @media(prefers-color-scheme:light){:root:not([data-theme]){
     --bg:#f6f7f6; --surface:#fdfdfc; --surface2:#eef1ef;
     --line:rgba(0,0,0,.10); --line2:rgba(0,0,0,.20);
-    --ink:#15181a; --ink2:#454b47; --muted:#6d726c;
-    --accent:#2f6664; --accent-ink:#ffffff; --glow:#2f666414; --tint:#2f66640d;
+    --ink:#15181a; --ink2:#454b47; --muted:#646963;
+    --accent:#2f6664; --accent-ink:#ffffff; --glow:#2f666414; --tint:#2f66640f;
     --header:rgba(246,247,246,.72); --sheet:#fdfdfc;
   }}
   :root[data-theme="light"]{
     --bg:#f6f7f6; --surface:#fdfdfc; --surface2:#eef1ef;
     --line:rgba(0,0,0,.10); --line2:rgba(0,0,0,.20);
-    --ink:#15181a; --ink2:#454b47; --muted:#6d726c;
-    --accent:#2f6664; --accent-ink:#ffffff; --glow:#2f666414; --tint:#2f66640d;
+    --ink:#15181a; --ink2:#454b47; --muted:#646963;
+    --accent:#2f6664; --accent-ink:#ffffff; --glow:#2f666414; --tint:#2f66640f;
     --header:rgba(246,247,246,.72); --sheet:#fdfdfc;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--ink);position:relative;overflow-x:hidden;
-    font-family:var(--font);line-height:1.65;-webkit-font-smoothing:antialiased;font-size:16px;
+    font-family:var(--font-body);line-height:1.65;-webkit-font-smoothing:antialiased;font-size:16px;
     transition:background .35s,color .35s}
   ::view-transition-old(root),::view-transition-new(root){animation-duration:.35s}
 
@@ -85,14 +96,17 @@ window.GW={
   .wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
   section{padding-top:104px;padding-bottom:104px}
   @media(max-width:640px){section{padding-top:72px;padding-bottom:72px}:root{--pad:20px}
-    .eyebrow{font-size:11px;letter-spacing:.09em;line-height:1.5}}
+    .eyebrow{font-size:11px;letter-spacing:.09em;line-height:1.5}
+    /* on a narrow screen the pill wraps and competes with the h1: keep it a plain micro-label */
+    .hero .eyebrow{border:0;background:none;padding:0;border-radius:0}}
 
   .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;letter-spacing:.14em;
     line-height:1;text-transform:uppercase;color:var(--ink2);border:1px solid var(--line);
     background:var(--surface);padding:9px 15px 8px;border-radius:999px}
   .eyebrow svg{color:var(--accent);width:14px;height:14px;transform:translateY(-0.5px)}
   .sec-head{max-width:64ch;margin-bottom:48px}
-  h2{font-size:clamp(27px,4vw,40px);line-height:1.14;letter-spacing:-.02em;font-weight:700;margin:0 0 18px}
+  h2{font-family:var(--font-display);font-size:clamp(27px,4vw,40px);line-height:1.14;
+    letter-spacing:-.02em;font-weight:700;margin:0 0 18px}
   h3{font-size:18px;font-weight:600;letter-spacing:-.01em}
   .lead{color:var(--ink2);font-size:clamp(15.5px,1.7vw,18px);max-width:62ch}
   .accent{color:var(--accent)}
@@ -100,7 +114,7 @@ window.GW={
   header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
     background:var(--header);border-bottom:1px solid var(--line)}
   nav{display:flex;align-items:center;justify-content:space-between;height:66px}
-  .logo{font-weight:700;letter-spacing:-.02em;font-size:17px}
+  .logo{font-family:var(--font-display);font-weight:700;letter-spacing:-.02em;font-size:17px}
   .navright{display:flex;align-items:center;gap:22px}
   .navlinks{display:flex;gap:26px}
   .navlinks a{color:var(--ink2);text-decoration:none;font-size:14px;transition:color .2s}
@@ -116,8 +130,8 @@ window.GW={
   .hero{padding-top:88px;padding-bottom:64px;display:grid;grid-template-columns:7fr 5fr;
     gap:56px;align-items:center;text-align:left}
   .hero .eyebrow{margin-bottom:28px}
-  .hero h1{font-size:clamp(44px,6.5vw,76px);font-weight:700;letter-spacing:-.03em;line-height:1.02;
-    margin:0 0 22px}
+  .hero h1{font-family:var(--font-display);font-size:clamp(40px,5vw,56px);font-weight:700;
+    letter-spacing:-.03em;line-height:1.06;margin:0 0 22px;max-width:21ch}
   .hero .lead{margin:0}
   .cta{display:inline-flex;gap:14px;margin-top:34px;flex-wrap:wrap}
   .btn{display:inline-flex;align-items:center;padding:13px 24px;border-radius:var(--rs);
@@ -128,7 +142,8 @@ window.GW={
   .btn.primary:hover{transform:translateY(-1px)}
   .btn.ghost{border-color:var(--line2);color:var(--ink);background:var(--surface)}
   .btn.ghost:hover{border-color:var(--ink2)}
-  .rulebook{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .rulebook{background:var(--surface);border:1px solid var(--line);border-top:2px solid var(--accent);
+    border-radius:var(--r);overflow:hidden}
   .rulebook .rb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface2)}
   .rulebook .rb-bar strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;font-weight:600}
@@ -152,19 +167,23 @@ window.GW={
     overflow:hidden;padding:16px 0;position:relative}
   .marquee .track{display:flex;gap:0;width:max-content;animation:slide 30s linear infinite}
   .marquee:hover .track{animation-play-state:paused}
-  .marquee span{white-space:nowrap;color:var(--muted);font-size:13.5px;letter-spacing:.12em;
-    text-transform:uppercase;padding:0 28px;border-right:1px solid var(--line)}
+  .marquee span{display:inline-flex;align-items:center;gap:11px;white-space:nowrap;
+    color:var(--muted);font-size:13.5px;font-weight:600;padding:0 28px;
+    border-right:1px solid var(--line)}
+  .marquee span svg{width:17px;height:17px;flex:none}
   @keyframes slide{to{transform:translateX(-50%)}}
 
   /* stats: a quiet hairline strip, real numbers, no boxes and no counting */
   .stats{display:grid;grid-template-columns:repeat(5,1fr);padding-top:44px;padding-bottom:0}
   .stat{padding:6px 18px;border-left:1px solid var(--line)}
   .stat:first-child{border-left:0;padding-left:0}
-  .stat .n{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.02em}
+  .stat .n{font-family:var(--font-display);font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.02em}
   .stat .n em{font-style:normal;color:var(--accent)}
   .stat .l{font-size:12.5px;color:var(--muted);margin-top:4px}
   @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr);row-gap:26px}
-    .stat:nth-child(odd){border-left:0;padding-left:0}}
+    .stat:nth-child(odd){border-left:0;padding-left:0}
+    /* the best number closes the strip full-width instead of orphaning in a half row */
+    .stat:last-child{grid-column:1/-1;border-left:0;padding:18px 0 0;border-top:1px solid var(--line)}}
 
   /* problems: definition rows on hairlines, no cards */
   .rows{border-top:1px solid var(--line)}
@@ -181,60 +200,80 @@ window.GW={
     transition:border-color .2s}
   .cell:hover{border-color:var(--line2)}
   .cell.s7{grid-column:span 7}.cell.s5{grid-column:span 5}.cell.s4{grid-column:span 4}.cell.s12{grid-column:span 12}
-  .cell.tinted{background:linear-gradient(0deg,var(--tint),var(--tint)),var(--surface)}
+  .cell.tinted{background:linear-gradient(0deg,var(--tint),var(--tint)),var(--surface);
+    border-top:2px solid var(--accent)}
   .cell .chip{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
     background:var(--surface2);border:1px solid var(--line);margin-bottom:20px;color:var(--ink)}
   .cell .chip svg{width:22px;height:22px}
   .cell p{color:var(--ink2);font-size:14.5px;margin-top:10px;max-width:58ch}
+  .cell .tree{margin-top:20px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:12.5px;line-height:2;color:var(--ink2);background:var(--surface2);
+    border:1px solid var(--line);border-radius:var(--rs);padding:14px 18px;
+    white-space:pre;overflow-x:auto}
+  .cell .tree b{color:var(--ink);font-weight:600}
+  .cell .tree i{font-style:normal;color:var(--ink2)}
   .cell.s12{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
   .cell.s12 .chip{margin-bottom:0}
   @media(max-width:900px){.cell.s7,.cell.s5,.cell.s4{grid-column:span 6}}
   @media(max-width:600px){.cell.s7,.cell.s5,.cell.s4,.cell.s12{grid-column:span 12}
     .cell.s12{grid-template-columns:1fr;gap:14px}}
 
-  /* skills: the one card grid on the page */
-  .cards{display:grid;gap:24px}
-  .c3{grid-template-columns:repeat(3,1fr)}
-  @media(max-width:900px){.c3{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:600px){.c3{grid-template-columns:1fr}}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px;
-    transition:border-color .2s}
+  /* skills: grouped along the route, label rail left, cards right */
+  .sgroup{display:grid;grid-template-columns:minmax(150px,3fr) 9fr;gap:28px;
+    padding:34px 0;border-top:1px solid var(--line)}
+  .glabel{font-size:14.5px;font-weight:600;color:var(--ink);letter-spacing:-.01em;padding-top:2px}
+  .glabel small{display:block;font-size:12.5px;color:var(--muted);font-weight:400;margin-top:5px}
+  .gcards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .gcards.g3{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:18px 20px;transition:border-color .2s}
   .card:hover{border-color:var(--line2)}
+  .card .tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;
+    font-weight:600;color:var(--ink)}
+  .card p{color:var(--ink2);font-size:13.5px;line-height:1.6;margin-top:7px}
+  @media(max-width:820px){.sgroup{grid-template-columns:1fr;gap:16px}}
+  @media(max-width:600px){.gcards,.gcards.g3{grid-template-columns:1fr}}
 
   .reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s cubic-bezier(.2,.7,.2,1)}
   .reveal.vis{opacity:1;transform:none}
 
   .tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:32px}
   .tab{padding:11px 18px;border-radius:var(--rs);border:1px solid var(--line);background:var(--surface);
-    color:var(--ink2);cursor:pointer;font-size:14px;font-weight:600;transition:all .18s;font-family:inherit}
+    color:var(--ink2);cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;
+    transition:color .18s,background-color .18s,border-color .18s}
   .tab[aria-selected="true"]{color:var(--accent-ink);background:var(--accent);border-color:transparent}
   .tab:hover:not([aria-selected="true"]){color:var(--ink);border-color:var(--line2)}
   .panel{display:none}
   .panel.on{display:grid;grid-template-columns:1.05fr 1fr;gap:32px;align-items:start;animation:fade .45s ease}
   @media(max-width:820px){.panel.on{grid-template-columns:1fr;gap:24px}}
   @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  .panel .big{font-size:clamp(22px,3.2vw,31px);font-weight:700;letter-spacing:-.02em;line-height:1.22}
+  .panel .big{font-family:var(--font-display);font-size:clamp(22px,3.2vw,31px);font-weight:700;
+    letter-spacing:-.02em;line-height:1.22}
+  .panel .pbody{color:var(--ink2);font-size:15px;max-width:52ch;margin-top:14px}
   .panel .how{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 26px}
   .panel .how li{list-style:none;padding:16px 0;border-bottom:1px solid var(--line);color:var(--ink2);
     font-size:14.5px;display:flex;gap:12px;align-items:flex-start}
   .panel .how li:last-child{border-bottom:0}
   .panel .how li svg{width:18px;height:18px;color:var(--accent);flex:none;margin-top:2px}
 
-  .skill{cursor:pointer}
-  .skill .top{display:flex;align-items:center;justify-content:space-between;gap:14px}
-  .skill .tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;color:var(--accent);font-weight:600}
-  .skill .pl{color:var(--muted);transition:transform .25s;display:grid;place-items:center}
-  .skill .pl svg{width:18px;height:18px}
-  .skill.open .pl{transform:rotate(45deg);color:var(--ink)}
-  .skill .desc{max-height:0;overflow:hidden;transition:max-height .3s ease;color:var(--ink2);font-size:14px}
-  .skill.open .desc{max-height:200px;margin-top:14px}
-
-  .steps{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:26px}
-  .step{flex:1;min-width:104px;padding:15px 10px;border-radius:var(--rs);border:1px solid var(--line);
-    background:var(--surface);text-align:center;cursor:pointer;font-size:13.5px;font-weight:600;
-    color:var(--ink2);transition:all .18s;font-family:inherit}
-  .step[aria-selected="true"]{color:var(--accent-ink);background:var(--accent);border-color:transparent}
-  .step:hover:not([aria-selected="true"]){color:var(--ink);border-color:var(--line2)}
+  /* the route: one hairline rail with nine stops, the page's signature visual */
+  .rail{display:grid;grid-template-columns:repeat(9,1fr);position:relative;margin-bottom:30px}
+  .rail::before{content:"";position:absolute;top:9px;left:0;right:0;height:1px;background:var(--line2)}
+  .stop{position:relative;background:none;border:0;cursor:pointer;font-family:inherit;
+    display:grid;justify-items:center;gap:12px;padding:0 4px;color:var(--muted);
+    transition:color .18s}
+  .stop .dot{width:19px;height:19px;border-radius:50%;background:var(--bg);
+    border:1px solid var(--line2);transition:border-color .18s,background-color .18s,transform .18s}
+  .stop span{font-size:13px;font-weight:600;letter-spacing:-.01em}
+  .stop:hover{color:var(--ink)}
+  .stop:hover .dot{border-color:var(--ink2)}
+  .stop[aria-selected="true"]{color:var(--ink)}
+  .stop[aria-selected="true"] .dot{background:var(--accent);border-color:var(--accent);transform:scale(1.18)}
+  @media(max-width:760px){
+    .rail{grid-template-columns:1fr}
+    .rail::before{top:10px;bottom:10px;left:9px;right:auto;width:1px;height:auto}
+    .stop{grid-template-columns:auto 1fr;justify-items:start;align-items:center;gap:14px;padding:9px 0}
+  }
   .stepbody{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:32px;min-height:130px}
   .stepbody h3{margin-bottom:10px}
   .stepbody .sk{display:inline-block;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--accent);
@@ -255,8 +294,11 @@ window.GW={
   .acc .chev{color:var(--muted);transition:transform .3s;flex:none;display:grid;place-items:center}
   .acc .chev svg{width:20px;height:20px}
   .acc.open .chev{transform:rotate(180deg)}
-  .acc .a-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
-  .acc.open .a-body{max-height:320px}
+  /* rows collapse via grid so zoomed text never clips; hidden text leaves the reading order */
+  .acc .a-body{display:grid;grid-template-rows:0fr;visibility:hidden;
+    transition:grid-template-rows .35s ease,visibility .35s}
+  .acc.open .a-body{grid-template-rows:1fr;visibility:visible}
+  .acc .a-clip{overflow:hidden;min-height:0}
   .acc .a-inner{padding:0 24px 24px;color:var(--ink2);font-size:15px;max-width:70ch}
 
   /* customizer */
@@ -266,11 +308,19 @@ window.GW={
   .fab:hover{transform:translateY(-2px)}
   .fab:active{transform:translateY(0) scale(.98)}
   .fab svg{width:22px;height:22px}
+  @media(max-width:640px){
+    /* in the single reading column the fab floats over content: smaller and quiet */
+    .fab{width:44px;height:44px;border-radius:12px;right:16px;bottom:16px;
+      background:var(--sheet);color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+    .fab svg{width:19px;height:19px}
+    .sheet{right:16px;bottom:70px}
+  }
   .sheet{position:fixed;right:22px;bottom:88px;z-index:70;width:min(340px,calc(100vw - 44px));
     background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:24px;
     box-shadow:0 24px 70px rgba(0,0,0,.35);opacity:0;transform:translateY(10px) scale(.97);
-    transform-origin:bottom right;pointer-events:none;transition:opacity .25s ease,transform .25s cubic-bezier(.2,.7,.2,1)}
-  .sheet.open{opacity:1;transform:none;pointer-events:auto}
+    transform-origin:bottom right;pointer-events:none;visibility:hidden;
+    transition:opacity .25s ease,transform .25s cubic-bezier(.2,.7,.2,1),visibility .25s}
+  .sheet.open{opacity:1;transform:none;pointer-events:auto;visibility:visible}
   .sheet .shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
   .sheet .shead h4{font-size:15px;font-weight:700;letter-spacing:-.01em}
   .sheet .grouplabel{display:flex;align-items:center;gap:8px;font-size:11.5px;letter-spacing:.1em;
@@ -281,7 +331,7 @@ window.GW={
   .swatch .dot{width:32px;height:32px;border-radius:50%;border:2px solid transparent;transition:transform .18s,border-color .18s}
   .swatch[aria-checked="true"] .dot{border-color:var(--ink);transform:scale(1.12)}
   .swatch:hover .dot{transform:scale(1.12)}
-  .swatch .nm{font-size:10.5px;color:var(--muted)}
+  .swatch .nm{font-size:11.5px;color:var(--muted)}
   .fontlist{display:grid;gap:8px}
   .fontopt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
     padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);
@@ -298,8 +348,13 @@ window.GW={
   footer .pill span{border:1px solid var(--line);border-radius:999px;padding:7px 15px;font-size:13px;color:var(--ink2)}
   footer p{max-width:60ch;margin:0 auto;font-size:14px}
 
+  /* one full-width band mid-page: a single deliberate depth beat, same theme family */
+  .band{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .band .gate{border-top-color:var(--line2)}
+
   :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
     *{animation:none!important;transition:none!important}
     .reveal{opacity:1;transform:none}
     .rise{opacity:1;transform:none}
@@ -321,18 +376,20 @@ window.GW={
         <a href="#skills">Skills</a>
         <a href="#cyclus">Levenscyclus</a>
         <a href="#eerlijk">Eerlijk</a>
+        <a href="https://github.com/Tradebaas/Groundwork">GitHub</a>
       </div>
       <button class="iconbtn" id="themebtn" aria-label="Wissel tussen licht en donker"></button>
     </div>
   </nav>
 </header>
 
+<main>
 <section class="hero wrap">
   <div>
     <span class="eyebrow rise" id="hero-eyebrow">Het besturingssysteem voor je projecten</span>
-    <h1 class="rise d1">Groundwork</h1>
-    <p class="lead rise d2">E&eacute;n map met regels die elke AI-assistent van eerste idee naar
-      geleverde, onderhouden software leidt. Op enterprise-niveau.</p>
+    <h1 class="rise d1">Van idee tot product, zonder rommel</h1>
+    <p class="lead rise d2">Groundwork is &eacute;&eacute;n map met regels die elke AI-assistent
+      stuurt: extern geheugen, vaste discipline en automatische controles, op enterprise-niveau.</p>
     <div class="cta rise d3">
       <a class="btn primary" href="#hoe">Hoe het werkt</a>
       <a class="btn ghost" href="#eerlijk">De grenzen</a>
@@ -341,7 +398,7 @@ window.GW={
   <div class="rise d4">
     <div class="rulebook" aria-label="Fragment uit het echte rulebook AGENTS.md">
       <div class="rb-bar"><strong>AGENTS.md</strong><span>het rulebook dat elke assistent leest</span></div>
-      <pre><span class="cm">## Session protocol</span>
+      <pre lang="en"><span class="cm">## Session protocol</span>
 
 <b>1.</b> Read the handoff block at the
    top of <span class="ac">docs/state/STATE.md</span>
@@ -353,7 +410,7 @@ window.GW={
 <b>4.</b> End every message with <span class="ac">&#9875;</span> to
    confirm these rules are loaded.</pre>
     </div>
-    <p class="rb-cap">Echt fragment. Kopieer de map, zeg "begin", en dit protocol stuurt elke sessie.</p>
+    <p class="rb-cap">Echt fragment, ingekort. Kopieer de map, zeg "begin", en dit protocol stuurt elke sessie.</p>
   </div>
 </section>
 
@@ -389,40 +446,43 @@ window.GW={
 <section id="waarom" class="wrap">
   <div class="sec-head reveal">
     <h2>Zes redenen, eerlijk uitgelegd</h2>
-    <p class="lead">Klik op een reden om te zien wat het betekent en hoe Groundwork het echt
-      waarmaakt. Geen beloftes, alleen ingebouwde werkwijzen.</p>
+    <p class="lead">Geen beloftes, alleen ingebouwde werkwijzen: elke reden hieronder is
+      terug te vinden in de map zelf.</p>
   </div>
-  <div class="tabs reveal" role="tablist" id="whytabs"></div>
+  <div class="tabs reveal" role="tablist" id="whytabs" aria-label="Zes redenen"></div>
   <div id="whypanels"></div>
 </section>
 
 <section id="skills" class="wrap">
   <div class="sec-head reveal">
-    <h2>Skills, elk een expert voor <span class="accent">e&eacute;n</span> taak</h2>
+    <h2>Skills, elk een expert voor <span class="accent">&eacute;&eacute;n</span> taak</h2>
     <p class="lead">Een skill is een uitgeschreven werkwijze die de assistent erbij pakt op het
-      juiste moment. Klik op een kaart voor de uitleg in gewone taal.</p>
+      juiste moment, gegroepeerd langs de route van idee naar beheer.</p>
   </div>
-  <div class="cards c3" id="skillgrid"></div>
+  <div id="skillgrid"></div>
 </section>
 
 <section id="cyclus" class="wrap">
   <div class="sec-head reveal">
-    <h2>E<span class="accent">&eacute;</span>n doorlopende route</h2>
+    <h2><span class="accent">E&eacute;n</span> doorlopende route</h2>
     <p class="lead">Groundwork begeleidt het hele leven van een product, niet alleen het bouwen.
       Klik op een fase.</p>
   </div>
-  <div class="steps reveal" id="steps" role="tablist"></div>
-  <div class="stepbody reveal" id="stepbody"></div>
+  <div class="rail reveal" id="steps" role="tablist" aria-label="Fases van de route"></div>
+  <div class="stepbody reveal" id="stepbody" role="tabpanel" tabindex="0"></div>
 </section>
 
+<div class="band">
 <section class="wrap">
   <div class="sec-head reveal">
     <h2>Controles die niets laten passeren</h2>
-    <p class="lead">Deze draaien automatisch bij elke opslag en publicatie. Ze kosten geen tokens
-      en kunnen niet stiekem worden uitgezet: een dichte poort is informatie, geen obstakel.</p>
+    <p class="lead">Deze draaien automatisch bij elke vastlegging (commit) en publicatie. Ze
+      kosten geen tokens, en omzeilen is door het rulebook verboden: een dichte poort is
+      informatie, geen obstakel.</p>
   </div>
   <div class="gatelist" id="gates"></div>
 </section>
+</div>
 
 <section id="eerlijk" class="wrap">
   <div class="sec-head reveal">
@@ -431,6 +491,7 @@ window.GW={
   </div>
   <div class="reveal" style="max-width:820px" id="faq"></div>
 </section>
+</main>
 
 <footer class="wrap">
   <div class="logo">Groundwork</div>
@@ -439,17 +500,18 @@ window.GW={
     <span>Werkt in elke editor</span><span>Jouw gegevens blijven lokaal</span>
   </div>
   <p>Geen woord te veel. Alles wat je nodig hebt leeft in de map: geef die map en het project reist mee.</p>
+  <p style="margin-top:18px"><a href="https://github.com/Tradebaas/Groundwork" style="color:var(--ink2)">github.com/Tradebaas/Groundwork</a></p>
 </footer>
 
-<button class="fab" id="fab" aria-label="Pas thema en lettertype aan" aria-expanded="false"></button>
+<button class="fab" id="fab" aria-label="Pas thema en lettertype aan" aria-expanded="false" aria-controls="sheet"></button>
 <div class="sheet" id="sheet" role="dialog" aria-label="Weergave aanpassen">
   <div class="shead">
     <h4>Weergave</h4>
-    <button class="iconbtn" id="sheetclose" aria-label="Sluiten" style="width:34px;height:34px"></button>
+    <button class="iconbtn" id="sheetclose" aria-label="Sluiten"></button>
   </div>
   <div class="grouplabel" id="gl-theme">Kleurthema</div>
   <div class="swatches" role="radiogroup" aria-labelledby="gl-theme" id="swatches"></div>
-  <div class="grouplabel" id="gl-font">Lettertype</div>
+  <div class="grouplabel" id="gl-font">Lettertype van de koppen</div>
   <div class="fontlist" role="radiogroup" aria-labelledby="gl-font" id="fontlist"></div>
   <p class="hint">Je keuzes worden op dit apparaat onthouden.</p>
 </div>
@@ -474,8 +536,8 @@ ruler:'<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 
 code:'<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
 scale:'<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>',
 wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>',
+droplet:'<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
 chevron:'<path d="m6 9 6 6 6-6"/>',
-plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
 check:'<path d="M20 6 9 17l-5-5"/>',
 sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
 moon:'<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
@@ -486,24 +548,37 @@ x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
 function ic(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||'')+'</svg>';}
 document.getElementById('hero-eyebrow').insertAdjacentHTML('afterbegin',ic('anchor'));
 
-var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ---------- real tool marks (Simple Icons, CC0), filled paths ---------- */
+var M={
+claude:'m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z',
+cursor:'M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23',
+copilot:'M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359 0 0 1-.355-.508Zm2.328 3.25c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm-5 0c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm3.313-6.185c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z',
+gemini:'M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81',
+windsurf:'M23.55 5.067c-1.2038-.002-2.1806.973-2.1806 2.1765v4.8676c0 .972-.8035 1.7594-1.7597 1.7594-.568 0-1.1352-.286-1.4718-.7659l-4.9713-7.1003c-.4125-.5896-1.0837-.941-1.8103-.941-1.1334 0-2.1533.9635-2.1533 2.153v4.8957c0 .972-.7969 1.7594-1.7596 1.7594-.57 0-1.1363-.286-1.4728-.7658L.4076 5.1598C.2822 4.9798 0 5.0688 0 5.2882v4.2452c0 .2147.0656.4228.1884.599l5.4748 7.8183c.3234.462.8006.8052 1.3509.9298 1.3771.313 2.6446-.747 2.6446-2.0977v-4.893c0-.972.7875-1.7593 1.7596-1.7593h.003a1.798 1.798 0 0 1 1.4718.7658l4.9723 7.0994c.4135.5905 1.05.941 1.8093.941 1.1587 0 2.1515-.9645 2.1515-2.153v-4.8948c0-.972.7875-1.7594 1.7596-1.7594h.194a.22.22 0 0 0 .2204-.2202v-4.622a.22.22 0 0 0-.2203-.2203Z',
+jetbrains:'M2.345 23.997A2.347 2.347 0 0 1 0 21.652V10.988C0 9.665.535 8.37 1.473 7.433l5.965-5.961A5.01 5.01 0 0 1 10.989 0h10.666A2.347 2.347 0 0 1 24 2.345v10.664a5.056 5.056 0 0 1-1.473 3.554l-5.965 5.965A5.017 5.017 0 0 1 13.007 24v-.003H2.345Zm8.969-6.854H5.486v1.371h5.828v-1.371ZM3.963 6.514h13.523v13.519l4.257-4.257a3.936 3.936 0 0 0 1.146-2.767V2.345c0-.678-.552-1.234-1.234-1.234H10.989a3.897 3.897 0 0 0-2.767 1.145L3.963 6.514Zm-.192.192L2.256 8.22a3.944 3.944 0 0 0-1.145 2.768v10.664c0 .678.552 1.234 1.234 1.234h10.666a3.9 3.9 0 0 0 2.767-1.146l1.512-1.511H3.771V6.706Z'
+};
+function mk(d){return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="'+d+'"/></svg>';}
 
-/* ---------- marquee ---------- */
+var reducedMq=matchMedia('(prefers-reduced-motion: reduce)');
+
+/* ---------- marquee: real marks, name beside each ---------- */
 (function(){
-  var tools=['Claude Code','Cursor','GitHub Copilot','Codex','Gemini CLI','Windsurf','JetBrains'];
-  var one=tools.map(function(t){return '<span>'+t+'</span>'}).join('');
+  /* tools without a published Simple Icons mark are left out rather than faked */
+  var tools=[['Claude Code',M.claude],['Cursor',M.cursor],['GitHub Copilot',M.copilot],
+             ['Gemini CLI',M.gemini],['Windsurf',M.windsurf],['JetBrains',M.jetbrains]];
+  var one=tools.map(function(t){return '<span>'+mk(t[1])+t[0]+'</span>'}).join('');
   var track=document.getElementById('mtrack');
-  var half=one;
-  track.innerHTML=half;
-  /* repeat the list until one half fills the viewport, so the loop never exposes empty space */
-  while(track.scrollWidth<window.innerWidth){half+=one;track.innerHTML=half;}
-  track.innerHTML=half+half; /* two identical halves: at translateX(-50%) the second sits where the first began, so it repeats with no visible jump */
+  track.innerHTML=one;
+  /* measure once, then repeat until one half fills the viewport */
+  var reps=Math.max(1,Math.ceil(window.innerWidth/Math.max(1,track.scrollWidth)));
+  var half=new Array(reps+1).join(one);
+  track.innerHTML=half+half; /* two identical halves: at translateX(-50%) the loop restarts with no visible jump */
 })();
 
 /* ---------- theme (light/dark) ---------- */
 var root=document.documentElement,tbtn=document.getElementById('themebtn');
 function swap(fn){
-  if(document.startViewTransition && !reduced){document.startViewTransition(fn);}else{fn();}
+  if(document.startViewTransition && !reducedMq.matches){document.startViewTransition(fn);}else{fn();}
 }
 function paintToggle(){tbtn.innerHTML=ic(GW.mode()==='dark'?'sun':'moon');}
 tbtn.onclick=function(){
@@ -516,9 +591,17 @@ matchMedia('(prefers-color-scheme: light)').addEventListener('change',function()
 paintToggle();
 
 /* ---------- reveals: content enters when the reader reaches it ---------- */
+/* elements that enter in the same batch (a grid) cascade with a small stagger */
 var io=('IntersectionObserver' in window)
-  ?new IntersectionObserver(function(es){es.forEach(function(x){
-      if(x.isIntersecting){x.target.classList.add('vis');io.unobserve(x.target);}});},{threshold:.12})
+  ?new IntersectionObserver(function(es){
+      var i=0;
+      es.forEach(function(x){
+        if(!x.isIntersecting)return;
+        var el=x.target;io.unobserve(el);
+        if(reducedMq.matches){el.classList.add('vis');return;}
+        setTimeout(function(){el.classList.add('vis');},Math.min(i*70,420));i++;
+      });
+    },{threshold:.12})
   :{observe:function(el){el.classList.add('vis');},unobserve:function(){}};
 function watch(el){io.observe(el);}
 document.querySelectorAll('.reveal').forEach(watch);
@@ -533,20 +616,21 @@ mount('problems',[
   ['brain','Geheugenverlies','Elke nieuwe sessie begint de assistent vaak blanco en verzint de stand van zaken opnieuw.'],
   ['history','Verouderde kennis','Een model weet alleen wat het ooit leerde. Zonder controle gebruikt het oude, onveilige manieren.'],
   ['shuffle','Rommel en afdwaling','Zonder grenzen bouwt het dingen die niemand vroeg, en ontstaat code die niemand meer begrijpt.'],
-  ['key','Lekken','Geheimen in de code, persoonsgegevens op de verkeerde plek. Makkelijk gedaan, moeilijk terug te draaien.'],
+  ['droplet','Lekken','Geheimen in de code, persoonsgegevens op de verkeerde plek. Makkelijk gedaan, moeilijk terug te draaien.'],
 ].map(function(a){
   return '<div class="row reveal"><div class="rt">'+ic(a[0])+'<span>'+a[1]+'</span></div><p>'+a[2]+'</p></div>';
 }).join(''));
 
 mount('hows',[
-  ['book','E&eacute;n rulebook','E&eacute;n bestand met alle regels dat elke AI-tool leest, in elke editor. Geen losse versies per programma.','s7 tinted'],
+  ['book','E&eacute;n rulebook','E&eacute;n bestand met alle regels dat elke AI-tool leest, in elke editor. Zo ziet de map eruit:','s7 tinted',
+   '<pre class="tree"><b>AGENTS.md</b>        <i>de regels, altijd geladen</i>\n<b>.agents/skills/</b>  <i>de experts, op afroep</i>\n<b>docs/</b>            <i>het geheugen op schijf</i>\n<b>checks/</b>          <i>de poorten, nul tokens</i></pre>'],
   ['puzzle','Skills op afroep','Expertmethodes die alleen inladen op het moment dat ze nodig zijn. Dat scheelt tokens en houdt de aandacht scherp.','s5'],
   ['database','Extern geheugen','De stand van het project leeft in bestanden op schijf, niet in het gesprek. Een sessie leest verder waar de vorige stopte.','s4'],
-  ['shield','Automatische poorten','Mechanische controles draaien bij elke opslag. Klopt iets niet, dan gaat de poort dicht. Nul tokens nodig.','s4'],
+  ['shield','Automatische poorten','Mechanische controles draaien bij elke vastlegging. Klopt iets niet, dan gaat de poort dicht. Nul tokens nodig.','s4'],
   ['checks','De beslis-ladder','Is het nodig? Bestaat het al? Doet een bestaand onderdeel dit? Pas daarna bouwen, en alleen het minimum dat werkt.','s4'],
   ['anchor','Samen: rust en controle','De assistent werkt hard, maar binnen kaders die jou beschermen en het project begrijpelijk houden.','s12 tinted'],
 ].map(function(a){
-  return '<div class="cell reveal '+a[3]+'"><div class="chip">'+ic(a[0])+'</div><div><h3>'+a[1]+'</h3><p>'+a[2]+'</p></div></div>';
+  return '<div class="cell reveal '+a[3]+'"><div class="chip">'+ic(a[0])+'</div><div><h3>'+a[1]+'</h3><p>'+a[2]+'</p></div>'+(a[4]||'')+'</div>';
 }).join(''));
 
 mount('gates',[
@@ -557,65 +641,99 @@ mount('gates',[
   ['ruler','Budgetten','Regels, documenten en codebestanden blijven binnen hun budget. Groeit iets te groot, dan wordt het gesplitst.'],
   ['code','Dode code','Uitgecommentarieerde brokken code worden opgeruimd. Git onthoudt de historie wel.'],
   ['scale','Zelf-test','De poorten testen zichzelf: een controle die niet bewijst dat hij werkt, telt niet mee.'],
-  ['wrench','En meer','Structuur, koppelingen tussen tools en uitgestelde keuzes worden allemaal bewaakt.'],
+  ['wrench','En de rest','Structuur, tickets, symlinks en uitgestelde keuzes: ook de kleinere afspraken hebben een eigen poort.'],
 ].map(function(a){
   return '<div class="gate reveal">'+ic(a[0])+'<div><h3>'+a[1]+'</h3><p>'+a[2]+'</p></div></div>';
 }).join(''));
 
+/* arrow-key contract for tablists and radiogroups: arrows move focus and select */
+function arrows(list,sel){
+  list.addEventListener('keydown',function(e){
+    var items=Array.prototype.slice.call(list.children),
+        i=items.indexOf(document.activeElement),n=null;
+    if(i<0)return;
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')n=(i+1)%items.length;
+    else if(e.key==='ArrowLeft'||e.key==='ArrowUp')n=(i-1+items.length)%items.length;
+    else if(e.key==='Home')n=0;
+    else if(e.key==='End')n=items.length-1;
+    if(n===null)return;
+    e.preventDefault();items[n].focus();sel(n);
+  });
+}
+
 var why=[
   {k:'Bij elk project',t:'Werkt met elke editor, elk model, elk project',
-   how:['E&eacute;n rulebook in de open AGENTS.md-standaard die alle grote AI-tools lezen','Geen binding aan e&eacute;n leverancier of programma','Begeleidt de hele route: van idee tot onderhoud, niet alleen het bouwen','Kopieer de map, zeg "begin", en je bent onderweg']},
+   d:'Groundwork schrijft zelf geen code: het stuurt de assistent die dat doet. Daarom maakt het niet uit welke editor of welk model je gebruikt, vandaag of na je volgende overstap.',
+   how:['E&eacute;n rulebook in de open AGENTS.md-standaard die alle grote AI-tools lezen','Geen binding aan &eacute;&eacute;n leverancier of programma','Begeleidt de hele route: van idee tot onderhoud, niet alleen het bouwen','Kopieer de map, zeg "begin", en je bent onderweg']},
   {k:'Zuinig met tokens',t:'Effici&euml;nt door ontwerp, niet door een truc',
-   how:['Skills laden alleen wanneer ze nodig zijn, niet allemaal tegelijk','Verwijzen in plaats van kopi&euml;ren: e&eacute;n feit op e&eacute;n plek','De projectstand staat op schijf, dus niets wordt elke sessie opnieuw afgeleid','Groot werk wordt geknipt in tickets van precies e&eacute;n verse sessie','De ingest-skill zet PDF en Office om naar compacte tekst; de poorten kosten nul tokens']},
+   d:'Context is het duurste onderdeel van AI-werk. Groundwork verspilt er zo min mogelijk van: alles wat herbruikbaar is staat op schijf, alles wat zwaar is laadt pas als het nodig is.',
+   how:['Skills laden alleen wanneer ze nodig zijn, niet allemaal tegelijk','Verwijzen in plaats van kopi&euml;ren: &eacute;&eacute;n feit op &eacute;&eacute;n plek','De projectstand staat op schijf, dus niets wordt elke sessie opnieuw afgeleid','Groot werk wordt geknipt in tickets van precies &eacute;&eacute;n verse sessie','De ingest-skill zet PDF en Office om naar compacte tekst; de poorten kosten nul tokens']},
   {k:'Actuele code',t:'Feiten live opgezocht, nooit uit verouderd geheugen',
+   d:'Een model weet alleen wat het ooit leerde. De werkwijzen dwingen af dat keuzes op onderzoek van vandaag rusten, en dat elk besluit met datum en reden wordt vastgelegd.',
    how:['De stack- en comply-skills eisen live onderzoek, nooit kennis uit het model zelf','Elke keuze wordt vastgelegd als besluit, met datum en reden','Onderhoud controleert regelmatig op verouderde afhankelijkheden','Klopt de code niet met een document, dan is de code het feit en wordt het document bijgewerkt']},
   {k:'Veilig',t:'Een beveiligingsvloer die nooit wordt weggesimplificeerd',
+   d:'Beveiliging is een vloer die in elke werkwijze terugkomt, geen extraatje achteraf. Wat op de vloer ligt, mag nooit worden versimpeld of overgeslagen.',
    how:['Vaste eisen: invoercontrole, toegangsrechten, nette foutafhandeling','Een scanner weigert geheimen zoals sleutels en wachtwoorden in de code','Een poort mag nooit worden omzeild; een rode poort wordt opgelost, niet uitgezet','Toegankelijkheid hoort bij de vloer, niet bij het extraatje']},
   {k:'Jouw data veilig',t:'Je gegevens blijven van jou en blijven lokaal',
-   how:['Geheimen komen nooit in de repo: uitgesloten en actief gescand','Persoonsgegevens worden gemeld bij het compliance-register (AVG en EU AI Act)','Je e-mailadres kan verborgen blijven in de historie','Alles leeft lokaal in de map; niets is afhankelijk van een externe dienst']},
+   d:'Je project leeft in een map op jouw eigen schijf. Er is geen account, geen externe dienst en geen database van een ander nodig om Groundwork te gebruiken.',
+   how:['Geheimen komen nooit in de repo: uitgesloten en actief gescand','Persoonsgegevens worden gemeld bij het compliance-register (AVG en EU AI Act)','Een verse kopie start met een schone eerste commit, zonder andermans historie','Alles leeft lokaal in de map; niets is afhankelijk van een externe dienst']},
   {k:'Enterprise-waardig',t:'De volledige discipline van een groot bedrijf, ingebouwd',
+   d:'Eerst vastleggen, dan bouwen, dan bewijzen dat het werkt: de discipline van een groot team zit in de werkwijzen zelf. Ook als je alleen bouwt, bouw je op dat niveau.',
    how:['Specs, architectuur, standaarden en besluiten worden vastgelegd voordat er gebouwd wordt','Compliance getoetst aan Nederlands en Europees recht','Verificatie bewijst dat iets echt werkt; oplevering is gecontroleerd en herhaalbaar','Overdracht en onderhoud maken het project blijvend, ook zonder jou']}
 ];
 var tw=document.getElementById('whytabs'),pw=document.getElementById('whypanels');
 why.forEach(function(w,i){
-  var b=document.createElement('button');b.className='tab';b.setAttribute('role','tab');
-  b.setAttribute('aria-selected',i===0);b.textContent=w.k;b.onclick=function(){selWhy(i);};tw.appendChild(b);
+  var b=document.createElement('button');b.className='tab';b.id='whytab-'+i;
+  b.setAttribute('role','tab');b.setAttribute('aria-selected',i===0);
+  b.setAttribute('aria-controls','whypanel-'+i);b.tabIndex=i===0?0:-1;
+  b.textContent=w.k;b.onclick=function(){selWhy(i);};tw.appendChild(b);
   var p=document.createElement('div');p.className='panel'+(i===0?' on':'');
-  p.innerHTML='<div class="big">'+w.t+'</div><ul class="how">'+w.how.map(function(h){return '<li>'+ic('check')+'<span>'+h+'</span></li>';}).join('')+'</ul>';
+  p.id='whypanel-'+i;p.setAttribute('role','tabpanel');
+  p.setAttribute('aria-labelledby','whytab-'+i);p.tabIndex=0;
+  p.innerHTML='<div><div class="big">'+w.t+'</div><p class="pbody">'+w.d+'</p></div><ul class="how">'+w.how.map(function(h){return '<li>'+ic('check')+'<span>'+h+'</span></li>';}).join('')+'</ul>';
   pw.appendChild(p);
 });
 function selWhy(i){
-  Array.prototype.forEach.call(tw.children,function(t,j){t.setAttribute('aria-selected',j===i);});
+  Array.prototype.forEach.call(tw.children,function(t,j){
+    t.setAttribute('aria-selected',j===i);t.tabIndex=j===i?0:-1;});
   Array.prototype.forEach.call(pw.children,function(p,j){p.classList.toggle('on',j===i);});
 }
+arrows(tw,selWhy);
 
-var skills=[
-  ['begin','Start een vers project: interviewt je over doel en grenzen, vult de sjablonen en zet git klaar.'],
-  ['scope','Bepaalt en bewaakt wat wel en niet gebouwd wordt. Nieuwe wensen komen hier binnen, niet stiekem tijdens het bouwen.'],
-  ['spec','Schrijft precies genoeg plan voordat er iets gebouwd wordt. Niet te veel, niet te weinig.'],
-  ['critical-thinking','Denkt kritisch mee voordat een idee gebouwd wordt: tegenwicht tegen de neiging van AI om overal ja op te knikken.'],
-  ['stack','Kiest de techniek en zoekt live op wat vandaag de juiste, veilige manier is voor die keuze.'],
-  ['architect','Ontwerpt het systeem: de grenzen, de gegevens, de koppelingen en de mogelijke bedreigingen.'],
-  ['design','Zet het visuele systeem en de schrijfstijl op, afgestemd op jouw smaak en publiek.'],
-  ['taste','Bouwregels tegen de standaard AI-look voor landingssites, marketing en portfolio: eerst de opdracht lezen, dan voorbij de sjablonen ontwerpen.'],
-  ['scope-guard','De laatste check voordat werk "af" heet: is er niets extra gebouwd dat niemand vroeg?'],
-  ['design-guard','De laatste check op schermen en teksten voordat ze de deur uit gaan.'],
-  ['verify','Bewijst dat een wijziging echt werkt, van begin tot eind. Groene tests alleen zijn geen bewijs.'],
-  ['code-review','Beoordeelt de wijziging met frisse ogen langs twee assen: voldoet de code aan de standaarden, en doet hij precies wat de spec vraagt?'],
-  ['deliver','Levert een release gecontroleerd en herhaalbaar op. Niets gaat de deur uit dat niet geverifieerd is.'],
-  ['maintain','Houdt een live product gezond: updates, incidenten, opgebouwde schuld en periodieke controles.'],
-  ['handover','Maakt het project overdraagbaar aan een ander mens of AI, zonder mondelinge uitleg.'],
-  ['checkpoint','Zet de stand van een lange sessie op schijf, zodat je met /clear vers en goedkoper verder kunt zonder de draad te verliezen.'],
-  ['skill-author','Maakt een nieuwe skill, maar alleen als het project die echt herhaaldelijk nodig heeft.'],
-  ['comply','Toetst aan Nederlands en Europees recht: privacy, de AI-wet, toegankelijkheid en licenties.'],
-  ['ingest','Zet PDF, Office-bestanden en afbeeldingen om naar compacte tekst, zodat tokens naar inhoud gaan.']
+var skillGroups=[
+  ['Koers bepalen','eerst denken, dan bouwen',[
+    ['begin','Start een vers project: interviewt je over doel en grenzen, vult de sjablonen en zet git klaar.'],
+    ['scope','Bepaalt en bewaakt wat wel en niet gebouwd wordt. Nieuwe wensen komen hier binnen, niet stiekem tijdens het bouwen.'],
+    ['spec','Schrijft precies genoeg plan voordat er iets gebouwd wordt. Niet te veel, niet te weinig.'],
+    ['critical-thinking','Denkt kritisch mee voordat een idee gebouwd wordt: tegenwicht tegen de neiging van AI om overal ja op te knikken.']]],
+  ['Fundament leggen','techniek, opbouw en smaak',[
+    ['stack','Kiest de techniek en zoekt live op wat vandaag de juiste, veilige manier is voor die keuze.'],
+    ['architect','Ontwerpt het systeem: de grenzen, de gegevens, de koppelingen en de mogelijke bedreigingen.'],
+    ['design','Zet het visuele systeem en de schrijfstijl op, afgestemd op jouw smaak en publiek.'],
+    ['taste','Bouwregels tegen de standaard AI-look voor landingssites, marketing en portfolio: eerst de opdracht lezen, dan voorbij de sjablonen ontwerpen.']]],
+  ['Kwaliteit bewaken','frisse ogen op elk resultaat',[
+    ['scope-guard','De laatste check voordat werk "af" heet: is er niets extra gebouwd dat niemand vroeg?'],
+    ['design-guard','De laatste check op schermen en teksten voordat ze de deur uit gaan.'],
+    ['verify','Bewijst dat een wijziging echt werkt, van begin tot eind. Groene tests alleen zijn geen bewijs.'],
+    ['code-review','Beoordeelt de wijziging met frisse ogen langs twee assen: voldoet de code aan de standaarden, en doet hij precies wat de spec vraagt?']]],
+  ['Leveren en beheren','de deur uit, en daarna',[
+    ['deliver','Levert een release gecontroleerd en herhaalbaar op. Niets gaat de deur uit dat niet geverifieerd is.'],
+    ['maintain','Houdt een live product gezond: updates, incidenten, opgebouwde schuld en periodieke controles.'],
+    ['handover','Maakt het project overdraagbaar aan een ander mens of AI, zonder mondelinge uitleg.'],
+    ['checkpoint','Zet de stand van een lange sessie op schijf, zodat je met /clear vers en goedkoper verder kunt zonder de draad te verliezen.']]],
+  ['Gereedschap','voor alles daaromheen',[
+    ['skill-author','Maakt een nieuwe skill, maar alleen als het project die echt herhaaldelijk nodig heeft.'],
+    ['comply','Toetst aan Nederlands en Europees recht: privacy, de AI-wet, toegankelijkheid en licenties.'],
+    ['ingest','Zet PDF, Office-bestanden en afbeeldingen om naar compacte tekst, zodat tokens naar inhoud gaan.']]]
 ];
 var sg=document.getElementById('skillgrid');
-skills.forEach(function(s){
-  var c=document.createElement('div');c.className='card skill reveal';
-  c.innerHTML='<div class="top"><span class="tag">'+s[0]+'</span><span class="pl">'+ic('plus')+'</span></div><div class="desc">'+s[1]+'</div>';
-  c.onclick=function(){c.classList.toggle('open');};sg.appendChild(c);watch(c);
-});
+sg.innerHTML=skillGroups.map(function(g){
+  return '<div class="sgroup"><h3 class="glabel reveal">'+g[0]+'<small>'+g[1]+'</small></h3>'+
+    '<div class="gcards'+(g[2].length===3?' g3':'')+'">'+g[2].map(function(s){
+      return '<div class="card reveal"><span class="tag">'+s[0]+'</span><p>'+s[1]+'</p></div>';
+    }).join('')+'</div></div>';
+}).join('');
+sg.querySelectorAll('.reveal').forEach(watch);
 
 var phases=[
   ['Idee','Je vertelt wat je wilt maken en voor wie. De assistent legt scope en doelen vast.','begin'],
@@ -630,28 +748,37 @@ var phases=[
 ];
 var se=document.getElementById('steps'),sb=document.getElementById('stepbody');
 phases.forEach(function(p,i){
-  var b=document.createElement('button');b.className='step';b.setAttribute('role','tab');b.setAttribute('aria-selected',i===0);
-  b.innerHTML=p[0];b.onclick=function(){selStep(i);};se.appendChild(b);
+  var b=document.createElement('button');b.className='stop';b.id='fase-'+i;
+  b.setAttribute('role','tab');b.setAttribute('aria-selected',i===0);
+  b.setAttribute('aria-controls','stepbody');b.tabIndex=i===0?0:-1;
+  b.innerHTML='<span class="dot" aria-hidden="true"></span><span>'+p[0]+'</span>';
+  b.onclick=function(){selStep(i);};se.appendChild(b);
 });
 function selStep(i){
-  Array.prototype.forEach.call(se.children,function(s,j){s.setAttribute('aria-selected',j===i);});
+  Array.prototype.forEach.call(se.children,function(s,j){
+    s.setAttribute('aria-selected',j===i);s.tabIndex=j===i?0:-1;});
   var p=phases[i];
+  sb.setAttribute('aria-labelledby','fase-'+i);
   sb.innerHTML='<h3>'+p[0]+'</h3><p style="color:var(--ink2);max-width:60ch">'+p[1]+'</p><span class="sk">skill: '+p[2]+'</span>';
 }
 selStep(0);
+arrows(se,selStep);
 
 var faq=[
   ['Het is geen magie','Groundwork is discipline en structuur die de AI dwingen zich te gedragen. Jij blijft eindverantwoordelijk en beoordeelt het resultaat. Het maakt goed werk waarschijnlijker, niet automatisch.'],
   ['"Actuele code" heeft grenzen','Het dwingt af dat feiten live worden opgezocht in plaats van gegokt uit verouderd geheugen. Dat is een enorme verbetering, maar geen garantie dat elke regel perfect is.'],
   ['"Veilig" is een vloer, geen keurmerk','Er is een vaste beveiligingsbasis plus automatische scans. Bij hoog risico vervangt dat geen echte, menselijke beveiligingsaudit.'],
-  ['Het is opinionated','Het legt bewust e&eacute;n werkwijze op. Dat voelt streng, en dat is precies de bedoeling: juist die kaders leveren de kwaliteit.'],
+  ['Het is bewust eigenwijs','Het legt bewust &eacute;&eacute;n werkwijze op. Dat voelt streng, en dat is precies de bedoeling: juist die kaders leveren de kwaliteit.'],
   ['Zuinig, geen wondermiddel','Het bespaart tokens door slim ontwerp. Grote, complexe projecten kosten nog steeds echt werk en aandacht.']
 ];
 var fq=document.getElementById('faq');
-faq.forEach(function(f){
+faq.forEach(function(f,i){
   var d=document.createElement('div');d.className='acc';
-  d.innerHTML='<button>'+f[0]+'<span class="chev">'+ic('chevron')+'</span></button><div class="a-body"><div class="a-inner">'+f[1]+'</div></div>';
-  d.querySelector('button').onclick=function(){d.classList.toggle('open');};fq.appendChild(d);
+  d.innerHTML='<button aria-expanded="false" aria-controls="faq-'+i+'">'+f[0]+'<span class="chev">'+ic('chevron')+'</span></button>'+
+    '<div class="a-body" id="faq-'+i+'"><div class="a-clip"><div class="a-inner">'+f[1]+'</div></div></div>';
+  var btn=d.querySelector('button');
+  btn.onclick=function(){var open=d.classList.toggle('open');btn.setAttribute('aria-expanded',open);};
+  fq.appendChild(d);
 });
 
 /* ---------- customizer ---------- */
@@ -678,15 +805,16 @@ var sw=document.getElementById('swatches');
 Object.keys(GW.accents).forEach(function(key){
   var a=GW.accents[key],cur=(GW.ls('gw-accent')||'teal')===key;
   var b=document.createElement('button');b.className='swatch';b.setAttribute('role','radio');
-  b.setAttribute('aria-checked',cur);b.setAttribute('aria-label','Thema '+a.label);
+  b.setAttribute('aria-checked',cur);b.setAttribute('aria-label','Thema '+a.label);b.tabIndex=cur?0:-1;
   b.innerHTML='<span class="dot" style="background:'+(GW.mode()==='light'?a.light[0]:a.dark[0])+'"></span><span class="nm">'+a.label+'</span>';
   b.onclick=function(){
     GW.st('gw-accent',key);
     swap(function(){GW.apply();});
-    Array.prototype.forEach.call(sw.children,function(x){x.setAttribute('aria-checked',x===b);});
+    Array.prototype.forEach.call(sw.children,function(x){x.setAttribute('aria-checked',x===b);x.tabIndex=x===b?0:-1;});
   };
   sw.appendChild(b);
 });
+arrows(sw,function(n){sw.children[n].click();});
 addEventListener('gw-look',function(){ /* keep swatch dots in sync with mode */
   var m=GW.mode(),i=0;
   Object.keys(GW.accents).forEach(function(key){
@@ -699,15 +827,16 @@ var fl=document.getElementById('fontlist');
 Object.keys(GW.fonts).forEach(function(key){
   var f=GW.fonts[key],cur=(GW.ls('gw-font')||'josefin')===key;
   var b=document.createElement('button');b.className='fontopt';b.setAttribute('role','radio');
-  b.setAttribute('aria-checked',cur);
-  b.innerHTML='<span>'+f.label+(key==='josefin'?' <span style="color:var(--muted)">(standaard)</span>':'')+'</span><span class="ag" style="font-family:'+f.stack.replace(/"/g,"&quot;")+'">Ag</span>';
+  b.setAttribute('aria-checked',cur);b.tabIndex=cur?0:-1;
+  b.innerHTML='<span>'+f.label+(key==='josefin'?' <span style="color:var(--muted)">(standaard)</span>':'')+'</span><span class="ag" aria-hidden="true" style="font-family:'+f.stack.replace(/"/g,"&quot;")+'">Ag</span>';
   b.onclick=function(){
     GW.st('gw-font',key);
     swap(function(){GW.apply();});
-    Array.prototype.forEach.call(fl.children,function(x){x.setAttribute('aria-checked',x===b);});
+    Array.prototype.forEach.call(fl.children,function(x){x.setAttribute('aria-checked',x===b);x.tabIndex=x===b?0:-1;});
   };
   fl.appendChild(b);
 });
+arrows(fl,function(n){fl.children[n].click();});
 </script>
 </body>
 </html>
