@@ -1,8 +1,8 @@
 # docs/ : the project's externalized memory (manifest)
 
 Every file in `docs/` must be listed here, or `checks/check.mjs` fails. Dynamic content
-(spec folders, decision records, log archives, generated standards, runbooks) is covered by the
-patterns marked ◆. Tiers: **LIVE** = always current, update-or-fail; **REF** = current for its
+(spec folders, decision records, log archives, generated standards, design references, runbooks)
+is covered by the patterns marked ◆. Tiers: **LIVE** = always current, update-or-fail; **REF** = current for its
 domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as current.
 
 | File | Tier | What it owns |
@@ -14,7 +14,7 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `state/log/*.md` ◆ | ARCHIVE | Rotated STATE.md log entries, per month |
 | `product/BRIEF.md` | LIVE | Scope: what this project is and is not |
 | `product/CONTEXT.md` | LIVE | Domain glossary: shared vocabulary, banned synonyms |
-| `product/ARCHITECTURE.md` | REF | System map: modules, data, contracts, environments (made by `architect`) |
+| `product/ARCHITECTURE.md` | REF | System map: modules, data, contracts, environments (made by `architect`; absent until then) |
 | `specs/TEMPLATE.md` | REF | Spec skeleton + tier rules (S/M/L) |
 | `specs/TEMPLATE-PLAN.md` | REF | Plan skeleton for tier L: build order, seams, rollback, verification |
 | `specs/TEMPLATE-TICKET.md` | REF | Ticket skeleton: one vertical slice per file, session-sized |

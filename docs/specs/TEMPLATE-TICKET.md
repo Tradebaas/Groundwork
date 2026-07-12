@@ -21,6 +21,5 @@ never a layer-by-layer implementation list.>
 
 ---
 
-Working rules (the `spec` skill owns the details): build on the frontier, the lowest-numbered
-ticket whose blockers are all `done`; one ticket per fresh session, clear context between
-tickets; STATE.md `Now ▶` points at the frontier ticket.
+Build order: work the frontier; the rule lives in the `spec` skill. STATE.md `Now ▶` points at
+the frontier ticket.

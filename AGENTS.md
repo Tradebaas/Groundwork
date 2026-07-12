@@ -75,6 +75,7 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 | Feedback/ideas awaiting triage | `docs/state/INTAKE.md` |
 | Technical debt ledger | `docs/state/DEBT.md` |
 | Specs for changes being built | `docs/specs/` |
+| System map (architecture) | `docs/product/ARCHITECTURE.md` (made by `architect`) |
 | Architecture & other decisions | `docs/decisions/` |
 | Code standards (per stack) | `docs/standards/` |
 | Design system (visual) | `docs/design/DESIGN.md` |

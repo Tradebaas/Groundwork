@@ -50,6 +50,10 @@ First, if a `.git/` directory exists the copy still carries Groundwork's commit 
 cloned, not made with "Use this template", `degit`, or a ZIP). The project must start from its own
 root, so remove it: `rm -rf .git`. Skip this only if that `.git` already holds the owner's own work.
 
+If `.claude/skills` is not a symlink to `../.agents/skills` (degit and some ZIP tools break it),
+restore it: `ln -sfn ../.agents/skills .claude/skills`. On Windows without symlink support: set
+`"skipSymlinkCheck": true` in `checks/config.json` and point the tool at `.agents/skills/` directly.
+
 ```bash
 git init -b main
 node checks/check.mjs --install-hooks   # wires core.hooksPath → checks/hooks (versioned)

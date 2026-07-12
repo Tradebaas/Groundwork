@@ -7,9 +7,9 @@
 
 ## Build order
 
-Owned by the ticket graph in `tickets/` (see `TEMPLATE-TICKET.md`), never by this file. Work
-the frontier: the lowest-numbered ticket whose Blocked-by entries are all `done`, one ticket
-per fresh session. List the graph here as an overview; the ticket files stay the source of truth.
+Owned by the ticket graph in `tickets/` (see `TEMPLATE-TICKET.md`), never by this file. Work the
+frontier; the rule lives in the `spec` skill. List the graph here as an overview; the ticket
+files stay the source of truth.
 
 - <NN> <title> (no blockers)
 - <NN> <title> (blocked by <NN>)
