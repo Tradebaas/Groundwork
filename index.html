@@ -11,11 +11,12 @@
 <meta property="og:url" content="https://tradebaas.github.io/Groundwork/">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233fae9f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6v16'/%3E%3Cpath d='m19 13 2-1a9 9 0 0 1-18 0l2 1'/%3E%3Cpath d='M9 11h6'/%3E%3Ccircle cx='12' cy='4' r='2'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Inter:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Manrope:wght@400;600;700&family=Sora:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>.reveal,.rise{opacity:1!important;transform:none!important}</style></noscript>
+<!-- Fonts are self-hosted (fonts/), so a normal page load makes zero third-party requests and
+     never leaks a visitor IP to Google. The two ACTIVE families ship as latin woff2; the four
+     customizer-only alternates lazy-load their Google stylesheet on first customizer open. -->
+<link rel="preload" href="fonts/josefin-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<noscript><style>.reveal,.rise{opacity:1!important;transform:none!important}</style></noscript>
 <script>
 /* bootstrap: apply saved look before first paint (no flash). Single source of truth: window.GW */
 window.GW={
@@ -56,6 +57,13 @@ window.GW={
 (function(){var t=GW.ls("gw-theme");if(t)document.documentElement.setAttribute("data-theme",t);GW.apply();})();
 </script>
 <style>
+  /* Self-hosted latin woff2, variable weight axis (Inter 100-900, Josefin 100-700). */
+  @font-face{font-family:"Josefin Sans";font-style:normal;font-weight:400 700;font-display:swap;
+    src:url(fonts/josefin-sans-latin.woff2) format("woff2");
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:"Inter";font-style:normal;font-weight:400 700;font-display:swap;
+    src:url(fonts/inter-latin.woff2) format("woff2");
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
   :root{
     --bg:#0a0b0b; --surface:rgba(255,255,255,.025); --surface2:rgba(255,255,255,.05);
     --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.15);
@@ -301,6 +309,24 @@ window.GW={
   .acc .a-clip{overflow:hidden;min-height:0}
   .acc .a-inner{padding:0 24px 24px;color:var(--ink2);font-size:15px;max-width:70ch}
 
+  /* closing: how to start */
+  .startgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:34px}
+  @media(max-width:760px){.startgrid{grid-template-columns:1fr}}
+  .startpath{display:flex;gap:16px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:22px 22px 24px}
+  .startpath .sp-n{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    background:var(--tint);color:var(--accent);font-family:var(--font-display);font-weight:700;font-size:15px}
+  .startpath h3{font-size:16px;font-weight:600;letter-spacing:-.01em;margin-bottom:7px}
+  .startpath p{color:var(--ink2);font-size:14px;line-height:1.6}
+  .startpath a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+  .startpath a:hover{border-bottom-color:var(--accent)}
+  .cmd{display:block;margin-top:12px;padding:11px 13px;border-radius:var(--rs);
+    background:var(--surface2);border:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink);
+    overflow-x:auto;white-space:nowrap}
+  .startnote{color:var(--muted);font-size:13.5px;margin-top:22px;max-width:70ch}
+  .startnote code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink2)}
+
   /* customizer */
   .fab{position:fixed;right:22px;bottom:22px;z-index:70;width:52px;height:52px;border-radius:16px;
     border:1px solid var(--line2);background:var(--accent);color:var(--accent-ink);cursor:pointer;
@@ -490,6 +516,47 @@ window.GW={
     <p class="lead">Vertrouwen ontstaat door eerlijkheid. Dit zijn de grenzen, ronduit benoemd.</p>
   </div>
   <div class="reveal" style="max-width:820px" id="faq"></div>
+</section>
+
+<section id="begin" class="wrap">
+  <div class="sec-head reveal">
+    <h2>Zo begin je</h2>
+    <p class="lead">Groundwork is een sjabloon. Kopieer het en je project start met het rulebook,
+      de skills en de controles al op hun plek. Kies een van de drie manieren, en begin met een
+      schone geschiedenis: je project verdient zijn eigen eerste vastlegging (commit), niet die
+      van ons.</p>
+  </div>
+  <div class="startgrid reveal">
+    <div class="startpath">
+      <span class="sp-n" aria-hidden="true">1</span>
+      <div>
+        <h3>Op GitHub</h3>
+        <p>Klik op <b>Use this template</b> op de repository. Je krijgt een eigen repo met
+          &eacute;&eacute;n beginvastlegging en zonder onze historie.</p>
+      </div>
+    </div>
+    <div class="startpath">
+      <span class="sp-n" aria-hidden="true">2</span>
+      <div>
+        <h3>Vanaf de opdrachtregel</h3>
+        <p>&Eacute;&eacute;n commando kopieert de laatste stand zonder historie:</p>
+        <code class="cmd">npx degit Tradebaas/Groundwork mijn-project</code>
+      </div>
+    </div>
+    <div class="startpath">
+      <span class="sp-n" aria-hidden="true">3</span>
+      <div>
+        <h3>Als ZIP</h3>
+        <p>Liever geen tooling? Download de map met de groene knop <b>Code</b> en pak hem uit.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cta reveal">
+    <a class="btn primary" href="https://github.com/Tradebaas/Groundwork">Open de repository</a>
+  </div>
+  <p class="startnote reveal">Open daarna de map in je editor of assistent en zeg
+    <b>begin</b> (of laad de skill <code>begin</code>). Die interviewt je over doel en scope,
+    zet git en de controles op, en stelt de eerste echte stap voor.</p>
 </section>
 </main>
 
@@ -788,7 +855,18 @@ fab.innerHTML=ic('palette');closeBtn.innerHTML=ic('x');
 document.getElementById('gl-theme').insertAdjacentHTML('afterbegin',ic('palette'));
 document.getElementById('gl-font').insertAdjacentHTML('afterbegin',ic('type'));
 
+/* The two active families are self-hosted; the four alternates in the picker are optional,
+   so their Google stylesheet only loads the first time someone opens the customizer.
+   A normal page load therefore makes zero third-party requests. */
+var altFontsLoaded=false;
+function loadAltFonts(){
+  if(altFontsLoaded)return;altFontsLoaded=true;
+  var l=document.createElement('link');l.rel='stylesheet';
+  l.href='https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Manrope:wght@400;600;700&family=Sora:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap';
+  document.head.appendChild(l);
+}
 function setSheet(open){
+  if(open)loadAltFonts();
   sheet.classList.toggle('open',open);
   fab.setAttribute('aria-expanded',open);
   if(open)sheet.querySelector('[aria-checked="true"]')?.focus();
