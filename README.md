@@ -33,7 +33,8 @@ its own first commit, not ours. Pick one:
 - **On GitHub (best):** click **Use this template**, then **Create a new repository**. You get a
   fresh repo with a single initial commit and no Groundwork history.
 - **From the CLI:** `npx degit Tradebaas/Groundwork my-project` copies the latest snapshot with no
-  history.
+  history. degit breaks the `.claude/skills` symlink; restore it once with
+  `ln -sfn ../.agents/skills .claude/skills` (the `begin` skill also repairs it).
 - **Or:** download the ZIP from the green **Code** button and unzip it (see the symlink note under
   Requirements).
 
@@ -51,7 +52,8 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
 
 - **[AGENTS.md](AGENTS.md)** is the single always-loaded rulebook, written to the open
   [agents.md](https://agents.md) standard that all major agent tools read. `CLAUDE.md` (Claude
-  Code) and `.gemini/settings.json` (Gemini CLI) are one-line bridges to it. Never edit those.
+  Code) and `.gemini/settings.json` (Gemini CLI) are thin bridge files that point to it. Never
+  edit those.
 - **[.agents/skills/](.agents/skills/)** holds the expert methods (scoping, spec, stack choice,
   design, verification, code review, delivery, maintenance, compliance ...) in the open
   [Agent Skills](https://agentskills.io) format. They load on demand, so they cost no context
@@ -69,9 +71,10 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
 
 - Any AI coding agent. No vendor lock-in: one rulebook, open standards, plain Markdown.
 - Node.js ≥ 20 for `checks/` (the only tooling dependency until you choose a stack).
-- On Windows: enable Developer Mode so the `.claude/skills` symlink works after
-  `git clone -c core.symlinks=true`. No symlink support? Set `"skipSymlinkCheck": true` in
-  `checks/config.json` and point your tool at `.agents/skills/` directly.
+- On Windows: enable Developer Mode so the `.claude/skills` symlink survives
+  `git clone -c core.symlinks=true` or ZIP extraction. No symlink support? Set
+  `"skipSymlinkCheck": true` in `checks/config.json` and point your tool at `.agents/skills/`
+  directly.
 - After every fresh clone: `node checks/check.mjs --install-hooks` (wires the versioned
   pre-commit gate).
 

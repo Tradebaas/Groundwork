@@ -21,8 +21,9 @@ by Codex, Cursor, Copilot, Gemini CLI, Windsurf and Amp. Claude Code still reads
 
 ## Decision & consequences
 
-A curated library of 13 skills (deliberately small; curation beats accumulation; the studied
-production system carries 557 bulk-imported skills of which 3 are used). Each skill: standard
+A deliberately small, curated library (13 skills at decision time; the AGENTS.md skills table is
+the live registry). Curation beats accumulation: the studied production system carries 557
+bulk-imported skills of which 3 are used. Each skill: standard
 frontmatter (`name` = directory name, trigger-rich `description`), body ≤500 lines, references
 one level deep. `checks/check.mjs` validates frontmatter, budgets, and the symlink. New skills
 only via the `skill-author` method.

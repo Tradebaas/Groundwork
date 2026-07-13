@@ -15,5 +15,6 @@
 ## Log
 
 <!-- Newest first. Per session one short dated entry: what changed, what was decided (link the
-     decision), what is next. Keep this file under 150 lines: when it grows past that, move the
-     oldest entries to docs/state/log/YYYY-MM.md (the manifest pattern already covers those). -->
+     decision), what is next. Keep this file under the stateMdLines budget in checks/config.json
+     (150 by default): when it grows past that, move the oldest entries to
+     docs/state/log/YYYY-MM.md (the manifest pattern already covers those). -->

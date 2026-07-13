@@ -16,7 +16,8 @@ than no gate. Documented 2026 incidents also show agents bypassing hooks via `--
    deterministic checks for everything checkable: manifest completeness, link integrity,
    retired-fact denylist across the configured text file types, size budgets (AGENTS.md, STATE.md,
    skills), skill frontmatter, bridge integrity, secret patterns, `defer:` marker hygiene, empty
-   dirs. `check.test.mjs` builds fixture violations and asserts every check actually fails.
+   dirs (the list as of this decision; `checks/check.mjs` is the live inventory). `check.test.mjs`
+   builds fixture violations and asserts every check actually fails.
 2. **Standard toolchain only (ESLint/Biome/pre-commit):** stack-specific, so unavailable before
    the stack exists; none of them check governance artifacts (manifests, denylists, budgets).
    They join later via the `stack` skill; they don't replace this layer.

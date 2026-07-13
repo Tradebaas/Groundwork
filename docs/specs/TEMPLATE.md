@@ -9,9 +9,11 @@ Right-sizing (details in the `spec` skill, never more ceremony than the change d
 
 - **S: no spec.** Small, clear, reversible (bugfix, copy change, config tweak). Build it
   directly; the commit message and tests are the record.
-- **M: this file only.** A feature or change touching one area. Fill Spec; skip Plan.
+- **M: this file only.** A feature or change touching one area. Fill Spec; skip Plan. If it
+  will not fit one session, also cut tickets from `TEMPLATE-TICKET.md`.
 - **L: this file + plan.md.** Multi-session, multi-area, risky, or contested work. Copy
-  `TEMPLATE-PLAN.md` for the plan and cut tickets from `TEMPLATE-TICKET.md`.
+  `TEMPLATE-PLAN.md` for the plan; multi-session work cuts tickets from `TEMPLATE-TICKET.md`
+  (method owned by the `spec` skill).
 
 ---
 
