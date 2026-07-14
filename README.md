@@ -15,8 +15,8 @@ Groundwork removes those failure modes by design:
 - **Memory on disk.** State, scope, decisions and standards live in files. A new session reads
   where the last one stopped instead of re-deriving the project in chat.
 - **Discipline built in.** One always-loaded rulebook, an on-demand skill library covering every
-  phase (scope, spec, architecture, design, verification, code review, delivery, maintenance,
-  compliance), and automated checks that gate every commit at zero token cost.
+  phase (scope, spec, architecture, design, verification, debugging, code review, delivery,
+  maintenance, compliance), and automated checks that gate every commit at zero token cost.
 - **Token efficiency by design.** Skills load only when needed, large work is cut into
   one-session tickets, and every fact lives in one file that everything else points to.
 - **No lock-in.** Plain Markdown and open standards, readable by any agent, any model, any
@@ -57,7 +57,8 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
   Code) and `.gemini/settings.json` (Gemini CLI) are thin bridge files that point to it. Never
   edit those.
 - **[.agents/skills/](.agents/skills/)** holds the expert methods (scoping, spec, stack choice,
-  design, verification, code review, delivery, maintenance, compliance ...) in the open
+  design, verification, debugging, code review, delivery, maintenance, compliance ...) in the
+  open
   [Agent Skills](https://agentskills.io) format. They load on demand, so they cost no context
   until needed. `.claude/skills` is a symlink to this directory.
 - **[docs/](docs/)** is the project's externalized memory: live state and session handoff,

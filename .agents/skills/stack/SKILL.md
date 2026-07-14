@@ -25,6 +25,13 @@ it down with versions, dates, and source links. Cover at least:
 - Tooling: formatter, linter, type checking, test framework, dead-code detection: exact tools
   and versions, with config that enforces strictness (strict typecheck catches most AI slips).
 - Dependency policy for this ecosystem (lockfiles, audit tooling, update cadence).
+- Errors & observability, implementing the GLOBAL.md floor in this ecosystem: the error idiom
+  (exceptions, Result types, or error returns), global-handler wiring, the structured-logging
+  library and its config, correlation-ID propagation, and the retry/circuit-breaker library
+  for remote calls.
+- Lint rules that make swallowed errors mechanically impossible here (empty catch blocks,
+  unhandled promises or ignored error returns, debug leftovers such as stray print/log
+  statements): name the exact rules and wire them into the gates in step 3.
 - The stack's sharp edges: the 5-10 mistakes agents actually make here.
 
 `GLOBAL.md` still applies; the stack file only adds or, with stated reason, overrides.

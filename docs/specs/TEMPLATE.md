@@ -36,6 +36,12 @@ Right-sizing (details in the `spec` skill, never more ceremony than the change d
 
 1. TBD
 
+## Failure modes
+
+<!-- What can go wrong in this change (bad input, dependency down, race, partial write),
+     what the user sees then (VOICE.md error pattern), and what gets logged or alerted.
+     One line per mode; "none beyond the global handler" is a valid, deliberate answer. -->
+
 ## Settled decisions
 
 <!-- Choices made during the spec interview, each with its one-line reason. Later sessions

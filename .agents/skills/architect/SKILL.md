@@ -26,10 +26,14 @@ page; a platform needs the full pass.
    without a failure plan is half a contract.
 4. **Environments.** Local → test → production: what exists, what differs, where config and
    secrets live per environment, how data gets seeded. One command to run locally, documented.
-5. **Threats.** A lightweight pass over the real risks: who can reach what, where untrusted
+5. **Observability.** Decide now what gets logged, measured and traced: correlation IDs from
+   every entry point, the golden signals (rate, errors, latency) on the critical flow, and
+   where a human sees failures. Instrumentation is an expensive-to-reverse decision: built
+   during construction, verified at launch by `maintain`, never bolted on after.
+6. **Threats.** A lightweight pass over the real risks: who can reach what, where untrusted
    input enters, what the abuse cases are, what the blast radius of a leaked credential is.
    Mitigations become requirements in specs, not wishes.
-6. **The 10× question.** Where does this design break at 10× the users/data? Mark those spots
+7. **The 10× question.** Where does this design break at 10× the users/data? Mark those spots
    with `defer:` markers (ceiling + upgrade trigger) instead of building for scale now.
 
 ## Record

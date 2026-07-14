@@ -23,7 +23,8 @@ Run the full chain and paste real results, not summaries of results:
   run (idempotency), the slow path. The first bug is usually one step off the happy path.
 - UI change → also run `design-guard` on what appeared on screen.
 - Bug fix → reproduce the bug first on the old behavior (or its regression test), then show it
-  gone. A fix you never saw fail is a guess.
+  gone. A fix you never saw fail is a guess. Cause unknown, or a fix attempt already failed?
+  Run the `debug` skill's loop before trying again.
 
 ## 3. What you cannot verify
 
