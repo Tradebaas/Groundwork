@@ -17,6 +17,9 @@ Run this once. When it's done, STATE.md carries real state and this skill never 
   example) and the `TEMPLATE*.md` files.
 - Reset `"denylist"` in `checks/config.json` to `[]`: its entries guard the origin repo's
   retired wording, never this project's. Keep `styleBans` intact (those are generic).
+- Keep `docs/decisions/0001-0012`: they document the system this project just inherited (why
+  the rulebook, skills and checks work the way they do). This project's own decisions start
+  at 0013.
 - Verify prerequisites: `git --version` and `node --version` (Node ≥ 20). Missing → tell the
   owner exactly what to install, then stop.
 
@@ -51,9 +54,14 @@ Do **not** ask about stack (that's the `stack` skill, argued on merit) or design
 - Seed the glossary `docs/product/CONTEXT.md` with the domain terms the interview surfaced;
   the file's template comment defines the entry format.
 - Fill the handoff block in `docs/state/STATE.md`: status active, phase `prepare`, Now ▶ next step.
-- If personal data or AI features: add a dated line to `docs/compliance/COMPLIANCE.md` triggers.
-- Rewrite `README.md`'s top half to describe *this product* (what, for whom, how to run once it
-  exists); keep the "How it works" system section and this table intact for successors.
+- Fill the §2 register header in `docs/compliance/COMPLIANCE.md`: set "Personal data processed",
+  "AI features" and "Applicable regimes", dated. Either first field a yes → `comply` runs before
+  first delivery.
+- Rewrite `README.md` for *this product*: the top half (what, for whom, how to run once it
+  exists) replaces Groundwork's pitch, and "Start a project" goes with it (that section is
+  copy-the-template onboarding, done by now). Keep "How it works", "Requirements", "What lives
+  where" and "Handing over" intact for successors; the License section is the owner's call
+  (`comply` sets it).
 
 ## 4. Set up the machinery
 
