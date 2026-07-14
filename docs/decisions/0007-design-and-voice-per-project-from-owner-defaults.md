@@ -5,10 +5,9 @@
 ## Context
 
 Nothing may ship with a generic "AI default" look or voice. Design taste is genuinely the
-owner's; the owner's captured defaults (2026-07-06): visual direction *strak & minimaal*: clean,
-whitespace, Swiss/Scandinavian precision (Linear/Stripe/Notion register), inspired by the Utibo
-"Soft Enterprise" system but re-derived on merit, never copied; voice *direct & nuchter*: short,
-clear, no fluff. Groundwork's own language is English; product language is set per project.
+owner's, and every owner's taste differs, so the framework captures the owner's defaults per
+project (the `design` skill's intake) rather than baking one brand's preferences into the
+template. Groundwork's own language is English; product language is set per project.
 
 ## Options considered
 

@@ -15,6 +15,8 @@ Run this once. When it's done, STATE.md carries real state and this skill never 
 - Delete any non-archived spec folder: `docs/specs/[0-9]*` directories are in-flight Groundwork
   maintainer work, never the new owner's. Keep `docs/specs/archive/` (it holds the worked
   example) and the `TEMPLATE*.md` files.
+- Reset `"denylist"` in `checks/config.json` to `[]`: its entries guard the origin repo's
+  retired wording, never this project's. Keep `styleBans` intact (those are generic).
 - Verify prerequisites: `git --version` and `node --version` (Node ≥ 20). Missing → tell the
   owner exactly what to install, then stop.
 
