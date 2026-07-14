@@ -347,6 +347,8 @@ export function runChecks(root) {
     'empty-dirs'() {
       // A dir with only a .gitkeep is intentionally kept; a truly empty dir is clutter.
       for (const d of tree.dirs) {
+        // An empty .claude/ means the skills symlink is gone; skills-symlink owns that repair.
+        if (rel(root, d) === '.claude') continue;
         const entries = readdirSync(d);
         if (entries.length === 0 && !(cfg.allowedEmptyDirs || []).includes(rel(root, d))) {
           fail(`${rel(root, d)}/ is empty: delete it, or add a .gitkeep if it must exist.`);

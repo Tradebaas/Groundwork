@@ -100,6 +100,18 @@ expectFail('skills', ({ put }) =>
 expectFail('skills-symlink', ({ root }) =>
   unlinkSync(join(root, '.claude', 'skills')));
 
+{ // a missing symlink leaves .claude/ empty; skills-symlink owns that repair, empty-dirs stays quiet
+  const fx = fixture();
+  unlinkSync(join(fx.root, '.claude', 'skills'));
+  const found = runChecks(fx.root);
+  try {
+    assert.ok(!found.some((f) => f.check === 'empty-dirs'),
+      `empty-dirs should stay quiet on .claude/, got: ${JSON.stringify(found.map((f) => f.check))}`);
+    passed++;
+  } catch (e) { failedTests.push(`empty-dirs-claude: ${e.message}`); }
+  rmSync(fx.root, { recursive: true, force: true });
+}
+
 expectFail('secrets', ({ put }) =>
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ demo\n- key AKIAIOSFODNN7EXAMPLE\n')); // checks:allow-secret
 

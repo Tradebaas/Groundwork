@@ -14,7 +14,10 @@ page; a platform needs the full pass.
 1. **Boundaries.** Cut the system into modules along the domain's natural seams (what changes
    together lives together). Per module: what it owns, what it exposes, what it may never reach
    into. These rules become mechanically enforced when the stack's tooling allows (import
-   restrictions: wire via `stack`).
+   restrictions: wire via `stack`). Shape modules for agent legibility: deep modules behind
+   small interfaces, one folder per module with its public interface on top, so an agent can
+   use a module without reading its internals. Test at the boundary (grey-box): those tests
+   survive refactors and agent rewrites of the inside alike.
 2. **Data.** The core entities, who owns each, where truth lives, what is derived. Personal
    data flagged per entity (feeds the compliance register). Retention and deletion are schema
    decisions, not afterthoughts.

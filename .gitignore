@@ -5,6 +5,7 @@ Thumbs.db
 # Editor/agent local state (personal, never shared)
 CLAUDE.local.md
 *.local.md
+.claude/scheduled_tasks.lock
 .idea/
 .vscode/*
 !.vscode/settings.json
