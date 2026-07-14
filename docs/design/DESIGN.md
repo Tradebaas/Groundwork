@@ -12,7 +12,11 @@
    must look: one primary action per view, active state, a key highlight. If everything is
    highlighted, nothing is.
 3. **Flat surfaces, hairline edges.** Cards and panels sit flush: surface color + a faint
-   1px border. Shadow is reserved for things that actually float (menus, dialogs, toasts).
+   1px border. That border is the neutral line color on every side. An accent-colored top stripe,
+   side bar, or edge segment used to dress up a card is a stock-AI tell, not a design: never use
+   the accent as border decoration. The accent earns a border only as functional state per
+   principle 2 (selected, focused). Shadow is reserved for things that actually float (menus,
+   dialogs, toasts).
 4. **One type family, few weights.** A single variable font, regular/medium/semibold. Hierarchy
    comes from size and color before weight. Label and value share size and weight; the
    difference is color only.

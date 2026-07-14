@@ -17,7 +17,9 @@ every `taste` section 11 tell that survived into the render is a finding here.
 1. **Tokens only.** Every color, size, radius, and space comes from the system: no raw values,
    no palette bypass, no near-miss grays. One accent, used sparingly; status colors via opacity.
 2. **No stock-AI look.** No default blue-to-purple palette and no gradient as a baseline (solid
-   fills, the project's own accent). Default to Lucide icons, one consistent set, never emoji as
+   fills, the project's own accent). No accent-colored border decoration: a tinted top stripe,
+   side bar, or edge segment on a card is a tell (card borders are the neutral line on every side;
+   accent on a border only as functional state). Default to Lucide icons, one consistent set, never emoji as
    UI icons, wordmark is text unless a real logo exists. Buttons are text-only or icon-only,
    never text plus a decorative icon (a disclosure chevron is the only exception). Strak and
    minimal with generous whitespace: nothing cramped, cards/labels/text never flush against each

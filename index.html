@@ -150,7 +150,7 @@ window.GW={
   .btn.primary:hover{transform:translateY(-1px)}
   .btn.ghost{border-color:var(--line2);color:var(--ink);background:var(--surface)}
   .btn.ghost:hover{border-color:var(--ink2)}
-  .rulebook{background:var(--surface);border:1px solid var(--line);border-top:2px solid var(--accent);
+  .rulebook{background:var(--surface);border:1px solid var(--line);
     border-radius:var(--r);overflow:hidden}
   .rulebook .rb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface2)}
@@ -208,8 +208,7 @@ window.GW={
     transition:border-color .2s}
   .cell:hover{border-color:var(--line2)}
   .cell.s7{grid-column:span 7}.cell.s5{grid-column:span 5}.cell.s4{grid-column:span 4}.cell.s12{grid-column:span 12}
-  .cell.tinted{background:linear-gradient(0deg,var(--tint),var(--tint)),var(--surface);
-    border-top:2px solid var(--accent)}
+  .cell.tinted{background:linear-gradient(0deg,var(--tint),var(--tint)),var(--surface)}
   .cell .chip{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
     background:var(--surface2);border:1px solid var(--line);margin-bottom:20px;color:var(--ink)}
   .cell .chip svg{width:22px;height:22px}
@@ -555,8 +554,10 @@ window.GW={
     <a class="btn primary" href="https://github.com/Tradebaas/Groundwork">Open de repository</a>
   </div>
   <p class="startnote reveal">Open daarna de map in je editor of assistent en zeg
-    <b>begin</b> (of laad de skill <code>begin</code>). Die interviewt je over doel en scope,
-    zet git en de controles op, en stelt de eerste echte stap voor.</p>
+    <b>begin</b> (of laad de skill <code>begin</code>). Heb je al een PRD, projectomschrijving
+    of alleen een vaag idee? Plak die tekst erbij: <b>begin</b> gebruikt hem als bron en vraagt
+    alleen nog wat ontbreekt. Daarna zet hij git en de controles op en stelt hij de eerste
+    echte stap voor.</p>
 </section>
 </main>
 
@@ -567,7 +568,7 @@ window.GW={
     <span>Werkt in elke editor</span><span>Jouw gegevens blijven lokaal</span>
   </div>
   <p>Geen woord te veel. Alles wat je nodig hebt leeft in de map: geef die map en het project reist mee.</p>
-  <p style="margin-top:18px"><a href="https://github.com/Tradebaas/Groundwork" style="color:var(--ink2)">github.com/Tradebaas/Groundwork</a></p>
+  <p style="margin-top:18px"><a href="https://github.com/Tradebaas/Groundwork" style="color:var(--ink2)">github.com/Tradebaas/Groundwork</a> &middot; <a href="https://github.com/Tradebaas/Groundwork/commits/main" style="color:var(--ink2)">wat er recent veranderde</a></p>
 </footer>
 
 <button class="fab" id="fab" aria-label="Pas thema en lettertype aan" aria-expanded="false" aria-controls="sheet"></button>
@@ -769,7 +770,7 @@ arrows(tw,selWhy);
 
 var skillGroups=[
   ['Koers bepalen','eerst denken, dan bouwen',[
-    ['begin','Start een vers project: interviewt je over doel en grenzen, vult de sjablonen en zet git klaar.'],
+    ['begin','Start een vers project. Een geplakt PRD of idee is de bron, het interview dekt alleen de gaten; daarna vult hij de sjablonen en zet git klaar.'],
     ['scope','Bepaalt en bewaakt wat wel en niet gebouwd wordt. Nieuwe wensen komen hier binnen, niet stiekem tijdens het bouwen.'],
     ['spec','Schrijft precies genoeg plan voordat er iets gebouwd wordt. Niet te veel, niet te weinig.'],
     ['critical-thinking','Denkt kritisch mee voordat een idee gebouwd wordt: tegenwicht tegen de neiging van AI om overal ja op te knikken.']]],
