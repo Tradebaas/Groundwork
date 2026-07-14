@@ -17,7 +17,8 @@ checklist catches what they can't see. Answer honestly; the point is the answers
 4. **While-I-was-here.** Any refactors, renames, or cleanups outside the task? Revert them or
    split them into their own proposed change; never smuggle them along.
 5. **Safety floor intact?** Validation at trust boundaries, authorization, data-loss error
-   handling, secrets, accessibility: none simplified away (AGENTS.md hard rule).
+   handling, no silently swallowed failures, secrets, accessibility: none simplified away
+   (AGENTS.md hard rule).
 6. **Deferrals marked.** Every deliberate simplification has a `defer:` marker with a ceiling
    and an upgrade trigger, and a DEBT.md row if it will outlive this change.
 7. **Done means verified.** Has `verify` actually been run on this change, behavior exercised,

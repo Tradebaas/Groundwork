@@ -38,7 +38,8 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 - **Never bypass a gate.** No `--no-verify`, no skipping hooks, no commenting out or weakening a
   check to make it pass. A red gate is information. If a gate is wrong, fix the gate in the open.
 - **Security floor (never simplify away):** input validation at trust boundaries, authorization
-  checks, error handling that prevents data loss, secrets out of code and logs, accessibility.
+  checks, error handling that prevents data loss and never swallows a failure silently,
+  secrets out of code and logs, accessibility.
 - **Honesty.** Report failures as failures, with output. Never claim something works that you
   did not verify. No reassuring the user against the evidence.
 - **Verify before "done".** Exercise the change end-to-end, not just the type checker. What you
@@ -104,6 +105,7 @@ trigger applies. The library:
 | `scope-guard` | Before calling work done or proposing a commit |
 | `design-guard` | Before delivering any UI or user-facing output |
 | `verify` | Verifying a change actually works, end to end |
+| `debug` | A bug, crash or failing test with no obvious cause; a fix attempt that did not work |
 | `code-review` | After `verify`, before committing substantial work: two-axis review of the diff |
 | `deliver` | Releasing, deploying, or handing over a milestone |
 | `maintain` | Post-launch work: monitoring, updates, incidents, debt harvest |
