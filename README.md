@@ -42,9 +42,11 @@ Avoid a plain `git clone` for this: it drags Groundwork's entire commit history,
 development choices, into your project. If you cloned anyway, `begin` resets git so your first
 commit is a true root.
 
-Then open the folder in your IDE / agent and say **`begin`** (or load the `begin` skill). It
-interviews you about scope and goals, sets up git and the hooks, fills the templates, and proposes
-the first real step. (Design taste comes later, when the `design` skill needs it.)
+Then open the folder in your IDE / agent and say **`begin`** (or load the `begin` skill).
+Already have a PRD, project description or even a vague idea? Paste it right there: `begin`
+treats it as the primary source and only interviews you for what it leaves open. From those
+answers it sets up git and the hooks, fills the templates, and proposes the first real step.
+(Design taste comes later, when the `design` skill needs it.)
 
 That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) tell it how.
 
@@ -87,6 +89,7 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
 | `.agents/skills/` | Skill library: expert methods, loaded on demand |
 | `docs/` | Project memory: state, scope, specs, decisions, standards, design, compliance |
 | `checks/` | Zero-token enforcement: hygiene checks + their self-tests |
+| `index.html` + `fonts/` | The interactive explainer of this system (the live version linked above) |
 | `.github/workflows/ci.yml` | CI quality gate (extended per stack by the `stack` skill) |
 
 Templates you fill per project are marked `TEMPLATE` at the top; the `begin` and follow-up
