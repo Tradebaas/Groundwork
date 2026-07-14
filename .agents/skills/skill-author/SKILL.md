@@ -41,5 +41,10 @@ Create `.agents/skills/<name>/SKILL.md` (open Agent Skills standard):
 
 ## 4. Maintain
 
-A skill nobody has loaded in months is a candidate for deletion. Check before big milestones.
-Deleting a wrong or dead skill is maintenance, not loss; note it in STATE.md's log. ⚓
+Skills decay in three ways: **sediment** (steps that stopped being needed but never left),
+**sprawl** (one skill quietly absorbing a second job: split it), and **no-ops** (rules so vague
+no behavior would change: sharpen or delete). After using a skill, reread it and prune what
+decayed in that same session. The skills table in `AGENTS.md` is the library's router: every
+skill earns its row by being findable from its moment of need, and a skill nobody has loaded in
+months is a candidate for deletion. Check before big milestones. Deleting a wrong or dead skill
+is maintenance, not loss; note it in STATE.md's log. ⚓

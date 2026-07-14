@@ -46,6 +46,9 @@ The parts that matter most:
   verification checklist; write them so `verify` can execute them without interpretation.
 - **Not in this change**: the adjacent work you are deliberately not doing. This line is what
   keeps "while I'm here" out of the diff.
+- **Settled decisions**: choices made during the interview, each with its one-line reason.
+  Later sessions build on these instead of re-opening them; only the owner re-opens a settled
+  decision. This section is what stops a fresh context from re-litigating the design.
 
 ## 4. Tier L (and multi-session M): cut tickets
 
@@ -53,6 +56,9 @@ When the work will not fit one session, decompose the spec into tickets before b
 `docs/specs/TEMPLATE-TICKET.md` to `tickets/<NN>-<slug>.md` inside the spec folder, one file
 per slice, numbered in rough build order.
 
+- **The first ticket is a tracer bullet.** The thinnest end-to-end slice that touches every
+  layer involved and proves the shape works, verified before anything widens. Later tickets
+  expand from it; never build broad before one narrow path runs for real.
 - **Slice vertically.** Each ticket cuts a narrow but complete path through every layer
   involved and is demoable or verifiable on its own. Never one layer per ticket.
 - **Size to one fresh agent session.** Too big to finish with context to spare? Split it.

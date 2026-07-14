@@ -36,6 +36,11 @@ Right-sizing (details in the `spec` skill, never more ceremony than the change d
 
 1. TBD
 
+## Settled decisions
+
+<!-- Choices made during the spec interview, each with its one-line reason. Later sessions
+     build on these instead of re-opening them; only the owner re-opens a settled decision. -->
+
 ## Testing seams
 
 <!-- The stable interfaces the change is tested at, agreed before building starts. Tests

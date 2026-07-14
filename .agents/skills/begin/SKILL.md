@@ -1,6 +1,6 @@
 ---
 name: begin
-description: Start a freshly copied Groundwork project. Use when docs/state/STATE.md says NOT STARTED, when the user says "begin", "start", "nieuw project", or asks how to get going in an empty copy. Interviews the owner, fills the templates, sets up git and hooks, and proposes the first real step.
+description: Start a freshly copied Groundwork project. Use when docs/state/STATE.md says NOT STARTED, when the user says "begin", "start", "nieuw project", or asks how to get going in an empty copy - also when they open with an existing PRD, project description, or idea text: that material is this skill's input. Interviews the owner (or extracts the answers from their material), fills the templates, sets up git and hooks, and proposes the first real step.
 ---
 
 # begin: from fresh copy to working project
@@ -20,8 +20,17 @@ Run this once. When it's done, STATE.md carries real state and this skill never 
 
 ## 2. Interview the owner
 
-Ask focused questions, capture answers verbatim where wording matters. Only what is genuinely
-theirs to decide. Everything else you decide later, and say so.
+**Material first.** Ask whether the owner already has anything written: a PRD, project
+description, pitch, notes, or a rough idea dump. Take it now (pasted text or a file; convert
+non-Markdown files with the `ingest` skill) and treat it as the primary source: extract answers
+to the questions below from it, play each extracted answer back for a one-line confirmation,
+and interview only for the gaps. A vague idea is a valid starting point: capture what the owner
+does know, record the rest in BRIEF.md as explicitly open, and let `scope` sharpen it (step 5
+routes there).
+
+For whatever the material leaves open, ask focused questions and capture answers verbatim where
+wording matters. Only what is genuinely theirs to decide. Everything else you decide later, and
+say so.
 
 1. **Product**: name; one sentence: what it does, for whom, why now.
 2. **Users**: who, in what situation, on which devices.

@@ -55,7 +55,10 @@ open a file if a fact is genuinely missing.
    new scope goes to `docs/state/INTAKE.md`. STATE.md links to them; it does not absorb them.
 4. **Keep STATE.md under its 150-line budget.** If the Log overflows, move the oldest entries to
    `docs/state/log/YYYY-MM.md` (the existing manifest pattern), do not trim the new entry.
-5. **Run `node checks/check.mjs`** so you never hand off a repo that is already red.
+5. **Sanitize.** STATE.md is tracked and travels with the repo: keep secrets, tokens, URLs with
+   embedded credentials, and personal data out of the handoff. Name where a credential lives
+   (keychain, untracked `.env`), never its value.
+6. **Run `node checks/check.mjs`** so you never hand off a repo that is already red.
 
 ## Then hand control back to the user
 
