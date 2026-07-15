@@ -99,7 +99,7 @@ trigger applies. The library:
 | `scope` | Defining or changing scope; triaging INTAKE.md |
 | `spec` | Before building anything non-trivial: right-sized spec method |
 | `critical-thinking` | Before committing to an idea/plan/approach; when you're about to just agree |
-| `stack` | Choosing the tech stack; generates `docs/standards/<stack>.md` and wires gates |
+| `stack` | Choosing the tech stack or hosted platform; generates `docs/standards/<stack>.md`, wires gates |
 | `architect` | System design before building: boundaries, data, contracts, threats |
 | `design` | Standing up the project's design & voice system |
 | `taste` | Building or redesigning a landing page, marketing site, portfolio or explainer |
