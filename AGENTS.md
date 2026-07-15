@@ -95,6 +95,7 @@ trigger applies. The library:
 | Skill | Load when |
 |---|---|
 | `begin` | Starting a freshly copied project: intake, setup, first commit |
+| `calibrate` | Picking the model + effort level for a session, before it starts |
 | `scope` | Defining or changing scope; triaging INTAKE.md |
 | `spec` | Before building anything non-trivial: right-sized spec method |
 | `critical-thinking` | Before committing to an idea/plan/approach; when you're about to just agree |
