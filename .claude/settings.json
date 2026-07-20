@@ -1,0 +1,15 @@
+{
+  "_doc": "Thin Claude adapter (decision 0001: AGENTS.md is the single rulebook). The Stop hook prints one plain-language progress line when the stand has changed since it was last shown, and stays silent otherwise. Reporting only reads project documents; see checks/progress.mjs.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/checks/progress.mjs\" --line"
+          }
+        ]
+      }
+    ]
+  }
+}

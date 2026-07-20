@@ -55,7 +55,9 @@ Do **not** ask about stack (that's the `stack` skill, argued on merit) or design
 
 ## 3. Write it down
 
-- Fill `docs/product/BRIEF.md`: numbered SC-items, explicit out-of-scope, constraints.
+- Fill `docs/product/BRIEF.md`: numbered SC-items, explicit out-of-scope, constraints. Write
+  each SC-item in the owner's own words, as something they would recognize without translation:
+  the progress overview quotes these lines back to them (`node checks/progress.mjs`).
 - Seed the glossary `docs/product/CONTEXT.md` with the domain terms the interview surfaced;
   the file's template comment defines the entry format.
 - Fill the handoff block in `docs/state/STATE.md`: status active, phase `prepare`, Now ▶ next step.
@@ -82,6 +84,7 @@ restore it: `ln -sfn ../.agents/skills .claude/skills`. On Windows without symli
 git init -b main
 node checks/check.mjs --install-hooks   # wires core.hooksPath → checks/hooks (versioned)
 node checks/check.mjs                   # must be green before the first commit
+node checks/progress.mjs --register     # adds this project to the owner's cross-project overview
 git add -A && git commit -m "chore: initialize project on Groundwork"
 ```
 
