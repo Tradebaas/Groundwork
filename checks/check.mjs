@@ -65,6 +65,13 @@ function globToRegex(glob) {
   return new RegExp(`^${re}$`);
 }
 
+// A filled-in "Traces to:" line: present, and not still carrying the template's placeholders.
+function tracesTo(body) {
+  const line = (body.match(/^- \*\*Traces to:\*\*\s*(.+)$/m) || [])[1] || '';
+  const filled = line.replace(/<!--[\s\S]*$/, '').trim();
+  return Boolean(filled) && !filled.includes('<') && !/^TBD\b/i.test(filled);
+}
+
 export function runChecks(root) {
   const failures = [];
   const cfg = JSON.parse(read(join(root, 'checks', 'config.json')));
@@ -340,6 +347,23 @@ export function runChecks(root) {
         }
         if (!/^\*\*What to build:\*\*/m.test(body)) {
           fail(`${r}: missing "**What to build:**" line: a ticket without behavior is not buildable.`);
+        }
+        if (!tracesTo(body)) {
+          fail(`${r}: missing or unfilled "- **Traces to:**" line: work that names no scope item cannot be attributed to one.`);
+        }
+      }
+    },
+
+    'spec-traces'() {
+      // A spec that does not name the scope item it serves breaks two things at once: the
+      // AGENTS.md rule "no trace, no build", and the progress overview, which then reports the
+      // scope item as not started while the work is happening. A silently wrong count is worse
+      // than no count, so this is a gate rather than a note. Archived specs are history.
+      for (const f of tree.files) {
+        const r = rel(root, f);
+        if (!/^docs\/specs\/.+\/spec\.md$/.test(r) || r.startsWith('docs/specs/archive/')) continue;
+        if (!tracesTo(read(f))) {
+          fail(`${r}: missing or unfilled "- **Traces to:**" line. Name the BRIEF SC-item this change serves, or the explicit request it answers (run \`scope\` first if neither exists).`);
         }
       }
     },

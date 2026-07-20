@@ -8,6 +8,8 @@
 
 - **Blocked by:** <sibling ticket filenames, comma-separated, or "none">
 - **Status:** ready <!-- ready | building | done -->
+- **Traces to:** BRIEF SC-<n> <!-- the scope item this slice serves; inherited from the spec.
+  Without it the progress overview cannot attribute the work (`node checks/progress.mjs`). -->
 
 **What to build:** <The end-to-end behavior this slice delivers, written from the user's
 perspective. A slice cuts a narrow but complete path through every layer involved (vertical),

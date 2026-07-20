@@ -66,9 +66,15 @@ open a file if a fact is genuinely missing.
 End your turn with a short block the user can act on without thinking:
 
 - One line confirming the handoff is written to STATE.md.
-- The instruction: **clear the context** (the tool's fresh-session command) to start over cheap.
-- The resume line to paste into that session, for example:
-  `Read docs/state/STATE.md and continue from the Now ▶ action.`
+- The **literal command** to start fresh, named for the tool in use: `/clear` in Claude Code,
+  the equivalent elsewhere. "Start a fresh session" without the exact keystroke is not an
+  instruction; the user must never have to guess what to type.
+- The resume prompt to paste into that session, **in a code block** so it copies in one click:
+
+  ```
+  Read docs/state/STATE.md and continue from the Now ▶ action.
+  ```
+
   (The session protocol reads STATE.md anyway; the paste just makes it explicit and works even in
   a tool that does not auto-load AGENTS.md.)
 

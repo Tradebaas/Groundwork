@@ -13,7 +13,8 @@ scope drifts, quality depends on the day, and tokens burn on re-explaining the p
 Groundwork removes those failure modes by design:
 
 - **Memory on disk.** State, scope, decisions and standards live in files. A new session reads
-  where the last one stopped instead of re-deriving the project in chat.
+  where the last one stopped instead of re-deriving the project in chat, and those same files
+  answer, in plain language, what is done and what is still left.
 - **Discipline built in.** One always-loaded rulebook, an on-demand skill library covering every
   phase (scope, spec, architecture, design, verification, debugging, code review, delivery,
   maintenance, compliance, plus session calibration of model and effort), and automated checks
@@ -69,7 +70,9 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
   docs manifest, link integrity, retired-fact denylist, file and source-code budgets, spec-ticket
   integrity, skill format, secrets, and more: zero model tokens spent. CI runs it on every push.
   The checks test themselves (`node checks/check.test.mjs`): a gate that isn't tested is false
-  confidence.
+  confidence. The same directory holds `node checks/progress.mjs`: a read-only, plain-language
+  answer to "what is done and what is left", derived from the brief, the specs and the handoff,
+  with `--all` covering every project you have started this way.
 
 ## Requirements
 
@@ -90,7 +93,7 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
 | `README.md` | This file (the front door for humans) |
 | `.agents/skills/` | Skill library: expert methods, loaded on demand |
 | `docs/` | Project memory: state, scope, specs, decisions, standards, design, compliance |
-| `checks/` | Zero-token enforcement: hygiene checks + their self-tests |
+| `checks/` | Zero-token enforcement: hygiene checks + their self-tests, plus the progress overview |
 | `index.html` + `fonts/` | The interactive explainer of this system (the live version linked above) |
 | `.github/workflows/ci.yml` | CI quality gate (extended per stack by the `stack` skill) |
 

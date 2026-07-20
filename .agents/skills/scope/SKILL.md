@@ -18,6 +18,9 @@ For each candidate capability, make it earn its place:
 
 Write results as numbered, testable SC-items. Vague scope ("a dashboard") is not scope; scope
 says what the user can *do* ("SC-3: owner sees per-project hours, filterable by month").
+Phrase each one so the owner recognizes it without a translation: their words, no jargon, no
+component names. The progress overview quotes these lines back to them verbatim
+(`node checks/progress.mjs`), so a line only they can read is a line they cannot check.
 
 A fuzzy word in any answer ("you said account: the Customer or the User?") gets pinned in the
 glossary `docs/product/CONTEXT.md` the moment it surfaces.

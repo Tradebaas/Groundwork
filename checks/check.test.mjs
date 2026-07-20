@@ -228,9 +228,33 @@ expectClean('code-file-cap-exclude', ({ put }) => {
 expectClean('tickets-valid', ({ put }) => {
   put('docs/README.md', ticketManifest);
   put('docs/specs/001-demo/tickets/01-a.md',
-    '# 01: A\n\n- **Blocked by:** none\n- **Status:** done\n\n**What to build:** demo.\n');
+    '# 01: A\n\n- **Blocked by:** none\n- **Status:** done\n- **Traces to:** BRIEF SC-1\n\n**What to build:** demo.\n');
   put('docs/specs/001-demo/tickets/02-b.md',
-    '# 02: B\n\n- **Blocked by:** 01-a\n- **Status:** ready <!-- ready | building | done -->\n\n**What to build:** demo.\n');
+    '# 02: B\n\n- **Blocked by:** 01-a\n- **Status:** ready <!-- ready | building | done -->\n- **Traces to:** BRIEF SC-2\n\n**What to build:** demo.\n');
+});
+
+expectFail('tickets', ({ put }) => { // Traces to left on the template placeholder
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/tickets/01-a.md',
+    '# 01: A\n\n- **Blocked by:** none\n- **Status:** ready\n- **Traces to:** BRIEF SC-<n>\n\n**What to build:** demo.\n');
+});
+
+// A spec that names no scope item makes the progress overview count that item as not started
+// while the work is happening (checks/progress.mjs). Silent miscounting is the failure to gate.
+expectFail('spec-traces', ({ put }) => { // no Traces to line at all
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n');
+});
+
+expectFail('spec-traces', ({ put }) => { // Traces to left unfilled
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** TBD\n');
+});
+
+expectClean('spec-traces-valid', ({ put }) => {
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** BRIEF SC-2\n');
+  put('docs/specs/archive/000-old/spec.md', '# 000: old\n\n- **Status:** done\n');
 });
 
 expectClean('tickets-archive-skipped', ({ put }) => {
