@@ -10,7 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   parseBrief, parseSpec, derive, readProject, renderFull, renderLine,
-  readRegistry, writeRegistry, registerProject,
+  readRegistry, writeRegistry, registerProject, cmdLine,
 } from './progress.mjs';
 
 const BRIEF = (items) => `# BRIEF
@@ -146,6 +146,18 @@ test('the one-liner stays within its length limit', () => {
   assert.match(line, /^Kassaboek: 0 van de 8 klaar/);
 });
 
+test('the one-liner carries a heads-up marker, and keeps it when the line is truncated', () => {
+  const drifted = { file: 'a', status: 'building', traces: ['SC-9'] };
+  const short = renderLine(project(), derive({ scopeItems: items, specs: [drifted] }));
+  assert.match(short, /⚠ 1× let op$/);
+  assert.match(renderLine(project({ lang: 'en' }), derive({ scopeItems: items, specs: [drifted] })), /⚠ 1 heads-up$/);
+
+  const long = Array.from({ length: 8 }, (_, n) => ({ id: `SC-${n + 1}`, title: 'a scope item with a deliberately very long description '.repeat(2) }));
+  const line = renderLine(project(), derive({ scopeItems: long, specs: [drifted] }));
+  assert.ok(line.length <= 120, `line was ${line.length} chars`);
+  assert.match(line, /\.\.\. · ⚠ 1× let op$/);
+});
+
 test('framing words follow the project language, English by default', () => {
   const progress = derive({ scopeItems: items, specs: [] });
   assert.match(renderLine(project({ lang: 'en' }), progress), /0 of 3 done/);
@@ -184,6 +196,23 @@ test('the project list tolerates a missing or malformed file', () => {
   assert.deepEqual(readRegistry(join(root, 'nope.json')), {});
   assert.deepEqual(readRegistry(join(root, 'bad.json')), {});
   rmSync(root, { recursive: true, force: true });
+});
+
+test('the proactive line stays quiet when nothing moved, but keeps reporting an open heads-up', () => {
+  const clean = fixture({
+    'docs/product/BRIEF.md': BRIEF('- SC-1 bonnen importeren'),
+    'docs/specs/001-import/spec.md': spec('building', 'BRIEF SC-1'),
+  });
+  const file = join(clean.root, 'list.json');
+  assert.match(cmdLine(clean.root, file), /0 of 1 done/);
+  assert.equal(cmdLine(clean.root, file), null, 'an unchanged stand must not repeat');
+
+  // Same project, now with work pointing outside the brief: the line must come back every turn.
+  clean.put('docs/specs/002-drift/spec.md', spec('building', 'BRIEF SC-9'));
+  const first = cmdLine(clean.root, file);
+  assert.match(first, /⚠/);
+  assert.equal(cmdLine(clean.root, file), first, 'an open heads-up must survive the dedupe');
+  rmSync(clean.root, { recursive: true, force: true });
 });
 
 test('registering is idempotent', () => {

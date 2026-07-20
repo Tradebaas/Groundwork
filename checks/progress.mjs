@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Groundwork progress: a plain-language answer to "what is done and what is left".
 // Run: node checks/progress.mjs            full report for this project
-//      node checks/progress.mjs --line     one line, only if the stand changed (Stop hook)
+//      node checks/progress.mjs --line     one line, if the stand changed or a heads-up is open
 //      node checks/progress.mjs --all      one line per registered project
 //      node checks/progress.mjs --json     the derived facts, for tooling
 //      node checks/progress.mjs --register add this project to the per-user list (`begin`)
@@ -35,6 +35,7 @@ const WORDS = {
     noScope: 'Scope is not defined yet. Run the `scope` skill to write down what this project '
       + 'will do, then this overview can report on it.',
     heads: 'Heads up',
+    headsShort: (n) => `${n} heads-up${n === 1 ? '' : 's'}`,
     nothingYet: 'Nothing is done yet',
   },
   nl: {
@@ -48,6 +49,7 @@ const WORDS = {
     noScope: 'De scope is nog niet bepaald. Draai de `scope`-skill om vast te leggen wat dit '
       + 'project gaat doen, dan kan dit overzicht erover rapporteren.',
     heads: 'Let op',
+    headsShort: (n) => `${n}× let op`,
     nothingYet: 'Er is nog niets klaar',
   },
 };
@@ -201,8 +203,12 @@ export function renderLine(project, progress) {
   if (doing) parts.push(`${w.now}: ${doing.title}`);
   else if (project.now) parts.push(`${w.now}: ${project.now}`);
   if (next) parts.push(`${w.next}: ${next.title}`);
+  // Work that traces nowhere is the one thing this line must never drop, so the marker is
+  // reserved its space first and the titles are what gives way when the line runs long.
+  const flag = progress.warnings.length ? ` · ⚠ ${w.headsShort(progress.warnings.length)}` : '';
+  const room = LINE_MAX - flag.length;
   const line = parts.join(' · ');
-  return line.length <= LINE_MAX ? line : `${line.slice(0, LINE_MAX - 3).trimEnd()}...`;
+  return (line.length <= room ? line : `${line.slice(0, room - 3).trimEnd()}...`) + flag;
 }
 
 // ---------------------------------------------------------------- per-user project list
@@ -255,17 +261,19 @@ function cmdAll() {
   return lines.length ? lines.join('\n') : 'No readable projects in the list.';
 }
 
-function cmdLine(root) {
+export function cmdLine(root, file = registryPath()) {
   // The proactive channel: one line, and only when the stand actually moved. A line that
   // repeats an unchanged stand becomes wallpaper and stops being read.
   const { project, progress } = reportFor(root);
   if (!progress.defined) return null;
   const line = renderLine(project, progress);
-  const file = registryPath();
   const data = readRegistry(file);
   const key = resolve(root);
   const seen = data[key]?.lastLine;
-  if (seen === line) return null;
+  // An open heads-up is the exception to the dedupe. It means work points outside the brief,
+  // and it keeps saying so every turn until it is resolved: silence would read as approval,
+  // and a fresh session after /clear would otherwise never hear about it at all.
+  if (seen === line && !progress.warnings.length) return null;
   data[key] = { ...(data[key] || {}), lastLine: line };
   writeRegistry(data, file);
   return line;
