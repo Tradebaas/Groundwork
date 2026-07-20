@@ -18,7 +18,9 @@ Run the full chain and paste real results, not summaries of results:
 
 - Take the spec's acceptance criteria (tier S: the request itself) and walk them **end to end**
   in the closest thing to reality available: run the app, call the endpoint, click the flow,
-  render the document. Per criterion: what you did → what you observed.
+  render the document. Per criterion: what you predicted you would see → what you did → what you
+  observed. Write the prediction down before running. A pass you did not predict proves only that
+  something happened, and it is where a broken path hides in a green run.
 - Probe the edges the criteria imply: empty input, wrong input, unauthorized user, the second
   run (idempotency), the slow path. The first bug is usually one step off the happy path.
 - UI change → also run `design-guard` on what appeared on screen.
