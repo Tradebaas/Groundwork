@@ -257,6 +257,39 @@ expectClean('spec-traces-valid', ({ put }) => {
   put('docs/specs/archive/000-old/spec.md', '# 000: old\n\n- **Status:** done\n');
 });
 
+// Once the brief defines scope, an SC-id becomes checkable. An invented or typo'd id reads as
+// a trace while tracing nowhere, so it passes the eye and fails the rule.
+const scopedManifest = `${ticketManifest}| \`product/BRIEF.md\` | LIVE | brief |\n`;
+const BRIEF_SC1 = '# BRIEF\n\n## In scope\n\n- SC-1 the one real scope item\n';
+
+expectFail('spec-traces', ({ put }) => { // spec names an SC-item the brief does not define
+  put('docs/README.md', scopedManifest);
+  put('docs/product/BRIEF.md', BRIEF_SC1);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** BRIEF SC-9\n');
+});
+
+expectFail('tickets', ({ put }) => { // ticket names an SC-item the brief does not define
+  put('docs/README.md', scopedManifest);
+  put('docs/product/BRIEF.md', BRIEF_SC1);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** BRIEF SC-1\n');
+  put('docs/specs/001-demo/tickets/01-a.md',
+    '# 01: A\n\n- **Blocked by:** none\n- **Status:** ready\n- **Traces to:** BRIEF SC-9\n\n**What to build:** demo.\n');
+});
+
+expectClean('spec-traces-known-id', ({ put }) => {
+  put('docs/README.md', scopedManifest);
+  put('docs/product/BRIEF.md', BRIEF_SC1);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** BRIEF SC-1\n');
+});
+
+// AGENTS.md allows tracing to an explicit request instead of an SC-item, so a line that names
+// no id at all must stay clean: this gate checks ids, it does not force specs to carry one.
+expectClean('spec-traces-explicit-request', ({ put }) => {
+  put('docs/README.md', scopedManifest);
+  put('docs/product/BRIEF.md', BRIEF_SC1);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** explicit request from the owner, 2026-07-20\n');
+});
+
 expectClean('tickets-archive-skipped', ({ put }) => {
   put('docs/README.md', ticketManifest);
   put('docs/specs/archive/001-old/tickets/01-a.md', '# 01: A\n\n- **Status:** shipped\n');

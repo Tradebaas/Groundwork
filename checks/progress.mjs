@@ -37,6 +37,10 @@ const WORDS = {
     heads: 'Heads up',
     headsShort: (n) => `${n} heads-up${n === 1 ? '' : 's'}`,
     nothingYet: 'Nothing is done yet',
+    unknownItem: (spec) => `the plan "${spec}" says it delivers something that is not in the brief. `
+      + 'Either it belongs in the brief, or it should not be built.',
+    doubleClaim: (title, specs) => `"${title}" is being worked on from ${specs.length} plans at once `
+      + `(${specs.join(', ')}). One of them owns it; the others should say so.`,
   },
   nl: {
     doneOfTotal: (d, t) => `${d} van de ${t} dingen zijn klaar`,
@@ -51,6 +55,10 @@ const WORDS = {
     heads: 'Let op',
     headsShort: (n) => `${n}× let op`,
     nothingYet: 'Er is nog niets klaar',
+    unknownItem: (spec) => `het plan "${spec}" levert iets op wat niet in de brief staat. `
+      + 'Of het hoort in de brief, of het moet niet gebouwd worden.',
+    doubleClaim: (title, specs) => `aan "${title}" wordt vanuit ${specs.length} plannen tegelijk gewerkt `
+      + `(${specs.join(', ')}). Eén ervan is eigenaar; de andere moeten dat zeggen.`,
   },
 };
 
@@ -134,12 +142,12 @@ export function readProject(root) {
 // The whole judgment of this tool lives here: scope items in, a state per item out.
 // Kept free of file reading so it can be tested directly against fixtures.
 export function derive({ scopeItems, specs }) {
+  // Warnings are kept as facts, not sentences: the wording is chosen at render time so it can
+  // follow the project's language and stay free of the internal ids the report never shows.
   const warnings = [];
   const known = new Set(scopeItems.map((i) => i.id));
   for (const s of specs) {
-    for (const t of s.traces) {
-      if (!known.has(t)) warnings.push(`spec "${s.file}" points at ${t}, which is not in the brief`);
-    }
+    if (s.traces.some((t) => !known.has(t))) warnings.push({ kind: 'unknownItem', spec: s.file });
   }
   const items = scopeItems.map((item) => {
     const mine = specs.filter((s) => s.traces.includes(item.id) && !SPEC_INACTIVE.has(s.status));
@@ -147,8 +155,7 @@ export function derive({ scopeItems, specs }) {
     if (mine.some((s) => s.status === SPEC_DONE)) state = 'done';
     else if (mine.length) state = 'doing';
     if (mine.length > 1) {
-      const shown = mine.map((s) => `${s.file} (${s.status || 'no status'})`).join(', ');
-      warnings.push(`${item.id} is claimed by more than one spec: ${shown}`);
+      warnings.push({ kind: 'doubleClaim', title: item.title, specs: mine.map((s) => s.file) });
     }
     return { ...item, state, specs: mine.map((s) => s.file) };
   });
@@ -165,6 +172,13 @@ export function derive({ scopeItems, specs }) {
 }
 
 // ---------------------------------------------------------------- rendering
+
+// A warning fact turned into the owner's own sentence. The spec folder name stays: it is how
+// they find the file, and unlike an SC-id it says something on its own.
+export function warningText(w, warn) {
+  if (warn.kind === 'unknownItem') return w.unknownItem(warn.spec);
+  return w.doubleClaim(warn.title, warn.specs);
+}
 
 export function renderFull(project, progress) {
   const w = WORDS[project.lang] || WORDS.en;
@@ -187,7 +201,7 @@ export function renderFull(project, progress) {
   if (project.now) out.push(`${w.now}: ${project.now}`);
   if (progress.warnings.length) {
     out.push('', `${w.heads}:`);
-    for (const warn of progress.warnings) out.push(`  - ${warn}`);
+    for (const warn of progress.warnings) out.push(`  - ${warningText(w, warn)}`);
   }
   return out.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd();
 }
