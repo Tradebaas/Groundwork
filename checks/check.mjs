@@ -12,6 +12,8 @@ import {
 import { execSync } from 'node:child_process';
 import { join, dirname, resolve, relative, extname, isAbsolute, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// The brief is parsed in exactly one place; the progress overview already owns that reading.
+import { parseBrief } from './progress.mjs';
 
 const TEXT_EXT = new Set([
   '.md', '.json', '.yml', '.yaml', '.txt', '.toml', '.xml', '.svg', '.html', '.css',
@@ -72,11 +74,31 @@ function tracesTo(body) {
   return Boolean(filled) && !filled.includes('<') && !/^TBD\b/i.test(filled);
 }
 
+// The SC-ids the brief actually defines, or null when scope is not written down yet. A project
+// that has not run `scope` has nothing to validate against and must not be blocked for it.
+function scopeIds(root) {
+  const p = join(root, 'docs', 'product', 'BRIEF.md');
+  if (!existsSync(p)) return null;
+  const { items } = parseBrief(read(p));
+  return items.length ? new Set(items.map((i) => i.id)) : null;
+}
+
+// SC-ids named in a "Traces to:" line that the brief does not define. A typo'd or invented id
+// reads as a trace while tracing nowhere, which is exactly what "no trace, no build" forbids.
+// Work may also trace to an explicit request instead, so a line naming no SC-id is left alone.
+function unknownScopeIds(body, known) {
+  if (!known) return [];
+  const line = (body.match(/^- \*\*Traces to:\*\*\s*(.+)$/m) || [])[1] || '';
+  const named = new Set([...line.matchAll(/SC-\d+/g)].map((m) => m[0]));
+  return [...named].filter((id) => !known.has(id));
+}
+
 export function runChecks(root) {
   const failures = [];
   const cfg = JSON.parse(read(join(root, 'checks', 'config.json')));
   for (const e of cfg.extraTextExtensions || []) TEXT_EXT.add(e);
   for (const e of cfg.extraCodeExtensions || []) CODE_EXT.add(e);
+  const known = scopeIds(root);
   const tree = walk(root);
   // *.local.md is personal, never shared (.gitignore). The checks walk the working tree, not the
   // git index, so without this they would gate gitignored files: a maintainer's CLAUDE.local.md or
@@ -351,6 +373,9 @@ export function runChecks(root) {
         if (!tracesTo(body)) {
           fail(`${r}: missing or unfilled "- **Traces to:**" line: work that names no scope item cannot be attributed to one.`);
         }
+        for (const id of unknownScopeIds(body, known)) {
+          fail(`${r}: Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
+        }
       }
     },
 
@@ -362,8 +387,12 @@ export function runChecks(root) {
       for (const f of tree.files) {
         const r = rel(root, f);
         if (!/^docs\/specs\/.+\/spec\.md$/.test(r) || r.startsWith('docs/specs/archive/')) continue;
-        if (!tracesTo(read(f))) {
+        const body = read(f);
+        if (!tracesTo(body)) {
           fail(`${r}: missing or unfilled "- **Traces to:**" line. Name the BRIEF SC-item this change serves, or the explicit request it answers (run \`scope\` first if neither exists).`);
+        }
+        for (const id of unknownScopeIds(body, known)) {
+          fail(`${r}: Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
         }
       }
     },

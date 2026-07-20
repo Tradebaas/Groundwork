@@ -98,7 +98,7 @@ test('a dropped spec leaves its scope item not started', () => {
 test('a spec pointing at an unknown scope item is surfaced, not swallowed', () => {
   const p = derive({ scopeItems: items, specs: [{ file: 'ghost', status: 'done', traces: ['SC-9'] }] });
   assert.equal(p.done, 0);
-  assert.match(p.warnings.join(), /ghost.*SC-9/);
+  assert.deepEqual(p.warnings, [{ kind: 'unknownItem', spec: 'ghost' }]);
 });
 
 test('two specs claiming one scope item: the furthest wins and the clash is reported', () => {
@@ -110,7 +110,7 @@ test('two specs claiming one scope item: the furthest wins and the clash is repo
     ],
   });
   assert.equal(p.items[0].state, 'done');
-  assert.match(p.warnings.join(), /SC-1 is claimed by more than one spec/);
+  assert.deepEqual(p.warnings, [{ kind: 'doubleClaim', title: items[0].title, specs: ['a', 'b'] }]);
 });
 
 test('no scope items means not defined, never a zero count', () => {
@@ -131,6 +131,24 @@ test('the full report uses whole sentences and no internal identifiers', () => {
   assert.match(text, /1 van de 3 dingen zijn klaar/);
   assert.match(text, /importeren/);
   assert.doesNotMatch(text, /SC-\d|building|status/i);
+});
+
+// The report's promise is that the owner reads it without translating. The warnings used to
+// escape that promise, speaking in SC-ids and spec statuses to the one person who cannot use them.
+test('warnings speak the project language and name no internal identifiers', () => {
+  const drifted = derive({ scopeItems: items, specs: [{ file: '002-drift', status: 'building', traces: ['SC-9'] }] });
+  const nl = renderFull(project(), drifted);
+  assert.match(nl, /Let op/);
+  assert.match(nl, /het plan "002-drift" levert iets op wat niet in de brief staat/);
+  assert.doesNotMatch(nl, /SC-\d|building/i);
+
+  const clash = derive({
+    scopeItems: items,
+    specs: [{ file: 'a', status: 'building', traces: ['SC-1'] }, { file: 'b', status: 'done', traces: ['SC-1'] }],
+  });
+  const en = renderFull(project({ lang: 'en' }), clash);
+  assert.match(en, /is being worked on from 2 plans at once \(a, b\)/);
+  assert.doesNotMatch(en, /SC-\d|building/i);
 });
 
 test('an undefined scope says so instead of reporting progress', () => {
