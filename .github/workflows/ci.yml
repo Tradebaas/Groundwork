@@ -56,16 +56,5 @@ jobs:
           done
           exit $rc
 
-      # With the repo set to squash "PR title and description", the body below IS the message
-      # body of the single commit that lands on main. Gating it here is what keeps the shipped
-      # history queryable: git log main --format='%(trailers:key=Traces-to)'.
-      - name: The squash message inherits the trace from the PR body
-        env:
-          BODY: ${{ github.event.pull_request.body }}
-        run: |
-          printf '%s\n' "$BODY" > "$RUNNER_TEMP/body"
-          if [ ! -s "$RUNNER_TEMP/body" ] || ! grep -q '[^[:space:]]' "$RUNNER_TEMP/body"; then
-            echo 'FAIL [commit-trace] the PR body is empty, so the squash commit would land on main with no trace.'
-            exit 1
-          fi
-          node checks/check.mjs --commit-msg "$RUNNER_TEMP/body"
+      # Nothing validates the PR body: squash is disabled on this repo (decision 0014), so these
+      # commits reach main unchanged and their own trailers are the shipped artifact.
