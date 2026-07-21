@@ -69,6 +69,8 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
 - **[checks/](checks/)** enforces hygiene mechanically: `node checks/check.mjs` validates the
   docs manifest, link integrity, retired-fact denylist, file and source-code budgets, spec-ticket
   integrity, skill format, secrets, and more: zero model tokens spent. CI runs it on every push.
+  A `commit-msg` hook adds the last link in the chain: every commit names the scope item it
+  serves, so a sha resolves back to a requirement instead of to someone's memory.
   The checks test themselves (`node checks/check.test.mjs`): a gate that isn't tested is false
   confidence. The same directory holds `node checks/progress.mjs`: a read-only, plain-language
   answer to "what is done and what is left", derived from the brief, the specs and the handoff,
@@ -83,7 +85,7 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
   `"skipSymlinkCheck": true` in `checks/config.json` and point your tool at `.agents/skills/`
   directly.
 - After every fresh clone: `node checks/check.mjs --install-hooks` (wires the versioned
-  pre-commit gate).
+  pre-commit and commit-msg gates).
 
 ## What lives where
 

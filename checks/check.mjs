@@ -121,11 +121,18 @@ export function checkCommitMessage(message, known) {
   if (!subject) return failures;
   if (/^(Merge|Revert) /.test(subject) || /^(fixup|squash)! /.test(subject)) return failures;
 
-  const line = (body.match(/^Traces-to:[ \t]*(.*)$/m) || [])[1];
-  if (line === undefined) {
-    fail('missing "Traces-to:" trailer. End the message with the scope item this commit serves, e.g. "Traces-to: SC-3", or "Traces-to: explicit request: <what was asked>" when the owner asked for it directly.');
+  // Git decides what a trailer is: the last block of the message, on one line, with nothing but
+  // trailers after it. Matching the key anywhere in the text instead would pass a message whose
+  // trailer `git log --format='%(trailers:key=Traces-to)'` cannot read, leaving the gate green
+  // and the artifact it exists to produce empty. Use the reader's own parser, so the two cannot
+  // disagree. Git missing or failing here raises, and a crashed gate is a failed gate.
+  const parsed = execSync('git interpret-trailers --parse', { input: body, encoding: 'utf8' });
+  const entry = parsed.split('\n').find((t) => /^Traces-to:/i.test(t));
+  if (entry === undefined) {
+    fail('missing "Traces-to:" trailer. The LAST block of the message must be trailers only, with the trace on one line: "Traces-to: SC-3", or "Traces-to: explicit request: <what was asked>". A line of prose (or a footer) after it puts the trace outside the block and git stops reading it as a trailer.');
     return failures;
   }
+  const line = entry.replace(/^Traces-to:[ \t]*/i, '');
   if (!traceFilled(line)) {
     fail('"Traces-to:" is empty or still a placeholder: a trailer that names nothing traces nowhere.');
   }
