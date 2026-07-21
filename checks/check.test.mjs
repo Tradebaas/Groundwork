@@ -8,7 +8,7 @@ import { execSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import assert from 'node:assert/strict';
-import { runChecks, installHooks } from './check.mjs';
+import { runChecks, installHooks, checkCommitMessage } from './check.mjs';
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'groundwork-test-'));
@@ -301,12 +301,58 @@ expectClean('manifest-glob-classes', ({ put }) => {
   put('docs/specs/001-demo/notes.md', '# notes\n');
 });
 
+// --- commit-trace: the trailer that carries the trace into the shipped history ---
+// Same two directions as every gate above: it must block a commit that names no scope item,
+// and stay silent on the shapes git composes itself.
+const SCOPED = new Set(['SC-1']);
+
+function expectMsgFail(label, message, known = SCOPED) {
+  const found = checkCommitMessage(message, known);
+  try {
+    assert.ok(found.length, `expected "${label}" to be blocked, but it passed`);
+    passed++;
+  } catch (e) { failedTests.push(`${label}: ${e.message}`); }
+}
+
+function expectMsgClean(label, message, known = SCOPED) {
+  const found = checkCommitMessage(message, known);
+  try {
+    assert.equal(found.length, 0, `"${label}" should pass, got: ${JSON.stringify(found)}`);
+    passed++;
+  } catch (e) { failedTests.push(`${label}: ${e.message}`); }
+}
+
+expectMsgFail('commit-trace-missing', 'feat(checks): add a thing\n\nA body that explains why.\n');
+expectMsgFail('commit-trace-empty', 'feat(checks): add a thing\n\nTraces-to:\n');
+expectMsgFail('commit-trace-placeholder', 'feat(checks): add a thing\n\nTraces-to: <SC-id>\n');
+expectMsgFail('commit-trace-tbd', 'feat(checks): add a thing\n\nTraces-to: TBD\n');
+expectMsgFail('commit-trace-unknown-id', 'feat(checks): add a thing\n\nTraces-to: SC-99\n');
+// git strips its own comments, so a trailer that only exists in the template help text is absent.
+expectMsgFail('commit-trace-commented-out', 'feat(checks): add a thing\n\n# Traces-to: SC-1\n');
+
+expectMsgClean('commit-trace-sc-id', 'feat(checks): add a thing\n\nWhy it changed.\n\nTraces-to: SC-1\n');
+expectMsgClean('commit-trace-two-ids', 'feat(checks): add a thing\n\nTraces-to: SC-1, SC-1\n');
+// AGENTS.md allows tracing to an explicit request, so a trace naming no id is a valid trace.
+expectMsgClean('commit-trace-explicit-request', 'fix(docs): reword\n\nTraces-to: explicit request: owner asked in session\n');
+expectMsgClean('commit-trace-before-coauthor', 'feat(x): y\n\nTraces-to: SC-1\nCo-Authored-By: A B <a@b.c>\n');
+// Composed by git, not authored: a merge has no scope item of its own, a revert names the sha
+// it undoes, and an autosquash message is replaced when the rebase runs.
+expectMsgClean('commit-trace-merge', 'Merge branch \'main\' into feat/x\n');
+expectMsgClean('commit-trace-revert', 'Revert "feat(x): y"\n\nThis reverts commit abc1234.\n');
+expectMsgClean('commit-trace-fixup', 'fixup! feat(x): y\n');
+// A fresh copy has no scope written down yet and must not be blocked for it, exactly as
+// spec-traces and tickets already behave. The trailer is still required; only the id is unchecked.
+expectMsgClean('commit-trace-unscoped-brief', 'feat(x): y\n\nTraces-to: SC-99\n', null);
+expectMsgFail('commit-trace-unscoped-still-needs-trailer', 'feat(x): y\n\nno trailer here\n', null);
+
 // installHooks wires the versioned hook path (needs git on PATH).
 {
   const fx = fixture();
   writeFileSync(join(fx.root, 'checks', 'hooks-placeholder'), '');
   mkdirSync(join(fx.root, 'checks', 'hooks'), { recursive: true });
-  writeFileSync(join(fx.root, 'checks', 'hooks', 'pre-commit'), '#!/bin/sh\nnode checks/check.mjs || exit 1\n');
+  for (const hook of ['pre-commit', 'commit-msg']) {
+    writeFileSync(join(fx.root, 'checks', 'hooks', hook), '#!/bin/sh\nnode checks/check.mjs || exit 1\n');
+  }
   try {
     execSync('git init -q', { cwd: fx.root });
     installHooks(fx.root);
