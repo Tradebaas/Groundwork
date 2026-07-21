@@ -330,6 +330,14 @@ expectMsgFail('commit-trace-unknown-id', 'feat(checks): add a thing\n\nTraces-to
 // git strips its own comments, so a trailer that only exists in the template help text is absent.
 expectMsgFail('commit-trace-commented-out', 'feat(checks): add a thing\n\n# Traces-to: SC-1\n');
 
+// Git reads only the final block as trailers. A trace anywhere else is invisible to
+// `git log --format='%(trailers:key=Traces-to)'`, so a gate that accepted it would report green
+// while producing nothing. These four are the shapes that actually shipped that bug once.
+expectMsgFail('commit-trace-footer-after', 'feat(x): y\n\nTraces-to: SC-1\n\nGenerated with a tool\n');
+expectMsgFail('commit-trace-prose-after', 'feat(x): y\n\nTraces-to: SC-1\n\nOne more thought.\n');
+expectMsgFail('commit-trace-value-wrapped', 'feat(x): y\n\nTraces-to: explicit request: a value that\nwrapped onto a second line\n');
+expectMsgClean('commit-trace-footer-before', 'feat(x): y\n\nbody\n\nGenerated with a tool\n\nTraces-to: SC-1\n');
+
 expectMsgClean('commit-trace-sc-id', 'feat(checks): add a thing\n\nWhy it changed.\n\nTraces-to: SC-1\n');
 expectMsgClean('commit-trace-two-ids', 'feat(checks): add a thing\n\nTraces-to: SC-1, SC-1\n');
 // AGENTS.md allows tracing to an explicit request, so a trace naming no id is a valid trace.
