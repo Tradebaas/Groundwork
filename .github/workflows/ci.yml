@@ -30,3 +30,42 @@ jobs:
       # - name: Dependency audit (fail on high/critical)
       # - name: Secret scan (gitleaks or equivalent)
       # - name: Build
+
+  # The local commit-msg hook can be skipped (--no-verify, or a clone that never ran
+  # --install-hooks), so the trace is re-proven here, where it cannot be bypassed.
+  trace:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Every commit names the scope item it serves
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          rc=0
+          for sha in $(git rev-list "$BASE".."$HEAD"); do
+            git log -1 --format=%B "$sha" > "$RUNNER_TEMP/msg"
+            node checks/check.mjs --commit-msg "$RUNNER_TEMP/msg" || { echo "  ^ commit $sha"; rc=1; }
+          done
+          exit $rc
+
+      # With the repo set to squash "PR title and description", the body below IS the message
+      # body of the single commit that lands on main. Gating it here is what keeps the shipped
+      # history queryable: git log main --format='%(trailers:key=Traces-to)'.
+      - name: The squash message inherits the trace from the PR body
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s\n' "$BODY" > "$RUNNER_TEMP/body"
+          if [ ! -s "$RUNNER_TEMP/body" ] || ! grep -q '[^[:space:]]' "$RUNNER_TEMP/body"; then
+            echo 'FAIL [commit-trace] the PR body is empty, so the squash commit would land on main with no trace.'
+            exit 1
+          fi
+          node checks/check.mjs --commit-msg "$RUNNER_TEMP/body"

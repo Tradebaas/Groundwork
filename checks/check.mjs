@@ -67,11 +67,25 @@ function globToRegex(glob) {
   return new RegExp(`^${re}$`);
 }
 
+// The value half of a trace, shared by the three artifacts that carry one: spec files, ticket
+// files, and commit messages. One reading of "filled in" and one reading of "which SC-ids does
+// this name", so the three gates cannot drift apart as they are edited.
+const traceValue = (line) => (line || '').replace(/<!--[\s\S]*$/, '').trim();
+const traceFilled = (line) => {
+  const v = traceValue(line);
+  return Boolean(v) && !v.includes('<') && !/^TBD\b/i.test(v);
+};
+const traceUnknownIds = (line, known) => {
+  if (!known) return [];
+  const named = new Set([...traceValue(line).matchAll(/SC-\d+/g)].map((m) => m[0]));
+  return [...named].filter((id) => !known.has(id));
+};
+
+const traceLine = (body) => (body.match(/^- \*\*Traces to:\*\*\s*(.+)$/m) || [])[1];
+
 // A filled-in "Traces to:" line: present, and not still carrying the template's placeholders.
 function tracesTo(body) {
-  const line = (body.match(/^- \*\*Traces to:\*\*\s*(.+)$/m) || [])[1] || '';
-  const filled = line.replace(/<!--[\s\S]*$/, '').trim();
-  return Boolean(filled) && !filled.includes('<') && !/^TBD\b/i.test(filled);
+  return traceFilled(traceLine(body));
 }
 
 // The SC-ids the brief actually defines, or null when scope is not written down yet. A project
@@ -87,10 +101,38 @@ function scopeIds(root) {
 // reads as a trace while tracing nowhere, which is exactly what "no trace, no build" forbids.
 // Work may also trace to an explicit request instead, so a line naming no SC-id is left alone.
 function unknownScopeIds(body, known) {
-  if (!known) return [];
-  const line = (body.match(/^- \*\*Traces to:\*\*\s*(.+)$/m) || [])[1] || '';
-  const named = new Set([...line.matchAll(/SC-\d+/g)].map((m) => m[0]));
-  return [...named].filter((id) => !known.has(id));
+  return traceUnknownIds(traceLine(body), known);
+}
+
+// The commit message is the only artifact that survives into the shipped history, so the trace
+// has to be on it: given a sha, the SC-id resolves back through the brief to the requirement it
+// served. Without this the chain runs BRIEF -> spec -> ticket and then goes dark, and no
+// system-generated list of "what changed, serving what" can be produced after the fact.
+export function checkCommitMessage(message, known) {
+  const failures = [];
+  const fail = (msg) => failures.push({ check: 'commit-trace', msg });
+  // git strips its own comment lines before storing the message; strip them here too, so a
+  // commented-out example trailer in a template cannot satisfy the gate.
+  const body = message.replace(/\r\n/g, '\n').split('\n').filter((l) => !l.startsWith('#')).join('\n');
+  const subject = body.trim().split('\n')[0] || '';
+
+  // Not authored units of work: git composes merge and revert subjects itself (a revert names
+  // the sha it undoes, which is already a trace), and autosquash messages are replaced on rebase.
+  if (!subject) return failures;
+  if (/^(Merge|Revert) /.test(subject) || /^(fixup|squash)! /.test(subject)) return failures;
+
+  const line = (body.match(/^Traces-to:[ \t]*(.*)$/m) || [])[1];
+  if (line === undefined) {
+    fail('missing "Traces-to:" trailer. End the message with the scope item this commit serves, e.g. "Traces-to: SC-3", or "Traces-to: explicit request: <what was asked>" when the owner asked for it directly.');
+    return failures;
+  }
+  if (!traceFilled(line)) {
+    fail('"Traces-to:" is empty or still a placeholder: a trailer that names nothing traces nowhere.');
+  }
+  for (const id of traceUnknownIds(line, known)) {
+    fail(`Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
+  }
+  return failures;
 }
 
 export function runChecks(root) {
@@ -426,7 +468,9 @@ export function runChecks(root) {
 export function installHooks(root) {
   // Hooks live versioned in checks/hooks/ so every clone gets them; this only wires the path.
   if (!existsSync(join(root, '.git'))) throw new Error('no .git directory: run git init first');
-  chmodSync(join(root, 'checks', 'hooks', 'pre-commit'), 0o755);
+  for (const hook of ['pre-commit', 'commit-msg']) {
+    chmodSync(join(root, 'checks', 'hooks', hook), 0o755);
+  }
   execSync('git config core.hooksPath checks/hooks', { cwd: root });
   return 'core.hooksPath -> checks/hooks (re-run after every fresh clone)';
 }
@@ -435,6 +479,21 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   if (process.argv.includes('--install-hooks')) {
     console.log(`hooks wired: ${installHooks(root)}`);
+    process.exit(0);
+  }
+  const msgFlag = process.argv.indexOf('--commit-msg');
+  if (msgFlag !== -1) {
+    const path = process.argv[msgFlag + 1];
+    if (!path) {
+      console.error('FAIL [commit-trace] --commit-msg needs the path to the message file.');
+      process.exit(1);
+    }
+    const found = checkCommitMessage(read(path), scopeIds(root));
+    if (found.length) {
+      for (const f of found) console.error(`FAIL [${f.check}] ${f.msg}`);
+      console.error('\nThe commit is not lost: git kept your message, fix it and commit again.');
+      process.exit(1);
+    }
     process.exit(0);
   }
   const failures = runChecks(root);
