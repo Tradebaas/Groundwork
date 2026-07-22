@@ -52,8 +52,11 @@ it down with versions, dates, and source links. Cover at least:
   - **pre-commit** (`checks/hooks/pre-commit`, versioned): append fast checks (format, lint
     staged) after the Groundwork line. Cheap first.
   - **CI** (`.github/workflows/ci.yml`, or this host's equivalent): the full authority:
-    checks, typecheck, lint, tests, build, dependency audit, secret scan. Replace the
-    placeholder stage; CI must fail on any gate.
+    checks, typecheck, lint, tests, build, secret scan. Replace the placeholder stage;
+    CI must fail on any gate.
+  - **Supply-chain floor**, as soon as the stack has dependencies: an SBOM (software bill of
+    materials) of at least top-level dependencies - the CRA legal floor - plus dependency
+    audit and license scan, all wired into CI with this ecosystem's current tools.
 - Add this ecosystem's file extensions to `extraTextExtensions`/`extraCodeExtensions` in
   `checks/config.json` so the denylist/secrets/zombie checks cover the product code.
 - Add the chosen tools' commands to the stack standards file so any agent can run them.
