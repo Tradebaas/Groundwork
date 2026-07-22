@@ -110,7 +110,7 @@ trigger applies. The library:
 | `design-guard` | Before delivering any UI or user-facing output |
 | `verify` | Verifying a change actually works, end to end |
 | `debug` | A bug, crash or failing test with no obvious cause; a fix attempt that did not work |
-| `code-review` | After `verify`, before committing substantial work: two-axis review of the diff |
+| `code-review` | After `verify`, before committing substantial work: fresh-eyes review of the diff by independent axes |
 | `deliver` | Releasing, deploying, or handing over a milestone |
 | `maintain` | Post-launch work: monitoring, updates, incidents, debt harvest |
 | `handover` | Making the project transferable to another human or agent |
