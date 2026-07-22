@@ -291,6 +291,24 @@ expectClean('spec-traces-explicit-request', ({ put }) => {
   put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** explicit request from the owner, 2026-07-20\n');
 });
 
+// progress.mjs counts a single .md sitting directly in docs/specs/ as a spec (specFiles), so
+// the trace gate covers that shape too: a spec that counts toward progress but escapes the
+// gate could steer work while naming no scope item.
+expectFail('spec-traces', ({ put }) => { // single-file spec, no trace
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/002-single.md', '# 002: single-file spec\n\n- **Status:** building\n');
+});
+
+expectClean('spec-traces-single-file-valid', ({ put }) => {
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/002-single.md', '# 002: single\n\n- **Status:** building\n- **Traces to:** explicit request from the owner, 2026-07-22\n');
+});
+
+expectClean('spec-traces-templates-skipped', ({ put }) => { // the shipped templates sit directly in docs/specs/ with placeholder traces
+  put('docs/README.md', ticketManifest);
+  put('docs/specs/TEMPLATE.md', '# spec template\n\n- **Traces to:** BRIEF SC-<n> / explicit request: <link or quote>\n');
+});
+
 expectClean('tickets-archive-skipped', ({ put }) => {
   put('docs/README.md', ticketManifest);
   put('docs/specs/archive/001-old/tickets/01-a.md', '# 01: A\n\n- **Status:** shipped\n');
