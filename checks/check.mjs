@@ -13,7 +13,7 @@ import { execSync } from 'node:child_process';
 import { join, dirname, resolve, relative, extname, isAbsolute, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // The brief is parsed in exactly one place; the progress overview already owns that reading.
-import { parseBrief } from './progress.mjs';
+import { parseBrief, isSpecPath } from './progress.mjs';
 
 const TEXT_EXT = new Set([
   '.md', '.json', '.yml', '.yaml', '.txt', '.toml', '.xml', '.svg', '.html', '.css',
@@ -435,11 +435,11 @@ export function runChecks(root) {
       // than no count, so this is a gate rather than a note. Archived specs are history.
       for (const f of tree.files) {
         const r = rel(root, f);
-        // Both spec shapes progress.mjs counts (specFiles): <folder>/spec.md, and a single file
-        // sitting directly in docs/specs/ (templates excluded). The two definitions must cover
-        // the same set, or a spec can steer the progress overview while escaping this gate.
-        const singleFile = /^docs\/specs\/[^/]+\.md$/.test(r) && !basename(r).startsWith('TEMPLATE');
-        if ((!/^docs\/specs\/.+\/spec\.md$/.test(r) && !singleFile) || r.startsWith('docs/specs/archive/')) continue;
+        // What counts as a spec file is progress.mjs's isSpecPath: one definition, so the
+        // counted set and the gated set cannot drift apart. Two deliberate differences remain:
+        // archived specs are history (skipped here), and *.local.md files never reach this
+        // loop at all (dropped from tree.files above): personal specs are counted, never gated.
+        if (!isSpecPath(r) || r.startsWith('docs/specs/archive/')) continue;
         const body = read(f);
         if (!tracesTo(body)) {
           fail(`${r}: missing or unfilled "- **Traces to:**" line. Name the BRIEF SC-item this change serves, or the explicit request it answers (run \`scope\` first if neither exists).`);

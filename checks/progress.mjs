@@ -86,21 +86,29 @@ export function parseSpec(text) {
   return { status, traces, tracesDeclared: Boolean(tracesLine.trim()) };
 }
 
+// One definition of what counts as a spec: <folder>/spec.md, or a single .md sitting directly
+// in docs/specs/; the TEMPLATE files are skeletons, not specs. Shared with check.mjs's
+// spec-traces gate so the counted set and the gated set cannot drift apart (the gap that
+// motivated it: single-file specs counted here escaped the gate there).
+export function isSpecPath(relPath) {
+  if (relPath.split('/').pop().startsWith('TEMPLATE')) return false;
+  return /^docs\/specs\/(.+\/spec|[^/]+)\.md$/.test(relPath);
+}
+
 function specFiles(root) {
   const dir = join(root, 'docs', 'specs');
   const out = [];
-  const walk = (d, depth) => {
+  const walk = (d, depth, relDir) => {
     let entries;
     try { entries = readdirSync(d, { withFileTypes: true }); } catch { return; }
     for (const e of entries) {
       const full = join(d, e.name);
-      if (e.isDirectory()) { if (depth < 4) walk(full, depth + 1); continue; }
-      if (!e.name.endsWith('.md') || e.name.startsWith('TEMPLATE')) continue;
-      // A spec is either <folder>/spec.md or a single file sitting directly in docs/specs/.
-      if (e.name === 'spec.md' || depth === 0) out.push(full);
+      const r = `${relDir}/${e.name}`;
+      if (e.isDirectory()) { if (depth < 4) walk(full, depth + 1, r); continue; }
+      if (isSpecPath(r)) out.push(full);
     }
   };
-  walk(dir, 0);
+  walk(dir, 0, 'docs/specs');
   return out;
 }
 
