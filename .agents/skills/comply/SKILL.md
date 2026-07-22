@@ -32,7 +32,9 @@ assert a deadline or obligation from model memory.
   checked per service; breach path known (72h to the AP).
 - **AI Act**: users told they're interacting with AI; AI-generated content marked
   machine-readably (Art 50, binding since 2026-08-02); high-risk uses (Annex III) identified
-  early. Obligations land 2027-12-02, design for them now, not then.
+  early. Obligations land 2027-12-02, design for them now, not then. Art 4 AI literacy:
+  `docs/compliance/AI-LITERACY.md` is the evidence note; keep its "Who is covered" line true
+  for this team and re-check the note at the quarterly audit.
 - **Accessibility**: EN 301 549 / WCAG 2.1 AA as the working floor (design-guard checks it per
   delivery; this skill checks the claim holds product-wide).
 - **CRA**: secure-by-default posture; the vulnerability intake channel and the support period
