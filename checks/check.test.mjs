@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import { runChecks, installHooks, checkCommitMessage } from './check.mjs';
+import { needsHandoffNudge } from './handoff-nudge.mjs';
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'groundwork-test-'));
@@ -369,6 +370,21 @@ expectMsgFail('commit-trace-unscoped-still-needs-trailer', 'feat(x): y\n\nno tra
     passed++;
   } catch (e) { failedTests.push(`install-hooks: ${e.message}`); }
   rmSync(fx.root, { recursive: true, force: true });
+}
+
+// handoff-nudge fires only when a turn advises a fresh session and hands over no code block.
+for (const [label, text, want] of [
+  ['advise clear, no block', 'Next: in a fresh session run /clear and continue.', true],
+  ['verse sessie, no block', 'Start een verse sessie voor de volgende ticket.', true],
+  ['advises clear WITH a code block', 'Start fresh:\n```\nRead docs/state/STATE.md\n```', false],
+  ['mentions /clear but a block is present', 'Type /clear then:\n```\nprompt\n```', false],
+  ['no fresh-session advice at all', 'I fixed the bug and the tests pass.', false],
+  ['empty input', '', false],
+]) {
+  try {
+    assert.equal(needsHandoffNudge(text), want, label);
+    passed++;
+  } catch (e) { failedTests.push(`handoff-nudge ${label}: ${e.message}`); }
 }
 
 if (failedTests.length) {
