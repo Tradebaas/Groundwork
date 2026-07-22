@@ -35,6 +35,10 @@ Nothing is built from INTAKE. Per item, propose one of:
 - **Later** → stays in INTAKE with an explicit revisit trigger ("after launch", "if >100 users").
 - **Bug** → not a scope question; goes straight to a fix with a regression test.
 
+For an in-scope item, name the cheapest tier that delivers it (decision 0015: an artifact or
+on-demand skill before a gate, a gate before an always-on rule); the tier is part of the
+recommendation.
+
 Present triage as a batch with your recommendation per item; the owner decides, you record.
 
 ## Changing scope mid-build
