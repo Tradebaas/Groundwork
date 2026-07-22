@@ -13,7 +13,9 @@ description: Release, deploy, or hand over a milestone in a disciplined, repeata
 - `scope-guard` clean; specs in this release at status `done`.
 - CI green on the exact commit being shipped. Local green is not CI green. No CI yet (no
   remote/host)? Wire it now. First delivery is the moment. Genuinely impossible? Run the full
-  gate chain on a fresh clean checkout and record that explicit exception in STATE.md.
+  gate chain on a fresh clean checkout and record that explicit exception in STATE.md. On
+  GitHub, a first release also protects `main`: the owner applies the runbook
+  `docs/operations/branch-protection.md` with repo admin.
 - The product holds persistent data → `docs/operations/backup-restore.md` exists and the
   restore has been performed once, for real. An untested restore is a hope, not a backup.
 - Compliance register (`docs/compliance/COMPLIANCE.md`) has no open blocking item. For a first

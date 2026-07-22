@@ -91,7 +91,10 @@ git add -A && git commit -m "chore: initialize project on Groundwork" \
 
 If the owner has a remote (GitHub gets CI from `.github/workflows/ci.yml`; another host needs
 its equivalent: port it before first delivery), wire it and push. If not, note in STATE.md
-that CI is a `deliver` precondition still to be wired.
+that CI is a `deliver` precondition still to be wired. On GitHub, also enable private
+vulnerability reporting on day one, so `SECURITY.md`'s reporting channel exists before anyone
+reads the policy: `gh api --method PUT 'repos/{owner}/{repo}/private-vulnerability-reporting'`
+(not on GitHub or no `gh` → skip; `deliver`'s first-release check covers it).
 
 ## 5. Hand off
 
