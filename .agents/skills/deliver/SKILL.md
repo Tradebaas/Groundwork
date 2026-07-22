@@ -8,6 +8,8 @@ description: Release, deploy, or hand over a milestone in a disciplined, repeata
 ## 0. Entry conditions: all of them
 
 - `verify` passed on everything in this release (evidence in STATE.md, not memory).
+- `code-review` clean on everything in this release (blockers and majors resolved), or its
+  trivial-tier skip recorded in STATE.md (`verify` §4 routes this).
 - `scope-guard` clean; specs in this release at status `done`.
 - CI green on the exact commit being shipped. Local green is not CI green. No CI yet (no
   remote/host)? Wire it now. First delivery is the moment. Genuinely impossible? Run the full
