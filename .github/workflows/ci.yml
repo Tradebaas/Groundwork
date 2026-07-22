@@ -18,7 +18,9 @@ jobs:
           node-version: 20
 
       - name: Checks must prove themselves first
-        run: node checks/check.test.mjs
+        run: |
+          node checks/check.test.mjs
+          node checks/progress.test.mjs
 
       - name: Groundwork checks
         run: node checks/check.mjs

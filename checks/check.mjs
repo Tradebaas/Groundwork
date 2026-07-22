@@ -435,7 +435,11 @@ export function runChecks(root) {
       // than no count, so this is a gate rather than a note. Archived specs are history.
       for (const f of tree.files) {
         const r = rel(root, f);
-        if (!/^docs\/specs\/.+\/spec\.md$/.test(r) || r.startsWith('docs/specs/archive/')) continue;
+        // Both spec shapes progress.mjs counts (specFiles): <folder>/spec.md, and a single file
+        // sitting directly in docs/specs/ (templates excluded). The two definitions must cover
+        // the same set, or a spec can steer the progress overview while escaping this gate.
+        const singleFile = /^docs\/specs\/[^/]+\.md$/.test(r) && !basename(r).startsWith('TEMPLATE');
+        if ((!/^docs\/specs\/.+\/spec\.md$/.test(r) && !singleFile) || r.startsWith('docs/specs/archive/')) continue;
         const body = read(f);
         if (!tracesTo(body)) {
           fail(`${r}: missing or unfilled "- **Traces to:**" line. Name the BRIEF SC-item this change serves, or the explicit request it answers (run \`scope\` first if neither exists).`);
