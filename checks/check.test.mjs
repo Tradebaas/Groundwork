@@ -325,10 +325,12 @@ expectClean('manifest-glob-classes', ({ put }) => {
 // and stay silent on the shapes git composes itself.
 const SCOPED = new Set(['SC-1']);
 
-function expectMsgFail(label, message, known = SCOPED) {
+function expectMsgFail(label, message, known = SCOPED, check = null) {
   const found = checkCommitMessage(message, known);
   try {
     assert.ok(found.length, `expected "${label}" to be blocked, but it passed`);
+    // Pin the failing check when named, so a case cannot silently pass for another reason.
+    if (check) assert.ok(found.some((f) => f.check === check), `expected "${label}" to fail on ${check}, got: ${JSON.stringify(found)}`);
     passed++;
   } catch (e) { failedTests.push(`${label}: ${e.message}`); }
 }
@@ -371,6 +373,22 @@ expectMsgClean('commit-trace-fixup', 'fixup! feat(x): y\n');
 // spec-traces and tickets already behave. The trailer is still required; only the id is unchecked.
 expectMsgClean('commit-trace-unscoped-brief', 'feat(x): y\n\nTraces-to: SC-99\n', null);
 expectMsgFail('commit-trace-unscoped-still-needs-trailer', 'feat(x): y\n\nno trailer here\n', null);
+
+// --- commit-subject: the Conventional Commit shape GLOBAL.md mandates ---
+// Format only, on the same parsed subject and the same git-composed exemptions as commit-trace
+// (the merge/revert/fixup cases above prove the exemptions for both checks). The type list stays
+// open: GLOBAL.md's own list ends in "...", and v1.0.0 allows types beyond feat and fix.
+expectMsgFail('commit-subject-no-type', 'Add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+expectMsgFail('commit-subject-uppercase-type', 'Feat(checks): add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+expectMsgFail('commit-subject-colon-missing', 'feat add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+expectMsgFail('commit-subject-space-missing', 'feat:add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+expectMsgFail('commit-subject-space-before-colon', 'feat : add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+expectMsgFail('commit-subject-empty-description', 'feat(checks): \n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+expectMsgFail('commit-subject-empty-scope', 'feat(): add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+expectMsgFail('commit-subject-blank-scope', 'feat( ): add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+expectMsgClean('commit-subject-bare-type', 'chore: tidy the hook comments\n\nTraces-to: SC-1\n');
+expectMsgClean('commit-subject-breaking', 'feat(api)!: drop the v1 routes\n\nTraces-to: SC-1\n');
+expectMsgClean('commit-subject-slash-scope', 'docs(state/log): rotate the July log\n\nTraces-to: SC-1\n');
 
 // installHooks wires the versioned hook path (needs git on PATH).
 {

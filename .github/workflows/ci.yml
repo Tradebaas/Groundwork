@@ -34,7 +34,7 @@ jobs:
       # - name: Build
 
   # The local commit-msg hook can be skipped (--no-verify, or a clone that never ran
-  # --install-hooks), so the trace is re-proven here, where it cannot be bypassed.
+  # --install-hooks), so the message gate is re-proven here, where it cannot be bypassed.
   trace:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Every commit names the scope item it serves
+      - name: Every commit message passes the gate
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
