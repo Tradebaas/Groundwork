@@ -53,7 +53,9 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 ## Efficiency
 
 - One ticket per fresh session. Finish the ticket, update state, then clear context before the
-  next one; a stale context costs more than a cold start against STATE.md.
+  next one; a stale context costs more than a cold start against STATE.md. Whenever you advise a
+  clear, hand back per `checkpoint`: the literal fresh-session command and the resume prompt in a
+  code block, so the user never has to guess what to type.
 - Checkpoint (skill `checkpoint`) activates at ~15% of the context window. Stretching to at most
   ~40% is the owner's call, and only when finishing the current unit of work first is clearly
   better. Past ~40%, always checkpoint.

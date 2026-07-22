@@ -1,5 +1,5 @@
 {
-  "_doc": "Thin Claude adapter (decision 0001: AGENTS.md is the single rulebook). The Stop hook prints one plain-language progress line when the stand has changed since it was last shown, and stays silent otherwise. Reporting only reads project documents; see checks/progress.mjs.",
+  "_doc": "Thin Claude adapter (decision 0001: AGENTS.md is the single rulebook). Two suggest-only Stop hooks: progress.mjs prints one plain-language progress line when the stand has changed since it was last shown; handoff-nudge.mjs prints one reminder when the turn advises a fresh session without a paste-ready prompt. Both only read, never block, and stay silent otherwise.",
   "hooks": {
     "Stop": [
       {
@@ -7,6 +7,10 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/checks/progress.mjs\" --line"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/checks/handoff-nudge.mjs\""
           }
         ]
       }
