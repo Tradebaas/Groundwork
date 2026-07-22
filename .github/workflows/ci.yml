@@ -30,6 +30,8 @@ jobs:
       # - name: Lint & format
       # - name: Tests
       # - name: Dependency audit (fail on high/critical)
+      # - name: SBOM (top-level dependencies at minimum)
+      # - name: License scan
       # - name: Secret scan (gitleaks or equivalent)
       # - name: Build
 
