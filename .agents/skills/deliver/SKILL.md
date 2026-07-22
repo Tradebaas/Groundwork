@@ -17,7 +17,10 @@ description: Release, deploy, or hand over a milestone in a disciplined, repeata
 - The product holds persistent data → `docs/operations/backup-restore.md` exists and the
   restore has been performed once, for real. An untested restore is a hope, not a backup.
 - Compliance register (`docs/compliance/COMPLIANCE.md`) has no open blocking item. For a first
-  release or new data/AI processing, run `comply` first.
+  release or new data/AI processing, run `comply` first. A first release also proves the root
+  `SECURITY.md` holds: the reporting channel works (on GitHub: private vulnerability reporting
+  enabled in the repo settings), and once the product is placed on the market its support
+  period is published (`comply` fills the marked fields).
 
 ## 1. The release
 

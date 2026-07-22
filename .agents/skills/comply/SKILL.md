@@ -35,8 +35,10 @@ assert a deadline or obligation from model memory.
   early. Obligations land 2027-12-02, design for them now, not then.
 - **Accessibility**: EN 301 549 / WCAG 2.1 AA as the working floor (design-guard checks it per
   delivery; this skill checks the claim holds product-wide).
-- **CRA**: secure-by-default posture, vulnerability intake channel, update path; actively
-  exploited vulnerability → reporting duty via ENISA platform (since 2026-09-11).
+- **CRA**: secure-by-default posture; the vulnerability intake channel and the support period
+  are published in the root `SECURITY.md` (ships as a working template; fill its marked TBD
+  fields per product); actively exploited vulnerability → reporting duty via ENISA platform
+  (since 2026-09-11).
 - **Licensing**: every dependency's license compatible with the product's use and distribution;
   copyleft obligations honored; the register lists anything non-trivial.
 
