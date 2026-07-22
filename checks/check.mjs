@@ -110,7 +110,7 @@ function unknownScopeIds(body, known) {
 // system-generated list of "what changed, serving what" can be produced after the fact.
 export function checkCommitMessage(message, known) {
   const failures = [];
-  const fail = (msg) => failures.push({ check: 'commit-trace', msg });
+  const fail = (check, msg) => failures.push({ check, msg });
   // git strips its own comment lines before storing the message; strip them here too, so a
   // commented-out example trailer in a template cannot satisfy the gate.
   const body = message.replace(/\r\n/g, '\n').split('\n').filter((l) => !l.startsWith('#')).join('\n');
@@ -121,6 +121,16 @@ export function checkCommitMessage(message, known) {
   if (!subject) return failures;
   if (/^(Merge|Revert) /.test(subject) || /^(fixup|squash)! /.test(subject)) return failures;
 
+  // GLOBAL.md mandates Conventional Commits v1.0.0; this is the mechanical shape of that
+  // mandate: lowercase type, optional (scope), optional ! for a breaking change, then ": "
+  // and a description. v1.0.0 itself reads types case-insensitively; this repo canonicalizes
+  // on lowercase, as GLOBAL.md's examples do. The type list stays open on purpose (GLOBAL.md's
+  // list ends in "...", and v1.0.0 allows types beyond feat and fix); imperative mood and
+  // "scoped small" need judgment and stay with review.
+  if (!/^[a-z]+(\([^\s()]+\))?!?: \S/.test(subject)) {
+    fail('commit-subject', `subject "${subject}" is not a Conventional Commit. Shape: "type(scope): what changed", e.g. "fix(checks): reject empty scopes" - lowercase type (feat, fix, docs, chore, ...), scope optional, "!" before ":" for a breaking change.`);
+  }
+
   // Git decides what a trailer is: the last block of the message, on one line, with nothing but
   // trailers after it. Matching the key anywhere in the text instead would pass a message whose
   // trailer `git log --format='%(trailers:key=Traces-to)'` cannot read, leaving the gate green
@@ -129,15 +139,15 @@ export function checkCommitMessage(message, known) {
   const parsed = execSync('git interpret-trailers --parse', { input: body, encoding: 'utf8' });
   const entry = parsed.split('\n').find((t) => /^Traces-to:/i.test(t));
   if (entry === undefined) {
-    fail('missing "Traces-to:" trailer. The LAST block of the message must be trailers only, with the trace on one line: "Traces-to: SC-3", or "Traces-to: explicit request: <what was asked>". A line of prose (or a footer) after it puts the trace outside the block and git stops reading it as a trailer.');
+    fail('commit-trace', 'missing "Traces-to:" trailer. The LAST block of the message must be trailers only, with the trace on one line: "Traces-to: SC-3", or "Traces-to: explicit request: <what was asked>". A line of prose (or a footer) after it puts the trace outside the block and git stops reading it as a trailer.');
     return failures;
   }
   const line = entry.replace(/^Traces-to:[ \t]*/i, '');
   if (!traceFilled(line)) {
-    fail('"Traces-to:" is empty or still a placeholder: a trailer that names nothing traces nowhere.');
+    fail('commit-trace', '"Traces-to:" is empty or still a placeholder: a trailer that names nothing traces nowhere.');
   }
   for (const id of traceUnknownIds(line, known)) {
-    fail(`Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
+    fail('commit-trace', `Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
   }
   return failures;
 }
@@ -496,7 +506,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (msgFlag !== -1) {
     const path = process.argv[msgFlag + 1];
     if (!path) {
-      console.error('FAIL [commit-trace] --commit-msg needs the path to the message file.');
+      console.error('FAIL [commit-msg] --commit-msg needs the path to the message file.');
       process.exit(1);
     }
     const found = checkCommitMessage(read(path), scopeIds(root));

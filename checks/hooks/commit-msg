@@ -1,5 +1,6 @@
 #!/bin/sh
-# Groundwork trace gate, versioned in the repo (checks/hooks), wired via `git config core.hooksPath`.
-# Every commit names the scope item it serves, so a sha resolves back to a requirement. Merge,
-# revert and autosquash messages are composed by git and pass untouched.
+# Groundwork commit-message gate, versioned in the repo (checks/hooks), wired via `git config core.hooksPath`.
+# Every commit carries a Conventional Commit subject and names the scope item it serves, so a sha
+# resolves back to a requirement. Merge, revert and autosquash messages are composed by git and
+# pass untouched.
 node checks/check.mjs --commit-msg "$1" || exit 1
