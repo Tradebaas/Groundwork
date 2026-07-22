@@ -4,6 +4,7 @@
 
 - **Blocked by:** 01-slot-picker-at-checkout
 - **Status:** done
+- **Traces to:** BRIEF SC-3: "customers order online and pick up in the shop"
 
 **What to build:** A slot never takes more than 4 orders, even when two customers race for
 the last place. Full slots disappear from the picker; a customer whose chosen slot fills

@@ -4,6 +4,7 @@
 
 - **Blocked by:** none
 - **Status:** done
+- **Traces to:** BRIEF SC-3: "customers order online and pick up in the shop"
 
 **What to build:** A customer finishing checkout picks a pickup slot and sees it confirmed.
 The checkout page shows the offerable slots (today or tomorrow, within opening hours, at
