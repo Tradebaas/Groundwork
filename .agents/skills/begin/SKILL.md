@@ -85,7 +85,8 @@ git init -b main
 node checks/check.mjs --install-hooks   # wires core.hooksPath → checks/hooks (versioned)
 node checks/check.mjs                   # must be green before the first commit
 node checks/progress.mjs --register     # adds this project to the owner's cross-project overview
-git add -A && git commit -m "chore: initialize project on Groundwork"
+git add -A && git commit -m "chore: initialize project on Groundwork" \
+  -m "Traces-to: explicit request: project initialization (begin)"
 ```
 
 If the owner has a remote (GitHub gets CI from `.github/workflows/ci.yml`; another host needs
