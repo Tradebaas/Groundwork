@@ -79,6 +79,7 @@ tickets).
 
 ## 6. Converge when it ships
 
-On done (with `verify` green): status `done`; reconcile every doc the change made stale: update
+On done (with `verify` green and `code-review` clean or recorded as skipped for the trivial
+tier - `verify` §4 routes this): status `done`; reconcile every doc the change made stale: update
 the owning file, add retired wording to the denylist in `checks/config.json`; move the folder to
 `docs/specs/archive/`. A spec that contradicts shipped reality is worse than no spec. ⚓
