@@ -18,10 +18,12 @@ one → NIS2. Every dependency → its license.
 
 ## 2. Verify current state of the law
 
-Regulations shift (the register's dates were verified 2026-07-06 and will age). For each
-applicable regime, confirm today's status via authoritative sources (EUR-Lex, the Commission's
-pages, the AP (autoriteitpersoonsgegevens.nl) for NL) and update the register's dates. Never
-assert a deadline or obligation from model memory.
+Regulations shift (the register carries its last-verified date; it ages). For each applicable
+regime, confirm today's status via authoritative sources (EUR-Lex, the Commission's pages, the
+AP (autoriteitpersoonsgegevens.nl) for NL) and update the register's dates. Never assert a
+deadline or obligation from model memory. Deadline horizon: when any register date falls within
+the next 60 days, re-verify that regime now instead of waiting for the quarterly audit - rules
+move fastest just before they bite.
 
 ## 3. Apply per obligation: build it in, don't bolt it on
 
@@ -31,7 +33,7 @@ assert a deadline or obligation from model memory.
   processor agreements for every third-party service touching personal data; EU data residency
   checked per service; breach path known (72h to the AP).
 - **AI Act**: users told they're interacting with AI; AI-generated content marked
-  machine-readably (Art 50, binding since 2026-08-02); high-risk uses (Annex III) identified
+  machine-readably (Art 50, binding from 2026-08-02); high-risk uses (Annex III) identified
   early. Obligations land 2027-12-02, design for them now, not then. Art 4 AI literacy:
   `docs/compliance/AI-LITERACY.md` is the evidence note; keep its "Who is covered" line true
   for this team and re-check the note at the quarterly audit.
@@ -40,7 +42,7 @@ assert a deadline or obligation from model memory.
 - **CRA**: secure-by-default posture; the vulnerability intake channel and the support period
   are published in the root `SECURITY.md` (ships as a working template; fill its marked TBD
   fields per product); actively exploited vulnerability → reporting duty via ENISA platform
-  (since 2026-09-11).
+  (from 2026-09-11).
 - **Licensing**: every dependency's license compatible with the product's use and distribution;
   copyleft obligations honored; the register lists anything non-trivial.
 
