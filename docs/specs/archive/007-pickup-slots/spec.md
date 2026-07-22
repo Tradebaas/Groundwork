@@ -24,6 +24,28 @@ spread the work and customers stop queueing.
    and include it in the order email.
 4. Staff see each order's slot on the order list, sorted by slot.
 
+## Failure modes
+
+- Two customers race for the last place in a slot: the save that lands second is refused, and
+  that customer sees the friendly "slot just filled" message and picks a new slot with their
+  cart intact - a normal outcome, not an error page. Nothing is logged beyond the order itself.
+- No slot is offerable (everything left today is full or under 45 minutes away, and tomorrow
+  is booked out): checkout says all pickup slots are taken and to try again tomorrow, instead
+  of showing an empty picker.
+- The order email fails after the order is saved: the order stands; the customer has already
+  seen the slot on the confirmation page and staff see it on the order list. The failed send
+  is logged.
+
+## Settled decisions
+
+- Slots are 15 minutes with at most 4 orders each: the owner's numbers from how the counter
+  already works (see the sign-off).
+- A slot is claimed only when the order is confirmed, never reserved while browsing: holding
+  places in a 4-order slot is more machinery than the counter needs, and the "slot just
+  filled" message covers the rare race.
+- The 45-minute minimum lead: the time the counter needs to have an order packed and ready.
+- Only today and tomorrow are bookable: the shop plans no further ahead than tomorrow's bake.
+
 ## Testing seams
 
 - The slot service's public function: give it a clock time and existing orders, it returns
@@ -38,5 +60,5 @@ spread the work and customers stop queueing.
 
 ## Risks & open questions
 
-- Two customers can race for the last place in a slot; the order that saves second must get a
-  friendly "slot just filled" message, not an error page. Covered by criterion 2's tests.
+- None open at sign-off: the slot race raised in the interview was settled into the failure
+  modes above and criterion 2's tests before building started.
