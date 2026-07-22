@@ -3,9 +3,12 @@
   "denylist": [
     { "pattern": "0001-0008 are Groundwork's own", "why": "retired manifest wording; the decision-record note no longer carries a number range (it went stale at 0009)" },
     { "pattern": "\\b(14 controles|19 skills)\\b", "why": "retired explainer heading counts; headings stay numberless, the hero stat strip owns live counts (drifted once: heading said 14 while check.mjs had 17)" },
+    { "pattern": "\\b14 (vastgelegde )?besluiten\\b|>14</div><div class=\"l\">Vastgelegde", "why": "retired stat-strip count: 15 recorded decisions exist since 0015; bump the strip when a decision lands, until the counts are derived (GAP Phase 3)" },
     { "pattern": "\\b2027-06-28\\b", "why": "wrong EAA date that once stood in the register: pre-2025 service contracts run until 2030-06-28 at the latest (EAA Art 32(2), verified 2026-07-22), no EU/NL deadline exists on 2027-06-28" },
     { "pattern": "NL still pending", "why": "retired NIS2 register wording; the Cyberbeveiligingswet is in force 2026-08-15, the register row owns the current status" },
-    { "pattern": "Omnibus June 2026", "why": "retired AI Act citation; the omnibus amendment was signed 2026-07-08 (OJ publication pending), the register row owns the current citation" }
+    { "pattern": "Omnibus June 2026", "why": "retired AI Act citation; the omnibus amendment was signed 2026-07-08 (OJ publication pending), the register row owns the current citation" },
+    { "pattern": "hard (budget|cap|limit) (of )?(≤|<=)? ?150", "why": "retired 0001 claim; since agent-file-cap the scheme is two-tier: working budget 150 for AGENTS.md, hard cap 200 for every agent rulebook file" },
+    { "pattern": "pip install ['\"]?markitdown|from markitdown import", "why": "retired ingest snippets; install/CLI/API syntax is read from the markitdown README at use time (skill-author: no code snippets that go stale)" }
   ],
   "styleBans": [
     { "pattern": "\\bdelve(s|d|ing)?\\b", "why": "AI-tell verb; say 'look at', 'go into' or just state the point" },

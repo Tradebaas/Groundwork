@@ -22,45 +22,18 @@ question, not the whole thing. Do not bulk-convert a folder "to have it".
 - The product being built must accept and parse user-uploaded documents (then markitdown, or its
   Python API, becomes part of the product, not just a build-time helper).
 
-## Install (only when you actually convert something)
+## Install and invoke (from the living source)
 
-Python 3.10 or higher. Node stays Groundwork's only always-on requirement; this is opt-in.
+Python with pip is the prerequisite (minimum version per the README); Node stays Groundwork's
+only always-on requirement, so this is opt-in, installed only when you actually convert
+something. Take the exact syntax from the markitdown README (linked above) at the moment of
+use: the install command with optional per-format extras, the CLI, the `markitdown-mcp` server
+(one `convert_to_markdown` tool, for tools that speak MCP) and the Python `MarkItDown` API all
+live there. This skill deliberately embeds none of those commands: frozen copies drift from
+upstream (skill-author rule: no code snippets that go stale, point at the living source).
 
-```bash
-pip install 'markitdown[all]'          # everything
-pip install 'markitdown[pdf,docx,pptx]' # or just the formats you need
-```
-
-## Convert, at the command line
-
-```bash
-markitdown report.pdf -o report.md     # write Markdown next to nothing you did not choose
-markitdown report.pdf > report.md       # same, via redirect
-cat report.pdf | markitdown             # from a pipe
-```
-
-Supported in: PDF, PowerPoint, Word, Excel, images (EXIF + OCR), audio (EXIF + transcription),
+It converts: PDF, PowerPoint, Word, Excel, images (EXIF + OCR), audio (EXIF + transcription),
 HTML, CSV, JSON, XML, ZIP (walks the archive), YouTube URLs, EPub.
-
-## Convert, agent-native (MCP)
-
-For tools that speak MCP, run the server and call one tool instead of shelling out:
-
-```bash
-pip install markitdown-mcp
-markitdown-mcp                                   # STDIO (default)
-markitdown-mcp --http --host 127.0.0.1 --port 3001  # local HTTP/SSE; localhost only
-```
-
-It exposes `convert_to_markdown(uri)` for `http:`, `https:`, `file:`, and `data:` URIs.
-
-## Convert, inside product code
-
-```python
-from markitdown import MarkItDown
-md = MarkItDown()
-print(md.convert("upload.xlsx").text_content)
-```
 
 ## Where the output goes
 
