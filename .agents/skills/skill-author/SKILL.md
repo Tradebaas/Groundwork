@@ -6,7 +6,9 @@ description: Create a new project-fitting skill correctly, or decide that none i
 # skill-author: grow the library deliberately, or not at all
 
 The studied failure mode is real: a library of 557 imported skills with 3 in use. Skills are
-context spent on every session's listing. Each one must earn that.
+context spent on every session's listing. Each one must earn that. The general rule this ladder
+instances - every addition declares where it is paid, and the always-on surface carries the
+highest bar - is decision 0015.
 
 ## 1. Should this be a skill? (ladder: stop at the first rung)
 
