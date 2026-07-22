@@ -1,6 +1,6 @@
 ---
 name: calibrate
-description: Pick the model and effort level for a work session BEFORE it starts, matched to the work planned and to token cost. Load when the user asks which model or effort to use, says "welk model", "calibrate", "model kiezen", "effort", or describes the next session's work and wants the cheapest setup that will finish it in one pass. Never for switching mid-session; the prompt cache is per model, so a mid-session switch re-reads the whole history at full price.
+description: Pick the model and effort level for a work session BEFORE it starts, matched to the work planned and to token cost. Load when the user asks which model or effort to use, says "which model", "calibrate", "pick a model", "effort", or describes the next session's work and wants the cheapest setup that will finish it in one pass. Never for switching mid-session; the prompt cache is per model, so a mid-session switch re-reads the whole history at full price.
 ---
 
 # calibrate: right-size the model and effort before the session starts

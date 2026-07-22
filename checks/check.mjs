@@ -305,8 +305,10 @@ export function runChecks(root) {
     'skills'() {
       const skillsDir = join(root, '.agents', 'skills');
       const agents = read(join(root, 'AGENTS.md'));
+      const dirs = new Set();
       for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
         if (!entry.isDirectory()) continue;
+        dirs.add(entry.name);
         const p = join(skillsDir, entry.name, 'SKILL.md');
         if (!existsSync(p)) { fail(`skill "${entry.name}" has no SKILL.md`); continue; }
         const body = read(p);
@@ -321,6 +323,10 @@ export function runChecks(root) {
         const bodyLines = body.split('\n').length;
         if (bodyLines > cfg.budgets.skillMdLines) fail(`skill "${entry.name}": ${bodyLines} lines (budget ${cfg.budgets.skillMdLines}): move reference material to files next to SKILL.md`);
         if (!agents.includes(`\`${entry.name}\``)) fail(`skill "${entry.name}" is not registered in the AGENTS.md skills table`);
+      }
+      // reverse direction; only skills-table rows open with a backticked name in the first cell
+      for (const m of agents.matchAll(/^\|\s*`([a-z0-9-]+)`\s*\|/gm)) {
+        if (!dirs.has(m[1])) fail(`the AGENTS.md skills table lists "${m[1]}" but .agents/skills/${m[1]} does not exist: remove the row or restore the skill`);
       }
     },
 

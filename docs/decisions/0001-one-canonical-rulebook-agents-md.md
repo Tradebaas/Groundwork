@@ -21,8 +21,11 @@ the `@AGENTS.md` import bridge) and Gemini CLI (needs one settings line).
 
 ## Decision & consequences
 
-`AGENTS.md` is the only rulebook; hard budget ≤150 lines (research: adherence drops and cost
-rises beyond ~150-300 lines; every line must earn its place). `CLAUDE.md` contains only
+`AGENTS.md` is the only rulebook, on a two-tier budget owned by `checks/config.json`: a working
+budget of 150 lines for this repo's rulebook (`budget-agents`) and a hard cap of 200 lines on
+every agent rulebook file (`agent-file-cap`). Amended 2026-07-22: this record originally called
+150 the hard budget, from before the two-tier scheme. The research holds: adherence drops and
+cost rises beyond ~150-300 lines; every line must earn its place. `CLAUDE.md` contains only
 `@AGENTS.md`; `.gemini/settings.json` points context at AGENTS.md. The check script fails the
-build if a bridge gains content of its own or the budget is exceeded. Rule details that don't fit
+build if a bridge gains content of its own or a budget is exceeded. Rule details that don't fit
 the budget live in skills and `docs/`, loaded on demand.

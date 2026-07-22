@@ -1,6 +1,6 @@
 ---
 name: checkpoint
-description: Flush a lean mid-session handoff into STATE.md so you can clear the context and resume the same work in a fresh, cheap session. Load when one chat session has used roughly 15% of the context window (the activation point; past ~40% it is urgent), when the session feels long or slow, or when the user says "checkpoint", "handoff", "samenvatting", "tokens sparen", "verse sessie" or "/clear en verder". Not for milestones or transfer to another person: that is `handover`.
+description: Flush a lean mid-session handoff into STATE.md so you can clear the context and resume the same work in a fresh, cheap session. Load when one chat session has used roughly 15% of the context window (the activation point; past ~40% it is urgent), when the session feels long or slow, or when the user says "checkpoint", "handoff", "summary", "save tokens", "fresh session" or "/clear and continue". Not for milestones or transfer to another person: that is `handover`.
 ---
 
 # checkpoint: reset the context, keep the thread
