@@ -25,6 +25,12 @@ component names. The progress overview quotes these lines back to them verbatim
 A fuzzy word in any answer ("you said account: the Customer or the User?") gets pinned in the
 glossary `docs/product/CONTEXT.md` the moment it surfaces.
 
+Sharpen at the project's class depth: `begin` §2 defines personal, team, and organization
+and names which BRIEF discovery rows each class answers. A change that shifts the class
+upward - a personal tool gains team users, a team tool reaches a client - reopens every
+BRIEF discovery row that says `n/a`: re-ask those at the new depth before widening anything
+else.
+
 ## Triage: INTAKE.md
 
 Nothing is built from INTAKE. Per item, propose one of:
