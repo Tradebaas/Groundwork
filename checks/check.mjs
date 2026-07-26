@@ -10,10 +10,13 @@ import {
   readFileSync, readdirSync, existsSync, readlinkSync, chmodSync,
 } from 'node:fs';
 import { execSync } from 'node:child_process';
-import { join, dirname, resolve, relative, extname, isAbsolute, basename } from 'node:path';
+import { join, dirname, resolve, relative, extname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // The brief is parsed in exactly one place; the progress overview already owns that reading.
 import { parseBrief, parseManifest, isSpecPath, BRIEF_PATH, MANIFEST_PATH } from './progress.mjs';
+// What counts as a link, and which files are this project's documents, are defined once and
+// read here and by the board.
+import { parseLinks, linkTargets, readDocuments, SKIP_DIRS } from './links.mjs';
 import { enforcementReport, formatReport } from './enforcement.mjs';
 
 const TEXT_EXT = new Set([
@@ -27,7 +30,6 @@ const CODE_EXT = new Set([
   '.swift', '.kt', '.php', '.rs', '.c', '.cpp', '.h', '.hpp', '.dart', '.scala',
   '.ex', '.exs', '.lua',
 ]);
-const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', 'coverage', '.next']);
 
 function walk(root, dir = root, out = { files: [], dirs: [] }) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -221,15 +223,15 @@ export function runChecks(root) {
     },
 
     'links'() {
-      const mdFiles = tree.files.filter((f) => f.endsWith('.md'));
-      for (const f of mdFiles) {
-        const prose = read(f).replace(/```[\s\S]*?```/g, '');
-        for (const m of prose.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
-          const target = m[1].split('#')[0];
-          if (!target || /^(https?:|mailto:)/.test(target) || isAbsolute(target)) continue;
-          if (!existsSync(resolve(dirname(f), decodeURI(target)))) {
-            fail(`${rel(root, f)}: broken link to ${m[1]}`);
-          }
+      for (const doc of readDocuments(root)) {
+        for (const link of parseLinks(doc.text)) {
+          // A markdown link is an assertion: the writer made it clickable, so a target that is
+          // not there is broken. A backticked path is a mention, and a mention that resolves to
+          // nothing is prose: this framework's own documents name files a project creates later.
+          if (!link.asserted) continue;
+          // An assertion has exactly one place it can land: the document it was written in.
+          const [target] = linkTargets(doc.path, link);
+          if (!existsSync(join(root, target))) fail(`${doc.path}: broken link to ${link.raw}`);
         }
       }
     },
