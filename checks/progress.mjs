@@ -71,18 +71,42 @@ export const WORDS = {
 
 // ---------------------------------------------------------------- reading
 
-export function parseBrief(text) {
-  const name = (text.match(/^- \*\*Name:\*\*\s*(.+)$/m) || [])[1]?.trim();
-  const section = text.split(/^## /m).find((s) => /^In scope\b/i.test(s)) || '';
-  // A scope item is one bullet, not one line: anything worth testing rarely fits in 95 columns,
-  // and reading only the first line would quote half a sentence back at the owner. Indented
-  // continuation lines belong to the item above; a blank line or an unindented line ends it.
+const tidy = (t) => t.replace(/\s*<!--[\s\S]*$/, '').replace(/\s+/g, ' ').trim();
+// A template still carrying its placeholders is not an answer; saying "0 of 1 done" would read
+// as progress on something that was never decided.
+const placeholder = (t) => !t || /^TBD\b/i.test(t);
+const section = (text, head) => text.split(/^## /m).find((s) => head.test(s)) || '';
+
+// Anything worth writing rarely fits in 95 columns, so a value runs on across indented lines
+// and is read whole: half a sentence quoted back at the owner is a broken report, not a
+// cosmetic issue. A blank line or a line that starts something new ends the value.
+function joinWrapped(lines, i, first) {
+  let value = first;
+  for (let j = i + 1; j < lines.length && /^\s+\S/.test(lines[j]); j += 1) value += ` ${lines[j].trim()}`;
+  return value;
+}
+
+function fieldValue(text, label) {
+  const lines = text.split('\n');
+  const head = new RegExp(`^- \\*\\*${label}:\\*\\*\\s*(.*)$`);
+  for (let i = 0; i < lines.length; i += 1) {
+    const m = lines[i].match(head);
+    if (m) return tidy(joinWrapped(lines, i, m[1]));
+  }
+  return '';
+}
+
+// The same rule for a list: one bullet is one item, however many lines it takes.
+const SCOPE_BULLET = /^[-*]\s*\**\s*(SC-\d+)\**[:.]?\s*(.*)$/;
+const PLAIN_BULLET = /^[-*]\s+(.*)$/;
+
+function bulletItems(text, re, withId) {
   const items = [];
   let current = null;
-  for (const line of section.split('\n')) {
-    const start = line.match(/^[-*]\s*\**\s*(SC-\d+)\**[:.]?\s*(.*)$/);
+  for (const line of text.split('\n')) {
+    const start = line.match(re);
     if (start) {
-      current = { id: start[1], title: start[2] };
+      current = withId ? { id: start[1], title: start[2] } : { title: start[1] };
       items.push(current);
     } else if (current && /^\s+\S/.test(line)) {
       current.title += ` ${line.trim()}`;
@@ -90,11 +114,23 @@ export function parseBrief(text) {
       current = null;
     }
   }
-  for (const i of items) i.title = i.title.replace(/\s*<!--[\s\S]*$/, '').replace(/\s+/g, ' ').trim();
-  // A template still carrying its placeholders is not scope; saying "0 of 1 done" would read
-  // as progress on something that was never decided.
-  const real = items.filter((i) => i.title && !/^TBD\b/i.test(i.title));
-  return { name: name && !/^TBD\b/i.test(name) ? name : null, items: real, placeholders: items.length - real.length };
+  for (const i of items) i.title = tidy(i.title);
+  return items;
+}
+
+export function parseBrief(text) {
+  const name = fieldValue(text, 'Name');
+  const goal = fieldValue(text, 'One sentence');
+  const items = bulletItems(section(text, /^In scope\b/i), SCOPE_BULLET, true);
+  const real = items.filter((i) => !placeholder(i.title));
+  return {
+    name: placeholder(name) ? null : name,
+    goal: placeholder(goal) ? null : goal,
+    items: real,
+    outOfScope: bulletItems(section(text, /^Out of scope\b/i), PLAIN_BULLET, false)
+      .filter((i) => !placeholder(i.title)),
+    placeholders: items.length - real.length,
+  };
 }
 
 export function parseSpec(text) {
@@ -106,9 +142,28 @@ export function parseSpec(text) {
   return { status, traces, tracesDeclared: Boolean(tracesLine.trim()) };
 }
 
-// Where the brief lives, in one place: the parser home owns it, and the gate (check.mjs) and
-// the board (cockpit.mjs) read it from here rather than each spelling the path again.
+// Where the shared documents live, in one place: the parser home owns these paths, and the gate
+// (check.mjs) and the board (cockpit.mjs) read them from here rather than each spelling a path
+// again. The handoff is a list because the session protocol prefers a maintainer-local file
+// whenever one exists.
 export const BRIEF_PATH = 'docs/product/BRIEF.md';
+export const MANIFEST_PATH = 'docs/README.md';
+export const HANDOFF_PATHS = ['docs/state/STATE.local.md', 'docs/state/STATE.md'];
+
+// The manifest already has to list every document, and the gate already fails when one is
+// missing from it, so the map of which file owns which fact is read straight off it.
+export function parseManifest(text) {
+  const rows = [];
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('|')) continue;
+    const cells = trimmed.split('|').slice(1, -1).map((c) => c.trim());
+    // The header and the divider carry no backticked path, which is what makes a row a row.
+    const path = cells.length >= 3 ? (cells[0].match(/`([^`]+)`/) || [])[1] : null;
+    if (path) rows.push({ path, tier: cells[1], owns: cells[2] });
+  }
+  return rows;
+}
 
 // One definition of what counts as a spec: <folder>/spec.md, or a single .md sitting directly
 // in docs/specs/; the TEMPLATE files are skeletons, not specs. Shared with check.mjs's
@@ -136,16 +191,24 @@ function specFiles(root) {
   return out;
 }
 
-function handoffNow(root) {
-  // The session protocol reads STATE.local.md when it exists; this follows the same rule.
-  for (const f of ['STATE.local.md', 'STATE.md']) {
-    const p = join(root, 'docs', 'state', f);
+// The next step, and the file it came from. The board names that file on its card, so the
+// lookup order lives here rather than being guessed a second time.
+export function readHandoff(root) {
+  let owning = null;
+  for (const rel of HANDOFF_PATHS) {
+    const p = join(root, rel);
     if (!existsSync(p)) continue;
-    const line = (read(p).match(/^- \*\*Now ▶\*\*\s*(.+)$/m)
-      || read(p).match(/Now ▶\*{0,2}\s*(.+)$/m) || [])[1];
-    if (line) return line.replace(/<!--.*?-->/g, '').replace(/\*\*/g, '').trim();
+    if (!owning) owning = rel;
+    const lines = read(p).split('\n');
+    for (let i = 0; i < lines.length; i += 1) {
+      const m = lines[i].match(/^- \*\*Now ▶\*\*\s*(.+)$/) || lines[i].match(/Now ▶\*{0,2}\s*(.+)$/);
+      if (!m) continue;
+      const now = joinWrapped(lines, i, m[1])
+        .replace(/<!--.*?-->/g, '').replace(/\*\*/g, '').replace(/\s+/g, ' ').trim();
+      if (now) return { path: rel, now };
+    }
   }
-  return null;
+  return { path: owning, now: null };
 }
 
 function language(root) {
@@ -155,9 +218,15 @@ function language(root) {
   return /nederlands|dutch|\bnl\b/i.test(declared) ? 'nl' : 'en';
 }
 
+// The brief as its own document. The board renders more of it than the overview counts, so it
+// reads the file through this rather than through the derived project.
+export function readBrief(root) {
+  const p = join(root, BRIEF_PATH);
+  return existsSync(p) ? parseBrief(read(p)) : null;
+}
+
 export function readProject(root) {
-  const briefPath = join(root, BRIEF_PATH);
-  const brief = existsSync(briefPath) ? parseBrief(read(briefPath)) : { name: null, items: [], placeholders: 0 };
+  const brief = readBrief(root) || { name: null, items: [], goal: null, outOfScope: [], placeholders: 0 };
   const specs = specFiles(root).map((f) => ({ file: basename(dirname(f)) === 'specs' ? basename(f) : basename(dirname(f)), ...parseSpec(read(f)) }));
   return {
     root,
@@ -165,7 +234,7 @@ export function readProject(root) {
     lang: language(root),
     scopeItems: brief.items,
     specs,
-    now: handoffNow(root),
+    now: readHandoff(root).now,
   };
 }
 

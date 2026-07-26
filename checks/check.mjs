@@ -13,7 +13,7 @@ import { execSync } from 'node:child_process';
 import { join, dirname, resolve, relative, extname, isAbsolute, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // The brief is parsed in exactly one place; the progress overview already owns that reading.
-import { parseBrief, isSpecPath, BRIEF_PATH } from './progress.mjs';
+import { parseBrief, parseManifest, isSpecPath, BRIEF_PATH, MANIFEST_PATH } from './progress.mjs';
 import { enforcementReport, formatReport } from './enforcement.mjs';
 
 const TEXT_EXT = new Set([
@@ -205,15 +205,14 @@ export function runChecks(root) {
     },
 
     'docs-manifest'() {
-      const tableRows = read(join(root, 'docs', 'README.md')).split('\n')
-        .filter((l) => l.trimStart().startsWith('|'));
-      const listed = tableRows.flatMap((l) => [...l.matchAll(/`([^`]+)`/g)].map((m) => m[1]))
-        .filter((p) => !p.includes(' ') && (p.includes('/') || p.includes('.')));
+      // The manifest is read in exactly one place, the same rows the board renders: two readers
+      // of one table drift, and a row the gate cannot see is a document nobody has to list.
+      const listed = parseManifest(read(join(root, MANIFEST_PATH))).map((r) => r.path);
       const literals = new Set(listed.filter((p) => !/[*[]/.test(p)));
       const patterns = listed.filter((p) => /[*[]/.test(p)).map(globToRegex);
       for (const f of tree.files) {
         const r = rel(root, f);
-        if (!r.startsWith('docs/') || r === 'docs/README.md' || r.endsWith('.gitkeep')) continue;
+        if (!r.startsWith('docs/') || r === MANIFEST_PATH || r.endsWith('.gitkeep')) continue;
         const inDocs = r.slice('docs/'.length);
         if (!literals.has(inDocs) && !patterns.some((re) => re.test(inDocs))) {
           fail(`${r} is not listed in docs/README.md: every docs file needs a manifest row.`);
