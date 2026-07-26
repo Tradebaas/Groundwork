@@ -50,6 +50,19 @@ Everything else you decide later, and say so.
 5. **Success**: how the owner will know it worked.
 6. **Ownership**: who signs off on scope changes (default: the owner you're talking to).
 
+**Discovery, proportional to project class.** The answers above size the project: *personal*
+(the owner is the user), *team* (others inside one organization depend on it), or
+*organization* (a client, systems of record, a compliance regime, or real money involved).
+The class usually becomes clear at questions 2 and 4; extend the announced counter when it
+does. Class names which of BRIEF's discovery rows to ask about - the row comments there
+carry what each row holds, and every row the class does not ask gets `n/a (<class>)` per
+BRIEF's own header rule. Never interrogate a hobby project:
+
+- **Personal**: ask nothing extra.
+- **Team**: ask the current situation and cost of doing nothing, systems & integrations,
+  and rollout & adoption.
+- **Organization**: ask every discovery row, concretely, one topic at a time.
+
 Do **not** ask about stack (that's the `stack` skill, argued on merit) or design details (the
 `design` skill asks those when the time comes).
 
@@ -69,9 +82,10 @@ section; idea changed, or the owner overruled a real concern → a decision reco
 
 ## 4. Write it down
 
-- Fill `docs/product/BRIEF.md`: numbered SC-items, explicit out-of-scope, constraints. Write
-  each SC-item in the owner's own words, as something they would recognize without translation:
-  the progress overview quotes these lines back to them (`node checks/progress.mjs`).
+- Fill `docs/product/BRIEF.md`: numbered SC-items, explicit out-of-scope, constraints, and
+  the discovery rows at the interviewed depth. Write each SC-item in the owner's own words,
+  as something they would recognize without translation: the progress overview quotes these
+  lines back to them (`node checks/progress.mjs`).
 - Seed the glossary `docs/product/CONTEXT.md` with the domain terms the interview surfaced;
   the file's template comment defines the entry format.
 - Fill the handoff block in `docs/state/STATE.md`: status active, phase `prepare`, Now ▶ next step.
