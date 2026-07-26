@@ -230,6 +230,21 @@ test('a spec is recognised by shape, in the archive as well as outside it', () =
   ]) assert.equal(isSpecPath(p), false, `${p} must not count as a spec`);
 });
 
+// A warning has to name its own evidence: the spec it points at is the only thing telling the
+// owner where to look. A folder spec is known by its folder, a single-file spec by its file name,
+// and archive/ is a spec root exactly like docs/specs/ is - so an archived single-file spec has to
+// keep its own name instead of reporting itself as "archive", which names no document at all.
+test('a spec is named by its own name in the archive too', () => {
+  const { root } = fixture({
+    'docs/product/BRIEF.md': BRIEF('- SC-1 bonnen importeren'),
+    'docs/specs/archive/002-overzicht.local.md': spec('done', 'BRIEF SC-9'),
+  });
+  assert.deepEqual(derive(readProject(root)).warnings, [
+    { kind: 'unknownItem', spec: '002-overzicht.local.md' },
+  ]);
+  rmSync(root, { recursive: true, force: true });
+});
+
 // ---------------------------------------------------------------- whole project
 
 test('a real project directory is read end to end', () => {
