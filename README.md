@@ -76,8 +76,9 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
   answer to "what is done and what is left", derived from the brief, the specs and the handoff,
   with `--all` covering every project you have started this way. Add `--serve` and the same
   answer opens as a page on this machine only: the goal, the stand, the next step, which file
-  owns which fact, and whether the gates are armed on this clone. Every card is read from the
-  file that owns it at the moment you open the page, and nothing is stored.
+  owns which fact, how the documents point at each other, and whether the gates are armed on
+  this clone. Every card is read from the file that owns it at the moment you open the page, and
+  nothing is stored.
 
 ## Requirements
 

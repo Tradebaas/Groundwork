@@ -1,25 +1,22 @@
 #!/usr/bin/env node
-// Self-test for the cockpit: the path decision, the board's cards, and the server that carries
-// them (checks/cockpit-path.mjs, cockpit-page.mjs, cockpit.mjs).
-// The file route is the one place where this repository serves anything at all, so its decision
-// is proven here directly, in every spelling that has ever been used to leave a root. The board itself is proven to keep its promise: the owner's
-// own sentences, a named card instead of an empty one, and no card taking the page down.
+// Self-test for the board's cards and the server that carries them (checks/cockpit-page.mjs and
+// checks/cockpit.mjs). The board is proven to keep its promise: the owner's own sentences, a
+// named card instead of an empty one, and no card taking the page down.
+// What may be opened is proven next door, in checks/cockpit-path.test.mjs.
 // Run: node --test checks/cockpit.test.mjs
 
-import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, unlinkSync, rmSync, realpathSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
 import { request as httpRequest } from 'node:http';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decidePath, hostAllowed } from './cockpit-path.mjs';
+import { fixture } from './cockpit-fixture.mjs';
 import {
   escapeHtml, formatSize, card, progressCard, goalCard, nextStepCard, fileMapCard, gatesCard,
-  renderBoard, boardPage,
+  linksCard, renderBoard, boardPage,
 } from './cockpit-page.mjs';
 import { createBoardServer } from './cockpit.mjs';
 import { derive, parseManifest } from './progress.mjs';
+import { linkGraph } from './links.mjs';
 
 const BRIEF = (items) => `# BRIEF
 
@@ -38,16 +35,6 @@ const SPEC = (status, traces) => `# 001: something
 - **Traces to:** ${traces}
 `;
 
-function fixture(files = {}) {
-  const root = mkdtempSync(join(tmpdir(), 'groundwork-cockpit-'));
-  const put = (p, body) => {
-    mkdirSync(dirname(join(root, p)), { recursive: true });
-    writeFileSync(join(root, p), body);
-  };
-  for (const [p, body] of Object.entries(files)) put(p, body);
-  return { root, put, clean: () => rmSync(root, { recursive: true, force: true }) };
-}
-
 const project = (over = {}) => ({ name: 'Kassaboek', lang: 'en', now: null, ...over });
 const items = [
   { id: 'SC-1', title: 'import receipts with the camera' },
@@ -56,123 +43,6 @@ const items = [
 ];
 // What a reader actually sees, with the markup taken away.
 const visible = (html) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-
-// ---------------------------------------------------------------- the path decision
-
-test('a normal project file inside the root is served', () => {
-  const f = fixture({ 'docs/product/BRIEF.md': BRIEF('- SC-1 iets') });
-  const d = decidePath(f.root, 'docs/product/BRIEF.md', { isIgnored: () => false });
-  assert.equal(d.ok, true);
-  assert.equal(d.rel, 'docs/product/BRIEF.md');
-  f.clean();
-});
-
-// Every spelling that has ever walked out of a document root. The answer is identical each
-// time, so a caller learns nothing from which refusal it got.
-test('a path that leaves the root is refused, in every spelling', () => {
-  const f = fixture({ 'docs/inside.md': 'inside' });
-  writeFileSync(join(f.root, '..', 'groundwork-cockpit-outside.md'), 'secret');
-  const nope = { isIgnored: () => false };
-  for (const spelling of [
-    '../groundwork-cockpit-outside.md',
-    'docs/../../groundwork-cockpit-outside.md',
-    './../groundwork-cockpit-outside.md',
-    '..%2Fgroundwork-cockpit-outside.md',
-    '%2e%2e/groundwork-cockpit-outside.md',
-    '..\\groundwork-cockpit-outside.md',
-    '/etc/hosts',
-    // An absolute path is refused as a spelling, even when it names a file that is inside the
-    // project. Both forms of the root are asked for: on a machine where the temp directory is
-    // itself a symlink, only the second one reaches the containment check as a real prefix,
-    // and a guard that leans on containment alone serves it (caught by CI on Linux).
-    join(f.root, 'docs', 'inside.md'),
-    join(realpathSync(f.root), 'docs', 'inside.md'),
-    'C:\\Windows\\win.ini',
-    '',
-    '   ',
-  ]) {
-    assert.deepEqual(decidePath(f.root, spelling, nope), { ok: false }, `permitted: ${spelling}`);
-  }
-  rmSync(join(f.root, '..', 'groundwork-cockpit-outside.md'), { force: true });
-  f.clean();
-});
-
-// A link is judged by where it lands, not by where it sits.
-test('a symlink whose target is outside the root is refused', () => {
-  const f = fixture({ 'docs/inside.md': 'inside' });
-  const outside = join(f.root, '..', 'groundwork-cockpit-target.md');
-  writeFileSync(outside, 'secret');
-  symlinkSync(outside, join(f.root, 'docs', 'escape.md'));
-  assert.deepEqual(decidePath(f.root, 'docs/escape.md', { isIgnored: () => false }), { ok: false });
-  rmSync(outside, { force: true });
-  f.clean();
-});
-
-// A path is spelled from inside the project or it is refused, even when it would loop back in
-// through a link outside the root.
-test('a path spelled from outside the root is refused even when it lands inside', () => {
-  const f = fixture({ 'docs/inside.md': 'inside' });
-  const loop = join(f.root, '..', 'groundwork-cockpit-loop');
-  // unlink, not rm: the link points at a directory, and only the link may go.
-  const drop = () => { try { unlinkSync(loop); } catch { /* not there */ } };
-  drop();
-  symlinkSync(f.root, loop);
-  const asked = `../${loop.split('/').pop()}/docs/inside.md`;
-  assert.deepEqual(decidePath(f.root, asked, { isIgnored: () => false }), { ok: false });
-  drop();
-  f.clean();
-});
-
-test('the git directory, environment files and keys are refused', () => {
-  const f = fixture({
-    '.git/config': '[core]',
-    '.env': 'TOKEN=live-secret',
-    '.env.production': 'TOKEN=live-secret',
-    'deploy.key': 'PRIVATE KEY',
-    'node_modules/pkg/index.js': 'module.exports = 1',
-  });
-  const nope = { isIgnored: () => false };
-  for (const p of ['.git/config', '.env', '.env.production', 'deploy.key', 'node_modules/pkg/index.js']) {
-    assert.deepEqual(decidePath(f.root, p, nope), { ok: false }, `permitted: ${p}`);
-  }
-  f.clean();
-});
-
-// What the project keeps out of git is what the owner already decided is not shared. The board
-// is not the place where that decision quietly stops holding.
-test('a file the project ignores in git is refused', () => {
-  const f = fixture({
-    '.gitignore': '*.local.md\n',
-    'docs/state/STATE.local.md': 'private handoff',
-    'docs/state/STATE.md': 'shared handoff',
-  });
-  execFileSync('git', ['init', '-q'], { cwd: f.root, stdio: 'ignore' });
-  assert.equal(decidePath(f.root, 'docs/state/STATE.local.md').ok, false);
-  assert.equal(decidePath(f.root, 'docs/state/STATE.md').ok, true);
-  f.clean();
-});
-
-test('a missing file and a directory are refused like anything else', () => {
-  const f = fixture({ 'docs/inside.md': 'inside' });
-  const nope = { isIgnored: () => false };
-  assert.deepEqual(decidePath(f.root, 'docs/nothing-here.md', nope), { ok: false });
-  assert.deepEqual(decidePath(f.root, 'docs', nope), { ok: false });
-  assert.deepEqual(decidePath(f.root, 'docs/inside.md\0.png', nope), { ok: false });
-  f.clean();
-});
-
-// ---------------------------------------------------------------- the Host check
-
-test('only a loopback Host is answered', () => {
-  for (const h of ['localhost', 'localhost:8321', '127.0.0.1', '127.0.0.1:8321', '127.1.2.3', '[::1]:8321']) {
-    assert.equal(hostAllowed(h), true, `refused: ${h}`);
-  }
-  // A page on another site can point a name it controls at 127.0.0.1; the Host header is what
-  // that attack cannot fake, so this is the line that stops it reading the owner's files.
-  for (const h of ['evil.example', 'evil.example:8321', '10.0.0.5', 'localhost.evil.example', '', undefined, '::1']) {
-    assert.equal(hostAllowed(h), false, `answered: ${h}`);
-  }
-});
 
 // ---------------------------------------------------------------- rendering
 
@@ -321,6 +191,43 @@ test('the file map keeps what is always current in view and names what owns what
   assert.match(visible(fileMapCard([], 'en')), /manifest is missing.*begin skill/);
 });
 
+test('the link card names what is load-bearing and folds the long lists behind their counts', () => {
+  const pointsAtBrief = 'the brief `docs/product/BRIEF.md`';
+  const graph = linkGraph([
+    { path: 'AGENTS.md', text: pointsAtBrief },
+    { path: 'docs/state/STATE.md', text: pointsAtBrief },
+    { path: 'docs/state/DEBT.md', text: pointsAtBrief },
+    // The manifest names a file from inside docs/, and it is the same document either way.
+    { path: 'docs/README.md', text: 'the brief `product/BRIEF.md`' },
+    { path: 'docs/product/BRIEF.md', text: 'no pointers here' },
+    { path: 'docs/lonely.md', text: 'no pointers here either' },
+  ]);
+  const html = linksCard(graph, 'en', (p) => p === 'docs/product/BRIEF.md');
+  const text = visible(html);
+  assert.match(text, /6 documents, with 4 links between them/);
+  // What was counted is said on the card: a reader deciding to delete a file has to know.
+  assert.match(text, /A link is a path a document spells out/);
+  assert.match(html, /<h3>4 or more documents point at these<\/h3>/);
+  assert.match(text, /docs\/product\/BRIEF\.md - 4 documents point at it/);
+  assert.match(html, /<summary>Nothing points at these <span class="count">5<\/span>/);
+  assert.match(html, /<summary>Every document, and what it points at <span class="count">6<\/span>/);
+  // Both directions per document, which is the card's whole promise (criterion 18).
+  // The separator is written once between the names; stripping the markup leaves a space beside it.
+  assert.match(text, /Pointed at by: AGENTS\.md ?, docs\/README\.md ?, docs\/state\/DEBT\.md ?, docs\/state\/STATE\.md/);
+  assert.match(text, /Points at: docs\/product\/BRIEF\.md/);
+  assert.match(text, /Points at no other document\./);
+  // A name opens its file where the file route will serve it, and stays a name where it will not.
+  assert.match(html, /<a href="\/file\?path=docs%2Fproduct%2FBRIEF\.md">/);
+  assert.doesNotMatch(html, /href="[^"]*lonely/);
+});
+
+test('a project with nothing to draw says so, on the card and in the numbers', () => {
+  assert.match(visible(linksCard(linkGraph([]), 'en')), /no documents to read yet/);
+  const alone = linksCard(linkGraph([{ path: 'AGENTS.md', text: 'rules' }]), 'en');
+  assert.match(visible(alone), /No document is pointed at by 4 or more others/);
+  assert.match(alone, /<summary>Nothing points at these <span class="count">1<\/span>/);
+});
+
 test('the gates card reports this machine, and repeats the fix line when one is down', () => {
   const html = gatesCard([
     { signal: 'hooks', armed: true, detail: 'core.hooksPath -> checks/hooks' },
@@ -366,7 +273,7 @@ test('the server answers the board, a permitted file, a refused path and a wrong
     'docs/specs/001-import/spec.md': SPEC('done', 'BRIEF SC-1'),
     'docs/design/reference/huge.md': `${'x'.repeat(600 * 1024)}\n`,
   });
-  writeFileSync(join(f.root, 'docs/design/reference/logo.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x1a]));
+  f.put('docs/design/reference/logo.png', Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x1a]));
   const server = createBoardServer(f.root, { isIgnored: () => false });
   const port = await listen(server);
   try {
@@ -426,7 +333,10 @@ test('the board names a handoff the project keeps out of git, and does not link 
   });
   execFileSync('git', ['init', '-q'], { cwd: f.root, stdio: 'ignore' });
   const html = boardPage(f.root);
-  assert.equal(html.split('<section class="card">').length - 1, 5, 'the board carries five cards');
+  assert.equal(html.split('<section class="card">').length - 1, 6, 'the board carries six cards');
+  // The sixth card reads the documents of this project and names the file that does the looking.
+  assert.match(visible(html), /How the documents point at each other/);
+  assert.match(visible(html), /From checks\/links\.mjs/);
   assert.match(visible(html), /Next step finish the export screen/);
   assert.match(visible(html), /From docs\/state\/STATE\.local\.md/);
   assert.doesNotMatch(html, /href="[^"]*STATE\.local/);

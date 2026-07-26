@@ -25,6 +25,32 @@ function gitIgnored(root, relPath) {
   } catch { return false; }
 }
 
+// The same question for a whole page in one go. git is a process, and a board that names every
+// document would otherwise spend most of a second spawning one per name. Anything the page did
+// not know it would ask about still gets the single-path answer, so a name that resolves
+// somewhere else (through a symlink) is judged on where it landed, not on what was pre-asked.
+export function ignoreLookup(root, paths, { ask = gitIgnored } = {}) {
+  // git reads this list one path per line, so a name that contains a line break cannot be asked
+  // about this way. It is left out of the batch and gets the single-path answer instead, where
+  // it travels as an argument and nothing can be read as a second path.
+  const asked = new Set(paths.filter((p) => p && !p.includes('\n')));
+  let ignored = new Set();
+  if (asked.size) {
+    try {
+      const out = execFileSync('git', ['check-ignore', '--stdin'], {
+        cwd: root, input: `${[...asked].join('\n')}\n`, encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'],
+      });
+      ignored = new Set(out.split('\n').map((l) => l.trim()).filter(Boolean));
+    } catch {
+      // git answers "none of these" with a non-zero exit, and a missing git or a directory that
+      // is no repository lands here too. All three mean the same for this list, and the explicit
+      // denials in decidePath still stand either way.
+      ignored = new Set();
+    }
+  }
+  return (r, relPath) => (asked.has(relPath) ? ignored.has(relPath) : ask(r, relPath));
+}
+
 // Five questions, each of which refuses on its own; none of them repeats another, so no line
 // here can rot behind a line above it.
 export function decidePath(root, requested, { isIgnored = gitIgnored } = {}) {

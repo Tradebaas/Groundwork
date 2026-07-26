@@ -15,11 +15,13 @@ import {
   BRIEF_PATH, MANIFEST_PATH,
 } from './progress.mjs';
 import { enforcementReport } from './enforcement.mjs';
-import { decidePath } from './cockpit-path.mjs';
+import { decidePath, ignoreLookup } from './cockpit-path.mjs';
+import { readDocuments, linkGraph, LINK_WORDS, HUB_MIN } from './links.mjs';
 
-// The gates card reports on this machine, not on a document, so the file it names is the one
-// that does the looking.
+// The gates card and the link card report on the project as a whole rather than on one document,
+// so the file each names is the one that does the looking.
 const ENFORCEMENT_PATH = 'checks/enforcement.mjs';
+const LINKS_PATH = 'checks/links.mjs';
 
 // The board's own framing words. Everything with content in it comes from the project's
 // documents through progress.mjs, so only these connectors live here.
@@ -124,6 +126,7 @@ body{margin:0;padding:48px 20px 80px;background:var(--bg);color:var(--ink);
 main{max-width:var(--maxw);margin:0 auto}
 h1{font-size:27px;line-height:1.2;letter-spacing:-.02em;margin:0 0 8px;font-weight:700}
 .sub{color:var(--muted);margin:0 0 36px;font-size:14px;max-width:62ch}
+.hint{color:var(--muted);margin:8px 0 0;font-size:14px;max-width:62ch}
 .card{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
   padding:26px 28px;margin:0 0 20px}
 .card h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
@@ -262,10 +265,6 @@ const tierRank = (tier) => {
 
 // Manifest paths are written from inside docs/, which is also where the file route has to be
 // pointed for the name to open.
-// defer: every row asks the path decision separately, and each ask spawns git check-ignore
-// (about 6 ms, so roughly 150 ms of a render on this repo). ceiling: a manifest of a few hundred
-// rows, or a board opened in a loop. upgrade-when: a render is noticeably slow, then answer the
-// whole list with one `git check-ignore --stdin` per request.
 export function fileMapCard(rows, lang, opens = () => false) {
   const w = words(lang);
   if (!rows.length) return lead(w.noFileMap, sentence);
@@ -305,6 +304,40 @@ export function gatesCard(signals, lang) {
     // thing about what to do.
     for (const s of degraded) out.push(`<p class="note">${sentence(`${named(s)} - ${s.detail}`)}</p>`);
   }
+  return out.join('\n');
+}
+
+// Which document points at which, so the question behind moving or deleting a file has an answer
+// before the move: what nothing points at can go, and what many documents lean on is a decision.
+// The words come from the link module, because the one-shot command says the same sentences.
+export function linksCard(graph, lang, opens = () => false) {
+  const w = LINK_WORDS[lang] || LINK_WORDS.en;
+  if (!graph.documents.length) return lead(w.noDocuments);
+  const named = (path) => {
+    const name = `<code>${escapeHtml(path)}</code>`;
+    return opens(path) ? `<a href="${fileHref(path)}">${name}</a>` : name;
+  };
+  const names = (paths) => paths.map(named).join(', ');
+  const out = [
+    lead(`${w.summary(graph.documents.length, graph.links)}.`),
+    // What a link is, said on the card: a reader deciding whether a file is safe to delete has
+    // to know what was counted. It is a footnote to the number above it, not a second headline.
+    `<p class="hint">${escapeHtml(w.whatCounts)}</p>`,
+  ];
+  out.push(graph.hubs.length
+    ? `<h3>${escapeHtml(w.hubs(HUB_MIN))}</h3>\n<ul>${graph.hubs
+      .map((h) => `<li>${named(h.path)} - ${escapeHtml(w.hubCount(h.count))}</li>`).join('')}</ul>`
+    : `<p class="note">${escapeHtml(w.noHubs(HUB_MIN))}</p>`);
+  out.push(graph.orphans.length
+    ? folded(w.orphans, graph.orphans.length, `<ul>${graph.orphans.map((p) => `<li>${named(p)}</li>`).join('')}</ul>`)
+    : `<p class="note">${escapeHtml(w.noOrphans)}</p>`);
+  // Both directions per document, which is the whole card; it folds because it is as long as the
+  // project has documents.
+  const each = graph.documents.map((d) => `<li>${named(d.path)}<ul>`
+    + `<li>${d.outbound.length ? `${escapeHtml(w.pointsAt)}: ${names(d.outbound)}` : escapeHtml(w.pointsAtNothing)}</li>`
+    + `<li>${d.inbound.length ? `${escapeHtml(w.pointedAtBy)}: ${names(d.inbound)}` : escapeHtml(w.pointedAtByNothing)}</li>`
+    + '</ul></li>').join('');
+  out.push(folded(w.each, graph.documents.length, `<ul>${each}</ul>`));
   return out.join('\n');
 }
 
@@ -353,23 +386,41 @@ function readManifest(root) {
   return existsSync(p) ? parseManifest(readFileSync(p, 'utf8')) : [];
 }
 
+// A read that fails is carried to the card that owns it, where a failure is named, instead of
+// taking the page down on its way there (criterion 23).
+const attempt = (fn) => { try { return { value: fn() }; } catch (error) { return { error }; } };
+const unwrap = ({ value, error }) => { if (error) throw error; return value; };
+
 export function boardPage(root, deps = {}) {
   const project = readProject(root);
   const progress = derive(project);
   const handoff = readHandoff(root);
   const w = words(project.lang);
+  const linkWords = LINK_WORDS[project.lang] || LINK_WORDS.en;
+  // Read before the cards, so the one ignore question below can cover every name they will show.
+  const manifest = attempt(() => readManifest(root));
+  const graph = attempt(() => linkGraph(readDocuments(root)));
   // A card names the file that owns it either way. It links only where the file route will
   // actually serve that file, so the board never hands a reader a door that does not open:
   // the maintainer's own handoff is kept out of git, and stays a name.
-  const opens = (path) => Boolean(path) && decidePath(root, path, deps).ok;
+  // Which of them git ignores is asked once for the whole page: a card that names every document
+  // would otherwise spawn a process per name.
+  const isIgnored = ignoreLookup(root, [
+    BRIEF_PATH, MANIFEST_PATH, handoff.path, ENFORCEMENT_PATH, LINKS_PATH,
+    ...(manifest.value || []).map((r) => `docs/${r.path}`),
+    ...(graph.value?.documents || []).map((d) => d.path),
+  ]);
+  const opens = (path) => Boolean(path) && decidePath(root, path, { isIgnored, ...deps }).ok;
   const from = (path) => ({ lang: project.lang, path, openable: opens(path) });
   // Read in the order the question is asked: what is this, where does it stand, what is next,
-  // where does everything live, and is any of this actually being enforced here.
+  // where does everything live, how does it hang together, and is any of this actually being
+  // enforced here.
   return renderBoard(project, [
     card(w.goal, from(BRIEF_PATH), () => goalCard(readBrief(root), project.lang)),
     card(w.progress, from(BRIEF_PATH), () => progressCard(project, progress)),
     card(w.nextStep, from(handoff.path), () => nextStepCard(handoff.now, progress.warnings, project.lang)),
-    card(w.fileMap, from(MANIFEST_PATH), () => fileMapCard(readManifest(root), project.lang, opens)),
+    card(w.fileMap, from(MANIFEST_PATH), () => fileMapCard(unwrap(manifest), project.lang, opens)),
+    card(linkWords.heading, from(LINKS_PATH), () => linksCard(unwrap(graph), project.lang, opens)),
     card(w.gates, from(ENFORCEMENT_PATH), () => gatesCard(enforcementReport(root), project.lang)),
   ]);
 }
