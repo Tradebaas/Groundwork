@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// Self-test for checks/cockpit.mjs. The file route is the one place where this repository
-// serves anything at all, so its decision is proven here directly, in every spelling that has
-// ever been used to leave a root. The board itself is proven to keep its promise: the owner's
+// Self-test for the cockpit: the path decision, the board's cards, and the server that carries
+// them (checks/cockpit-path.mjs, cockpit-page.mjs, cockpit.mjs).
+// The file route is the one place where this repository serves anything at all, so its decision
+// is proven here directly, in every spelling that has ever been used to leave a root. The board itself is proven to keep its promise: the owner's
 // own sentences, a named card instead of an empty one, and no card taking the page down.
 // Run: node --test checks/cockpit.test.mjs
 
@@ -12,11 +13,13 @@ import { join, dirname } from 'node:path';
 import { request as httpRequest } from 'node:http';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { decidePath, hostAllowed } from './cockpit-path.mjs';
 import {
-  decidePath, hostAllowed, escapeHtml, formatSize,
-  card, progressCard, renderBoard, boardPage, createBoardServer,
-} from './cockpit.mjs';
-import { derive } from './progress.mjs';
+  escapeHtml, formatSize, card, progressCard, goalCard, nextStepCard, fileMapCard, gatesCard,
+  renderBoard, boardPage,
+} from './cockpit-page.mjs';
+import { createBoardServer } from './cockpit.mjs';
+import { derive, parseManifest } from './progress.mjs';
 
 const BRIEF = (items) => `# BRIEF
 
@@ -234,6 +237,104 @@ test('framing words follow the project language', () => {
   assert.match(nl, /Uit docs\/product\/BRIEF\.md/);
 });
 
+// A finished list only grows, and on a board it is the least urgent thing there. It keeps its
+// count in view and its sentences one click away; what is running is never hidden.
+test('what is done folds behind its count, what is running stays open', () => {
+  const progress = derive({
+    scopeItems: items,
+    specs: [{ file: 'a', status: 'done', traces: ['SC-1'] }, { file: 'b', status: 'building', traces: ['SC-2'] }],
+  });
+  const html = progressCard(project(), progress);
+  assert.match(html, /<details><summary>Done <span class="count">1<\/span>/);
+  assert.match(visible(html), /Done 1.*import receipts with the camera/);
+  // The two groups that answer "where are we now" are not behind a click.
+  assert.match(html, /<h3>Working on now<\/h3>/);
+  assert.match(html, /<h3>Not started yet<\/h3>/);
+});
+
+// ---------------------------------------------------------------- the other cards
+
+test('goal and scope: the promise in one sentence, the boundary behind its count', () => {
+  const brief = {
+    goal: 'Kassaboek turns a shoebox of receipts into a monthly overview the accountant accepts.',
+    outOfScope: [{ title: 'payroll' }, { title: 'a second currency' }],
+  };
+  const html = goalCard(brief, 'en');
+  assert.match(visible(html), /shoebox of receipts/);
+  assert.match(html, /<summary>Deliberately not part of this <span class="count">2<\/span>/);
+  assert.match(visible(html), /payroll/);
+});
+
+test('goal and scope: an unfilled brief names the skill that fills it', () => {
+  for (const brief of [null, { goal: null, outOfScope: [] }]) {
+    const text = visible(goalCard(brief, 'en'));
+    assert.match(text, /does not say yet what this project is for.*scope skill/);
+  }
+  // A brief with a goal but no boundary says that too, instead of showing nothing.
+  assert.match(visible(goalCard({ goal: 'one sentence', outOfScope: [] }, 'en')), /names nothing as out of scope yet/);
+});
+
+test('next step: the handoff in its own words, with every heads-up beside it', () => {
+  const warnings = derive({
+    scopeItems: [{ id: 'SC-1', title: 'export to the accountant' }],
+    specs: [{ file: '004-vat', status: 'building', traces: ['SC-9'] }],
+  }).warnings;
+  const text = visible(nextStepCard('finish the `export` screen', warnings, 'en'));
+  assert.match(text, /finish the export screen/);
+  assert.match(text, /Heads up.*004-vat.*not in the brief/);
+  // The handoff writes in backticks; the board reads them as it does everywhere else.
+  assert.match(nextStepCard('finish the `export` screen', [], 'en'), /<code>export<\/code>/);
+});
+
+test('next step: no handoff, or none that names one, points at the skill that writes it', () => {
+  const text = visible(nextStepCard(null, [], 'en'));
+  assert.match(text, /names no next step.*checkpoint skill/);
+});
+
+test('the file map is read off the manifest rows, header and divider aside', () => {
+  const rows = parseManifest(`# docs
+| File | Tier | What it owns |
+|---|---|---|
+| \`state/STATE.md\` | LIVE | Live state and the single "what's next" |
+| \`design/*.md\` ◆ | REF | Design and voice |
+Rules: one fact, one owning file.
+`);
+  assert.deepEqual(rows.map((r) => r.path), ['state/STATE.md', 'design/*.md']);
+  assert.equal(rows[0].tier, 'LIVE');
+  assert.equal(rows[1].owns, 'Design and voice');
+});
+
+test('the file map keeps what is always current in view and names what owns what', () => {
+  const rows = [
+    { path: 'state/STATE.md', tier: 'LIVE', owns: 'Live state' },
+    { path: 'design/*.md', tier: 'REF', owns: 'Design and voice' },
+  ];
+  const html = fileMapCard(rows, 'en', (p) => p === 'docs/state/STATE.md');
+  assert.match(html, /<h3>Always current<\/h3>/);
+  assert.match(html, /<summary>Current for its subject <span class="count">1<\/span>/);
+  // The card's whole job: the file, and the fact it owns, on the same line.
+  assert.match(visible(html), /state\/STATE\.md - Live state/);
+  assert.match(visible(html), /design\/\*\.md - Design and voice/);
+  // A name opens its file where the file route will serve it, and stays a name where it will not.
+  assert.match(html, /<a href="\/file\?path=docs%2Fstate%2FSTATE\.md"><code>state\/STATE\.md<\/code><\/a>/);
+  assert.doesNotMatch(html, /href="[^"]*design/);
+  assert.match(visible(fileMapCard([], 'en')), /manifest is missing.*begin skill/);
+});
+
+test('the gates card reports this machine, and repeats the fix line when one is down', () => {
+  const html = gatesCard([
+    { signal: 'hooks', armed: true, detail: 'core.hooksPath -> checks/hooks' },
+    { signal: 'CI', armed: false, detail: 'CI workflow present but no GitHub remote: it never runs.' },
+    { signal: 'adapter hooks', armed: true, detail: 'wired' },
+  ], 'en');
+  const text = visible(html);
+  assert.match(text, /2 of the 3 gates on this machine are armed/);
+  assert.match(text, /Armed.*the checks before every commit/);
+  assert.match(text, /Not armed.*no GitHub remote: it never runs/);
+  // An armed signal says what it does, not how it is configured.
+  assert.doesNotMatch(text, /core\.hooksPath/);
+});
+
 test('a size is named in words a reader can use', () => {
   assert.equal(formatSize(12), '12 bytes');
   assert.equal(formatSize(2048), '2 KB');
@@ -313,10 +414,33 @@ test('the server answers the board, a permitted file, a refused path and a wrong
   }
 });
 
+// The owner's ruling on the collision between criteria 9 and 15: a card always names the file
+// that owns it, and the file route stays exactly as narrow as it is. Where the project keeps its
+// handoff out of git, the board names it and does not offer to open it.
+test('the board names a handoff the project keeps out of git, and does not link it', () => {
+  const f = fixture({
+    '.gitignore': '*.local.md\n',
+    'docs/product/BRIEF.md': BRIEF('- SC-1 import receipts with the camera'),
+    'docs/README.md': '| File | Tier | What it owns |\n|---|---|---|\n| `state/STATE.md` | LIVE | Live state |\n',
+    'docs/state/STATE.local.md': '# STATE\n\n- **Now ▶** finish the export screen\n',
+  });
+  execFileSync('git', ['init', '-q'], { cwd: f.root, stdio: 'ignore' });
+  const html = boardPage(f.root);
+  assert.equal(html.split('<section class="card">').length - 1, 5, 'the board carries five cards');
+  assert.match(visible(html), /Next step finish the export screen/);
+  assert.match(visible(html), /From docs\/state\/STATE\.local\.md/);
+  assert.doesNotMatch(html, /href="[^"]*STATE\.local/);
+  // Criterion 12, across the whole board and not just one card.
+  assert.doesNotMatch(html, /<script|onload=|javascript:/i);
+  f.clean();
+});
+
 test('a project without a brief still gets a board that says so', () => {
   const f = fixture({ 'docs/state/STATE.md': '# STATE\n' });
   const text = visible(boardPage(f.root, { isIgnored: () => false }));
   assert.match(text, /Scope is not defined yet/);
-  assert.doesNotMatch(text, /0 of the/);
+  // A zero that would read as progress on undecided scope. The gates card may honestly report
+  // zero of three armed in a bare directory, and does; that is a measured fact, not a blank.
+  assert.doesNotMatch(text, /0 of the \d+ things/);
   f.clean();
 });
