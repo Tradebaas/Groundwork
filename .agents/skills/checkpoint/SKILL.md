@@ -54,6 +54,10 @@ open a file if a fact is genuinely missing.
 3. **Route facts to their owner, not into the checkpoint.** A real decision goes to
    `docs/decisions/`; deferred work gets a `defer:` marker plus a line in `docs/state/DEBT.md`;
    new scope goes to `docs/state/INTAKE.md`. STATE.md links to them; it does not absorb them.
+   A lesson that outlives this session goes to INTAKE.md as well, as an improvement row: a
+   correction the user had to give twice, a fix applied more than once, an insight about how this
+   project actually works. Name the candidate fix and leave it a candidate: `scope` triages the
+   row, and `skill-author` §1's ladder decides whether it becomes a doc line, a gate, or a skill.
 4. **Keep STATE.md under its 150-line budget.** If the Log overflows, move the oldest entries to
    `docs/state/log/YYYY-MM.md` (the existing manifest pattern), do not trim the new entry.
 5. **Sanitize.** STATE.md is tracked and travels with the repo: keep secrets, tokens, URLs with
