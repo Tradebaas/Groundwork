@@ -86,7 +86,7 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 | EU/NL compliance register | `docs/compliance/COMPLIANCE.md` |
 | Operational runbooks | `docs/operations/` |
 | Automated checks (run: `node checks/check.mjs`) | `checks/` |
-| What is done, what is left (run: `node checks/progress.mjs`; `--all` for every project, `--serve` for the same stand as a page on this machine) | derived from BRIEF + specs + STATE, never stored |
+| What is done, what is left (run: `node checks/progress.mjs`; `--all` for every project, `--serve` for the same stand as a page on this machine, `--links` for which document points at which) | derived from BRIEF + specs + STATE, never stored |
 | Full docs manifest | `docs/README.md` |
 
 ## Skills: expert methods, loaded on demand
