@@ -13,7 +13,7 @@ import { execSync } from 'node:child_process';
 import { join, dirname, resolve, relative, extname, isAbsolute, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // The brief is parsed in exactly one place; the progress overview already owns that reading.
-import { parseBrief, isSpecPath } from './progress.mjs';
+import { parseBrief, isSpecPath, BRIEF_PATH } from './progress.mjs';
 import { enforcementReport, formatReport } from './enforcement.mjs';
 
 const TEXT_EXT = new Set([
@@ -92,7 +92,7 @@ function tracesTo(body) {
 // The SC-ids the brief actually defines, or null when scope is not written down yet. A project
 // that has not run `scope` has nothing to validate against and must not be blocked for it.
 function scopeIds(root) {
-  const p = join(root, 'docs', 'product', 'BRIEF.md');
+  const p = join(root, BRIEF_PATH);
   if (!existsSync(p)) return null;
   const { items } = parseBrief(read(p));
   return items.length ? new Set(items.map((i) => i.id)) : null;
