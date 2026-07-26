@@ -40,6 +40,8 @@ on-demand skill before a gate, a gate before an always-on rule); the tier is par
 recommendation.
 
 Present triage as a batch with your recommendation per item; the owner decides, you record.
+For a contested item or a whole-direction call, run the `critical-thinking` moves before
+recommending: a recommendation that never faced a named alternative is agreement, not triage.
 
 ## Changing scope mid-build
 

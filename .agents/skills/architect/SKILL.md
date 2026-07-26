@@ -6,8 +6,9 @@ description: Design the system before building it: module boundaries, data model
 # architect: decide the shape once, before the code hardens it
 
 Architecture is the set of decisions that are expensive to reverse. Make them deliberately,
-record them, and keep the map current. Scale the depth to the project: a small tool needs a
-page; a platform needs the full pass.
+record them, and keep the map current. Each one settles only after the `critical-thinking`
+moves, so the decision record's options section holds what actually competed. Scale the depth
+to the project: a small tool needs a page; a platform needs the full pass.
 
 ## The pass
 

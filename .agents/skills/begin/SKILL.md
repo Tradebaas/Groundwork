@@ -33,7 +33,7 @@ description, pitch, notes, or a rough idea dump. Take it now (pasted text or a f
 non-Markdown files with the `ingest` skill) and treat it as the primary source: extract answers
 to the questions below from it, play each extracted answer back for a one-line confirmation,
 and interview only for the gaps. A vague idea is a valid starting point: capture what the owner
-does know, record the rest in BRIEF.md as explicitly open, and let `scope` sharpen it (step 5
+does know, record the rest in BRIEF.md as explicitly open, and let `scope` sharpen it (step 6
 routes there).
 
 For whatever the material leaves open, interview **one question per message**, never a batch:
@@ -53,7 +53,21 @@ Everything else you decide later, and say so.
 Do **not** ask about stack (that's the `stack` skill, argued on merit) or design details (the
 `design` skill asks those when the time comes).
 
-## 3. Write it down
+## 3. Challenge the idea
+
+The interview captured the idea; this step tests it, before any template absorbs it. Load the
+`critical-thinking` skill and run its moves on the product idea itself - whether this is the
+right product to build is the highest-leverage decision of the whole lifecycle, and it gets
+pushback before it gets paperwork. The moves that always bite here: the named alternative
+(which for a whole product includes buying or configuring something that exists, and doing
+nothing), the load-bearing assumption, and the falsification question. The skill owns the
+method and the disagree-and-commit rule; this step fixes only the moment it runs.
+
+Record the outcome in one or two lines: idea confirmed → a dated note in BRIEF.md's Product
+section; idea changed, or the owner overruled a real concern → a decision record in
+`docs/decisions/`.
+
+## 4. Write it down
 
 - Fill `docs/product/BRIEF.md`: numbered SC-items, explicit out-of-scope, constraints. Write
   each SC-item in the owner's own words, as something they would recognize without translation:
@@ -70,7 +84,7 @@ Do **not** ask about stack (that's the `stack` skill, argued on merit) or design
   where" and "Handing over" intact for successors; the License section is the owner's call
   (`comply` sets it).
 
-## 4. Set up the machinery
+## 5. Set up the machinery
 
 First, if a `.git/` directory exists the copy still carries Groundwork's commit history (it was
 cloned, not made with "Use this template", `degit`, or a ZIP). The project must start from its own
@@ -96,7 +110,7 @@ vulnerability reporting on day one, so `SECURITY.md`'s reporting channel exists 
 reads the policy: `gh api --method PUT 'repos/{owner}/{repo}/private-vulnerability-reporting'`
 (not on GitHub or no `gh` → skip; `deliver`'s first-release check covers it).
 
-## 5. Hand off
+## 6. Hand off
 
 Update STATE.md, then propose exactly one next step, normally:
 - Scope needs sharpening → `scope`
