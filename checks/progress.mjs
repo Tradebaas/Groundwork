@@ -12,7 +12,7 @@
 // that already own the fact (BRIEF.md, the specs, STATE.md), so there is no second place to
 // maintain and nothing to keep in sync. The only thing it writes is the per-user list of
 // projects in the home directory, which holds no project content.
-// Spec: docs/specs/008-status-overzicht (maintainer-local).
+// Spec: docs/specs/archive/008-status-overzicht (maintainer-local).
 
 import { readFileSync, readdirSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, resolve, dirname, basename } from 'node:path';
@@ -168,13 +168,17 @@ export function parseManifest(text) {
   return rows;
 }
 
-// One definition of what counts as a spec: <folder>/spec.md, or a single .md sitting directly
-// in docs/specs/; the TEMPLATE files are skeletons, not specs. Shared with check.mjs's
+// One definition of what counts as a spec: <folder>/spec.md, or a single .md sitting directly in
+// docs/specs/; the TEMPLATE files are skeletons, not specs. Both shapes count inside archive/ too,
+// because `spec` §6 sends every finished spec there: archiving says where a spec lives, never that
+// it stopped being one, and a single-file spec that obeyed §6 used to leave the counted set and
+// flip its scope item back to not started. The shape stays strict about depth so the tickets
+// beside a folder spec keep out; they are not specs of their own. Shared with check.mjs's
 // spec-traces gate so the counted set and the gated set cannot drift apart (the gap that
 // motivated it: single-file specs counted here escaped the gate there).
 export function isSpecPath(relPath) {
   if (relPath.split('/').pop().startsWith('TEMPLATE')) return false;
-  return /^docs\/specs\/(.+\/spec|[^/]+)\.md$/.test(relPath);
+  return /^docs\/specs\/(archive\/)?(.+\/spec|[^/]+)\.md$/.test(relPath);
 }
 
 function specFiles(root) {

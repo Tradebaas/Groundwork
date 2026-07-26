@@ -10,7 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   parseBrief, parseSpec, derive, readProject, renderFull, renderLine,
-  readRegistry, writeRegistry, registerProject, cmdLine,
+  readRegistry, writeRegistry, registerProject, cmdLine, isSpecPath,
 } from './progress.mjs';
 
 const BRIEF = (items) => `# BRIEF
@@ -205,6 +205,31 @@ test('framing words follow the project language, English by default', () => {
   assert.match(renderLine(project(), progress), /0 van de 3 klaar/);
 });
 
+// ---------------------------------------------------------------- what counts as a spec
+
+// Archiving is where a spec ends up, not what kind of document it is: `spec` §6 tells every
+// finished spec to move to docs/specs/archive/, so both shapes have to survive the move. The
+// exclusions matter just as much: a folder spec keeps its tickets beside it, and those are not
+// specs of their own - counting them would report work that no scope item ever asked for.
+test('a spec is recognised by shape, in the archive as well as outside it', () => {
+  for (const p of [
+    'docs/specs/008-status.md',
+    'docs/specs/008-status.local.md',
+    'docs/specs/007-pickup/spec.md',
+    'docs/specs/archive/009-discovery.local.md',
+    'docs/specs/archive/000-baseline/spec.md',
+  ]) assert.equal(isSpecPath(p), true, `${p} must count as a spec`);
+
+  for (const p of [
+    'docs/specs/TEMPLATE.md',
+    'docs/specs/TEMPLATE-TICKET.md',
+    'docs/specs/007-pickup/tickets/01-slot-picker.md',
+    'docs/specs/archive/007-pickup/tickets/01-slot-picker.md',
+    'docs/specs/archive/007-pickup/TEMPLATE.md',
+    'docs/product/BRIEF.md',
+  ]) assert.equal(isSpecPath(p), false, `${p} must not count as a spec`);
+});
+
 // ---------------------------------------------------------------- whole project
 
 test('a real project directory is read end to end', () => {
@@ -222,6 +247,23 @@ test('a real project directory is read end to end', () => {
   // Shipped work lives in the archive; it must keep counting as done.
   assert.equal(derive(p).done, 2);
   rmSync(root, { recursive: true, force: true });
+});
+
+// The defect this proves: a single-file spec that obeys `spec` §6 and moves to archive/ on done
+// used to leave the derived set entirely, so its scope item silently flipped back to not started.
+// Obeying the framework's own instruction must never cost a finished item.
+test('a single-file spec keeps counting after it is archived on done', () => {
+  const files = {
+    'docs/product/BRIEF.md': BRIEF('- SC-1 bonnen importeren\n- SC-2 maandoverzicht'),
+    'docs/specs/001-import/spec.md': spec('done', 'BRIEF SC-1'),
+    'docs/state/STATE.md': '# STATE\n',
+  };
+  const before = fixture({ ...files, 'docs/specs/002-overzicht.md': spec('done', 'BRIEF SC-2') });
+  const after = fixture({ ...files, 'docs/specs/archive/002-overzicht.md': spec('done', 'BRIEF SC-2') });
+  assert.equal(derive(readProject(before.root)).done, 2);
+  assert.equal(derive(readProject(after.root)).done, 2, 'archiving a spec must not undo the work');
+  rmSync(before.root, { recursive: true, force: true });
+  rmSync(after.root, { recursive: true, force: true });
 });
 
 test('a missing brief does not crash the report', () => {
