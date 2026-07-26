@@ -8,6 +8,9 @@ Report progress. Arguments given: $ARGUMENTS
 - No arguments: run `node checks/progress.mjs` and show its output as is.
 - Arguments containing "all" or "alles": run `node checks/progress.mjs --all` and show its
   output as is.
+- Arguments containing "board", "page", "serve" or "scherm": hand the owner the line
+  `node checks/progress.mjs --serve` to run in their own terminal, and say it stays running
+  until they stop it. Do not start it yourself: it is a server, so it never returns.
 
 The script already writes in the project's own language and phrasing. Pass it through without
 rewriting, summarizing, or adding commentary. When it reports something under "Heads up" or
