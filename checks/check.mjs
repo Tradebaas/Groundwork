@@ -14,6 +14,7 @@ import { join, dirname, resolve, relative, extname, isAbsolute, basename } from 
 import { fileURLToPath } from 'node:url';
 // The brief is parsed in exactly one place; the progress overview already owns that reading.
 import { parseBrief, isSpecPath } from './progress.mjs';
+import { enforcementReport, formatReport } from './enforcement.mjs';
 
 const TEXT_EXT = new Set([
   '.md', '.json', '.yml', '.yaml', '.txt', '.toml', '.xml', '.svg', '.html', '.css',
@@ -524,6 +525,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     process.exit(0);
   }
   const failures = runChecks(root);
+  // Report, never block (enforcement.mjs): the tier line is information; the exit code stays
+  // with the checks alone. Skipped under CI, whose runner clone would misread as degradation,
+  // and a crashed report is named rather than allowed to take the checks down with it.
+  if (!process.env.CI) {
+    try {
+      for (const line of formatReport(enforcementReport(root))) console.log(line);
+    } catch (e) {
+      console.log(`enforcement: self-report crashed (${e.message}); the checks below still decide.`);
+    }
+  }
   if (failures.length) {
     for (const f of failures) console.error(`FAIL [${f.check}] ${f.msg}`);
     console.error(`\n${failures.length} finding(s). Fix the cause; never weaken the gate.`);

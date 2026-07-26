@@ -10,6 +10,7 @@ import { join, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import { runChecks, installHooks, checkCommitMessage } from './check.mjs';
 import { needsHandoffNudge } from './handoff-nudge.mjs';
+import { enforcementReport, formatReport } from './enforcement.mjs';
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'groundwork-test-'));
@@ -412,6 +413,61 @@ expectMsgClean('commit-subject-slash-scope', 'docs(state/log): rotate the July l
     passed++;
   } catch (e) { failedTests.push(`install-hooks: ${e.message}`); }
   rmSync(fx.root, { recursive: true, force: true });
+}
+
+// --- enforcement self-report: report, never block (GAP C-2) ---
+// Each signal proves both directions, like every gate above; the report itself must never
+// throw, whatever the directory looks like: a missing piece is a degraded signal, not a crash.
+
+function expectSignal(label, mutate, name, armed, needle = null) {
+  const fx = fixture();
+  mutate(fx);
+  const report = enforcementReport(fx.root);
+  rmSync(fx.root, { recursive: true, force: true });
+  try {
+    const s = report.find((x) => x.signal === name);
+    assert.equal(s.armed, armed, `${label}: expected ${name} armed=${armed}, got: ${JSON.stringify(s)}`);
+    if (needle) assert.ok(s.detail.includes(needle), `${label}: detail should mention "${needle}", got: ${s.detail}`);
+    passed++;
+  } catch (e) { failedTests.push(`${label}: ${e.message}`); }
+}
+
+expectSignal('enforcement-hooks-no-git', () => {}, 'hooks', false, 'git init');
+expectSignal('enforcement-hooks-fresh-clone', ({ root }) =>
+  execSync('git init -q', { cwd: root }), 'hooks', false, '--install-hooks');
+expectSignal('enforcement-hooks-armed', ({ root }) =>
+  execSync('git init -q && git config core.hooksPath checks/hooks', { cwd: root }), 'hooks', true);
+expectSignal('enforcement-ci-no-workflow', ({ root }) =>
+  execSync('git init -q && git remote add origin https://github.com/example/demo.git', { cwd: root }),
+'CI', false, 'workflow');
+expectSignal('enforcement-ci-no-remote', ({ root, put }) => {
+  execSync('git init -q', { cwd: root });
+  put('.github/workflows/ci.yml', 'name: ci\n');
+}, 'CI', false, 'GitHub remote');
+expectSignal('enforcement-ci-armed', ({ root, put }) => {
+  execSync('git init -q && git remote add origin https://github.com/example/demo.git', { cwd: root });
+  put('.github/workflows/ci.yml', 'name: ci\n');
+}, 'CI', true);
+expectSignal('enforcement-adapter-missing', () => {}, 'adapter hooks', false, '.claude/settings.json');
+expectSignal('enforcement-adapter-empty-hooks', ({ put }) =>
+  put('.claude/settings.json', '{"hooks":{}}'), 'adapter hooks', false);
+expectSignal('enforcement-adapter-unparseable', ({ put }) =>
+  put('.claude/settings.json', 'not json'), 'adapter hooks', false);
+expectSignal('enforcement-adapter-wired', ({ put }) =>
+  put('.claude/settings.json', '{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"node x"}]}]}}'),
+'adapter hooks', true);
+
+{ // a bare directory still yields all three signals, formatted with a fix line per degraded one
+  const bare = mkdtempSync(join(tmpdir(), 'groundwork-bare-'));
+  try {
+    const report = enforcementReport(bare);
+    assert.equal(report.length, 3, 'always exactly three signals');
+    const lines = formatReport(report);
+    assert.ok(lines[0].startsWith('enforcement: '), 'summary line names the tier');
+    assert.equal(lines.length, 4, 'three degraded signals get three fix lines under the summary');
+    passed++;
+  } catch (e) { failedTests.push(`enforcement-bare-dir: ${e.message}`); }
+  rmSync(bare, { recursive: true, force: true });
 }
 
 // handoff-nudge fires only when a turn advises a fresh session and hands over no code block.
