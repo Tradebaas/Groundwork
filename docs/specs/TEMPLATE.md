@@ -19,7 +19,8 @@ Right-sizing (details in the `spec` skill, never more ceremony than the change d
 
 # <NNN>: <title>
 
-- **Status:** draft | approved | building | done | dropped
+- **Status:** draft | approved | building | done | dropped <!-- `example` is reserved for the
+  worked example that ships with Groundwork: fiction, never counted as this project's work. -->
 - **Traces to:** BRIEF SC-<n> / explicit request: <link or quote>
 - **Owner sign-off:** TBD <!-- the interview's shared-understanding confirmation: date plus the
   owner's words. Required before building starts; a bare "approved" is not it. -->

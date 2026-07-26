@@ -20,6 +20,11 @@ import { homedir } from 'node:os';
 const read = (p) => readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
 const SPEC_DONE = 'done';
 const SPEC_INACTIVE = new Set(['dropped']);
+// A worked example ships with Groundwork to show the format filled in; it is fiction, and it
+// names SC-ids from the fictional brief it belongs to. Every project that later defines those
+// same ids would otherwise see the example credited as its own finished work, or warned about
+// as a spec pointing at nothing. It is not this project's work, so it never counts as any.
+const SPEC_EXAMPLE = 'example';
 
 // The framing words. Content always comes from the project's own documents, so only these
 // connectors need translating. VOICE.md decides which set is used.
@@ -67,10 +72,23 @@ const WORDS = {
 export function parseBrief(text) {
   const name = (text.match(/^- \*\*Name:\*\*\s*(.+)$/m) || [])[1]?.trim();
   const section = text.split(/^## /m).find((s) => /^In scope\b/i.test(s)) || '';
+  // A scope item is one bullet, not one line: anything worth testing rarely fits in 95 columns,
+  // and reading only the first line would quote half a sentence back at the owner. Indented
+  // continuation lines belong to the item above; a blank line or an unindented line ends it.
   const items = [];
-  for (const m of section.matchAll(/^[-*]\s*\**\s*(SC-\d+)\**[:.]?\s*(.*)$/gm)) {
-    items.push({ id: m[1], title: m[2].replace(/\s*<!--.*$/, '').trim() });
+  let current = null;
+  for (const line of section.split('\n')) {
+    const start = line.match(/^[-*]\s*\**\s*(SC-\d+)\**[:.]?\s*(.*)$/);
+    if (start) {
+      current = { id: start[1], title: start[2] };
+      items.push(current);
+    } else if (current && /^\s+\S/.test(line)) {
+      current.title += ` ${line.trim()}`;
+    } else {
+      current = null;
+    }
   }
+  for (const i of items) i.title = i.title.replace(/\s*<!--[\s\S]*$/, '').replace(/\s+/g, ' ').trim();
   // A template still carrying its placeholders is not scope; saying "0 of 1 done" would read
   // as progress on something that was never decided.
   const real = items.filter((i) => i.title && !/^TBD\b/i.test(i.title));
@@ -149,7 +167,8 @@ export function readProject(root) {
 
 // The whole judgment of this tool lives here: scope items in, a state per item out.
 // Kept free of file reading so it can be tested directly against fixtures.
-export function derive({ scopeItems, specs }) {
+export function derive({ scopeItems, specs: allSpecs }) {
+  const specs = allSpecs.filter((s) => s.status !== SPEC_EXAMPLE);
   // Warnings are kept as facts, not sentences: the wording is chosen at render time so it can
   // follow the project's language and stay free of the internal ids the report never shows.
   const warnings = [];
