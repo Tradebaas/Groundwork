@@ -21,10 +21,12 @@ three months?* Yes to either → at least M.
 ## 2. Tier M and L: interview before writing
 
 Build shared understanding first; a finished draft the owner can only react to is not that.
-Tier S is exempt: a bugfix gets no interview. Four rules:
+Tier S is exempt: a bugfix gets no interview. The rules:
 
 - **One question at a time.** Each question comes with your recommended answer and a one-line
   reason, so the owner can accept the default or push back cheaply.
+- **Recommendations are argued, not agreeable.** A question with a real design choice behind it
+  gets the `critical-thinking` moves first: the recommendation names the alternative it beat.
 - **Facts are looked up, never asked.** Whatever the repo, the docs, or the code can answer,
   you answer yourself before asking anything.
 - **Decisions are put to the owner, never assumed.** Scope, trade-offs, and preferences are

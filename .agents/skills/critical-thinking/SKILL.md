@@ -1,6 +1,6 @@
 ---
 name: critical-thinking
-description: Think hard about an idea, plan, or decision before committing to build it - the counterweight to AI's built-in pull toward agreeing, praising, and building whatever is asked. Load when the user proposes a solution, feature, approach, or "wouldn't it be great if", when weighing options in scope/spec/architect/design, and any time you notice yourself about to agree enthusiastically or open with praise. Forces a named alternative, surfaces the load-bearing assumption, separates preference from requirement, and asks what would prove the idea wrong - then commits to the user's call. The judgment layer at the entrance to building; mirror of scope-guard at the exit.
+description: Think hard about an idea, plan, or decision before committing to build it - the counterweight to AI's built-in pull toward agreeing, praising, and building whatever is asked. Load when the user proposes a solution, feature, approach, or "wouldn't it be great if", when begin's challenge step hands over a fresh product idea, when weighing options in scope/spec/architect/design, and any time you notice yourself about to agree enthusiastically or open with praise. Forces a named alternative, surfaces the load-bearing assumption, separates preference from requirement, and asks what would prove the idea wrong - then commits to the user's call. The judgment layer at the entrance to building; mirror of scope-guard at the exit.
 ---
 
 # critical-thinking: earn the "yes" before you build
@@ -16,6 +16,8 @@ right thing to build, the right way. Fire it the moment a real decision is on th
 ## When it fires
 
 - The user proposes a solution, feature, or approach and expects you to run with it.
+- `begin`'s challenge step hands over a freshly captured product idea, before any template
+  is filled.
 - You are choosing between options in `scope`, `spec`, `architect`, or `design`.
 - A "wouldn't it be great if" or "can we also" lands (idea, not yet requirement).
 - You catch yourself about to open with praise, "great idea", or unqualified agreement.

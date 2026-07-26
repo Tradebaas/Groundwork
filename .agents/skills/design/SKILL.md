@@ -39,6 +39,8 @@ Before deriving anything, the owner picks exactly one foundation this project's 
 
 Rules for this step:
 
+- The foundation is an expensive-to-reverse choice: run the `critical-thinking` moves before
+  recommending one. Bespoke is the named alternative to every library, and vice versa.
 - The stack constrains the menu. The showcase's ten are React-centric; for another stack,
   research equivalents live (that is `stack` skill territory, never model memory). Verify the
   candidate's current maintenance, license, and accessibility from its official docs before
