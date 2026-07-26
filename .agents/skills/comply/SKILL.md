@@ -13,8 +13,10 @@ they require, status per obligation. This skill fills and re-verifies it.
 Walk the register's trigger table against BRIEF.md and the actual system: personal data?
 (almost always yes: an email address is enough) → GDPR/AVG. AI features → AI Act, at minimum
 Art 50 transparency. Consumer-facing digital service/e-commerce → European Accessibility Act.
-Product with digital elements sold in the EU → CRA. Essential/important sector or supplier to
-one → NIS2. Every dependency → its license.
+Product with digital elements sold in the EU → CRA. Software placed on the EU market, which is
+virtually every shipped product → Product Liability Directive. Essential/important sector or
+supplier to one → NIS2. The client is a financial entity → DORA. Every dependency → its
+license.
 
 ## 2. Verify current state of the law
 
@@ -43,6 +45,12 @@ move fastest just before they bite.
   are published in the root `SECURITY.md` (ships as a working template; fill its marked TBD
   fields per product); actively exploited vulnerability → reporting duty via ENISA platform
   (from 2026-09-11).
+- **PLD**: software is a product with no-fault liability; defectiveness includes cybersecurity
+  vulnerabilities, and damage covers users' destroyed or corrupted data. The CRA posture above
+  plus a proven restore path (`docs/operations/backup-restore.md`) are the working defense.
+- **DORA**: the obligations arrive through the financial client's contract (Art 30: security
+  measures, incident support, audit and access rights, exit strategy); check those clauses
+  against what the product actually delivers and record any gap in the register.
 - **Licensing**: every dependency's license compatible with the product's use and distribution;
   copyleft obligations honored; the register lists anything non-trivial.
 
