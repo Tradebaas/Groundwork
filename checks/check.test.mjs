@@ -81,6 +81,13 @@ expectFail('docs-manifest', ({ put }) =>
 expectFail('links', ({ put }) =>
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ demo\n\nsee [missing](./nope.md)\n'));
 
+// The other half of the one link definition (checks/links.mjs): a path between backticks is a
+// mention, and a mention that resolves to nothing is prose. This framework's own documents name
+// files a project creates later, so demanding that every one of them exists would fail a fresh
+// copy for saying what it is for.
+expectClean('links-mention-is-prose', ({ put }) =>
+  put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ write `docs/product/ARCHITECTURE.md`\n'));
+
 expectFail('denylist', ({ root, put }) => {
   put('checks/config.json', JSON.stringify({
     denylist: [{ pattern: 'Poppins', why: 'font was retired' }],

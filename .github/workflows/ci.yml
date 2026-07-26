@@ -21,6 +21,7 @@ jobs:
         run: |
           node checks/check.test.mjs
           node checks/progress.test.mjs
+          node checks/links.test.mjs
           node checks/cockpit.test.mjs
 
       - name: Groundwork checks
