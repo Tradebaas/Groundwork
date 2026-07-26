@@ -5,7 +5,7 @@
 // own sentences, a named card instead of an empty one, and no card taking the page down.
 // Run: node --test checks/cockpit.test.mjs
 
-import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, unlinkSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, unlinkSync, rmSync, realpathSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -78,7 +78,12 @@ test('a path that leaves the root is refused, in every spelling', () => {
     '%2e%2e/groundwork-cockpit-outside.md',
     '..\\groundwork-cockpit-outside.md',
     '/etc/hosts',
+    // An absolute path is refused as a spelling, even when it names a file that is inside the
+    // project. Both forms of the root are asked for: on a machine where the temp directory is
+    // itself a symlink, only the second one reaches the containment check as a real prefix,
+    // and a guard that leans on containment alone serves it (caught by CI on Linux).
     join(f.root, 'docs', 'inside.md'),
+    join(realpathSync(f.root), 'docs', 'inside.md'),
     'C:\\Windows\\win.ini',
     '',
     '   ',

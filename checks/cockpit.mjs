@@ -13,7 +13,7 @@
 import { createServer } from 'node:http';
 import { readFileSync, realpathSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { resolve, relative, sep } from 'node:path';
+import { resolve, relative, sep, isAbsolute } from 'node:path';
 import { readProject, derive, WORDS, warningText, BRIEF_PATH } from './progress.mjs';
 
 const DEFAULT_PORT = 8321;
@@ -71,21 +71,27 @@ function gitIgnored(root, relPath) {
   } catch { return false; }
 }
 
-// Four questions, each of which refuses on its own; none of them repeats another, so no line
+// Five questions, each of which refuses on its own; none of them repeats another, so no line
 // here can rot behind a line above it.
 export function decidePath(root, requested, { isIgnored = gitIgnored } = {}) {
   // 1. Is this a path at all? A route with no path parameter hands over null.
   if (typeof requested !== 'string' || !requested) return REFUSED;
+
+  // 2. Is it relative? Every path the board hands out is, so an absolute one is somebody
+  //    else's idea. It is refused as a spelling, including the case that would land inside the
+  //    project anyway, which containment alone waves through whenever the root's own path is
+  //    written out in full.
+  if (isAbsolute(requested) || /^[a-z]:[\\/]/i.test(requested)) return REFUSED;
   let realRoot;
   try { realRoot = realpathSync(root); } catch { return REFUSED; }
 
-  // 2. Is it spelled from inside the project? resolve() folds every traversal spelling into one
-  //    comparison: relative, absolute, encoded (the query is decoded before it gets here), and
-  //    any mix of them. A path that resolves anywhere but under the root is refused.
+  // 3. Is it spelled from inside the project? resolve() folds every traversal spelling into one
+  //    comparison: relative, encoded (the query is decoded before it gets here), and any mix of
+  //    them. A path that resolves anywhere but under the root is refused.
   const full = resolve(realRoot, requested);
   if (!full.startsWith(realRoot + sep)) return REFUSED;
 
-  // 3. Does it land inside the project? Resolved through every symlink, so a link whose target
+  // 4. Does it land inside the project? Resolved through every symlink, so a link whose target
   //    sits outside is outside, whatever its name says. A missing file, a directory and an
   //    unreadable path all leave here with the same answer as a forbidden one.
   let real;
@@ -96,7 +102,7 @@ export function decidePath(root, requested, { isIgnored = gitIgnored } = {}) {
   } catch { return REFUSED; }
   if (!real.startsWith(realRoot + sep) || !stat.isFile()) return REFUSED;
 
-  // 4. Is it the owner's to read on a page? Judged on where the path landed, never on how it
+  // 5. Is it the owner's to read on a page? Judged on where the path landed, never on how it
   //    was spelled, so a link cannot smuggle a name past this.
   const relPath = relative(realRoot, real).split(sep).join('/');
   if (relPath.split('/').some((s) => DENIED_SEGMENT.test(s)) || DENIED_SUFFIX.test(relPath)) return REFUSED;
