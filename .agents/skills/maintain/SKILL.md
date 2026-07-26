@@ -31,7 +31,9 @@ First maintenance session: confirm the minimum exists, or create it and record i
 
 ## Incidents
 
-Something is broken for real users: fix first, understand fully, *then* improve.
+Something is broken for real users: fix first, understand fully, *then* improve. Open
+`docs/operations/incident-response.md` alongside step 1: its notification clocks (AP,
+NCSC-NL, ENISA) count from the moment of awareness, not from the fix.
 1. Stabilize (rollback per runbook is a fine fix). 2. Root cause: the actual one, not the
 first plausible one. 3. Regression test. 4. Ten-line post-mortem in `docs/operations/`:
 what, impact, cause, fix, what now detects it earlier. No blame, no essay.
