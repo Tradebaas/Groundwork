@@ -3,6 +3,7 @@
 // Run: node checks/progress.mjs            full report for this project
 //      node checks/progress.mjs --line     one line, if the stand changed or a heads-up is open
 //      node checks/progress.mjs --all      one line per registered project
+//      node checks/progress.mjs --serve    the same stand as a page, on this machine only
 //      node checks/progress.mjs --json     the derived facts, for tooling
 //      node checks/progress.mjs --register add this project to the per-user list (`begin`)
 //
@@ -27,8 +28,9 @@ const SPEC_INACTIVE = new Set(['dropped']);
 const SPEC_EXAMPLE = 'example';
 
 // The framing words. Content always comes from the project's own documents, so only these
-// connectors need translating. VOICE.md decides which set is used.
-const WORDS = {
+// connectors need translating. VOICE.md decides which set is used. Exported because the board
+// (checks/cockpit.mjs) renders the same facts and must say them in the same words.
+export const WORDS = {
   en: {
     doneOfTotal: (d, t) => `${d} of the ${t} things are done`,
     shortDone: (d, t) => `${d} of ${t} done`,
@@ -104,6 +106,10 @@ export function parseSpec(text) {
   return { status, traces, tracesDeclared: Boolean(tracesLine.trim()) };
 }
 
+// Where the brief lives, in one place: the parser home owns it, and the gate (check.mjs) and
+// the board (cockpit.mjs) read it from here rather than each spelling the path again.
+export const BRIEF_PATH = 'docs/product/BRIEF.md';
+
 // One definition of what counts as a spec: <folder>/spec.md, or a single .md sitting directly
 // in docs/specs/; the TEMPLATE files are skeletons, not specs. Shared with check.mjs's
 // spec-traces gate so the counted set and the gated set cannot drift apart (the gap that
@@ -150,7 +156,7 @@ function language(root) {
 }
 
 export function readProject(root) {
-  const briefPath = join(root, 'docs', 'product', 'BRIEF.md');
+  const briefPath = join(root, BRIEF_PATH);
   const brief = existsSync(briefPath) ? parseBrief(read(briefPath)) : { name: null, items: [], placeholders: 0 };
   const specs = specFiles(root).map((f) => ({ file: basename(dirname(f)) === 'specs' ? basename(f) : basename(dirname(f)), ...parseSpec(read(f)) }));
   return {
@@ -328,6 +334,24 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       console.log(registerProject(root) ? `registered: ${root}` : `already registered: ${root}`);
     } else if (arg === '--all') {
       console.log(cmdAll());
+    } else if (arg === '--serve') {
+      // One command answers "where do we stand", as text or as a page. The server lives in its
+      // own module and is loaded only here, so the report and the Stop-hook line stay cheap.
+      // Loaded after this module finishes evaluating, never awaited here: the board imports
+      // this file back, and a top-level await would leave the two waiting on each other.
+      const flag = process.argv.indexOf('--port');
+      const port = flag === -1 ? undefined : Number(process.argv[flag + 1]);
+      if (flag !== -1 && !Number.isInteger(port)) {
+        console.error('progress: --port needs a number, for example: --serve --port 8322');
+        process.exitCode = 1;
+      } else {
+        import('./cockpit.mjs')
+          .then(({ serve }) => serve(root, port === undefined ? {} : { port }))
+          .catch((e) => {
+            console.error(`progress: the board could not start (${e.message})`);
+            process.exitCode = 1;
+          });
+      }
     } else if (arg === '--json') {
       const { project, progress } = reportFor(root);
       console.log(JSON.stringify({ ...project, progress }, null, 2));

@@ -9,4 +9,5 @@ commit/spec instead. New findings from audits also land here, not in chat.
 
 | ID | Where (file:line or area) | What / ceiling | Upgrade when | Status |
 |---|---|---|---|---|
-| <!-- DEBT-001 --> | | | | |
+| DEBT-001 | `checks/cockpit.mjs`, the STYLE block | The board's colours are copied from the explainer page instead of read from this project's tokens. Ceiling: a third surface, or a changed accent, and the copies drift apart. | The token section in `docs/design/DESIGN.md` is filled by a design session | open |
+| <!-- DEBT-002 --> | | | | |
