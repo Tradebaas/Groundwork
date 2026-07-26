@@ -103,6 +103,15 @@ const sentence = (text) => escapeHtml(text).replace(/`([^`]+)`/g, '<code>$1</cod
 
 const fileHref = (relPath) => `/file?path=${encodeURIComponent(relPath)}`;
 
+// A path is a name first, and a link only where the file route will actually serve that file, so
+// the board never hands a reader a door that does not open. Every card that names a file names it
+// through here; the label may be shorter than the path (the file map writes its rows from inside
+// docs/), and it is the path that decides and the label that shows.
+const pathName = (path, opens, label = path) => {
+  const name = `<code>${escapeHtml(label)}</code>`;
+  return opens(path) ? `<a href="${fileHref(path)}">${name}</a>` : name;
+};
+
 export function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} bytes`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -273,11 +282,7 @@ export function fileMapCard(rows, lang, opens = () => false) {
     if (!groups.has(r.tier)) groups.set(r.tier, []);
     groups.get(r.tier).push(r);
   }
-  const row = (r) => {
-    const full = `docs/${r.path}`;
-    const name = `<code>${escapeHtml(r.path)}</code>`;
-    return `<li>${opens(full) ? `<a href="${fileHref(full)}">${name}</a>` : name} - ${sentence(r.owns)}</li>`;
-  };
+  const row = (r) => `<li>${pathName(`docs/${r.path}`, opens, r.path)} - ${sentence(r.owns)}</li>`;
   // What must always be current comes first and stays open; the rest is reference, and folds.
   return [...groups.entries()]
     .sort((a, b) => tierRank(a[0]) - tierRank(b[0]))
@@ -313,10 +318,7 @@ export function gatesCard(signals, lang) {
 export function linksCard(graph, lang, opens = () => false) {
   const w = LINK_WORDS[lang] || LINK_WORDS.en;
   if (!graph.documents.length) return lead(w.noDocuments);
-  const named = (path) => {
-    const name = `<code>${escapeHtml(path)}</code>`;
-    return opens(path) ? `<a href="${fileHref(path)}">${name}</a>` : name;
-  };
+  const named = (path) => pathName(path, opens);
   const names = (paths) => paths.map(named).join(', ');
   const out = [
     lead(`${w.summary(graph.documents.length, graph.links)}.`),
