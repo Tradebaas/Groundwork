@@ -53,6 +53,19 @@ test('brief: scope items are read with their own wording', () => {
   assert.equal(b.items[0].title, 'bonnen importeren met de camera');
 });
 
+// A testable capability rarely fits on one line. The overview quotes these back to the owner
+// verbatim, so half a sentence is a broken report, not a cosmetic issue.
+test('brief: a scope item wrapped over several lines is read whole', () => {
+  const b = parseBrief(BRIEF([
+    '- SC-1 de eigenaar ziet per project de uren,',
+    '  filterbaar per maand,',
+    '  zonder de repo te openen',
+    '- SC-2 maandoverzicht per klant',
+  ].join('\n')));
+  assert.equal(b.items[0].title, 'de eigenaar ziet per project de uren, filterbaar per maand, zonder de repo te openen');
+  assert.equal(b.items.length, 2);
+});
+
 test('brief: an unfilled template is not scope', () => {
   const b = parseBrief(BRIEF('- SC-1 TBD'));
   assert.deepEqual(b.items, []);
@@ -93,6 +106,16 @@ test('a dropped spec leaves its scope item not started', () => {
   const p = derive({ scopeItems: items, specs: [{ file: 'a', status: 'dropped', traces: ['SC-1'] }] });
   assert.equal(p.items[0].state, 'todo');
   assert.equal(p.done, 0);
+});
+
+// The worked example that ships with Groundwork is fiction carrying the fictional brief's
+// SC-ids. Once a real project defines the same id, counting it would credit the owner with work
+// nobody did, and before that it would nag about a spec pointing at nothing. Neither happens.
+test('the worked example is never counted as this project work, and never warned about', () => {
+  const example = { file: '007-pickup-slots', status: 'example', traces: ['SC-1', 'SC-9'] };
+  const p = derive({ scopeItems: items, specs: [example] });
+  assert.deepEqual([p.done, p.doing, p.todo], [0, 0, 3]);
+  assert.deepEqual(p.warnings, []);
 });
 
 test('a spec pointing at an unknown scope item is surfaced, not swallowed', () => {

@@ -1,10 +1,12 @@
 <!-- WORKED EXAMPLE. This spec is fictional (a neighborhood bakery's web shop) and ships with
      Groundwork only to show the format in its filled-in state: a tier M multi-session spec with
-     tickets. It was never built; the folder is ARCHIVE tier per `docs/README.md`. -->
+     tickets. It was never built; the folder is ARCHIVE tier per `docs/README.md`.
+     Its status is `example` for exactly that reason: the SC-id below belongs to the bakery's
+     brief, and the progress overview must never credit it to the project reading this. -->
 
 # 007: Customers book a pickup slot at checkout
 
-- **Status:** done
+- **Status:** example
 - **Traces to:** BRIEF SC-3: "customers order online and pick up in the shop"
 - **Owner sign-off:** approved 2026-05-14 ("Yes, slots of 15 minutes, max 4 orders each, that
   is exactly how the counter works")

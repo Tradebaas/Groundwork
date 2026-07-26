@@ -16,8 +16,12 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   origin brief, not part of any project. Delete it. (Fresh copies no longer carry it: it is
   gitignored at source. This clears it from older copies made while it was still tracked.)
 - Delete any non-archived spec folder: `docs/specs/[0-9]*` directories are in-flight Groundwork
-  maintainer work, never the new owner's. Keep `docs/specs/archive/` (it holds the worked
-  example) and the `TEMPLATE*.md` files.
+  maintainer work, never the new owner's. Keep the worked example in
+  `docs/specs/archive/007-pickup-slots/` and the `TEMPLATE*.md` files.
+- `docs/product/BRIEF.md` and `docs/specs/archive/000-baseline/` hold Groundwork's own scope and
+  the record of what the framework itself had already shipped. Counted against this project they
+  would report someone else's work as done here. Put the blank brief back
+  (`cp docs/product/TEMPLATE-BRIEF.md docs/product/BRIEF.md`) and delete the baseline folder.
 - Reset `"denylist"` in `checks/config.json` to `[]`: its entries guard the origin repo's
   retired wording, never this project's. Keep `styleBans` intact (those are generic).
 - Keep `docs/decisions/0001-0012`: they document the system this project just inherited (why
