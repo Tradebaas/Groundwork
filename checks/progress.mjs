@@ -181,6 +181,16 @@ export function isSpecPath(relPath) {
   return /^docs\/specs\/(archive\/)?(.+\/spec|[^/]+)\.md$/.test(relPath);
 }
 
+// How a spec is named where the report quotes one: a folder spec by its folder, a single-file spec
+// by its file name. Both spec roots count as "sits directly in specs", so an archived single-file
+// spec keeps its own name; naming it after the archive folder would point a warning at no document.
+// Which directories are spec roots is the one fact this shares with isSpecPath above: a change to
+// the set belongs in both, or the report starts naming files the counter never looked at.
+export function specLabel(file) {
+  const parent = basename(dirname(file));
+  return parent === 'specs' || parent === 'archive' ? basename(file) : parent;
+}
+
 function specFiles(root) {
   const dir = join(root, 'docs', 'specs');
   const out = [];
@@ -234,7 +244,7 @@ export function readBrief(root) {
 
 export function readProject(root) {
   const brief = readBrief(root) || { name: null, items: [], goal: null, outOfScope: [], placeholders: 0 };
-  const specs = specFiles(root).map((f) => ({ file: basename(dirname(f)) === 'specs' ? basename(f) : basename(dirname(f)), ...parseSpec(read(f)) }));
+  const specs = specFiles(root).map((f) => ({ file: specLabel(f), ...parseSpec(read(f)) }));
   return {
     root,
     name: brief.name || basename(root),
