@@ -43,9 +43,18 @@ description: Release, deploy, or hand over a milestone in a disciplined, repeata
 Deliverable milestone for a client/owner → run `handover` so the repo is cold-start complete,
 and demo against BRIEF's success criteria: per SC-item in this milestone, show it working.
 
+A demo proves capability, not value: it works, and nobody has measured yet whether the promised
+value arrived. So before the milestone closes, every shipped SC-item's measurement plan in BRIEF
+carries a concrete read date ("quarterly" gets a date) and a named reader, set with the owner
+because the measurement is theirs, and `maintain`'s loop reads it when that date passes. An
+SC-item BRIEF marks `n/a` has nothing to schedule; a quantified criterion with no plan at all is
+a `scope` question, not a delivery blocker.
+
 ## 3. Record
 
 STATE.md: phase (`maintain` after first production release), release line (version, date, sha,
 environment), Now ▶. Deferred-but-shipped debt: DEBT.md rows checked against what shipped.
 New operational facts (URLs, dashboards, schedules) → `docs/operations/`, listed in the
-manifest. Report: version, where it now runs, evidence of the smoke checks, one next step. ⚓
+manifest. What this release cycle taught, a missing runbook step included, routes to INTAKE.md
+as a candidate like any session lesson (`checkpoint`, step 3 of its method, owns that rule).
+Report: version, where it now runs, evidence of the smoke checks, one next step. ⚓

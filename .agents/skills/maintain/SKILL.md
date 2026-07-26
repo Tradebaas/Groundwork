@@ -28,6 +28,10 @@ First maintenance session: confirm the minimum exists, or create it and record i
    Paying debt is a proposed, owner-approved task like any other.
 4. **Drift check**: `node checks/check.mjs` + spot-check that STATE.md, BRIEF and reality still
    agree. Docs describing a system that no longer exists → fix + denylist.
+5. **Success metrics**: a read date in BRIEF's measurement plan that has passed gets read now,
+   and the number written next to its criterion in BRIEF, dated. Nothing due, nothing to do.
+   Measured below target is a finding for `scope`, not a defect for `debug`: the capability
+   works, the value did not arrive.
 
 ## Incidents
 
