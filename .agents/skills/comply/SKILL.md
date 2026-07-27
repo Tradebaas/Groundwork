@@ -20,12 +20,14 @@ license.
 
 ## 2. Verify current state of the law
 
-Regulations shift (the register carries its last-verified date; it ages). For each applicable
-regime, confirm today's status via authoritative sources (EUR-Lex, the Commission's pages, the
-AP (autoriteitpersoonsgegevens.nl) for NL) and update the register's dates. Never assert a
-deadline or obligation from model memory. Deadline horizon: when any register date falls within
-the next 60 days, re-verify that regime now instead of waiting for the quarterly audit - rules
-move fastest just before they bite.
+Regulations shift (every register row carries its own last-verified date; they age). For each
+applicable regime, confirm today's status via authoritative sources (EUR-Lex, the Commission's
+pages, the AP (autoriteitpersoonsgegevens.nl) for NL) and update the register's dates. Stamp
+today in `Dates verified` on the rows you actually checked, and leave the other rows' stamps
+alone: a partial pass that stamps the whole table turns a stale row into a fresh-looking one.
+Never assert a deadline or obligation from model memory. Deadline horizon: when any register
+date falls within the next 60 days, re-verify that regime now instead of waiting for the
+quarterly audit - rules move fastest just before they bite.
 
 ## 3. Apply per obligation: build it in, don't bolt it on
 

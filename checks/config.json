@@ -6,7 +6,9 @@
     { "pattern": "\\b14 (vastgelegde )?besluiten\\b|>14</div><div class=\"l\">Vastgelegde", "why": "retired stat-strip count: 15 recorded decisions exist since 0015; bump the strip when a decision lands, until the counts are derived (GAP Phase 3)" },
     { "pattern": "\\b2027-06-28\\b", "why": "wrong EAA date that once stood in the register: pre-2025 service contracts run until 2030-06-28 at the latest (EAA Art 32(2), verified 2026-07-22), no EU/NL deadline exists on 2027-06-28" },
     { "pattern": "NL still pending", "why": "retired NIS2 register wording; the Cyberbeveiligingswet is in force 2026-08-15, the register row owns the current status" },
-    { "pattern": "Omnibus June 2026", "why": "retired AI Act citation; the omnibus amendment was signed 2026-07-08 (OJ publication pending), the register row owns the current citation" },
+    { "pattern": "Omnibus June 2026", "why": "retired AI Act citation; the omnibus is Regulation (EU) 2026/1744, in force 2026-07-27, and the register row owns the current citation" },
+    { "pattern": "OJ publication pending", "why": "retired AI Act register wording; the omnibus is no longer pending publication and the register row owns the current citation" },
+    { "pattern": "ensure that the people operating them have a level of AI literacy", "why": "retired AI Act Art 4 wording; the Digital Omnibus softened it to taking measures that support AI literacy, with no level to guarantee in any individual (AI-LITERACY.md owns the current statement). Pre-omnibus training data says otherwise, so this one returns by itself" },
     { "pattern": "hard (budget|cap|limit) (of )?(≤|<=)? ?150", "why": "retired 0001 claim; since agent-file-cap the scheme is two-tier: working budget 150 for AGENTS.md, hard cap 200 for every agent rulebook file" },
     { "pattern": "pip install ['\"]?markitdown|from markitdown import", "why": "retired ingest snippets; install/CLI/API syntax is read from the markitdown README at use time (skill-author: no code snippets that go stale)" }
   ],

@@ -4,11 +4,13 @@
      AI coding agents operated under this repo's rulebook. Per project, `comply` keeps the
      "Who is covered" line true and re-checks this note at the quarterly audit. -->
 
-Article 4 of the EU AI Act requires providers and deployers of AI systems to ensure that the
-people operating them have a level of AI literacy that fits their role. A team building
-software with AI coding agents professionally is a deployer, so this project is in scope.
-Since when it applies and enforcement dates are the register's facts: `COMPLIANCE.md` §1,
-AI Act row.
+Article 4 of the EU AI Act asks providers and deployers of AI systems to take measures that
+support the AI literacy of the people operating them, matched to their role and context. The
+Digital Omnibus on AI softened the original wording into an obligation of effort: no level of
+literacy has to be guaranteed in any individual, so a working system of measures is what
+evidence looks like here. A team building software with AI coding agents professionally is a
+deployer, so this project is in scope. Since when it applies, which act amended it and the
+enforcement dates are the register's facts: `COMPLIANCE.md` §1, AI Act row.
 
 ## The measures
 
