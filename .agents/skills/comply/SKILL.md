@@ -15,7 +15,8 @@ Walk the register's trigger table against BRIEF.md and the actual system: person
 Art 50 transparency. Consumer-facing digital service/e-commerce → European Accessibility Act.
 Product with digital elements sold in the EU → CRA. Software placed on the EU market, which is
 virtually every shipped product → Product Liability Directive. Essential/important sector or
-supplier to one → NIS2. The client is a financial entity → DORA. Every dependency → its
+supplier to one → NIS2. The client is a financial entity → DORA. Connected product, or a
+cloud/SaaS service a customer can switch away from → Data Act. Every dependency → its
 license.
 
 ## 2. Verify current state of the law
@@ -53,6 +54,9 @@ quarterly audit - rules move fastest just before they bite.
 - **DORA**: the obligations arrive through the financial client's contract (Art 30: security
   measures, incident support, audit and access rights, exit strategy); check those clauses
   against what the product actually delivers and record any gap in the register.
+- **Data Act**: a connected product is designed so its data reaches the user by default, not
+  bolted on as an export later; a cloud/SaaS offering carries no switching barriers and an exit
+  the customer can actually walk, contract terms and egress included.
 - **Licensing**: every dependency's license compatible with the product's use and distribution;
   copyleft obligations honored; the register lists anything non-trivial.
 
