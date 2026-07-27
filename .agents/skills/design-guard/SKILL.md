@@ -24,30 +24,38 @@ every `taste` section 11 tell that survived into the render is a finding here.
    never text plus a decorative icon (a disclosure chevron is the only exception). Strak and
    minimal with generous whitespace: nothing cramped, cards/labels/text never flush against each
    other, unless the owner deliberately chose otherwise.
-3. **Locks hold page-wide.** One accent used identically in every section, one theme (no
+3. **No stock-AI layout.** Four tells survive a corrected palette, so look for them in the shape
+   of the thing: cards nested inside cards (one bordered surface per region, and the grouping
+   inside it is plain), blurred gradient orbs left to do the decorating (DESIGN.md principle 10
+   allows one deliberate owner-approved wash; a field of them, or one carrying a page nothing
+   else carries, is the tell), monospace worn as atmosphere on prose and labels instead of
+   carrying code, paths and IDs, and the row of exactly four big numbers that exists because the
+   template had four slots. A stat earns its place when someone measured it and would act on it;
+   otherwise the row goes, not just its weakest number.
+4. **Locks hold page-wide.** One accent used identically in every section, one theme (no
    section flipping to inverted mode mid-scroll), one corner-radius system, one icon family.
    On persuasion pages also: eyebrow labels rationed (at most 1 per 3 sections), no layout
    family repeated, no CTA label wrapping and one CTA label per intent, real images instead of
    div-built fake screenshots, every animation motivated and reduced-motion safe.
-4. **Typography discipline.** Scale steps only; label and value share size and weight
+5. **Typography discipline.** Scale steps only; label and value share size and weight
    (distinction by color only); no banned weights; line lengths readable.
-5. **Spacing ladder.** Air comes from consistent ladder steps, not ad-hoc gaps. Related things
+6. **Spacing ladder.** Air comes from consistent ladder steps, not ad-hoc gaps. Related things
    closer than unrelated things: check it actually reads that way.
-6. **Layout truth.** No text over text, no wrapping button labels or prices, equal heights in
+7. **Layout truth.** No text over text, no wrapping button labels or prices, equal heights in
    card rows, reserved space for optional badges, sensible behavior at narrow width and with
    long content. Check the ugly states: empty, loading, error, overflow.
-7. **States exist.** Hover, focus (visible!), disabled, loading, empty, error: designed, not
+8. **States exist.** Hover, focus (visible!), disabled, loading, empty, error: designed, not
    browser defaults.
-8. **Accessibility floor**: contrast, focus order, labels on inputs and icons, keyboard path
+9. **Accessibility floor**: contrast, focus order, labels on inputs and icons, keyboard path
    through the flow. (Legal baseline: see COMPLIANCE.md.)
 
 ## Voice
 
-9. **Reads like VOICE.md**: register, wording table respected, direct and calm; no exclamation
-   inflation, no em-dash tells, no filler ("simply", "just", "please note").
-10. **Errors follow the pattern**: what happened, what the user can do: no codes without words,
+10. **Reads like VOICE.md**: register, wording table respected, direct and calm; no exclamation
+    inflation, no em-dash tells, no filler ("simply", "just", "please note").
+11. **Errors follow the pattern**: what happened, what the user can do: no codes without words,
     no blame, no false cheer.
-11. **Every value has a label**, every screen answers "what is this and what do I do here?"
+12. **Every value has a label**, every screen answers "what is this and what do I do here?"
 
 ## Verdict
 
