@@ -1,6 +1,6 @@
 ---
 name: maintain
-description: Keep a shipped product healthy: monitoring, updates, incidents, debt, periodic audits. Use after first production release, on a maintenance session, when dependencies need updating, when something broke in production, or to harvest defer: markers into the debt ledger.
+description: Keep a shipped product healthy: monitoring, updates, incidents, debt, periodic audits, retirement. Use after first production release, on a maintenance session, when dependencies need updating, when something broke in production, to harvest defer: markers into the debt ledger, or when a product, environment or integration is being retired and its data and access must actually go.
 ---
 
 # maintain: the product is now a running system
@@ -22,7 +22,13 @@ First maintenance session: confirm the minimum exists, or create it and record i
 1. **Signals**: errors, alerts, intake since last session. Triage bugs (fix + regression test)
    from wishes (INTAKE.md → `scope`).
 2. **Dependencies**: audit for known vulnerabilities (blocking; fix now), then routine updates
-   in small, verified batches: never a big-bang upgrade with feature work mixed in.
+   in small, verified batches: never a big-bang upgrade with feature work mixed in. On a
+   platform stack (the stack file's header declares a hosted platform) the audit has the same
+   job and different subjects: connectors and the permissions they carry, installed managed
+   solutions and store apps, plugins and custom code registered in the instance, and the
+   vendor's own release and deprecation notices. Those last ones move on the vendor's schedule
+   rather than yours, which is what makes a platform go stale while every project file sits
+   untouched.
 3. **Debt harvest**: `grep -rn "defer:" --exclude-dir=.git .` → reconcile with DEBT.md. Flag
    markers whose upgrade trigger has fired, and `no-trigger` markers (those rot silently).
    Paying debt is a proposed, owner-approved task like any other.
@@ -47,4 +53,35 @@ what, impact, cause, fix, what now detects it earlier. No blame, no essay.
 One focused pass: security posture, compliance register still current (`comply`), backup
 restore proven again (a restore you haven't run this quarter is a rumor), unused code/deps
 (stack dead-code tooling), skill library still curated, STATE.md log rotated.
-Findings → INTAKE/DEBT with severity; fix nothing unasked. ⚓
+
+The stack standards file ages the same way the compliance register does. Its header carries the
+date those facts were last verified; when that date is more than a quarter old, or the stack has
+shipped a major version since, re-verify the file against the vendor's live documentation and
+re-stamp the header (`stack` owns how, and its rule that a stack fact from model memory is a
+rumor with a cutoff). The major-version half fires on the news rather than on the calendar: a
+release that deprecates what the standards file blesses is worth knowing about in the week it
+lands, not in the quarter it lands.
+
+Findings → INTAKE/DEBT with severity; fix nothing unasked.
+
+## End of life: retiring a product, an environment, or an integration
+
+`comply` makes two promises that only come due here: the retention periods written in the
+register's processing record, and deletion that is implemented rather than described. This is
+where they are kept. Decommissioning is a proposed, owner-approved task like paying debt, never
+a cleanup done in passing, and it is the one maintenance job whose evidence someone may ask for
+years later.
+
+- **The data goes, per the record.** Every purpose in `docs/compliance/COMPLIANCE.md`'s
+  processing record names a retention period; at end of life each one is deleted, or exported
+  first to the destination the owner agreed. Backups, replicas and analytics copies hold the
+  same personal data and outlive the primary store, so name when they expire too - a deletion
+  proven only against the live database is a deletion visible only from the front.
+- **The access goes with it.** Credentials, API tokens, service accounts, connectors, webhooks
+  and third-party processor accounts created for this product are revoked at their source, and
+  the processor agreements that covered them are ended. A key nobody revoked outlives the
+  product it belonged to and has no owner left to notice it.
+- **Say what happened, where the promise lived.** Record per purpose what was deleted or
+  exported and on what date, in the register that carried the retention promise, and note the
+  retirement in STATE.md. An undocumented deletion and a forgotten one look identical
+  afterwards. ⚓
