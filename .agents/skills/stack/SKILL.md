@@ -27,7 +27,15 @@ authoritative sources (official docs, release pages). Model memory is a rumor wi
 ## 2. Generate `docs/standards/<stack>.md`
 
 Research what a top engineer in *this* ecosystem does **today**, from primary sources, and write
-it down with versions, dates, and source links. Cover at least:
+it down with versions, dates, and source links.
+
+Head the file with what its readers depend on: the stack's name and version, whether it is a
+hosted platform (and which one), and the date these facts were last verified against primary
+sources. That header carries weight elsewhere - the platform line is what switches on the
+platform route in `code-review`, `debug`, `maintain` and `deliver`, and the date is what
+`maintain`'s quarterly audit tests for staleness. A file with no platform line reads downstream
+as "not a platform", so a platform project that omits it loses all four routes silently. Then
+cover at least:
 
 - Project layout for this stack (senior-readable, conventional, not invented).
 - Language/framework idiom: the current blessed patterns, and the deprecated ones to refuse.
