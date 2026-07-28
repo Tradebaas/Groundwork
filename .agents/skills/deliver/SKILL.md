@@ -16,6 +16,13 @@ description: Release, deploy, or hand over a milestone in a disciplined, repeata
   gate chain on a fresh clean checkout and record that explicit exception in STATE.md. On
   GitHub, a first release also protects `main`: the owner applies the runbook
   `docs/operations/branch-protection.md` with repo admin.
+- On a platform stack (the stack file's header declares a hosted platform): the target instance
+  and the repo still agree. Export the environment fresh and compare it against what is
+  committed; whatever was changed directly in the platform editor since the last export is
+  brought into the repo or deliberately dropped, and either way it happens before the release,
+  not during it. A repo that is behind its own instance ships a release that overwrites work
+  nobody reviewed. This is the platform's standard failure mode and the one CI cannot see:
+  green on the commit says nothing about what the instance holds.
 - The product holds persistent data → `docs/operations/backup-restore.md` exists and the
   restore has been performed once, for real. An untested restore is a hope, not a backup.
 - Compliance register (`docs/compliance/COMPLIANCE.md`) has no open blocking item. For a first

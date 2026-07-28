@@ -31,6 +31,17 @@ beats diagnosis under fire), then run this loop calmly.
    shim (prints, sleeps, forced branches, commented-out calls) is removed; the full gate
    chain runs green.
 
+## On a platform stack
+
+When the stack file's header declares a hosted platform, steps 2 and 3 keep their intent and
+change their instrument; the rest of the loop is unchanged. Reproduce in a real dev environment,
+against the platform's own record of the failure - run history, execution logs, the audit trail -
+and with its test tooling where the platform has any. For what changed, the platform keeps its
+own history: solution layers and version history, the audit log of who edited what, and the
+vendor's release notes for the change nobody in the project made. That is the bisect equivalent,
+and it reaches one thing bisect cannot - an edit made directly in the platform editor that never
+became a commit.
+
 ## Record
 
 A non-obvious cause is lesson material: one gotcha line in STATE.md's log, so the next
