@@ -73,6 +73,20 @@ Baseline of thirteen smells to check by name, beyond whatever the standards say:
     between the old version and the new one, so both ship. The fix is the choice: replace the
     original, or name what actually differs about this one.
 
+**On a platform stack.** When the stack file's header declares a hosted platform, the seven that
+describe object structure (3, 4, 5, 6, 10, 11, 12) go quiet against solution XML, flow
+definitions and generated exports. The other six survive the translation and are where the
+findings are: a flow named `New flow 1`, the same logic copied into three flows, a solution
+edited for unrelated reasons, one change forcing edits across a dozen artifacts, options nobody
+asked for, and `Flow - Copy` shipping beside the original. The subject of the review is what the
+platform actually runs - flows, apps, business rules, security roles, connector permissions,
+environment variables - read in the platform's own terms, with the export diff treated as the
+transport it is. The discriminator matters here: churn the exporter produced (reordered nodes,
+regenerated ids, timestamps) is not a finding, while a security role granting more than the spec
+asked for is one whether or not the diff makes it obvious. The standards file's platform craft
+section (environment strategy, naming, blessed and deprecated patterns, connector governance) is
+the written standard this axis holds it to.
+
 ## Axis B: spec and message fidelity
 
 Inputs: the diff, the spec (tier S: the request as recorded), and the commit message about to be
