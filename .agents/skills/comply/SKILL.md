@@ -34,7 +34,9 @@ quarterly audit - rules move fastest just before they bite.
 
 - **GDPR/AVG**: lawful basis named per processing purpose; data minimization in the schema
   (collect nothing "for later"); records of processing (Art 30); DPIA if high-risk (Art 35);
-  data-subject rights executable (export, delete: actually implemented, not promised);
+  data-subject rights executable (export, delete: actually implemented, not promised); the
+  retention periods recorded here honored to the end, the product's own retirement included
+  (`maintain` owns that step);
   processor agreements for every third-party service touching personal data; EU data residency
   checked per service; breach path known (72h to the AP).
 - **AI Act**: users told they're interacting with AI; AI-generated content marked
