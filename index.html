@@ -442,9 +442,13 @@ window.GW={
 <div class="marquee reveal" aria-hidden="true"><div class="track" id="mtrack"></div></div>
 
 <div class="stats wrap reveal">
-  <div class="stat"><div class="n">21</div><div class="l">Skills op afroep</div></div>
-  <div class="stat"><div class="n">19</div><div class="l">Automatische poorten</div></div>
-  <div class="stat"><div class="n">15</div><div class="l">Vastgelegde besluiten</div></div>
+  <!-- data-derive marks a number this repo can count: checks/check.mjs (explainer-stats) counts
+       the owning directory and turns red when this page drifts. The two unmarked stats are
+       claims, not counts. Copied this repo to start a product? `begin` drops these markers:
+       the numbers then describe the framework you copied, not what you are building. -->
+  <div class="stat"><div class="n" data-derive="skills">21</div><div class="l">Skills op afroep</div></div>
+  <div class="stat"><div class="n" data-derive="gates">20</div><div class="l">Automatische poorten</div></div>
+  <div class="stat"><div class="n" data-derive="decisions">16</div><div class="l">Vastgelegde besluiten</div></div>
   <div class="stat"><div class="n">1</div><div class="l">Rulebook, alle tools</div></div>
   <div class="stat"><div class="n"><em>0</em></div><div class="l">Tokens voor de poorten</div></div>
 </div>

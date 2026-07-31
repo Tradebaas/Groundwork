@@ -27,6 +27,10 @@ went wrong or needs the owner's action; a list of deleted template files is nois
 - Keep `docs/decisions/0001-0012`: they document the system this project just inherited (why
   the rulebook, skills and checks work the way they do). This project's own decisions start
   at 0013.
+- Strip the `data-derive` attributes from the stat strip in `index.html` (leave the numbers and
+  the page alone). They tie those numbers to a gate that counts this repo, and in a copy the
+  numbers describe the framework, not the project: the first decision this project records would
+  otherwise turn the gate red.
 - Verify prerequisites: `git --version` and `node --version` (Node ≥ 20). Missing → tell the
   owner exactly what to install, then stop.
 
