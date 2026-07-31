@@ -31,6 +31,10 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   the record of what the framework itself had already shipped. Counted against this project they
   would report someone else's work as done here. Put the blank brief back
   (`cp docs/product/TEMPLATE-BRIEF.md docs/product/BRIEF.md`) and delete the baseline folder.
+- `docs/operations/deploy.md` holds Groundwork's own release route, which would read as this
+  project's if it stayed. Put the blank runbook back
+  (`cp docs/operations/TEMPLATE-DEPLOY.md docs/operations/deploy.md`). `deliver` fills it at first
+  delivery.
 - `docs/compliance/` carries Groundwork's own answers in two places, and inheriting them would
   hand this project a register that describes someone else. In `docs/compliance/COMPLIANCE.md`,
   clear §2 back to its skeleton: the three header bullets to `TBD`, the register table to one
