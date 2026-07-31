@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="nl">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Groundwork, uitgelegd</title>
-<meta name="description" content="Groundwork is een map met regels die elke AI-assistent van eerste idee naar geleverde, onderhouden software leidt. Open source, zonder lock-in.">
-<meta property="og:title" content="Groundwork, uitgelegd">
-<meta property="og:description" content="Een map met regels die elke AI-assistent van eerste idee naar geleverde, onderhouden software leidt.">
+<title>Groundwork, explained</title>
+<meta name="description" content="Groundwork is a folder of rules that steers any AI assistant from first idea to delivered, maintained software. Open source, no lock-in.">
+<meta property="og:title" content="Groundwork, explained">
+<meta property="og:description" content="A folder of rules that steers any AI assistant from first idea to delivered, maintained software.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tradebaas.github.io/Groundwork/">
 <meta name="twitter:card" content="summary">
@@ -21,12 +21,12 @@
 /* bootstrap: apply saved look before first paint (no flash). Single source of truth: window.GW */
 window.GW={
   accents:{
-    teal:   {label:"Teal",    dark:["#3fae9f","#04110e"], light:["#2f6664","#ffffff"]},
-    grafiet:{label:"Grafiet", dark:["#e8eae6","#0a0b0b"], light:["#1c1f1e","#ffffff"]},
-    amber:  {label:"Amber",   dark:["#e3b04e","#221503"], light:["#7a5a05","#ffffff"]},
-    robijn: {label:"Robijn",  dark:["#e5647e","#26040d"], light:["#a3243f","#ffffff"]},
-    bos:    {label:"Bos",     dark:["#72c076","#05170a"], light:["#2c6e31","#ffffff"]},
-    klei:   {label:"Klei",    dark:["#d98e6a","#2b1206"], light:["#96491f","#ffffff"]}
+    teal:    {label:"Teal",     dark:["#3fae9f","#04110e"], light:["#2f6664","#ffffff"]},
+    graphite:{label:"Graphite", dark:["#e8eae6","#0a0b0b"], light:["#1c1f1e","#ffffff"]},
+    amber:   {label:"Amber",    dark:["#e3b04e","#221503"], light:["#7a5a05","#ffffff"]},
+    ruby:    {label:"Ruby",     dark:["#e5647e","#26040d"], light:["#a3243f","#ffffff"]},
+    forest:  {label:"Forest",   dark:["#72c076","#05170a"], light:["#2c6e31","#ffffff"]},
+    clay:    {label:"Clay",     dark:["#d98e6a","#2b1206"], light:["#96491f","#ffffff"]}
   },
   fonts:{
     josefin: {label:"Josefin Sans",    stack:'"Josefin Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
@@ -310,21 +310,32 @@ window.GW={
 
   /* closing: how to start */
   .startgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:34px}
+  /* the route out of a different starting position, so it sits under the three and spans them */
+  .startpath.wide{grid-column:1/-1}
+  .startpath.wide p{max-width:74ch}
   @media(max-width:760px){.startgrid{grid-template-columns:1fr}}
   .startpath{display:flex;gap:16px;background:var(--surface);border:1px solid var(--line);
     border-radius:var(--r);padding:22px 22px 24px}
   .startpath .sp-n{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
     background:var(--tint);color:var(--accent);font-family:var(--font-display);font-weight:700;font-size:15px}
+  .startpath .sp-n svg{width:16px;height:16px}
   .startpath h3{font-size:16px;font-weight:600;letter-spacing:-.01em;margin-bottom:7px}
   .startpath p{color:var(--ink2);font-size:14px;line-height:1.6}
+  .startpath .sp-note{margin-top:12px}
   .startpath a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
   .startpath a:hover{border-bottom-color:var(--accent)}
   .cmd{display:block;margin-top:12px;padding:11px 13px;border-radius:var(--rs);
     background:var(--surface2);border:1px solid var(--line);
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink);
     overflow-x:auto;white-space:nowrap}
+  /* the version story is prose, not a second grid of cards under the first one */
+  .versionnote{max-width:70ch;color:var(--ink2);font-size:15px}
+  .versionnote p+p{margin-top:18px}
+  .versionnote b{color:var(--ink);font-weight:600}
+  .versionnote a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+  .versionnote a:hover{border-bottom-color:var(--accent)}
   .startnote{color:var(--muted);font-size:13.5px;margin-top:22px;max-width:70ch}
-  .startnote code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink2)}
+  .startnote code,.startpath p code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink2)}
 
   /* customizer */
   .fab{position:fixed;right:22px;bottom:22px;z-index:70;width:52px;height:52px;border-radius:16px;
@@ -395,15 +406,15 @@ window.GW={
     <div class="logo">Groundwork</div>
     <div class="navright">
       <div class="navlinks">
-        <a href="#probleem">Probleem</a>
-        <a href="#hoe">Hoe</a>
-        <a href="#waarom">Waarom</a>
+        <a href="#problem">Problem</a>
+        <a href="#how">How</a>
+        <a href="#why">Why</a>
         <a href="#skills">Skills</a>
-        <a href="#cyclus">Levenscyclus</a>
-        <a href="#eerlijk">Eerlijk</a>
+        <a href="#lifecycle">Lifecycle</a>
+        <a href="#limits">Limits</a>
         <a href="https://github.com/Tradebaas/Groundwork">GitHub</a>
       </div>
-      <button class="iconbtn" id="themebtn" aria-label="Wissel tussen licht en donker"></button>
+      <button class="iconbtn" id="themebtn" aria-label="Switch between light and dark"></button>
     </div>
   </nav>
 </header>
@@ -411,19 +422,19 @@ window.GW={
 <main>
 <section class="hero wrap">
   <div>
-    <span class="eyebrow rise" id="hero-eyebrow">Het besturingssysteem voor je projecten</span>
-    <h1 class="rise d1">Van idee tot product, zonder rommel</h1>
-    <p class="lead rise d2">Groundwork is &eacute;&eacute;n map met regels die elke AI-assistent
-      stuurt: extern geheugen, vaste discipline en automatische controles, op enterprise-niveau.</p>
+    <span class="eyebrow rise" id="hero-eyebrow">The operating system for your projects</span>
+    <h1 class="rise d1">From idea to product, without the mess</h1>
+    <p class="lead rise d2">Groundwork is one folder of rules that steers any AI assistant:
+      memory on disk, built-in discipline and automated checks, at enterprise level.</p>
     <div class="cta rise d3">
-      <a class="btn primary" href="#hoe">Hoe het werkt</a>
-      <a class="btn ghost" href="#eerlijk">De grenzen</a>
+      <a class="btn primary" href="#how">How it works</a>
+      <a class="btn ghost" href="#limits">The limits</a>
     </div>
   </div>
   <div class="rise d4">
-    <div class="rulebook" aria-label="Fragment uit het echte rulebook AGENTS.md">
-      <div class="rb-bar"><strong>AGENTS.md</strong><span>het rulebook dat elke assistent leest</span></div>
-      <pre lang="en"><span class="cm">## Session protocol</span>
+    <div class="rulebook" aria-label="Fragment from the real rulebook AGENTS.md">
+      <div class="rb-bar"><strong>AGENTS.md</strong><span>the rulebook every assistant reads</span></div>
+      <pre><span class="cm">## Session protocol</span>
 
 <b>1.</b> Read the handoff block at the
    top of <span class="ac">docs/state/STATE.md</span>
@@ -435,7 +446,7 @@ window.GW={
 <b>4.</b> End every message with <span class="ac">&#9875;</span> to
    confirm these rules are loaded.</pre>
     </div>
-    <p class="rb-cap">Echt fragment, ingekort. Kopieer de map, zeg "begin", en dit protocol stuurt elke sessie.</p>
+    <p class="rb-cap">Real fragment, shortened. Copy the folder, say "begin", and this protocol steers every session.</p>
   </div>
 </section>
 
@@ -446,146 +457,182 @@ window.GW={
        the owning directory and turns red when this page drifts. The two unmarked stats are
        claims, not counts. Copied this repo to start a product? `begin` drops these markers:
        the numbers then describe the framework you copied, not what you are building. -->
-  <div class="stat"><div class="n" data-derive="skills">21</div><div class="l">Skills op afroep</div></div>
-  <div class="stat"><div class="n" data-derive="gates">21</div><div class="l">Automatische poorten</div></div>
-  <div class="stat"><div class="n" data-derive="decisions">18</div><div class="l">Vastgelegde besluiten</div></div>
-  <div class="stat"><div class="n">1</div><div class="l">Rulebook, alle tools</div></div>
-  <div class="stat"><div class="n"><em>0</em></div><div class="l">Tokens voor de poorten</div></div>
+  <div class="stat"><div class="n" data-derive="skills">21</div><div class="l">Skills on demand</div></div>
+  <div class="stat"><div class="n" data-derive="gates">21</div><div class="l">Automated checks</div></div>
+  <div class="stat"><div class="n" data-derive="decisions">18</div><div class="l">Recorded decisions</div></div>
+  <div class="stat"><div class="n">1</div><div class="l">Rulebook, every tool</div></div>
+  <div class="stat"><div class="n"><em>0</em></div><div class="l">Tokens for the checks</div></div>
 </div>
 
-<section id="probleem" class="wrap">
+<section id="problem" class="wrap">
   <div class="sec-head reveal">
-    <h2>AI is krachtig, maar zonder structuur bouwt het rommel</h2>
-    <p class="lead">Een AI-assistent schrijft snel code. Maar hij vergeet wat er gisteren gebeurde,
-      gokt soms op verouderde kennis, dwaalt af naar dingen die niemand vroeg, en kan per ongeluk
-      je gegevens laten rondslingeren. Groundwork lost precies die vier dingen op.</p>
+    <h2>AI is powerful, but without structure it builds a mess</h2>
+    <p class="lead">An AI assistant writes code fast. But it forgets what happened yesterday,
+      sometimes guesses from outdated knowledge, drifts into work nobody asked for, and can leave
+      your data lying in the wrong place. Groundwork fixes exactly those four things.</p>
   </div>
   <div class="rows" id="problems"></div>
 </section>
 
-<section id="hoe" class="wrap">
+<section id="how" class="wrap">
   <div class="sec-head reveal">
-    <h2>Vijf eenvoudige onderdelen die samenwerken</h2>
-    <p class="lead">Je hoeft geen regel code te begrijpen. Groundwork is in de kern een set
-      afspraken en automatische controles die de assistent dwingen netjes en veilig te werken.</p>
+    <h2>Five simple parts that work together</h2>
+    <p class="lead">You do not need to read a line of code. At its core, Groundwork is a set of
+      agreements and automated checks that force the assistant to work cleanly and safely.</p>
   </div>
   <div class="bento" id="hows"></div>
 </section>
 
-<section id="waarom" class="wrap">
+<section id="why" class="wrap">
   <div class="sec-head reveal">
-    <h2>Zes redenen, eerlijk uitgelegd</h2>
-    <p class="lead">Geen beloftes, alleen ingebouwde werkwijzen: elke reden hieronder is
-      terug te vinden in de map zelf.</p>
+    <h2>Six reasons, honestly explained</h2>
+    <p class="lead">No promises, only built-in working methods: every reason below can be found
+      in the folder itself.</p>
   </div>
-  <div class="tabs reveal" role="tablist" id="whytabs" aria-label="Zes redenen"></div>
+  <div class="tabs reveal" role="tablist" id="whytabs" aria-label="Six reasons"></div>
   <div id="whypanels"></div>
 </section>
 
 <section id="skills" class="wrap">
   <div class="sec-head reveal">
-    <h2>Skills, elk een expert voor <span class="accent">&eacute;&eacute;n</span> taak</h2>
-    <p class="lead">Een skill is een uitgeschreven werkwijze die de assistent erbij pakt op het
-      juiste moment, gegroepeerd langs de route van idee naar beheer.</p>
+    <h2>Skills, each an expert for <span class="accent">one</span> task</h2>
+    <p class="lead">A skill is a written-out working method the assistant picks up at the right
+      moment, grouped along the route from idea to maintenance.</p>
   </div>
   <div id="skillgrid"></div>
 </section>
 
-<section id="cyclus" class="wrap">
+<section id="lifecycle" class="wrap">
   <div class="sec-head reveal">
-    <h2><span class="accent">E&eacute;n</span> doorlopende route</h2>
-    <p class="lead">Groundwork begeleidt het hele leven van een product, niet alleen het bouwen.
-      Klik op een fase.</p>
+    <h2><span class="accent">One</span> continuous route</h2>
+    <p class="lead">Groundwork guides the whole life of a product, not only the building.
+      Click a phase.</p>
   </div>
-  <div class="rail reveal" id="steps" role="tablist" aria-label="Fases van de route"></div>
+  <div class="rail reveal" id="steps" role="tablist" aria-label="Phases of the route"></div>
   <div class="stepbody reveal" id="stepbody" role="tabpanel" tabindex="0"></div>
 </section>
 
 <div class="band">
 <section class="wrap">
   <div class="sec-head reveal">
-    <h2>Controles die niets laten passeren</h2>
-    <p class="lead">Deze draaien automatisch bij elke vastlegging (commit) en publicatie. Ze
-      kosten geen tokens, en omzeilen is door het rulebook verboden: een dichte poort is
-      informatie, geen obstakel.</p>
+    <h2>Checks that let nothing through</h2>
+    <p class="lead">These run automatically at every commit and every publish. They cost no
+      tokens, and the rulebook forbids bypassing them: a closed gate is information, not an
+      obstacle.</p>
   </div>
   <div class="gatelist" id="gates"></div>
 </section>
 </div>
 
-<section id="eerlijk" class="wrap">
+<section id="limits" class="wrap">
   <div class="sec-head reveal">
-    <h2>Wat Groundwork <span class="accent">niet</span> is</h2>
-    <p class="lead">Vertrouwen ontstaat door eerlijkheid. Dit zijn de grenzen, ronduit benoemd.</p>
+    <h2>What Groundwork is <span class="accent">not</span></h2>
+    <p class="lead">Trust comes from honesty. These are the limits, said plainly.</p>
   </div>
   <div class="reveal" style="max-width:820px" id="faq"></div>
 </section>
 
-<section id="begin" class="wrap">
+<section id="start" class="wrap">
   <div class="sec-head reveal">
-    <h2>Zo begin je</h2>
-    <p class="lead">Groundwork is een sjabloon. Kopieer het en je project start met het rulebook,
-      de skills en de controles al op hun plek. Kies een van de drie manieren, en begin met een
-      schone geschiedenis: je project verdient zijn eigen eerste vastlegging (commit), niet die
-      van ons.</p>
+    <h2>How to start</h2>
+    <p class="lead">Groundwork is a template. Copy it and your project starts with the rulebook,
+      the skills and the checks already in place. Pick one of the three routes, and start with a
+      clean history: your project deserves its own first commit, not ours.</p>
   </div>
   <div class="startgrid reveal">
     <div class="startpath">
       <span class="sp-n" aria-hidden="true">1</span>
       <div>
-        <h3>Op GitHub</h3>
-        <p>Klik op <b>Use this template</b> op de repository. Je krijgt een eigen repo met
-          &eacute;&eacute;n beginvastlegging en zonder onze historie.</p>
+        <h3>On GitHub</h3>
+        <p>Click <b>Use this template</b> on the repository. You get your own repo with one
+          initial commit and none of our history.</p>
       </div>
     </div>
     <div class="startpath">
       <span class="sp-n" aria-hidden="true">2</span>
       <div>
-        <h3>Vanaf de opdrachtregel</h3>
-        <p>&Eacute;&eacute;n commando kopieert de laatste stand zonder historie:</p>
-        <code class="cmd">npx degit Tradebaas/Groundwork mijn-project</code>
+        <h3>From the command line</h3>
+        <p>One command copies the latest snapshot without history:</p>
+        <code class="cmd">npx degit Tradebaas/Groundwork my-project</code>
+        <p class="sp-note">degit drops the <code>.claude/skills</code> symlink. Restore it once,
+          or let <b>begin</b> repair it:</p>
+        <code class="cmd">ln -sfn ../.agents/skills .claude/skills</code>
       </div>
     </div>
     <div class="startpath">
       <span class="sp-n" aria-hidden="true">3</span>
       <div>
-        <h3>Als ZIP</h3>
-        <p>Liever geen tooling? Download de map met de groene knop <b>Code</b> en pak hem uit.</p>
+        <h3>As a ZIP</h3>
+        <p>Rather not install tooling? Download the folder with the green <b>Code</b> button and
+          unzip it. Unpacking drops the same symlink, and the same one line above restores it.</p>
+      </div>
+    </div>
+    <div class="startpath wide">
+      <span class="sp-n" data-icon="puzzle" aria-hidden="true"></span>
+      <div>
+        <h3>Already have a project?</h3>
+        <p>Groundwork lays over a repo that exists, without touching its history. Take a copy the
+          same way, then move its contents into your project root, minus the four files that
+          describe a product rather than the framework: keep your own <code>README.md</code>,
+          <code>LICENSE</code>, <code>.gitignore</code> and <code>index.html</code>. Then say
+          <b>begin</b> as below. It reads which of the two situations it is: your git history
+          stays, the interview takes its answers from your code first, and the first run of the
+          checks counts as a measurement of where you stand, not as a verdict.</p>
       </div>
     </div>
   </div>
   <div class="cta reveal">
-    <a class="btn primary" href="https://github.com/Tradebaas/Groundwork">Open de repository</a>
+    <a class="btn primary" href="https://github.com/Tradebaas/Groundwork">Open the repository</a>
   </div>
-  <p class="startnote reveal">Open daarna de map in je editor of assistent en zeg
-    <b>begin</b> (of laad de skill <code>begin</code>). Heb je al een PRD, projectomschrijving
-    of alleen een vaag idee? Plak die tekst erbij: <b>begin</b> gebruikt hem als bron en vraagt
-    alleen nog wat ontbreekt. Daarna zet hij git en de controles op en stelt hij de eerste
-    echte stap voor.</p>
+  <p class="startnote reveal">Then open the folder in your editor or assistant and say
+    <b>begin</b> (or load the skill <code>begin</code>). Already have a PRD, a project description
+    or only a vague idea? Paste it in: <b>begin</b> uses that as the source and asks only for what
+    it leaves open. From there it sets up git and the checks, and proposes the first real step.
+    You need Node.js 20 or newer for the checks; the rest is your AI assistant.</p>
+</section>
+
+<section id="versions" class="wrap">
+  <div class="sec-head reveal">
+    <h2>Versions, and taking later improvements</h2>
+    <p class="lead">Groundwork keeps moving after you copy it. Nothing changes under your feet:
+      from its first commit the copy is your own repo. What you do get is a way to see what moved
+      since, and to take only the parts you want.</p>
+  </div>
+  <div class="versionnote reveal">
+    <p><b>Every release is tagged.</b> Each version carries a git tag and a section in the
+      changelog, so a copy can say which Groundwork it holds and what has happened since:
+      <a href="https://github.com/Tradebaas/Groundwork/releases">releases and changelog</a>.</p>
+    <p><b>Improvements travel by hand.</b> Read the changelog from your version forward, copy in
+      the files you want, and keep everything you have made your own. There is no updater, and
+      there will not be one: by then your copy has edited skills, tuned checks and rules of its
+      own, and merging that safely is a package manager rather than a framework.
+      <a href="https://github.com/Tradebaas/Groundwork/blob/main/docs/decisions/0017-copies-take-improvements-by-hand-from-tagged-releases.md">The
+      reasoning is recorded as a decision</a>.</p>
+  </div>
 </section>
 </main>
 
 <footer class="wrap">
   <div class="logo">Groundwork</div>
   <div class="pill">
-    <span>MIT-licentie</span><span>Open standaarden</span><span>Geen vendor lock-in</span>
-    <span>Werkt in elke editor</span><span>Jouw gegevens blijven lokaal</span>
+    <span>MIT license</span><span>Open standards</span><span>No vendor lock-in</span>
+    <span>Works in every editor</span><span>Your data stays local</span>
   </div>
-  <p>Geen woord te veel. Alles wat je nodig hebt leeft in de map: geef die map en het project reist mee.</p>
-  <p style="margin-top:18px"><a href="https://github.com/Tradebaas/Groundwork" style="color:var(--ink2)">github.com/Tradebaas/Groundwork</a> &middot; <a href="https://github.com/Tradebaas/Groundwork/commits/main" style="color:var(--ink2)">wat er recent veranderde</a></p>
+  <p>Not a word too many. Everything you need lives in the folder: hand over the folder and the project travels with it.</p>
+  <p style="margin-top:18px"><a href="https://github.com/Tradebaas/Groundwork" style="color:var(--ink2)">github.com/Tradebaas/Groundwork</a> &middot; <a href="https://github.com/Tradebaas/Groundwork/releases" style="color:var(--ink2)">releases and changelog</a></p>
 </footer>
 
-<button class="fab" id="fab" aria-label="Pas thema en lettertype aan" aria-expanded="false" aria-controls="sheet"></button>
-<div class="sheet" id="sheet" role="dialog" aria-label="Weergave aanpassen">
+<button class="fab" id="fab" aria-label="Adjust theme and font" aria-expanded="false" aria-controls="sheet"></button>
+<div class="sheet" id="sheet" role="dialog" aria-label="Adjust the look">
   <div class="shead">
-    <h4>Weergave</h4>
-    <button class="iconbtn" id="sheetclose" aria-label="Sluiten"></button>
+    <h4>Look</h4>
+    <button class="iconbtn" id="sheetclose" aria-label="Close"></button>
   </div>
-  <div class="grouplabel" id="gl-theme">Kleurthema</div>
+  <div class="grouplabel" id="gl-theme">Color theme</div>
   <div class="swatches" role="radiogroup" aria-labelledby="gl-theme" id="swatches"></div>
-  <div class="grouplabel" id="gl-font">Lettertype van de koppen</div>
+  <div class="grouplabel" id="gl-font">Heading font</div>
   <div class="fontlist" role="radiogroup" aria-labelledby="gl-font" id="fontlist"></div>
-  <p class="hint">Je keuzes worden op dit apparaat onthouden.</p>
+  <p class="hint">Your choices are remembered on this device.</p>
 </div>
 
 <script>
@@ -679,6 +726,9 @@ var io=('IntersectionObserver' in window)
 function watch(el){io.observe(el);}
 document.querySelectorAll('.reveal').forEach(watch);
 
+/* cards written straight into the HTML name their icon instead of inlining the path twice */
+document.querySelectorAll('[data-icon]').forEach(function(el){el.innerHTML=ic(el.getAttribute('data-icon'));});
+
 /* ---------- content ---------- */
 function mount(id,html){
   var el=document.getElementById(id);el.innerHTML=html;
@@ -686,36 +736,36 @@ function mount(id,html){
 }
 
 mount('problems',[
-  ['brain','Geheugenverlies','Elke nieuwe sessie begint de assistent vaak blanco en verzint de stand van zaken opnieuw.'],
-  ['history','Verouderde kennis','Een model weet alleen wat het ooit leerde. Zonder controle gebruikt het oude, onveilige manieren.'],
-  ['shuffle','Rommel en afdwaling','Zonder grenzen bouwt het dingen die niemand vroeg, en ontstaat code die niemand meer begrijpt.'],
-  ['droplet','Lekken','Geheimen in de code, persoonsgegevens op de verkeerde plek. Makkelijk gedaan, moeilijk terug te draaien.'],
+  ['brain','Memory loss','Every new session often starts blank, and the assistant invents where the project stood.'],
+  ['history','Outdated knowledge','A model only knows what it once learned. Unchecked, it reaches for old, unsafe ways of doing things.'],
+  ['shuffle','Mess and drift','Without boundaries it builds things nobody asked for, and code appears that nobody understands any more.'],
+  ['droplet','Leaks','Secrets in the code, personal data in the wrong place. Easy to do, hard to undo.'],
 ].map(function(a){
   return '<div class="row reveal"><div class="rt">'+ic(a[0])+'<span>'+a[1]+'</span></div><p>'+a[2]+'</p></div>';
 }).join(''));
 
 mount('hows',[
-  ['book','E&eacute;n rulebook','E&eacute;n bestand met alle regels dat elke AI-tool leest, in elke editor. Zo ziet de map eruit:','s7 tinted',
-   '<pre class="tree"><b>AGENTS.md</b>        <i>de regels, altijd geladen</i>\n<b>.agents/skills/</b>  <i>de experts, op afroep</i>\n<b>docs/</b>            <i>het geheugen op schijf</i>\n<b>checks/</b>          <i>de poorten, nul tokens</i></pre>'],
-  ['puzzle','Skills op afroep','Expertmethodes die alleen inladen op het moment dat ze nodig zijn. Dat scheelt tokens en houdt de aandacht scherp.','s5'],
-  ['database','Extern geheugen','De stand van het project leeft in bestanden op schijf, niet in het gesprek. Een sessie leest verder waar de vorige stopte, en uit diezelfde bestanden rolt in gewone taal wat af is en wat er nog moet.','s4'],
-  ['shield','Automatische poorten','Mechanische controles draaien bij elke vastlegging. Klopt iets niet, dan gaat de poort dicht. Nul tokens nodig.','s4'],
-  ['checks','De beslis-ladder','Is het nodig? Bestaat het al? Doet een bestaand onderdeel dit? Pas daarna bouwen, en alleen het minimum dat werkt.','s4'],
-  ['anchor','Samen: rust en controle','De assistent werkt hard, maar binnen kaders die jou beschermen en het project begrijpelijk houden.','s12 tinted'],
+  ['book','One rulebook','One file with all the rules, read by every AI tool, in every editor. This is what the folder looks like:','s7 tinted',
+   '<pre class="tree"><b>AGENTS.md</b>        <i>the rules, always loaded</i>\n<b>.agents/skills/</b>  <i>the experts, on demand</i>\n<b>docs/</b>            <i>the memory on disk</i>\n<b>checks/</b>          <i>the checks, zero tokens</i></pre>'],
+  ['puzzle','Skills on demand','Expert methods that load only at the moment they are needed. That saves tokens and keeps the attention sharp.','s5'],
+  ['database','Memory on disk','The state of the project lives in files on disk, not in the chat. A session reads on from where the last one stopped, and those same files answer, in plain language, what is done and what is left.','s4'],
+  ['shield','Automated checks','Mechanical checks run at every commit. If something is off, the gate closes. Zero tokens needed.','s4'],
+  ['checks','The decision ladder','Does this need to exist? Does it already? Does something installed already do it? Only then build, and only the minimum that works.','s4'],
+  ['anchor','Together: calm and control','The assistant works hard, inside boundaries that protect you and keep the project understandable.','s12 tinted'],
 ].map(function(a){
   return '<div class="cell reveal '+a[3]+'"><div class="chip">'+ic(a[0])+'</div><div><h3>'+a[1]+'</h3><p>'+a[2]+'</p></div>'+(a[4]||'')+'</div>';
 }).join(''));
 
 mount('gates',[
-  ['key','Geheimen-scan','Wachtwoorden, sleutels en tokens worden geweigerd voordat ze in de code belanden.'],
-  ['pen','Schrijfstijl','Typische AI-tekens en holle frasen worden geblokkeerd, zodat tekst niet leest als door een model geschreven.'],
-  ['link','Dode links','Elke verwijzing tussen documenten moet echt bestaan, anders faalt de controle.'],
-  ['clipboard','Documentregister','Elk document staat in de inhoudsopgave. Geen zwevende, vergeten bestanden.'],
-  ['ruler','Budgetten','Regels, documenten en codebestanden blijven binnen hun budget. Groeit iets te groot, dan wordt het gesplitst.'],
-  ['code','Dode code','Uitgecommentarieerde brokken code worden opgeruimd. Git onthoudt de historie wel.'],
-  ['history','Spoor naar het doel','Elke vastlegging noemt het doel waarvoor hij bestaat. Zo blijft later te achterhalen waarom een stuk code er staat.'],
-  ['scale','Zelf-test','De poorten testen zichzelf: een controle die niet bewijst dat hij werkt, telt niet mee.'],
-  ['wrench','En de rest','Structuur, tickets, symlinks en uitgestelde keuzes: ook de kleinere afspraken hebben een eigen poort.'],
+  ['key','Secret scan','Passwords, keys and tokens are refused before they land in the code.'],
+  ['pen','Writing style','Typical AI characters and hollow phrases are blocked, so text does not read as written by a model.'],
+  ['link','Dead links','Every reference between documents has to point at something real, or the check fails.'],
+  ['clipboard','Document register','Every document is listed in the manifest. No floating, forgotten files.'],
+  ['ruler','Budgets','Rules, documents and source files stay inside their budget. Grow too large and they get split.'],
+  ['code','Dead code','Commented-out blocks of code are cleaned up. Git remembers the history.'],
+  ['history','Trace to the goal','Every commit names the goal it serves, so later you can still find out why a piece of code is there.'],
+  ['scale','Self-test','The checks test themselves: a check that cannot prove it works does not count.'],
+  ['wrench','And the rest','Structure, tickets, symlinks and deferred choices: the smaller agreements have their own check too.'],
 ].map(function(a){
   return '<div class="gate reveal">'+ic(a[0])+'<div><h3>'+a[1]+'</h3><p>'+a[2]+'</p></div></div>';
 }).join(''));
@@ -736,24 +786,24 @@ function arrows(list,sel){
 }
 
 var why=[
-  {k:'Bij elk project',t:'Werkt met elke editor, elk model, elk project',
-   d:'Groundwork schrijft zelf geen code: het stuurt de assistent die dat doet. Daarom maakt het niet uit welke editor of welk model je gebruikt, vandaag of na je volgende overstap.',
-   how:['E&eacute;n rulebook in de open AGENTS.md-standaard die alle grote AI-tools lezen','Geen binding aan &eacute;&eacute;n leverancier of programma','Begeleidt de hele route: van idee tot onderhoud, niet alleen het bouwen','Kopieer de map, zeg "begin", en je bent onderweg']},
-  {k:'Zuinig met tokens',t:'Effici&euml;nt door ontwerp, niet door een truc',
-   d:'Context is het duurste onderdeel van AI-werk. Groundwork verspilt er zo min mogelijk van: alles wat herbruikbaar is staat op schijf, alles wat zwaar is laadt pas als het nodig is.',
-   how:['Skills laden alleen wanneer ze nodig zijn, niet allemaal tegelijk','Verwijzen in plaats van kopi&euml;ren: &eacute;&eacute;n feit op &eacute;&eacute;n plek','De projectstand staat op schijf, dus niets wordt elke sessie opnieuw afgeleid','Groot werk wordt geknipt in tickets van precies &eacute;&eacute;n verse sessie','De ingest-skill zet PDF en Office om naar compacte tekst; de poorten kosten nul tokens']},
-  {k:'Actuele code',t:'Feiten live opgezocht, nooit uit verouderd geheugen',
-   d:'Een model weet alleen wat het ooit leerde. De werkwijzen dwingen af dat keuzes op onderzoek van vandaag rusten, en dat elk besluit met datum en reden wordt vastgelegd.',
-   how:['De stack- en comply-skills eisen live onderzoek, nooit kennis uit het model zelf','Elke keuze wordt vastgelegd als besluit, met datum en reden','Onderhoud controleert regelmatig op verouderde afhankelijkheden','Klopt de code niet met een document, dan is de code het feit en wordt het document bijgewerkt']},
-  {k:'Veilig',t:'Een beveiligingsvloer die nooit wordt weggesimplificeerd',
-   d:'Beveiliging is een vloer die in elke werkwijze terugkomt, geen extraatje achteraf. Wat op de vloer ligt, mag nooit worden versimpeld of overgeslagen.',
-   how:['Vaste eisen: invoercontrole, toegangsrechten, nette foutafhandeling','Een scanner weigert geheimen zoals sleutels en wachtwoorden in de code','Een poort mag nooit worden omzeild; een rode poort wordt opgelost, niet uitgezet','Toegankelijkheid hoort bij de vloer, niet bij het extraatje']},
-  {k:'Jouw data veilig',t:'Je gegevens blijven van jou en blijven lokaal',
-   d:'Je project leeft in een map op jouw eigen schijf. Er is geen account, geen externe dienst en geen database van een ander nodig om Groundwork te gebruiken.',
-   how:['Geheimen komen nooit in de repo: uitgesloten en actief gescand','Persoonsgegevens worden gemeld bij het compliance-register (AVG en EU AI Act)','Een verse kopie start met een schone eerste commit, zonder andermans historie','Alles leeft lokaal in de map; niets is afhankelijk van een externe dienst']},
-  {k:'Enterprise-waardig',t:'De volledige discipline van een groot bedrijf, ingebouwd',
-   d:'Eerst vastleggen, dan bouwen, dan bewijzen dat het werkt: de discipline van een groot team zit in de werkwijzen zelf. Ook als je alleen bouwt, bouw je op dat niveau.',
-   how:['Specs, architectuur, standaarden en besluiten worden vastgelegd voordat er gebouwd wordt','Compliance getoetst aan Nederlands en Europees recht','Verificatie bewijst dat iets echt werkt; oplevering is gecontroleerd en herhaalbaar','Overdracht en onderhoud maken het project blijvend, ook zonder jou']}
+  {k:'Any project',t:'Works with every editor, every model, every project',
+   d:'Groundwork writes no code itself: it steers the assistant that does. So it makes no difference which editor or which model you use, today or after your next switch.',
+   how:['One rulebook in the open AGENTS.md standard that every major AI tool reads','No tie to a single vendor or program','Covers the whole route: from idea to maintenance, not only the building','Copy the folder, say "begin", and you are on your way']},
+  {k:'Easy on tokens',t:'Efficient by design, not by trick',
+   d:'Context is the most expensive part of AI work. Groundwork wastes as little of it as it can: everything reusable sits on disk, everything heavy loads only when it is needed.',
+   how:['Skills load only when they are needed, not all at once','Point instead of copy: one fact in one place','The project state sits on disk, so nothing is re-derived every session','Large work is cut into tickets of exactly one fresh session','The ingest skill turns PDF and Office into compact text; the checks cost zero tokens']},
+  {k:'Current facts',t:'Facts looked up live, never from stale memory',
+   d:'A model only knows what it once learned. The working methods force choices to rest on research from today, and every decision to be recorded with its date and its reason.',
+   how:['The stack and comply skills demand live research, never knowledge from the model itself','Every choice is written down as a decision, with date and reason','Maintenance checks for outdated dependencies at a fixed rhythm','Where code and a document disagree, the code is the fact and the document gets fixed']},
+  {k:'Safe',t:'A security floor that is never simplified away',
+   d:'Security is a floor that returns in every working method, not an extra afterwards. What lies on that floor may never be simplified away or skipped.',
+   how:['Fixed requirements: input validation, access rights, clean error handling','A scanner refuses secrets such as keys and passwords in the code','A check may never be bypassed; a red one gets solved, not switched off','Accessibility belongs to the floor, not to the extras']},
+  {k:'Your data',t:'Your data stays yours, and stays on your own machine',
+   d:'Your project lives in a folder on your own disk. No account, no external service and nobody else\'s database is needed to use Groundwork.',
+   how:['Secrets never reach the repo: excluded and actively scanned','Personal data is registered in the compliance register (GDPR and the EU AI Act)','A fresh copy starts with a clean first commit, without anyone else\'s history','Everything lives locally in the folder; nothing depends on an external service']},
+  {k:'Enterprise-grade',t:'The full discipline of a large company, built in',
+   d:'Write it down first, then build, then prove it works: the discipline of a large team sits inside the working methods. Even building alone, you build at that level.',
+   how:['Specs, architecture, standards and decisions are recorded before anything is built','Compliance tested against Dutch and European law','Verification proves something really works; delivery is controlled and repeatable','Handover and maintenance keep the project alive, also without you']}
 ];
 var tw=document.getElementById('whytabs'),pw=document.getElementById('whypanels');
 why.forEach(function(w,i){
@@ -775,32 +825,32 @@ function selWhy(i){
 arrows(tw,selWhy);
 
 var skillGroups=[
-  ['Koers bepalen','eerst denken, dan bouwen',[
-    ['begin','Start een vers project. Een geplakt PRD of idee is de bron, het interview dekt alleen de gaten; daarna vult hij de sjablonen en zet git klaar.'],
-    ['scope','Bepaalt en bewaakt wat wel en niet gebouwd wordt. Nieuwe wensen komen hier binnen, niet stiekem tijdens het bouwen.'],
-    ['spec','Schrijft precies genoeg plan voordat er iets gebouwd wordt. Niet te veel, niet te weinig.'],
-    ['critical-thinking','Denkt kritisch mee voordat een idee gebouwd wordt: tegenwicht tegen de neiging van AI om overal ja op te knikken.']]],
-  ['Fundament leggen','techniek, opbouw en smaak',[
-    ['stack','Kiest de techniek en zoekt live op wat vandaag de juiste, veilige manier is voor die keuze.'],
-    ['architect','Ontwerpt het systeem: de grenzen, de gegevens, de koppelingen en de mogelijke bedreigingen.'],
-    ['design','Zet het visuele systeem en de schrijfstijl op, afgestemd op jouw smaak en publiek.'],
-    ['taste','Bouwregels tegen de standaard AI-look voor landingssites, marketing en portfolio: eerst de opdracht lezen, dan voorbij de sjablonen ontwerpen.']]],
-  ['Kwaliteit bewaken','frisse ogen op elk resultaat',[
-    ['scope-guard','De laatste check voordat werk "af" heet: is er niets extra gebouwd dat niemand vroeg?'],
-    ['design-guard','De laatste check op schermen en teksten voordat ze de deur uit gaan.'],
-    ['verify','Bewijst dat een wijziging echt werkt, van begin tot eind. Groene tests alleen zijn geen bewijs.'],
-    ['code-review','Beoordeelt de wijziging met frisse ogen langs twee assen: voldoet de code aan de standaarden, en doet hij precies wat de spec vraagt?']]],
-  ['Leveren en beheren','de deur uit, en daarna',[
-    ['deliver','Levert een release gecontroleerd en herhaalbaar op. Niets gaat de deur uit dat niet geverifieerd is.'],
-    ['maintain','Houdt een live product gezond: updates, incidenten, opgebouwde schuld en periodieke controles.'],
-    ['handover','Maakt het project overdraagbaar aan een ander mens of AI, zonder mondelinge uitleg.'],
-    ['checkpoint','Zet de stand van een lange sessie op schijf, zodat je met /clear vers en goedkoper verder kunt zonder de draad te verliezen.']]],
-  ['Gereedschap','voor alles daaromheen',[
-    ['debug','Vindt bij een hardnekkige fout de echte oorzaak: eerst reproduceren, dan hypothese voor hypothese testen, en de oorzaak &eacute;&eacute;n keer fixen met een test als bewijs.'],
-    ['skill-author','Maakt een nieuwe skill, maar alleen als het project die echt herhaaldelijk nodig heeft.'],
-    ['comply','Toetst aan Nederlands en Europees recht: privacy, de AI-wet, toegankelijkheid en licenties.'],
-    ['ingest','Zet PDF, Office-bestanden en afbeeldingen om naar compacte tekst, zodat tokens naar inhoud gaan.'],
-    ['calibrate','Kiest v&oacute;&oacute;r elke sessie het juiste model en de juiste denk-inspanning voor het geplande werk: zo goedkoop als kan, zo zwaar als moet.']]]
+  ['Setting course','think first, then build',[
+    ['begin','Starts a fresh project. A pasted PRD or idea is the source and the interview covers only the gaps; then it fills the templates and sets up git.'],
+    ['scope','Decides and guards what does and does not get built. New wishes arrive here, not quietly during the building.'],
+    ['spec','Writes exactly enough plan before anything gets built. Not too much, not too little.'],
+    ['critical-thinking','Thinks along critically before an idea gets built: the counterweight to the AI habit of nodding along with everything.']]],
+  ['Laying the foundation','technology, structure and taste',[
+    ['stack','Chooses the technology and looks up live what the right, safe way to use it is today.'],
+    ['architect','Designs the system: the boundaries, the data, the integrations and the threats it faces.'],
+    ['design','Sets up the visual system and the writing style, tuned to your taste and your audience.'],
+    ['taste','Build rules against the default AI look for landing pages, marketing and portfolios: read the brief first, then design past the templates.']]],
+  ['Guarding quality','fresh eyes on every result',[
+    ['scope-guard','The last check before work is called "done": was nothing extra built that nobody asked for?'],
+    ['design-guard','The last check on screens and texts before they go out the door.'],
+    ['verify','Proves that a change really works, end to end. Green tests alone are not proof.'],
+    ['code-review','Reviews the change with fresh eyes along two axes: does the code meet the standards, and does it do exactly what the spec asked?']]],
+  ['Delivering and running','out the door, and after',[
+    ['deliver','Ships a release in a controlled, repeatable way. Nothing goes out that has not been verified.'],
+    ['maintain','Keeps a live product healthy: updates, incidents, accumulated debt and periodic audits.'],
+    ['handover','Makes the project transferable to another human or AI, with no spoken explanation.'],
+    ['checkpoint','Puts the state of a long session on disk, so you can clear the context and continue fresh and cheaper without losing the thread.']]],
+  ['Tools','for everything around it',[
+    ['debug','Finds the real cause of a stubborn fault: reproduce first, then test hypothesis by hypothesis, and fix the cause once with a test as proof.'],
+    ['skill-author','Writes a new skill, but only when the project genuinely needs one again and again.'],
+    ['comply','Tests against Dutch and European law: privacy, the AI Act, accessibility and licensing.'],
+    ['ingest','Turns PDF, Office files and images into compact text, so tokens go to content.'],
+    ['calibrate','Picks the right model and the right thinking effort before a session starts: as cheap as it can be, as heavy as it has to be.']]]
 ];
 var sg=document.getElementById('skillgrid');
 sg.innerHTML=skillGroups.map(function(g){
@@ -812,15 +862,15 @@ sg.innerHTML=skillGroups.map(function(g){
 sg.querySelectorAll('.reveal').forEach(watch);
 
 var phases=[
-  ['Idee','Je vertelt wat je wilt maken en voor wie. De assistent legt scope en doelen vast.','begin'],
-  ['Scope','Wat hoort er wel en niet bij? Dit wordt scherp gemaakt en bewaakt.','scope'],
-  ['Stack','De techniek wordt gekozen op basis van live onderzoek, niet op gevoel.','stack'],
-  ['Architectuur','De opbouw wordt ontworpen: grenzen, gegevens en bedreigingen.','architect'],
-  ['Ontwerp','Het uiterlijk en de toon worden vastgelegd, afgestemd op jouw smaak.','design'],
-  ['Bouwen','Er wordt gebouwd volgens de beslis-ladder: alleen het minimum dat werkt.','spec'],
-  ['Verifi&euml;ren','Er wordt bewezen dat het echt werkt, en de wijziging wordt met frisse ogen beoordeeld.','verify'],
-  ['Opleveren','De release gaat gecontroleerd en herhaalbaar de deur uit.','deliver'],
-  ['Onderhouden','Het product blijft gezond: updates, incidenten en overdracht.','maintain']
+  ['Idea','You say what you want to make and for whom. The assistant records the scope and the goals.','begin'],
+  ['Scope','What belongs to this and what does not? That gets sharpened, and then guarded.','scope'],
+  ['Stack','The technology is chosen from live research, not from a hunch.','stack'],
+  ['Architecture','The structure is designed: boundaries, data and threats.','architect'],
+  ['Design','The look and the tone are set, tuned to your taste.','design'],
+  ['Build','Building follows the decision ladder: only the minimum that works.','spec'],
+  ['Verify','It is proven to really work, and the change is reviewed with fresh eyes.','verify'],
+  ['Deliver','The release goes out controlled and repeatable.','deliver'],
+  ['Maintain','The product stays healthy: updates, incidents and handover.','maintain']
 ];
 var se=document.getElementById('steps'),sb=document.getElementById('stepbody');
 phases.forEach(function(p,i){
@@ -841,11 +891,11 @@ selStep(0);
 arrows(se,selStep);
 
 var faq=[
-  ['Het is geen magie','Groundwork is discipline en structuur die de AI dwingen zich te gedragen. Jij blijft eindverantwoordelijk en beoordeelt het resultaat. Het maakt goed werk waarschijnlijker, niet automatisch.'],
-  ['"Actuele code" heeft grenzen','Het dwingt af dat feiten live worden opgezocht in plaats van gegokt uit verouderd geheugen. Dat is een enorme verbetering, maar geen garantie dat elke regel perfect is.'],
-  ['"Veilig" is een vloer, geen keurmerk','Er is een vaste beveiligingsbasis plus automatische scans. Bij hoog risico vervangt dat geen echte, menselijke beveiligingsaudit.'],
-  ['Het is bewust eigenwijs','Het legt bewust &eacute;&eacute;n werkwijze op. Dat voelt streng, en dat is precies de bedoeling: juist die kaders leveren de kwaliteit.'],
-  ['Zuinig, geen wondermiddel','Het bespaart tokens door slim ontwerp. Grote, complexe projecten kosten nog steeds echt werk en aandacht.']
+  ['It is not magic','Groundwork is discipline and structure that force the AI to behave. You stay responsible, and you judge the result. It makes good work more likely, not automatic.'],
+  ['"Current facts" has limits','It forces facts to be looked up live instead of guessed from stale memory. That is a large improvement, not a guarantee that every line is right.'],
+  ['"Safe" is a floor, not a certificate','There is a fixed security baseline plus automated scans. At high risk that does not replace a real, human security audit.'],
+  ['It is opinionated on purpose','It imposes one way of working. That feels strict, and it is meant to: those boundaries are what deliver the quality.'],
+  ['Lean, not a miracle cure','It saves tokens by design. Large, complex projects still cost real work and real attention.']
 ];
 var fq=document.getElementById('faq');
 faq.forEach(function(f,i){
@@ -892,7 +942,7 @@ var sw=document.getElementById('swatches');
 Object.keys(GW.accents).forEach(function(key){
   var a=GW.accents[key],cur=(GW.ls('gw-accent')||'teal')===key;
   var b=document.createElement('button');b.className='swatch';b.setAttribute('role','radio');
-  b.setAttribute('aria-checked',cur);b.setAttribute('aria-label','Thema '+a.label);b.tabIndex=cur?0:-1;
+  b.setAttribute('aria-checked',cur);b.setAttribute('aria-label','Theme '+a.label);b.tabIndex=cur?0:-1;
   b.innerHTML='<span class="dot" style="background:'+(GW.mode()==='light'?a.light[0]:a.dark[0])+'"></span><span class="nm">'+a.label+'</span>';
   b.onclick=function(){
     GW.st('gw-accent',key);
@@ -915,7 +965,7 @@ Object.keys(GW.fonts).forEach(function(key){
   var f=GW.fonts[key],cur=(GW.ls('gw-font')||'josefin')===key;
   var b=document.createElement('button');b.className='fontopt';b.setAttribute('role','radio');
   b.setAttribute('aria-checked',cur);b.tabIndex=cur?0:-1;
-  b.innerHTML='<span>'+f.label+(key==='josefin'?' <span style="color:var(--muted)">(standaard)</span>':'')+'</span><span class="ag" aria-hidden="true" style="font-family:'+f.stack.replace(/"/g,"&quot;")+'">Ag</span>';
+  b.innerHTML='<span>'+f.label+(key==='josefin'?' <span style="color:var(--muted)">(default)</span>':'')+'</span><span class="ag" aria-hidden="true" style="font-family:'+f.stack.replace(/"/g,"&quot;")+'">Ag</span>';
   b.onclick=function(){
     GW.st('gw-font',key);
     swap(function(){GW.apply();});
