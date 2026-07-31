@@ -52,6 +52,36 @@ answers it sets up git and the hooks, fills the templates, and proposes the firs
 
 That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) tell it how.
 
+## Already have a project?
+
+Groundwork lays over a repo that exists, without touching its history. Take a copy the same way as
+above, then move its contents into your project root, minus the four files that describe a product
+rather than the framework: keep your own `README.md`, `LICENSE`, `.gitignore` and `index.html`.
+Merge Groundwork's ignore entries into yours by hand, and read the explainer from the copy you
+took. Everything else is framework and lands as is, merging into `docs/` and `.github/` if you
+already have those. Where a name collides, copy it in under a temporary name and merge by hand:
+nothing here is worth losing your own file over. If your tool broke the `.claude/skills` symlink on
+the way, restore it with `ln -sfn ../.agents/skills .claude/skills`.
+
+Then say **`begin`** as above. It reads which of the two situations it is and adapts: your git
+history stays, the interview takes its answers from your code first, one baseline record states
+what already shipped so the overview does not report a running product as nothing done, and the
+first `node checks/check.mjs` is treated as a measurement instead of a verdict. Real code turns
+those gates red on contact, and the point is a starting position you can see, in
+[docs/state/DEBT.md](docs/state/DEBT.md), not a cleanup marathon before you may work.
+Why one route and not a separate installer:
+[decision 0018](docs/decisions/0018-an-existing-project-adopts-groundwork-through-begin.md).
+
+## Version, and taking later improvements
+
+Every release is tagged and described in [CHANGELOG.md](CHANGELOG.md), so a copy can tell which
+Groundwork it holds. Improvements travel by hand and on purpose: read the changelog from your
+version forward, copy in the files you want, and keep everything you have made your own. There is
+no updater, and there will not be one: your copy has edited skills, tuned checks and its own rules
+by then, and merging that safely is a package manager, not a framework.
+[Decision 0017](docs/decisions/0017-copies-take-improvements-by-hand-from-tagged-releases.md)
+records the reasoning.
+
 ## How it works
 
 - **[AGENTS.md](AGENTS.md)** is the single always-loaded rulebook, written to the open
