@@ -172,6 +172,53 @@ expectFail('tickets', ({ put }) => { // Blocked-by names a missing sibling
     '# 01: A\n\n- **Blocked by:** 99-ghost\n- **Status:** ready\n\n**What to build:** demo.\n');
 });
 
+// The explainer's numbers. The fixture holds exactly one skill directory, so a page claiming
+// one skill is in sync and any other number is drift. The gates key is proven by the absurd
+// number rather than a hardcoded one: pinning the expected count here would mean editing this
+// test every time a gate is added, which is the very staleness the check exists to stop.
+const statPage = (key, n) =>
+  `<div class="stat"><div class="n" data-derive="${key}">${n}</div><div class="l">label</div></div>\n`;
+
+expectClean('explainer-stats-in-sync', ({ put }) => put('index.html', statPage('skills', 1)));
+
+expectClean('explainer-stats-unmarked-number-is-a-claim', ({ put }) =>
+  put('index.html', '<div class="stat"><div class="n">42</div><div class="l">a claim</div></div>\n'));
+
+expectClean('explainer-stats-em-wrapped', ({ put }) => // the strip styles one number with <em>
+  put('index.html', '<div class="stat"><div class="n" data-derive="skills"><em>1</em></div></div>\n'));
+
+expectClean('explainer-stats-decisions-skip-the-template', ({ put }) => {
+  put('docs/README.md', '# manifest\n\n| `state/STATE.md` | LIVE | state |\n| `decisions/*.md` | LIVE | decisions |\n');
+  put('docs/decisions/0001-real.md', '# 0001: a recorded decision\n');
+  put('docs/decisions/TEMPLATE.md', '# NNNN: the form, not a decision\n');
+  put('index.html', statPage('decisions', 1));
+});
+
+expectFail('explainer-stats', ({ put }) => put('index.html', statPage('skills', 7))); // drift
+
+expectFail('explainer-stats', ({ put }) => put('index.html', statPage('gates', 999)));
+
+expectFail('explainer-stats', ({ put }) => // a key nothing can count
+  put('index.html', statPage('wombats', 3)));
+
+expectFail('explainer-stats', ({ put }) => // an inherited name is not a source either
+  put('index.html', statPage('constructor', 3)));
+
+expectFail('explainer-stats', ({ put }) => // the marker is read whichever quotes the page uses
+  put('index.html', "<div class=\"stat\"><div class='n' data-derive='skills'>7</div></div>\n"));
+
+expectFail('explainer-stats', ({ put }) => // the count is the whole text, not the digits in front
+  put('index.html', statPage('skills', '1.000')));
+
+expectFail('explainer-stats', ({ put }) => // the source directory this page counts is gone
+  put('index.html', statPage('decisions', 0)));
+
+// A marked element with no number of its own, next to a stat that does carry one: the empty
+// marker must speak for itself. Reading on past its closing tag would borrow the neighbour's 1,
+// which happens to match this fixture, and the gate would call a page with a hole in it correct.
+expectFail('explainer-stats', ({ put }) =>
+  put('index.html', `<div class="stat"><div class="n" data-derive="skills"></div></div>\n${statPage('skills', 1)}`));
+
 // --- sub-rules that the one-violation-per-check pass above does not reach ---
 
 expectFail('state-file', ({ put }) =>

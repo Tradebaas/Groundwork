@@ -468,6 +468,70 @@ export function runChecks(root) {
       }
     },
 
+    'explainer-stats'() {
+      // The explainer page states counts of what this repo holds. A typed count goes stale the
+      // moment a skill or a decision is added, and a public page that is quietly wrong is worse
+      // than one that says nothing: where page and repo disagree, the repo is the fact (SC-11).
+      // So the element holding a countable number carries data-derive="<key>", and its own text
+      // is compared against the directory that owns the count. Numbers that are claims rather
+      // than counts (one rulebook, zero tokens for the gates) carry no marker and stay typed.
+      // A page without markers, or no page at all, leaves this gate silent. That silence is
+      // what a product built on Groundwork needs: it inherits this page, whose numbers describe
+      // the framework it was copied from and not the product, so `begin` strips the markers out
+      // of the copy.
+      const page = join(root, 'index.html');
+      if (!existsSync(page)) return;
+      const count = (dir, keep) => {
+        const p = join(root, dir);
+        if (!existsSync(p)) return null;
+        return readdirSync(p, { withFileTypes: true }).filter(keep).length;
+      };
+      // The gates that run from their own hook and so never appear in the registry below. Named
+      // rather than counted, because nothing in this file can find them: one hook, one gate, the
+      // way `skills` reports several rules under one name.
+      const hookGates = ['commit-msg'];
+      const sources = {
+        // The registry this runner walks, plus those. Reading the object itself is what keeps
+        // the number honest: a gate added or removed moves the count the same day.
+        gates: () => Object.keys(checks).length + hookGates.length,
+        skills: () => count(join('.agents', 'skills'), (e) => e.isDirectory()),
+        // Numbered records only: TEMPLATE.md is the form to fill in, not a decision.
+        decisions: () => count(join('docs', 'decisions'), (e) => e.isFile() && /^\d+-.+\.md$/.test(e.name)),
+      };
+      const knownKeys = Object.keys(sources).join(', ');
+      const html = read(page);
+      const lineAt = (i) => html.slice(0, i).split('\n').length;
+      for (const m of html.matchAll(/data-derive=(["'])([^"']*)\1/g)) {
+        const key = m[2];
+        const at = `index.html:${lineAt(m.index)}`;
+        // Own keys only: an inherited name like "constructor" is truthy on any object and would
+        // read as a known source while naming nothing.
+        if (!Object.hasOwn(sources, key)) {
+          fail(`${at} data-derive="${key}" names nothing this repo can count. Known keys: ${knownKeys}.`);
+          continue;
+        }
+        // The count is the marked element's own text, read no further than its closing tag and
+        // stripped of the styling around it. Reading past that tag would let the gate pick up
+        // the number of the element next door and call the page correct on someone else's count.
+        const rest = html.slice(m.index);
+        const open = rest.indexOf('>');
+        const close = rest.indexOf('</div>');
+        const typed = open !== -1 && close > open
+          ? rest.slice(open + 1, close).replace(/<[^>]*>/g, '').trim()
+          : '';
+        if (!/^\d+$/.test(typed)) {
+          fail(`${at} the data-derive="${key}" element reads "${typed}" where a count belongs: the marker goes on the element whose own text is the number.`);
+          continue;
+        }
+        const actual = sources[key]();
+        if (actual === null) {
+          fail(`${at} states ${typed} ${key}, but the directory that would prove it is gone: restore it, or drop the marker.`);
+        } else if (Number(typed) !== actual) {
+          fail(`${at} states ${typed} ${key}; this repo holds ${actual}. The repo is the fact: fix the page.`);
+        }
+      }
+    },
+
     'empty-dirs'() {
       // A dir with only a .gitkeep is intentionally kept; a truly empty dir is clutter.
       for (const d of tree.dirs) {
