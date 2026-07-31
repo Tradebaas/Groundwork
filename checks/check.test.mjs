@@ -3,7 +3,7 @@
 // and stays quiet on a clean repo: an untested gate is false confidence (decision 0005).
 // Run: node checks/check.test.mjs
 
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, unlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, unlinkSync, readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -144,6 +144,62 @@ expectFail('prose-style', ({ root, put }) => { // config-driven phrase ban
 
 expectFail('defer-markers', ({ put }) =>
   put('src/app.js', 'export const x = 1;\n// defer: global lock. ceiling: 100 users.\n'));
+
+// Several tests below need a config that differs from the fixture's in one key. One helper
+// beats six copies of the base object, and keeps each test's intent on one line.
+const BASE_BUDGETS = { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024 };
+const withConfig = (extra) => ({ put }) => put('checks/config.json', JSON.stringify({
+  denylist: [], allowedEmptyDirs: [], secretScanExclude: ['checks/'], budgets: BASE_BUDGETS, ...extra,
+}));
+const APOLOGY = [{ pattern: '\\bfor now\\b', why: 'unmarked deferral' }];
+const withApology = (extra = {}) => withConfig({ commentBans: APOLOGY, ...extra });
+
+// The commentBans half of the defer contract: an apology in a comment is a deferral that
+// skipped the marker, so nothing can grep for it later.
+expectFail('defer-markers', (fx) => {
+  withApology()(fx);
+  fx.put('src/app.js', 'export const x = 1;\n// one global lock for now.\n');
+});
+// ... and the four ways it must stay quiet, because a noisy gate gets switched off.
+expectClean('comment-ban-ignores-non-comment', (fx) => {
+  withApology()(fx);
+  fx.put('src/app.js', 'export const label = "closed for now";\n');
+});
+expectClean('comment-ban-is-code-only', (fx) => {
+  withApology()(fx);
+  fx.put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ good enough for now\n');
+});
+expectClean('comment-ban-skips-vendored', (fx) => {
+  withApology({ codeFileCapExclude: ['vendor/'] })(fx);
+  fx.put('vendor/bundle.js', '// patched for now\n');
+});
+expectClean('comment-ban-yields-to-marker', (fx) => {
+  withApology()(fx);
+  fx.put('src/app.js', '// defer: one lock for now. ceiling: 100 users. upgrade-when: 100 users.\n');
+});
+
+// config-invariants: the config may be tuned, never disarmed.
+expectFail('config-invariants', withConfig({ budgets: { ...BASE_BUDGETS, agentFileHardCapLines: 400 } }));
+expectFail('config-invariants', withConfig({ budgets: { ...BASE_BUDGETS, agentFileHardCapLines: '200' } }));
+expectFail('config-invariants', withConfig({ codeFileCapExclude: ['checks/'] }));
+expectFail('config-invariants', withConfig({ codeFileCapExclude: ['docs/'] })); // swallows docs/standards/
+expectFail('config-invariants', withConfig({ codeFileCapExclude: [''] })); // swallows everything
+expectFail('config-invariants', withConfig({ codeFileCapExclude: [123] }));
+expectFail('config-invariants', withConfig({ secretScanExclude: ['checks/', 'docs/standards/'] }));
+// The evasions a prefix-only invariant would wave through: code-file-cap also matches a
+// suffix, and a denylist exclude matches a substring anywhere in the path.
+expectFail('config-invariants', withConfig({ codeFileCapExclude: ['s/'] }));
+expectFail('config-invariants', withConfig({
+  denylist: [{ pattern: 'no-such-text-anywhere', why: 'x', exclude: ['heck'] }],
+}));
+expectFail('config-invariants', withConfig({
+  denylist: [{ pattern: 'no-such-text-anywhere', why: 'x', exclude: ['checks/'] }],
+}));
+// Lowering the cap is allowed; only raising it is a weakening. And the shipped secretScanExclude
+// names checks/ by construction, which the clean fixture above already proves stays green.
+expectClean('config-invariants-allows-a-lower-cap', withConfig({
+  budgets: { ...BASE_BUDGETS, agentFileHardCapLines: 120 },
+}));
 
 expectFail('zombie-code', ({ put }) =>
   put('src/app.js', 'export const x = 1;\n// const old = 2;\n// function dead() {\n// return old;\n'));
@@ -538,6 +594,32 @@ for (const [label, text, want] of [
     passed++;
   } catch (e) { failedTests.push(`handoff-nudge ${label}: ${e.message}`); }
 }
+
+// The wave-2 bans ship as data, so prove the real list bites rather than a test stand-in:
+// chat residue and a citation artifact, caught by the patterns this repo actually ships.
+for (const residue of ['As an AI, I hope this helps.', 'See the guide (utm_source=chatgpt.com).']) {
+  expectFail('prose-style', (fx) => {
+    const shipped = JSON.parse(readFileSync(new URL('./config.json', import.meta.url), 'utf8'));
+    withConfig({ styleBans: shipped.styleBans })(fx);
+    fx.put('docs/state/STATE.md', `# STATE\n\n## Handoff\n\n- Now ▶ ${residue}\n`);
+  });
+}
+
+// Every test above drives a fixture config, so a typo in a pattern this repo actually SHIPS
+// would surface only when someone runs the gate for real. Compile the shipped lists once: a
+// broken regex makes the whole check crash, and a ban with no "why" is an order without a reason.
+try {
+  const shipped = JSON.parse(readFileSync(new URL('./config.json', import.meta.url), 'utf8'));
+  const broken = [];
+  for (const key of ['denylist', 'styleBans', 'commentBans']) {
+    for (const e of shipped[key] || []) {
+      try { new RegExp(e.pattern, 'i'); } catch (err) { broken.push(`${key} /${e.pattern}/: ${err.message}`); }
+      if (!String(e.why || '').trim()) broken.push(`${key} /${e.pattern}/ has no "why"`);
+    }
+  }
+  assert.deepEqual(broken, [], 'shipped config patterns must all compile and explain themselves');
+  passed++;
+} catch (e) { failedTests.push(`shipped-config-patterns: ${e.message}`); }
 
 if (failedTests.length) {
   for (const f of failedTests) console.error(`TEST FAIL ${f}`);
