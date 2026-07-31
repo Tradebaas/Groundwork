@@ -16,7 +16,7 @@ import {
 } from './progress.mjs';
 import { enforcementReport } from './enforcement.mjs';
 import { decidePath, ignoreLookup } from './cockpit-path.mjs';
-import { readDocuments, linkGraph, LINK_WORDS, HUB_MIN } from './links.mjs';
+import { projectGraph, LINK_WORDS, HUB_MIN } from './links.mjs';
 
 // The gates card and the link card report on the project as a whole rather than on one document,
 // so the file each names is the one that does the looking.
@@ -331,8 +331,20 @@ export function linksCard(graph, lang, opens = () => false) {
       .map((h) => `<li>${named(h.path)} - ${escapeHtml(w.hubCount(h.count))}</li>`).join('')}</ul>`
     : `<p class="note">${escapeHtml(w.noHubs(HUB_MIN))}</p>`);
   out.push(graph.orphans.length
-    ? folded(w.orphans, graph.orphans.length, `<ul>${graph.orphans.map((p) => `<li>${named(p)}</li>`).join('')}</ul>`)
+    ? folded(w.orphans, graph.orphans.length, `<ul>${graph.orphans.map((p) => `<li>${named(p)}</li>`).join('')}</ul>`
+      // Most of an orphan list is by design, and a reader who does not know that reads it as a
+      // list of dead files. The clause is inside the fold, next to the names it explains.
+      + `\n<p class="hint">${escapeHtml(w.orphansWhy)}</p>`)
     : `<p class="note">${escapeHtml(w.noOrphans)}</p>`);
+  // The residual, as a number: what the two questions above could not place. Reported, never
+  // gated - the card is where the number waits for a rename to prove it catches one.
+  out.push(graph.unresolved.length
+    ? folded(w.unresolved, graph.unresolved.length,
+      // The target is set as the path it is, and never as a link: there is nothing to open, which
+      // is the whole finding.
+      `<ul>${graph.unresolved.map((m) => `<li>${named(m.from)}: <code>${escapeHtml(m.raw)}</code></li>`).join('')}</ul>`
+      + `\n<p class="hint">${escapeHtml(w.unresolvedWhy)}</p>`)
+    : `<p class="note">${escapeHtml(w.noUnresolved)}</p>`);
   // Both directions per document, which is the whole card; it folds because it is as long as the
   // project has documents.
   const each = graph.documents.map((d) => `<li>${named(d.path)}<ul>`
@@ -401,7 +413,7 @@ export function boardPage(root, deps = {}) {
   const linkWords = LINK_WORDS[project.lang] || LINK_WORDS.en;
   // Read before the cards, so the one ignore question below can cover every name they will show.
   const manifest = attempt(() => readManifest(root));
-  const graph = attempt(() => linkGraph(readDocuments(root)));
+  const graph = attempt(() => projectGraph(root));
   // A card names the file that owns it either way. It links only where the file route will
   // actually serve that file, so the board never hands a reader a door that does not open:
   // the maintainer's own handoff is kept out of git, and stays a name.

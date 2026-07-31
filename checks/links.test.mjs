@@ -10,7 +10,7 @@ import { join, dirname } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  parseLinks, linkTargets, linkGraph, readDocuments, renderLinks, HUB_MIN,
+  parseLinks, linkTargets, linkGraph, readDocuments, projectGraph, renderLinks, HUB_MIN,
 } from './links.mjs';
 
 // ---------------------------------------------------------------- what counts as a link
@@ -105,6 +105,85 @@ test('what nothing points at, and what enough documents point at to be load-bear
   assert.deepEqual(thin.hubs, []);
 });
 
+// ---------------------------------------------------------------- paths that point at nothing
+
+test('a path is only residual when it lands on neither a document nor a file', () => {
+  const graph = linkGraph([
+    {
+      path: 'AGENTS.md',
+      text: [
+        'A document: `docs/product/BRIEF.md`. A file that is not a document: `checks/check.mjs`.',
+        'Myself: `AGENTS.md`. A name a project creates later: `docs/product/ARCHITECTURE.md`,',
+        'said twice: `docs/product/ARCHITECTURE.md`. A broken link: [gone](docs/gone.md).',
+      ].join('\n'),
+    },
+    { path: 'docs/product/BRIEF.md', text: 'no pointers' },
+  ], { exists: (p) => p === 'checks/check.mjs' });
+  // A document, a file and the document itself all land somewhere; the same miss written twice is
+  // one thing to fix, not two.
+  assert.deepEqual(graph.unresolved, [
+    { from: 'AGENTS.md', raw: 'docs/gone.md' },
+    { from: 'AGENTS.md', raw: 'docs/product/ARCHITECTURE.md' },
+  ]);
+});
+
+test('one dead file is one row, however many spellings point at it', () => {
+  // A fragment is not part of the file, so a link carrying one is the same claim as the mention
+  // beside it: counting both would inflate a number whose whole worth is that it can be acted on.
+  const graph = linkGraph([
+    { path: 'AGENTS.md', text: 'gone [twice](docs/gone.md#top), and again as `docs/gone.md`.' },
+  ]);
+  assert.deepEqual(graph.unresolved, [{ from: 'AGENTS.md', raw: 'docs/gone.md#top' }]);
+});
+
+test('without a filesystem to ask, every path that is no document counts as residual', () => {
+  // The derivation stays pure: the default answers "no such file", so a caller that forgets to
+  // pass the question gets an over-count it can see, never a silently emptied number.
+  const graph = linkGraph([{ path: 'AGENTS.md', text: 'the runner `checks/check.mjs`' }]);
+  assert.deepEqual(graph.unresolved, [{ from: 'AGENTS.md', raw: 'checks/check.mjs' }]);
+});
+
+test('the project graph asks the working tree, and never outside the project', () => {
+  const outside = mkdtempSync(join(tmpdir(), 'groundwork-residual-'));
+  const root = join(outside, 'project');
+  const put = (p, body) => {
+    mkdirSync(dirname(join(root, p)), { recursive: true });
+    writeFileSync(join(root, p), body);
+  };
+  put('AGENTS.md', [
+    'The runner `checks/check.mjs` and the brief `docs/product/BRIEF.md` both exist.',
+    'The neighbour [next door](../neighbour.md) is not this project, and neither is `docs/gone.md`.',
+  ].join('\n'));
+  // Every spelling of the same climb. A test for the `../` prefix alone would pass all three of
+  // the climbs and call a directory outside the root an answer. `..` from a document one level
+  // down is the project root itself, so it resolves: the rule is where a path lands, not how it
+  // is spelled.
+  put('docs/deep.md', 'Up: [root](..), [two](../..), [encoded](%2e%2e/%2e%2e), [back](..\\..).');
+  put('docs/product/BRIEF.md', 'the brief');
+  put('checks/check.mjs', '// the runner');
+  // A real file one level up. Resolving it would read outside the root, and would answer "that
+  // path is fine" about a file the project does not have.
+  writeFileSync(join(outside, 'neighbour.md'), 'not this project');
+  assert.deepEqual(projectGraph(root).unresolved, [
+    { from: 'AGENTS.md', raw: '../neighbour.md' },
+    { from: 'AGENTS.md', raw: 'docs/gone.md' },
+    { from: 'docs/deep.md', raw: '../..' },
+    { from: 'docs/deep.md', raw: '..\\..' },
+    { from: 'docs/deep.md', raw: '%2e%2e/%2e%2e' },
+  ]);
+  rmSync(outside, { recursive: true, force: true });
+});
+
+test('a control character in a path never reaches the terminal as one', () => {
+  // The report prints what a document wrote. A terminal is a sink, so an escape sequence smuggled
+  // between backticks would repaint the report around the finding it names.
+  const graph = linkGraph([{ path: 'AGENTS.md', text: 'hidden `docs/\x1bcgone.md`' }]);
+  const text = renderLinks({ name: 'Kassaboek', lang: 'en' }, graph);
+  assert.match(text, /- AGENTS\.md: docs\/cgone\.md/);
+  // Everything a control character can be, except the newlines the report is built from.
+  assert.doesNotMatch(text, /[\x00-\x09\x0b-\x1f\x7f]/);
+});
+
 // ---------------------------------------------------------------- reading the documents
 
 test('the documents are the markdown files of the project, and nothing else', () => {
@@ -148,6 +227,28 @@ test('the printed report answers both directions, and names hubs and orphans', (
   assert.match(text, /Nothing points at these \(2\)\n {2}- AGENTS\.md\n {2}- docs\/lonely\.md/);
   assert.match(text, /AGENTS\.md\n {4}Points at: docs\/product\/BRIEF\.md\n {4}No document points at it\./);
   assert.match(text, /docs\/product\/BRIEF\.md\n {4}Points at no other document\.\n {4}Pointed at by: AGENTS\.md/);
+});
+
+test('the printed report states the residual as a number, and why a skill has no inbound path', () => {
+  const graph = linkGraph([
+    { path: 'AGENTS.md', text: 'made by `architect`: `docs/product/ARCHITECTURE.md`' },
+    { path: '.agents/skills/architect/SKILL.md', text: 'the brief `docs/product/BRIEF.md`' },
+    { path: 'docs/product/BRIEF.md', text: 'nothing here' },
+  ]);
+  const text = renderLinks({ name: 'Kassaboek', lang: 'en' }, graph);
+  assert.match(text, /Paths that point at nothing \(1\)\n {2}- AGENTS\.md: docs\/product\/ARCHITECTURE\.md/);
+  assert.match(text, /a name shortened to its bare filename, or prose shaped like a path/);
+  // The orphan list is mostly by design, and the clause is what keeps a reader from deleting a
+  // skill file because no path leads to it.
+  assert.match(text, /the rulebook names a skill by its name/);
+  // Nothing left over is said as plainly as a number, so the card never goes quiet on the question.
+  const clean = renderLinks({ name: 'Kassaboek', lang: 'en' }, linkGraph([
+    { path: 'AGENTS.md', text: 'the brief `docs/product/BRIEF.md`' },
+    { path: 'docs/product/BRIEF.md', text: 'the rulebook `AGENTS.md`' },
+  ]));
+  assert.match(clean, /Every path spelled out lands on a document or on a file\./);
+  assert.match(clean, /Every document is pointed at by at least one other\./);
+  assert.doesNotMatch(clean, /the rulebook names a skill by its name/);
 });
 
 test('a project with no documents says so instead of drawing an empty graph', () => {

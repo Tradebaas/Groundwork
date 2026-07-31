@@ -11,12 +11,18 @@
 //     not, because Groundwork's own documents name files a project has not created yet
 //     (`docs/product/ARCHITECTURE.md` before `architect` runs) and shorthands that are not paths.
 //
-// The derivation itself is pure: documents in, who points at whom out. No filesystem, so it can
-// be tested against fixtures directly.
+// A mention that resolves to nothing is prose most of the time, and a dead path the rest of the
+// time, and nothing here can tell those apart. So the ones left over are counted and shown rather
+// than gated: a number a reader can act on, which is also the number that has to catch a real
+// rename before a gate is worth arguing for (INTAKE row 12).
+//
+// The derivation itself is pure: documents in, who points at whom out. The one filesystem
+// question it needs (does this path exist?) is injected, so it can be tested against fixtures
+// directly; `projectGraph` is where that question gets its real answer.
 // Spec: docs/specs/010-cockpit (maintainer-local).
 
-import { readdirSync, readFileSync } from 'node:fs';
-import { join, relative, posix, isAbsolute } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join, relative, resolve, sep, posix, isAbsolute } from 'node:path';
 
 // Not part of the project: build output and other people's code. Shared with the gate's own walk
 // so "which directories are not this project" has one answer.
@@ -74,15 +80,38 @@ export function linkTargets(fromPath, link) {
 export const HUB_MIN = 4;
 
 // documents: [{ path, text }] in, who points at whom out. Pure on purpose (testing seam).
-export function linkGraph(documents) {
+//
+// `exists` answers the second question a path can be asked. The graph is between documents, so a
+// path landing on `checks/check.mjs` is no edge - but it is not a failure either, and most of what
+// a document names beyond its neighbours is exactly that, so counting those as misses would bury
+// the ones a reader can act on. What is left after both questions is the residual: written as a
+// path, and nothing is there when you follow it. It is reported as a number and never gated,
+// because the honest remainder still holds names a project creates later
+// (`docs/product/ARCHITECTURE.md` before `architect` runs), and an allowance list for those is the
+// thing that rots (INTAKE row 12, decision 0013's warning-before-gate route).
+export function linkGraph(documents, { exists = () => false } = {}) {
   const rows = new Map(documents.map((d) => [d.path, { path: d.path, inbound: new Set(), outbound: new Set() }]));
+  const unresolved = [];
   let links = 0;
   for (const doc of documents) {
     const row = rows.get(doc.path);
+    // The same path written twice in one document is one claim about one file, so it is one row
+    // here: repetition would inflate the number without adding anything to fix. The key is the
+    // target rather than what the writer typed, or a link carrying a fragment would count a second
+    // time against the same file.
+    const asked = new Set();
     for (const link of parseLinks(doc.text)) {
-      const hit = linkTargets(doc.path, link).find((c) => rows.has(c));
+      const candidates = linkTargets(doc.path, link);
+      const hit = candidates.find((c) => rows.has(c));
+      if (!hit) {
+        // A markdown link among these is also a red gate (checks/check.mjs, links); a mention is
+        // only ever reported. Both are the same fact to a reader deciding whether a path is dead.
+        if (!asked.has(link.target) && !candidates.some(exists)) unresolved.push({ from: doc.path, raw: link.raw });
+        asked.add(link.target);
+        continue;
+      }
       // A document pointing at itself is a table of contents, not a link between documents.
-      if (!hit || hit === doc.path || row.outbound.has(hit)) continue;
+      if (hit === doc.path || row.outbound.has(hit)) continue;
       row.outbound.add(hit);
       rows.get(hit).inbound.add(doc.path);
       links += 1;
@@ -95,6 +124,7 @@ export function linkGraph(documents) {
   return {
     documents: list,
     links,
+    unresolved: unresolved.sort((a, b) => byPath(a.from, b.from) || byPath(a.raw, b.raw)),
     orphans: list.filter((d) => !d.inbound.length).map((d) => d.path),
     hubs: list.filter((d) => d.inbound.length >= HUB_MIN)
       .map((d) => ({ path: d.path, count: d.inbound.length }))
@@ -126,6 +156,24 @@ export function readDocuments(root) {
   return documents.sort((a, b) => a.path.localeCompare(b.path));
 }
 
+// The project's own graph, built once here so the board and the one-shot command cannot answer
+// the same question differently, and the only place the filesystem gets asked anything.
+//
+// A candidate that climbs out of the project is not this project's file, and answering "that one
+// is fine" about it would hide a dead path behind a stat of the disk outside the root. Containment
+// is decided the way checks/cockpit-path.mjs decides it, because a spelling test is not
+// containment: `../..` normalizes to `..`, which starts with no `../` at all, and a Windows
+// checkout can spell the same climb with backslashes that posix normalizing leaves alone.
+// resolve() folds every spelling into one absolute path, and only then is it compared.
+export function projectGraph(root) {
+  const base = resolve(root);
+  const exists = (p) => {
+    const full = resolve(base, p);
+    return (full === base || full.startsWith(base + sep)) && existsSync(full);
+  };
+  return linkGraph(readDocuments(root), { exists });
+}
+
 // The framing words for both surfaces, so the page and the one-shot command say the same thing.
 export const LINK_WORDS = {
   en: {
@@ -137,7 +185,11 @@ export const LINK_WORDS = {
     hubCount: (n) => `${n} documents point at it`,
     noHubs: (n) => `No document is pointed at by ${n} or more others, so nothing is load-bearing yet.`,
     orphans: 'Nothing points at these',
+    orphansWhy: 'A file is named without a path too: the rulebook names a skill by its name and points at the decision records by their directory, so no path leads to those.',
     noOrphans: 'Every document is pointed at by at least one other.',
+    unresolved: 'Paths that point at nothing',
+    unresolvedWhy: 'Written as a path, and nothing is there when you follow it: a rename nobody followed, a name shortened to its bare filename, or prose shaped like a path.',
+    noUnresolved: 'Every path spelled out lands on a document or on a file.',
     each: 'Every document, and what it points at',
     pointsAt: 'Points at',
     pointsAtNothing: 'Points at no other document.',
@@ -153,7 +205,11 @@ export const LINK_WORDS = {
     hubCount: (n) => `${n} documenten wijzen ernaar`,
     noHubs: (n) => `Geen enkel document wordt door ${n} of meer andere aangewezen, dus nog niets is dragend.`,
     orphans: 'Hier wijst niets naar',
+    orphansWhy: 'Een bestand wordt ook zonder pad genoemd: het rulebook noemt een skill bij naam en wijst de decision records per map aan, dus daar leidt geen pad heen.',
     noOrphans: 'Elk document wordt door minstens een ander aangewezen.',
+    unresolved: 'Paden die nergens heen wijzen',
+    unresolvedWhy: 'Uitgeschreven als pad, en er staat niets waar het heen wijst: een hernoeming die niemand volgde, een naam ingekort tot alleen de bestandsnaam, of proza in de vorm van een pad.',
+    noUnresolved: 'Elk uitgeschreven pad komt uit bij een document of een bestand.',
     each: 'Elk document, en waar het naar wijst',
     pointsAt: 'Wijst naar',
     pointsAtNothing: 'Wijst naar geen enkel ander document.',
@@ -176,6 +232,12 @@ export function renderLinks(project, graph) {
   for (const hub of graph.hubs) out.push(`  - ${hub.path} (${w.hubCount(hub.count)})`);
   out.push('', graph.orphans.length ? `${w.orphans} (${graph.orphans.length})` : w.noOrphans);
   for (const path of graph.orphans) out.push(`  - ${path}`);
+  if (graph.orphans.length) out.push(w.orphansWhy);
+  out.push('', graph.unresolved.length ? `${w.unresolved} (${graph.unresolved.length})` : w.noUnresolved);
+  // The only place this report prints text a document wrote rather than text it derived, and a
+  // terminal is a sink: an escape sequence between backticks would repaint the report around it.
+  for (const miss of graph.unresolved) out.push(`  - ${miss.from}: ${miss.raw.replace(/[\x00-\x1f\x7f]/g, '')}`);
+  if (graph.unresolved.length) out.push(w.unresolvedWhy);
   out.push('', w.each);
   for (const doc of graph.documents) {
     out.push(`  ${doc.path}`);

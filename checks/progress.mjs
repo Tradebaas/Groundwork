@@ -4,7 +4,8 @@
 //      node checks/progress.mjs --line     one line, if the stand changed or a heads-up is open
 //      node checks/progress.mjs --all      one line per registered project
 //      node checks/progress.mjs --serve    the same stand as a page, on this machine only
-//      node checks/progress.mjs --links    which document points at which, plus orphans and hubs
+//      node checks/progress.mjs --links    which document points at which, plus orphans, hubs,
+//                                          and how many paths point at nothing
 //      node checks/progress.mjs --json     the derived facts, for tooling
 //      node checks/progress.mjs --register add this project to the per-user list (`begin`)
 //
@@ -19,7 +20,7 @@ import { join, resolve, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 // The link graph is derived next door, from the one definition of a link the gate also uses.
-import { readDocuments, linkGraph, renderLinks } from './links.mjs';
+import { projectGraph, renderLinks } from './links.mjs';
 
 const read = (p) => readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
 const SPEC_DONE = 'done';
@@ -440,7 +441,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       }
     } else if (arg === '--links') {
       // The same derivation the board's link card renders, without starting a server.
-      console.log(renderLinks(readProject(root), linkGraph(readDocuments(root))));
+      console.log(renderLinks(readProject(root), projectGraph(root)));
     } else if (arg === '--json') {
       const { project, progress } = reportFor(root);
       console.log(JSON.stringify({ ...project, progress }, null, 2));
