@@ -35,6 +35,10 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   project's if it stayed. Put the blank runbook back
   (`cp docs/operations/TEMPLATE-DEPLOY.md docs/operations/deploy.md`). `deliver` fills it at first
   delivery.
+- `docs/state/DEBT.md` carries Groundwork's own debt rows, which `maintain` would harvest and
+  report as this project's. Put the blank ledger back
+  (`cp docs/state/TEMPLATE-DEBT.md docs/state/DEBT.md`). The first accepted `defer:` marker fills
+  it; on the existing-project door below, the check total lands here as the starting position.
 - `docs/compliance/` carries Groundwork's own answers in two places, and inheriting them would
   hand this project a register that describes someone else. In `docs/compliance/COMPLIANCE.md`,
   clear §2 back to its skeleton: the three header bullets to `TBD`, the register table to one

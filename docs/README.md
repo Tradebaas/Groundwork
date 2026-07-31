@@ -10,6 +10,7 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `README.md` | LIVE | This manifest |
 | `state/STATE.md` | LIVE | Live state, session handoff, the single "what's next" |
 | `state/DEBT.md` | LIVE | Technical debt ledger (with `defer:` site markers) |
+| `state/TEMPLATE-DEBT.md` | REF | Blank debt ledger; `begin` puts it in place of Groundwork's own |
 | `state/INTAKE.md` | LIVE | Untriaged feedback and ideas; nothing built from here |
 | `state/log/*.md` ◆ | ARCHIVE | Rotated STATE.md log entries, per month |
 | `product/BRIEF.md` | LIVE | Scope: what this project is and is not |
