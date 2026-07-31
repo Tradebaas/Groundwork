@@ -1,11 +1,17 @@
 ---
 name: begin
-description: Start a freshly copied Groundwork project. Use when docs/state/STATE.md says NOT STARTED, when the user says "begin", "start", "nieuw project", or asks how to get going in an empty copy - also when they open with an existing PRD, project description, or idea text: that material is this skill's input. Interviews the owner (or extracts the answers from their material), fills the templates, sets up git and hooks, and proposes the first real step.
+description: Start a project on Groundwork. Use when docs/state/STATE.md says NOT STARTED, when the user says "begin", "start", "nieuw project", or asks how to get going in an empty copy - also when they lay Groundwork over a project that already exists (adopt, retrofit, brownfield), and when they open with an existing PRD, project description, or idea text: that material is this skill's input. Interviews the owner (or extracts the answers from their material and their code), fills the templates, sets up git and hooks, and proposes the first real step.
 ---
 
 # begin: from fresh copy to working project
 
 Run this once. When it's done, STATE.md carries real state and this skill never triggers again.
+
+**Which of the two entrances is this?** Read it off the tree before doing anything, and say which
+one you read: a **fresh copy** holds nothing but Groundwork, while an **existing project** has its
+own `.git` history, source files, and a README that is not this one. Both take the route below;
+the existing project keeps everything it already has, and the steps say where the two differ.
+One skill, two doors: decision 0018 records why.
 
 ## 1. Clean the copy
 
@@ -15,6 +21,9 @@ went wrong or needs the owner's action; a list of deleted template files is nois
 - If a `MASTER_PROMPT.md` or `MASTER_PROMPT.local.md` exists at the root: it is Groundwork's own
   origin brief, not part of any project. Delete it. (Fresh copies no longer carry it: it is
   gitignored at source. This clears it from older copies made while it was still tracked.)
+- `CHANGELOG.md` at the root is Groundwork's release history, not this project's. Note which
+  version this copy came from (its newest entry) in STATE.md at step 4, then empty the file down to
+  its heading so this project's first release writes into it.
 - Delete any non-archived spec folder: `docs/specs/[0-9]*` directories are in-flight Groundwork
   maintainer work, never the new owner's. Keep the worked example in
   `docs/specs/archive/007-pickup-slots/` and the `TEMPLATE*.md` files.
@@ -24,9 +33,10 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   (`cp docs/product/TEMPLATE-BRIEF.md docs/product/BRIEF.md`) and delete the baseline folder.
 - Reset `"denylist"` in `checks/config.json` to `[]`: its entries guard the origin repo's
   retired wording, never this project's. Keep `styleBans` intact (those are generic).
-- Keep `docs/decisions/0001-0012`: they document the system this project just inherited (why
-  the rulebook, skills and checks work the way they do). This project's own decisions start
-  at 0013.
+- Keep the numbered records in `docs/decisions/`: they document the system this project just
+  inherited (why the rulebook, skills and checks work the way they do). This project's own
+  decisions continue from the next free number. Naming a range here would go stale the next time
+  the framework records one.
 - Strip the `data-derive` attributes from the stat strip in `index.html` (leave the numbers and
   the page alone). They tie those numbers to a gate that counts this repo, and in a copy the
   numbers describe the framework, not the project: the first decision this project records would
@@ -35,6 +45,12 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   owner exactly what to install, then stop.
 
 ## 2. Interview the owner
+
+**Existing project: the code answers first.** Its README, manifests, directory layout and recent
+commits already hold what the product is, who runs it and what it is built on. Read them, play the
+answers back for a one-line confirmation each, and spend the interview on what only the owner
+knows: why it exists, who it is for, what is deliberately out, and what "done" means from here.
+Asking an owner to describe software they have been running is the fastest way to lose their trust.
 
 **Material first.** Ask whether the owner already has anything written: a PRD, project
 description, pitch, notes, or a rough idea dump. Take it now (pasted text or a file; convert
@@ -94,9 +110,16 @@ section; idea changed, or the owner overruled a real concern → a decision reco
   the discovery rows at the interviewed depth. Write each SC-item in the owner's own words,
   as something they would recognize without translation: the progress overview quotes these
   lines back to them (`node checks/progress.mjs`).
+- Existing project: write one baseline record in `docs/specs/archive/000-baseline/spec.md`, from
+  `docs/specs/TEMPLATE.md`, stating what already shipped before the brief existed and which
+  SC-items it covers. Without it the overview quotes a running product back to its owner as
+  nothing done, and the alternative is inventing retroactive specs nobody wrote. Everything from
+  here forward gets a real spec at the size `spec` picks.
 - Seed the glossary `docs/product/CONTEXT.md` with the domain terms the interview surfaced;
   the file's template comment defines the entry format.
-- Fill the handoff block in `docs/state/STATE.md`: status active, phase `prepare`, Now ▶ next step.
+- Fill the handoff block in `docs/state/STATE.md`: status active, phase `prepare`, Now ▶ next step,
+  and the Groundwork version this copy started from (step 1). Without that line nothing can say
+  which framework this project holds, which is what makes a later improvement findable.
 - Fill the §2 register header in `docs/compliance/COMPLIANCE.md`: set "Personal data processed",
   "AI features" and "Applicable regimes", dated. Either first field a yes → `comply` runs before
   first delivery.
@@ -104,13 +127,15 @@ section; idea changed, or the owner overruled a real concern → a decision reco
   exists) replaces Groundwork's pitch, and "Start a project" goes with it (that section is
   copy-the-template onboarding, done by now). Keep "How it works", "Requirements", "What lives
   where" and "Handing over" intact for successors; the License section is the owner's call
-  (`comply` sets it).
+  (`comply` sets it). Existing project: its README already belongs to the product, so leave the
+  top half alone and add "What lives where" and "Handing over" to it instead.
 
 ## 5. Set up the machinery
 
 First, if a `.git/` directory exists the copy still carries Groundwork's commit history (it was
 cloned, not made with "Use this template", `degit`, or a ZIP). The project must start from its own
-root, so remove it: `rm -rf .git`. Skip this only if that `.git` already holds the owner's own work.
+root, so remove it: `rm -rf .git`. In an existing project that `.git` is the owner's own history:
+keep it, skip `git init` below, and run the rest on the branch they are on.
 
 If `.claude/skills` is not a symlink to `../.agents/skills` (degit and some ZIP tools break it),
 restore it: `ln -sfn ../.agents/skills .claude/skills`. On Windows without symlink support: set
@@ -124,6 +149,18 @@ node checks/progress.mjs --register     # adds this project to the owner's cross
 git add -A && git commit -m "chore: initialize project on Groundwork" \
   -m "Traces-to: explicit request: project initialization (begin)"
 ```
+
+Existing project: run `node checks/check.mjs` **before** installing the hooks, and read its output
+as a measurement rather than a verdict. Real code turns it red on contact (length caps, typography
+in text the project already had), and adoption cannot mean cleaning a whole codebase before any
+work is possible. Take it in this order: fix what is unsafe to leave, secrets in tracked files
+first; give every file the project already had in `docs/` its row in `docs/README.md`, which is a
+real fix and takes a minute; mark the rest at the site with the escape the check already offers and
+a reason (`checks:allow-length: <reason>`, `checks:allow-style`), never by adding paths to an
+exclusion list in `checks/config.json`; and log the total in `docs/state/DEBT.md`. Then
+install the hooks and commit, with `git init` skipped. Report the numbers to the owner: what it
+flagged, what you fixed, what is now marked. If that count is large, it is the finding worth
+discussing before anything else gets built.
 
 If the owner has a remote (GitHub gets CI from `.github/workflows/ci.yml`; another host needs
 its equivalent: port it before first delivery), wire it and push. If not, note in STATE.md

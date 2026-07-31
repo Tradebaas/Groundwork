@@ -45,8 +45,9 @@ Four situations the framework is built for:
 
 ## In scope
 
-- SC-1 Someone copies the repo, says "begin", and reaches a first governed commit with scope
-  written, state on disk and gates running, without the maintainer.
+- SC-1 Someone copies the repo, or lays it over a project they already have, says "begin", and
+  reaches a first governed commit with scope written, state on disk and gates running, without the
+  maintainer.
 - SC-2 Work nobody asked for is named and parked instead of built, and every change traces to
   a written scope item or a recorded request.
 - SC-3 The project remembers itself: a new session, a different tool or a reader a year later
@@ -71,8 +72,12 @@ Four situations the framework is built for:
 
 ## Out of scope, explicitly
 
-- An IDE, a CLI, an installer or a scaffolder. Groundwork is copied before the project exists;
-  there is nothing to run.
+- An IDE, a CLI, an installer or a scaffolder. Groundwork is copied into place, whether or not a
+  project is already there; there is nothing to run.
+- A mechanism that pulls later framework changes into an existing copy. Improvements travel as a
+  versioned release, a changelog and a written route the owner follows by hand (decision 0017);
+  merging them safely into a project that has edited its own copy is a package manager, which is a
+  second product.
 - A code generator or a component library. It carries method, not implementation.
 - Prebuilt stack, design or legal knowledge frozen into the repo. That knowledge is researched
   live at the moment of decision and written down with a date and a source. This is what keeps
@@ -111,8 +116,11 @@ Four situations the framework is built for:
 
 ## Rollout & adoption
 
-Copy before the project exists (GitHub template or degit), then say "begin". The explainer page
-is the front door, English first. Existing repos come in through the retrofit route.
+Copy before the project exists (GitHub template or degit), then say "begin". A project that already
+exists takes the same route with its own history kept: `begin` asks which of the two it is and
+adapts (decision 0018). The explainer page is the front door, English first. Each release is tagged
+and carries a changelog, so a copy can tell which Groundwork it holds and what has moved since
+(decision 0017).
 
 ## Success criteria
 

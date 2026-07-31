@@ -35,8 +35,10 @@ description: Release, deploy, or hand over a milestone in a disciplined, repeata
 
 1. Version it: semantic version derived from Conventional Commits (breaking → major, feat →
    minor, fix → patch). Tag: `vX.Y.Z`.
-2. Changelog: generate from commits since the last tag, edit for a human reader: what changed
-   *for the user*, in the product's voice.
+2. Changelog: `CHANGELOG.md` at the root, newest version first. Generate from commits since the
+   last tag, then edit for a human reader: what changed *for the user*, in the product's voice.
+   Write the entry in the release commit and set its date when the tag is cut, so a dateless
+   heading is the visible sign that a release is prepared but not out.
 3. Deploy **only** via the runbook `docs/operations/deploy.md`. First delivery? Write that
    runbook now (target, credentials location (never in the repo), steps, verification URL,
    rollback procedure) and test it by following it literally, from a clean state.
