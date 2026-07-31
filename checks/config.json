@@ -1,5 +1,5 @@
 {
-  "_doc": "Configuration for checks/check.mjs. denylist: retired facts that may never return in any scanned text file, add the OLD wording whenever a fact changes (see AGENTS.md conflict rule). Each entry: pattern (JS regex source, case-insensitive), why (shown on failure), optional exclude (path substrings to skip). docs/decisions/, archives and checks/ are never scanned by the denylist (decision records may quote retired wording). styleBans: AI-boilerplate phrases banned in all text (prose-style check, decision 0008); same shape as denylist, seeded with high-confidence tells, extend per project. The prose-style check also bans AI typography (em dash, en dash, ellipsis and curly quotes) with no config needed; escape a deliberate case with checks:allow-style on the line. extraTextExtensions/extraCodeExtensions: the stack skill adds this ecosystem's file types here. codeFileCapExclude: path prefixes/suffixes the code-file-cap check skips (generated or vendored code); a checks:allow-length: <reason> line inside the file works too. skipSymlinkCheck: set true only on Windows without symlink support.",
+  "_doc": "Configuration for checks/check.mjs. denylist: retired facts that may never return in any scanned text file, add the OLD wording whenever a fact changes (see AGENTS.md conflict rule). Each entry: pattern (JS regex source, case-insensitive), why (shown on failure), optional exclude (path substrings to skip). docs/decisions/, archives and checks/ are never scanned by the denylist (decision records may quote retired wording). styleBans: AI-boilerplate phrases banned in all text (prose-style check, decision 0008); same shape as denylist, seeded with tells measured to fire on no legitimate prose, extend per project. The prose-style check also bans AI typography (em dash, en dash, ellipsis and curly quotes) with no config needed; escape a deliberate case with checks:allow-style on the line. commentBans: the deferral-apology set, the negative image of the defer: contract - scanned by defer-markers on comment lines in code files only, because 'for now' is legitimate in a string or a UI label and only a comment can apologise for a simplification. extraTextExtensions/extraCodeExtensions: the stack skill adds this ecosystem's file types here. codeFileCapExclude: path prefixes/suffixes that hold generated or vendored code, skipped by code-file-cap and commentBans, since neither this project's length budget nor its deferral contract governs code it did not write; a checks:allow-length: <reason> line inside the file works too for the length cap. Exclusion lists are themselves gated by config-invariants: none of them may hide docs/standards/, and only secretScanExclude may name checks/. skipSymlinkCheck: set true only on Windows without symlink support.",
   "denylist": [
     { "pattern": "0001-0008 are Groundwork's own", "why": "retired manifest wording; the decision-record note no longer carries a number range (it went stale at 0009)" },
     { "pattern": "\\b(14 controles|19 skills)\\b", "why": "retired explainer heading counts; headings stay numberless, the hero stat strip owns live counts (drifted once: heading said 14 while check.mjs had 17)" },
@@ -20,7 +20,38 @@
     { "pattern": "\\bat the end of the day\\b", "why": "filler; cut it or say what you mean" },
     { "pattern": "\\bgame[- ]?changer\\b", "why": "hype word; state the concrete effect" },
     { "pattern": "\\ba testament to\\b", "why": "AI-tell flourish; say what it shows" },
-    { "pattern": "\\bunlock(s|ing)? the (power|potential)\\b", "why": "hype phrasing; describe the capability plainly" }
+    { "pattern": "\\bunlock(s|ing)? the (power|potential)\\b", "why": "hype phrasing; describe the capability plainly" },
+
+    { "pattern": "\\bas an AI\\b|\\bas a language model\\b", "why": "chat residue: an assistant introducing itself has no place in a committed file" },
+    { "pattern": "\\bI hope (this|that) helps\\b", "why": "chat residue: a document is not a reply, delete the sign-off" },
+    { "pattern": "\\blet me know if (you|there|I)\\b|\\bfeel free to (ask|reach out)\\b", "why": "chat residue: a document has no reader to answer, delete the offer" },
+    { "pattern": "\\b(great|excellent) (question|point|catch)\\b", "why": "chat residue: boilerplate enthusiasm aimed at a conversation partner" },
+    { "pattern": "^\\s*(certainly|absolutely)[!,]", "why": "chat residue: an answer opener, not a sentence in a document" },
+    { "pattern": "\\byou'?re absolutely right\\b", "why": "chat residue: agreement addressed to a person, not content" },
+    { "pattern": "\\bmy (knowledge|training) cutoff\\b", "why": "chat residue: the model's own limits are not a fact about this project" },
+
+    { "pattern": "oaicite|oai_citation|contentReference\\[", "why": "citation artifact pasted from an assistant's output; keep the source, drop the marker" },
+    { "pattern": "\\bturn\\d+(search|view|news|image|forecast)\\d+\\b", "why": "search-tool citation artifact; cite the real URL instead" },
+    { "pattern": "utm_source=(chatgpt|openai|claude|perplexity)", "why": "tracking parameter from an assistant's link; paste the clean URL" },
+    { "pattern": "【[^】]{0,40}†[^】]{0,40}】", "why": "citation artifact pasted from an assistant's output; keep the source, drop the marker" },
+    { "pattern": "\\[citation needed\\]", "why": "unresolved claim: verify it and cite the source, or delete the claim" },
+
+    { "pattern": "\\bin conclusion\\b|\\bto sum up\\b|\\ball in all\\b", "why": "closing summary that restates what was just said; end on the last real point" },
+    { "pattern": "\\bunderscor(e|es|ing) the\\b", "why": "AI-tell flourish; say what it shows" },
+    { "pattern": "\\b(tapestry|plethora|treasure trove)\\b", "why": "ornamental noun; name the thing and its number" },
+    { "pattern": "\\b(cutting[- ]edge|state[- ]of[- ]the[- ]art|best[- ]in[- ]class)\\b", "why": "unfalsifiable superlative; state the version or the measurement" },
+    { "pattern": "\\b(revolutioniz|supercharg)(e|es|ed|ing)\\b", "why": "hype verb; describe the actual change" },
+    { "pattern": "\\bboasts?\\b", "why": "hype verb for a feature list; say 'has', or state the number" },
+    { "pattern": "\\bwhether you'?re a\\b", "why": "landing-page filler that addresses everyone and no one; name the actual user" },
+    { "pattern": "\\bwhen it comes to\\b", "why": "empty run-up; start the sentence at the point" }
+  ],
+
+  "commentBans": [
+    { "pattern": "\\bfor now\\b", "why": "an unmarked deferral rots silently; use the defer: marker with its ceiling and upgrade-when trigger" },
+    { "pattern": "\\bfor (brevity|simplicity)\\b|\\bsimplified for\\b", "why": "a simplification the reader cannot audit; use the defer: marker so it stays grep-recoverable" },
+    { "pattern": "\\bin a real (implementation|app|application|system|project)\\b|\\bin production,? you\\b", "why": "code that admits it is not the real thing; either build it or mark it with defer:" },
+    { "pattern": "\\bleft as an exercise\\b|\\bfor demonstration purposes\\b", "why": "tutorial phrasing in shipped code; finish it or mark it with defer:" },
+    { "pattern": "\\byou would (typically|normally|want to)\\b", "why": "advice to an imaginary reader instead of a decision; state what this code does, or defer: it" }
   ],
   "extraTextExtensions": [],
   "extraCodeExtensions": [],

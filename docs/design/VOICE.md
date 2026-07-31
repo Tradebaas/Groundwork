@@ -23,6 +23,12 @@
      today's ... world", "a testament to", "unlock the power/potential", "game-changer", "at the
      end of the day". The unambiguous ones are in `checks/config.json` styleBans; the rest are
      judgment, caught by `design-guard`.
+   - **Banned residue:** chat leftovers and citation artifacts have no place in a committed
+     file: an assistant introducing itself, "I hope this helps", an offer to answer follow-up
+     questions, and the markers a tool leaves behind (oaicite, turn0search, utm_source=chatgpt).
+     A document is not a reply. Keep the content and the real source, drop the wrapper. In code
+     comments the same rule covers the deferral apology ("for now", "in a real app"): that is a
+     deferral, so it carries a `defer:` marker or it gets finished. All mechanically enforced.
    - **Banned habits:** the rule-of-three cadence ("fast, simple, and reliable") on repeat,
      "not just X, but Y" framing, exclamation inflation, "please note", emoji used as icons,
      boilerplate enthusiasm ("great choice!"), filler apologies, and closing summaries that

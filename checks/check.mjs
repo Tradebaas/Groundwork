@@ -167,6 +167,9 @@ export function runChecks(root) {
   // STATE.local.md could fail the pre-commit hook. Drop them from every file-based check.
   tree.files = tree.files.filter((f) => !basename(f).endsWith('.local.md'));
   const textFiles = tree.files.filter((f) => TEXT_EXT.has(extname(f)) || f.endsWith('.gitignore'));
+  // What counts as generated or vendored code is one fact, read by the length cap and by the
+  // deferral contract. Written once so the two can never drift apart.
+  const isVendored = (r) => (cfg.codeFileCapExclude || []).some((x) => r.startsWith(x) || r.endsWith(x));
 
   const checks = {
     'budget-agents'() {
@@ -188,6 +191,53 @@ export function runChecks(root) {
         const n = lines(f).length;
         if (n > cap) {
           fail(`${rel(root, f)} is ${n} lines (hard cap ${cap}): an AGENTS.md/CLAUDE.md past ${cap} lines stops being read in full. Move detail into a skill or docs/.`);
+        }
+      }
+    },
+
+    'config-invariants'() {
+      // checks/config.json is the one file that can weaken every other gate, in the same commit
+      // as the violation it hides: raise a budget past the rule it encodes, or add an exclusion
+      // that steers a check away from the paths it exists to police. So the config gates itself.
+      // Both invariants come from a rule written down elsewhere, never from taste.
+      const cap = cfg.budgets?.agentFileHardCapLines;
+      // 200 is not a preference: past it an agent rulebook stops being read in full, so a higher
+      // cap does not buy a longer file, it buys a file that silently stops governing. The two
+      // ways to break it read differently, so they are reported differently.
+      if (cap !== undefined && !(Number.isInteger(cap) && cap > 0)) {
+        fail(`checks/config.json budgets.agentFileHardCapLines is ${JSON.stringify(cap)}, which is not a positive whole number of lines: agent-file-cap would fall back to 200 and the value would govern nothing.`);
+      } else if (cap !== undefined && cap > 200) {
+        fail(`checks/config.json budgets.agentFileHardCapLines is ${cap}: the hard cap is 200 lines and may be lowered, never raised. A rulebook past 200 lines stops being loaded in full.`);
+      }
+      // An exclusion that reaches these prefixes disarms the gates rather than tuning them:
+      // checks/ is where the gates themselves live, docs/standards/ is where a stack's rules do.
+      // secretScanExclude names checks/ by construction (the detector patterns are in check.mjs
+      // and would match themselves), so it is the one list allowed to, and only for that prefix.
+      const protectedPrefixes = ['checks/', 'docs/standards/'];
+      // Each list is read back by its own matching rule, so the invariant has to test the rule
+      // that will actually run, or it guarantees less than its message claims. An affix list
+      // (code-file-cap, secrets) hides a path when either end of it matches; a substring list
+      // (denylist) hides it when the value appears anywhere inside it. Testing only the prefix
+      // would let "s/" and "heck" walk past a gate whose whole job is to stop exactly that.
+      const hides = (mode, v, p) => v === '' || v.startsWith(p)
+        || (mode === 'affix' ? p.startsWith(v) || p.endsWith(v) : p.includes(v));
+      const lists = [
+        ['codeFileCapExclude', cfg.codeFileCapExclude || [], protectedPrefixes, 'affix'],
+        ['secretScanExclude', cfg.secretScanExclude || [], ['docs/standards/'], 'affix'],
+        ...(cfg.denylist || []).map((e, i) => [`denylist[${i}].exclude`, e.exclude || [], protectedPrefixes, 'substring']),
+      ];
+      for (const [where, values, guarded, mode] of lists) {
+        for (const v of values) {
+          if (typeof v !== 'string') {
+            fail(`checks/config.json ${where} holds ${JSON.stringify(v)}: an exclusion is a path string, and a non-string silently excludes nothing.`);
+            continue;
+          }
+          // Overlap in either direction is a hit: "docs/" swallows docs/standards/ from above,
+          // "docs/standards/react.md" carves it out from within, "" swallows everything.
+          const hit = guarded.find((p) => hides(mode, v, p));
+          if (hit) {
+            fail(`checks/config.json ${where} excludes "${v}", which hides ${hit}: that is where the gates (or a stack's standards) live, so excluding it disarms a check instead of tuning it. Narrow the exclusion.`);
+          }
         }
       }
     },
@@ -364,15 +414,34 @@ export function runChecks(root) {
     },
 
     'defer-markers'() {
+      // Two halves of one contract. The marker half: a defer: that names no trigger rots.
+      // The commentBans half is its negative image - a comment that apologises for a
+      // simplification ("for now", "in a real app") is a deferral that skipped the marker, so
+      // nothing can ever grep for it. Comment lines in code files only: "for now" is legitimate
+      // in a string, a UI label or prose, and only a comment can apologise for the code below it.
+      const apologies = (cfg.commentBans || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
+      const commentLine = /^\s*(\/\/|#|\*|<!--)|\/\*/;
       for (const f of textFiles) {
         const r = rel(root, f);
         if (r.startsWith('checks/')) continue;
+        // Generated and vendored code is not this project's deferral to make or to mark, and it
+        // is already named once in config for the length cap. One list, both meanings.
+        const vendored = isVendored(r);
+        const isCode = CODE_EXT.has(extname(f));
         const content = lines(f);
         content.forEach((line, i) => {
           // A wrapped marker may carry its trigger on the next line or two.
           const vicinity = content.slice(i, i + 3).join(' ');
           if (/(\/\/|#|<!--)\s*defer:/i.test(line) && !/upgrade-when:/i.test(vicinity)) {
             fail(`${r}:${i + 1} defer: marker without "upgrade-when:": untriggered deferrals rot silently (AGENTS.md format).`);
+          }
+          if (!isCode || vendored || !commentLine.test(line) || line.includes('checks:allow-style')) return;
+          // A line that already carries the marker is the documented case, not the apology.
+          if (/defer:/i.test(vicinity)) return;
+          for (const e of apologies) {
+            if (e.re.test(line)) {
+              fail(`${r}:${i + 1} comment defers without a marker (/${e.pattern}/): ${e.why}. Deliberate wording? Append "checks:allow-style" to that line.`);
+            }
           }
         });
       }
