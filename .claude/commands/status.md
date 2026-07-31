@@ -12,8 +12,8 @@ Report progress. Arguments given: $ARGUMENTS
   `node checks/progress.mjs --serve` to run in their own terminal, and say it stays running
   until they stop it. Do not start it yourself: it is a server, so it never returns.
 - Arguments containing "links", "verwijzingen" or "graph": run `node checks/progress.mjs --links`
-  and show its output as is. It says which document points at which, what nothing points at, and
-  what enough documents point at to be load-bearing.
+  and show its output as is. It says which document points at which, what nothing points at, what
+  enough documents point at to be load-bearing, and how many paths point at nothing.
 
 The script already writes in the project's own language and phrasing. Pass it through without
 rewriting, summarizing, or adding commentary. When it reports something under "Heads up" or

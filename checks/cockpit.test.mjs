@@ -221,11 +221,32 @@ test('the link card names what is load-bearing and folds the long lists behind t
   assert.doesNotMatch(html, /href="[^"]*lonely/);
 });
 
+test('the link card states how many paths point at nothing, and why an orphan can be by design', () => {
+  const graph = linkGraph([
+    {
+      path: 'AGENTS.md',
+      text: 'the runner `checks/check.mjs`, made by `architect`: `docs/product/ARCHITECTURE.md`',
+    },
+    { path: '.agents/skills/architect/SKILL.md', text: 'the rulebook `AGENTS.md`' },
+  ], { exists: (p) => p === 'checks/check.mjs' });
+  const html = linksCard(graph, 'en');
+  assert.match(html, /<summary>Paths that point at nothing <span class="count">1<\/span>/);
+  // The name is its own element, so stripping the markup leaves a space beside the separator.
+  assert.match(visible(html), /AGENTS\.md ?: docs\/product\/ARCHITECTURE\.md/);
+  assert.match(visible(html), /a name shortened to its bare filename, or prose shaped like a path/);
+  // The clause sits inside the fold, next to the names it explains.
+  assert.match(html, /Nothing points at these[\s\S]*the rulebook names a skill by its name[\s\S]*<\/details>/);
+  // A path that lands on a file which is no document is placed, not counted as a miss.
+  assert.doesNotMatch(visible(html), /check\.mjs/);
+});
+
 test('a project with nothing to draw says so, on the card and in the numbers', () => {
   assert.match(visible(linksCard(linkGraph([]), 'en')), /no documents to read yet/);
   const alone = linksCard(linkGraph([{ path: 'AGENTS.md', text: 'rules' }]), 'en');
   assert.match(visible(alone), /No document is pointed at by 4 or more others/);
   assert.match(alone, /<summary>Nothing points at these <span class="count">1<\/span>/);
+  // Nothing left over is stated, not left silent: an empty card would read as an unasked question.
+  assert.match(visible(alone), /Every path spelled out lands on a document or on a file\./);
 });
 
 test('the gates card reports this machine, and repeats the fix line when one is down', () => {
