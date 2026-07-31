@@ -110,8 +110,10 @@ Four situations the framework is built for:
 - MIT licensed, free, no paid tier.
 - Vendor-neutral: never a forked rule set per tool. What only some tools enforce degrades
   visibly, never silently.
-- Groundwork is itself software placed on the EU market, so the CRA and the PLD apply to it.
-  See `docs/compliance/COMPLIANCE.md`.
+- Free and unmonetised is a compliance constraint here, not only a pricing one: it is what keeps
+  the framework outside the CRA and the PLD, both of which turn on supply in the course of a
+  commercial activity. Monetising Groundwork in any form is a scope change that pulls both in.
+  See `docs/compliance/COMPLIANCE.md` §2.
 - Run budget: a public repo plus Pages. No servers, no paid services, no operational cost.
 
 ## Rollout & adoption

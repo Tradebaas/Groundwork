@@ -31,7 +31,10 @@ that does not work. Each has a counter in the table above.
 ## Who is covered
 
 - The project owner and every contributor operating an AI agent on this repo, by default.
-- **This project's specifics:** TBD <!-- roles/people using AI tooling here. AI features in
-  the product itself belong in COMPLIANCE.md §2 ("AI features"), not here -->
+- **This project's specifics:** one maintainer, who is both owner and only regular operator of
+  the agents. Outside contributions arrive as pull requests and are covered by the same measures,
+  because the rulebook and the gates apply to the change, not to who wrote it. Reviewed
+  2026-07-31. <!-- roles/people using AI tooling here. AI features in the product itself belong
+  in COMPLIANCE.md §2 ("AI features"), not here -->
 
 Review cadence: with `comply`, at every first delivery and at the quarterly audit.

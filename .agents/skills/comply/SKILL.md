@@ -46,10 +46,16 @@ quarterly audit - rules move fastest just before they bite.
   for this team and re-check the note at the quarterly audit.
 - **Accessibility**: EN 301 549 / WCAG 2.1 AA as the working floor (design-guard checks it per
   delivery; this skill checks the claim holds product-wide).
-- **CRA**: secure-by-default posture; the vulnerability intake channel and the support period
-  are published in the root `SECURITY.md` (ships as a working template; fill its marked TBD
-  fields per product); actively exploited vulnerability → reporting duty via ENISA platform
-  (from 2026-09-11).
+- **CRA**: scope before duties, because both the CRA and the PLD turn on the same test: supply in
+  the course of a commercial activity. Free and open-source software its maintainer does not
+  monetise is outside it, and paid services alongside a freely downloadable product or donations
+  that do not gate access do not change that; a paid edition, updates behind a payment, or other
+  services monetised through it do. A legal person sustaining such an unmarketed project intended
+  for commercial use is an open-source software steward instead (Art 24). Inside scope:
+  secure-by-default posture, and the vulnerability intake channel plus the support period
+  published in the root `SECURITY.md` (ships as a working template; fill its marked TBD fields);
+  actively exploited vulnerability → reporting duty via ENISA platform (from 2026-09-11). The
+  register's §1 CRA row carries the test in full, and rows C-1 to C-4 there are a worked example.
 - **PLD**: software is a product with no-fault liability; defectiveness includes cybersecurity
   vulnerabilities, and damage covers users' destroyed or corrupted data. The CRA posture above
   plus a proven restore path (`docs/operations/backup-restore.md`) are the working defense.

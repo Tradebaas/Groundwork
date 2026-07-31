@@ -37,16 +37,23 @@ above. Under those rules we will not pursue legal action.
 
 ## Support period and security updates
 
-<!-- CRA (EU 2024/2847) Art 13(8): a product with digital elements placed on the EU market
-     publishes a support period of at least five years; shorter only if the expected use time
-     is shorter. When the product ships, surface and fill this line:
+<!-- CRA (EU 2024/2847): a product with digital elements placed on the EU market carries a
+     support period of at least five years, or the expected use time when that is shorter
+     (Art 13(8)), and states its end date to the buyer (Art 13(19)). This binds a product
+     supplied in the course of a commercial activity; free and open-source software its
+     manufacturer does not monetise is outside that test, so the line below is filled when the
+     product is monetised, not merely when it ships. `comply` decides which case this is and
+     records it in the register. When it applies, surface and fill this line:
      - **This product:** TBD (e.g. "placed on the market 2027-01-15; security updates until
        at least 2032-01-15") -->
 
-- **Groundwork itself** (the framework this repo started from) is free software distributed
-  as a copy-once template, not a product placed on the market. Security fixes land on `main`
-  of [Tradebaas/Groundwork](https://github.com/Tradebaas/Groundwork); a copied project starts
-  from the state at copy time and receives nothing automatically, so track upstream yourself.
+- **Groundwork itself** (the framework this repo started from) is free and open-source software
+  that its maintainer does not monetise, so it is not made available on the market within the
+  meaning of the CRA and carries no published support period. The reasoning and its trigger sit
+  in the register: [C-1 and C-2](docs/compliance/COMPLIANCE.md). Security fixes land on `main`
+  of [Tradebaas/Groundwork](https://github.com/Tradebaas/Groundwork) and are named in the
+  changelog of the release that carries them; a copied project starts from the state at copy
+  time and receives nothing automatically, so track upstream yourself.
 
 Security fixes ship through the normal delivery pipeline and are named in the changelog.
 Supported versions: the latest release, unless the line above says otherwise.
