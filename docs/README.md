@@ -30,7 +30,7 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `design/VOICE.md` | REF | Voice & content system: how the product reads |
 | `compliance/COMPLIANCE.md` | LIVE | EU/NL compliance register and obligations |
 | `compliance/AI-LITERACY.md` | REF | AI Act Art 4 literacy evidence: the measures and who they cover |
-| `operations/*.md` ◆ | REF | Runbooks: deploy, incident, backup/restore, monitoring |
+| `operations/*.md` ◆ | REF | Runbooks: deploy, incident, backup/restore, monitoring, plus the blank `operations/TEMPLATE-DEPLOY.md` that `begin` puts in place of the deploy one |
 
 Rules: one fact, one owning file; everything else links to it. New file → add a row here in the
 same change. Retire a fact → add its old wording to the denylist in `checks/config.json`.
