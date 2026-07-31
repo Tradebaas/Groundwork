@@ -11,7 +11,7 @@ own. There is no updater, on purpose:
 Versions follow [semantic versioning](https://semver.org). Below 1.0 the shape is still settling,
 so a minor version may move a file or rename a check; each entry says so when it does.
 
-## v0.1.0 - unreleased
+## v0.1.0 - 2026-07-31
 
 The first tagged release. Everything below already shipped; the version is what is new, so a copy
 can now name what it holds.
