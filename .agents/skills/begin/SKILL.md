@@ -31,6 +31,13 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   the record of what the framework itself had already shipped. Counted against this project they
   would report someone else's work as done here. Put the blank brief back
   (`cp docs/product/TEMPLATE-BRIEF.md docs/product/BRIEF.md`) and delete the baseline folder.
+- `docs/compliance/` carries Groundwork's own answers in two places, and inheriting them would
+  hand this project a register that describes someone else. In `docs/compliance/COMPLIANCE.md`,
+  clear §2 back to its skeleton: the three header bullets to `TBD`, the register table to one
+  `C-1 TBD` row, and the processing record to one `TBD` row. §1 is shared knowledge about the
+  regimes and stays as it is. In `docs/compliance/AI-LITERACY.md`, put "This project's specifics"
+  back to `TBD`. Step 4 fills the header from the interview; `comply` fills the rest before
+  first delivery.
 - Reset `"denylist"` in `checks/config.json` to `[]`: its entries guard the origin repo's
   retired wording, never this project's. Keep `styleBans` intact (those are generic).
 - Keep the numbered records in `docs/decisions/`: they document the system this project just
