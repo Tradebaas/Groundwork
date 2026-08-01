@@ -770,6 +770,7 @@ mount('gates',[
   ['code','Dead code','Commented-out blocks of code are cleaned up. Git remembers the history.'],
   ['history','Trace to the goal','Every commit names the goal it serves, so later you can still find out why a piece of code is there.'],
   ['scale','Self-test','The checks test themselves: a check that cannot prove it works does not count.'],
+  ['anchor','The copy route','Every push unpacks a fresh copy, walks it to a first guarded commit and throws it away again. Break that route and the build turns red on the commit that broke it.'],
   ['wrench','And the rest','Structure, tickets, symlinks and deferred choices: the smaller agreements have their own check too.'],
 ].map(function(a){
   return '<div class="gate reveal">'+ic(a[0])+'<div><h3>'+a[1]+'</h3><p>'+a[2]+'</p></div></div>';
@@ -844,7 +845,7 @@ var skillGroups=[
     ['scope-guard','The last check before work is called "done": was nothing extra built that nobody asked for?'],
     ['design-guard','The last check on screens and texts before they go out the door.'],
     ['verify','Proves that a change really works, end to end. Green tests alone are not proof.'],
-    ['code-review','Reviews the change with fresh eyes along two axes: does the code meet the standards, and does it do exactly what the spec asked?']]],
+    ['code-review','Reviews the change with fresh eyes, one axis at a time: did this diff weaken a check, does the code meet the standards, does it do exactly what the spec asked. Around logins, payments or personal data a security axis comes on top.']]],
   ['Delivering and running','out the door, and after',[
     ['deliver','Ships a release in a controlled, repeatable way. Nothing goes out that has not been verified.'],
     ['maintain','Keeps a live product healthy: updates, incidents, accumulated debt and periodic audits.'],
@@ -853,7 +854,7 @@ var skillGroups=[
   ['Tools','for everything around it',[
     ['debug','Finds the real cause of a stubborn fault: reproduce first, then test hypothesis by hypothesis, and fix the cause once with a test as proof.'],
     ['skill-author','Writes a new skill, but only when the project genuinely needs one again and again.'],
-    ['comply','Tests against Dutch and European law: privacy, the AI Act, accessibility and licensing.'],
+    ['comply','Tests against Dutch and European law: privacy, the AI Act, accessibility, product and cyber security duties, and licensing. Every date is verified against the official source, never from memory.'],
     ['ingest','Turns PDF, Office files and images into compact text, so tokens go to content.'],
     ['calibrate','Picks the right model and the right thinking effort before a session starts: as cheap as it can be, as heavy as it has to be.']]]
 ];
