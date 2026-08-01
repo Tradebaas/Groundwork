@@ -2,9 +2,9 @@
 
 <!-- Required by the `maintain` skill when something breaks for real users: this file is the
      order of work under pressure. Fill every placeholder before first delivery. The table is an
-     operational mirror: whether a regime applies to this product, its effective dates and the
-     legal detail are owned by docs/compliance/COMPLIANCE.md §1 - change the register first,
-     update this table in the same commit. -->
+     operational mirror: the effective dates and the legal detail are owned by
+     docs/compliance/COMPLIANCE.md, and whether a regime reaches this product by
+     docs/compliance/REGISTER.md - change those first, update this table in the same commit. -->
 
 ## First hour
 

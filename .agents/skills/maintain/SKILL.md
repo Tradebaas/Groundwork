@@ -72,7 +72,7 @@ where they are kept. Decommissioning is a proposed, owner-approved task like pay
 a cleanup done in passing, and it is the one maintenance job whose evidence someone may ask for
 years later.
 
-- **The data goes, per the record.** Every purpose in `docs/compliance/COMPLIANCE.md`'s
+- **The data goes, per the record.** Every purpose in `docs/compliance/REGISTER.md`'s
   processing record names a retention period; at end of life each one is deleted, or exported
   first to the destination the owner agreed. Backups, replicas and analytics copies hold the
   same personal data and outlive the primary store, so name when they expire too - a deletion

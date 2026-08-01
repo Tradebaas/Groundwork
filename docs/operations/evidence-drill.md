@@ -57,11 +57,10 @@ The drill walks the half of the route that is a command. The half that is judgme
 session's work and is not simulated: the interview, what `docs/product/BRIEF.md` ends up saying,
 the first spec, the first real change.
 
-Four of `begin` step 1's bullets are edits rather than one command, and the drill leaves them
-alone: emptying `CHANGELOG.md` down to its heading, clearing §2 of
-`docs/compliance/COMPLIANCE.md` and the specifics in `docs/compliance/AI-LITERACY.md` back to
-their skeletons, and stripping the `data-derive` attributes from the stat strip in `index.html`.
-A copy that skips all four still passes the checks, which is why nothing here catches it.
+Two of `begin` step 1's bullets are edits rather than one command, and the drill leaves them
+alone: emptying `CHANGELOG.md` down to its heading, and stripping the `data-derive` attributes
+from the stat strip in `index.html`. A copy that skips both still passes the checks, which is
+why nothing here catches it.
 
 ## Reading a failure
 

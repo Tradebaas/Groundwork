@@ -93,7 +93,7 @@ test('an overview that does not render is caught', async () => {
   c.clean();
 });
 
-// begin step 1 tells the owner to copy three blanks over Groundwork's own files. If one of those
+// begin step 1 tells the owner to copy four blanks over Groundwork's own files. If one of those
 // blanks is ever renamed or dropped, the instruction becomes a dead command.
 test('a begin clearing command with no template left to copy is caught', async () => {
   const c = await copyAt();

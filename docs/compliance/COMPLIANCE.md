@@ -1,11 +1,10 @@
-# COMPLIANCE: EU/NL register
+# COMPLIANCE: the EU/NL regimes and when they bite
 
-<!-- TEMPLATE: §1 facts ship with Groundwork (legal status first verified 2026-07-22 against
-     EUR-Lex, Commission, EDPB, W3C/ETSI and NL government sources; the `Dates verified` column
-     carries each row's own last check, and the `comply` skill re-verifies a row before relying
-     on it). §2 is this project's register, filled by `begin`/`comply`. -->
-
-## 1. The regimes and when they bite
+<!-- TEMPLATE: these facts ship with Groundwork and read the same in every project (legal status
+     first verified 2026-07-22 against EUR-Lex, Commission, EDPB, W3C/ETSI and NL government
+     sources; the `Dates verified` column carries each row's own last check, and the `comply`
+     skill re-verifies a row before relying on it). Which of these reach this project, and the
+     status per obligation, live next door in `REGISTER.md`. -->
 
 | Regime | Dates verified | Applies when | Key obligations & dates |
 |---|---|---|---|
@@ -19,44 +18,8 @@
 | **Data Act** (2023/2854) | 2026-07-27 | Connected products; cloud/SaaS switching | Applies since 2025-09-12. Switching barriers banned; max 2-month notice; switching charges including data egress entirely gone **from 2027-01-12**. Access-by-design (Art 3(1)) binds connected products and their related services **placed on the market after 2026-09-12**: relevant data reachable by the user by default, easily, securely and free of charge where technically feasible. Digital Omnibus amendments to this regulation are proposed, not adopted. |
 | **Licensing** | n/a | Every dependency, font, asset, service | License compatible with use and distribution; copyleft honored; entitlements (fonts, icons, APIs) actually held. |
 
-## 2. THIS PROJECT: register <!-- filled by `begin` / `comply`; re-verified per delivery -->
-
-<!-- This section holds Groundwork's OWN answers, not a blank skeleton: the framework is
-     dogfooded on itself, and a register nobody filled proves nothing (decision 0016 made the
-     same call for the brief). `begin` resets it when a project starts from a copy. -->
-
-- **Personal data processed:** Not by the framework: the checks run offline on plain Node, with
-  no accounts, no services and no systems of record (`docs/product/BRIEF.md`, Systems &
-  integrations). The repository around it does carry personal data, because public version
-  control does: contributor names and email addresses in commit metadata, and GitHub handles on
-  issues and pull requests. That is one processing purpose, recorded below.
-- **AI features:** None. Groundwork instructs AI agents; it contains, calls and ships no AI
-  system of its own, so no AI Act provider or deployer duty attaches to the product. Article 4
-  AI literacy applies to the people who operate agents on this repo: `AI-LITERACY.md`.
-- **Applicable regimes:** GDPR (repository metadata only), AI Act Art 4 (as an operator of AI
-  tools, not as a provider), licensing. Out of scope with a reason per row below: CRA, PLD, EAA,
-  NIS2, DORA, Data Act. Verified 2026-07-31 against the sources in §1.
-
-| # | Regime | Obligation | Status | Evidence / where implemented |
-|---|---|---|---|---|
-| C-1 | CRA | Manufacturer duties for a product with digital elements placed on the EU market | n/a while unmonetised | Groundwork is MIT-licensed free and open-source software that its maintainer does not monetise: no price, no paid or donor-only edition, no updates behind a payment, no service monetised through it, no personal data required for use. Under Art 2(1) with recital 18 and guidance C(2026) 5252 §3 (example 18: a freely downloadable tool, optional paid help alongside it) that is not making available on the market, so no manufacturer duty arises. Verified 2026-07-31. **Trigger:** any monetisation flips this row, and the constraint that holds it is in `docs/product/BRIEF.md`. |
-| C-2 | CRA Art 24 | Open-source software steward: cybersecurity policy, cooperation with market surveillance, reporting | n/a | A steward is a **legal** person (Art 3(14)). Groundwork is published by a natural person, and guidance C(2026) 5252 §3.2.1 para 53 is explicit that for a natural person the freely provided version sits outside the CRA altogether. **Trigger:** the project moving under a company or foundation while copies are used commercially. That would arm this row even though C-1 stayed n/a. |
-| C-3 | CRA Art 14 | Report actively exploited vulnerabilities and severe incidents, from 2026-09-11 | n/a, route published anyway | Follows C-1 and C-2: the duty binds manufacturers and stewards. `SECURITY.md` publishes the intake channel and the coordinated-disclosure route regardless, and Art 15 voluntary reporting stays open to us. |
-| C-4 | PLD | No-fault liability for a defective product, from 2026-12-09 | n/a | Art 2(2) excludes free and open-source software supplied outside a commercial activity, which is the same test as C-1 and the same answer. Recital 13 points the same way for what this repo ships, since it keeps information outside the notion of a product and names the mere source code of software. Verified 2026-07-31. |
-| C-5 | GDPR | Lawful basis, minimisation and data-subject rights for contributor metadata | met | Only what version control needs, recorded below. The framework itself collects nothing from the people who use it: the checks make no network calls, and the published explainer has no analytics, no cookies and no third-party request in any state (`index.html`, verified 2026-08-01: both webfonts are self-hosted, and since the four Google-hosted alternates were dropped the customizer offers only those two plus stacks the browser resolves on its own, so opening it fetches nothing). The one thing it stores on the visitor's device is their own theme, accent and font choice in `localStorage` under `gw-*` keys, which is storage the visitor asked for and so needs no consent under Art 11.7a Telecommunicatiewet. What remains is GitHub's own server log as the host, which the processing record names. |
-| C-6 | AI Act Art 4 | AI literacy measures for the people operating AI here | met | `docs/compliance/AI-LITERACY.md`, with the current obligation and its dates in the §1 AI Act row. |
-| C-7 | EAA | Accessibility of consumer-facing digital services | n/a as a duty, held as a floor | A free developer framework is not one of the Annex I services, and a solo maintainer is a microenterprise, exempt under Art 4(5) either way. The published explainer is held to WCAG 2.1 AA by `design-guard` regardless, because the standard is worth holding without a regulator. |
-| C-8 | NIS2, DORA, Data Act | Sector duty of care and reporting; ICT contract clauses; connected-product and switching rules | n/a | No service is operated for third parties and no entity sits in an Annex I or II sector, so the Cyberbeveiligingswet does not reach this project; no financial-entity client exists to impose DORA Art 30 clauses; nothing here is a connected product or a cloud offering a customer could be locked into. **Trigger:** the first hosted service or paid engagement. |
-| C-9 | Licensing | Every dependency, font and asset covered, notices shipped with what is redistributed | met, two gaps closed on 2026-07-31 | The framework is MIT (`LICENSE`) with zero runtime dependencies and no package manifest at the root: the checks run on plain Node. What this repo redistributes is the explainer's assets, and both notices were missing. The bundled Inter and Josefin Sans subsets are under the SIL Open Font License 1.1, which requires the notice to travel with the files: `fonts/OFL.txt` now does that. The inlined icons are Lucide, which is ISC and descends from Feather (MIT), not MIT as the source comment said; `index.html` now names both. The customizer no longer offers a font this repo does not hold: the four Google-hosted alternates were dropped on 2026-08-01 for system stacks, so `fonts/OFL.txt` covers every family the page can apply. |
-
-**Processing record (Art 30)** <!-- per purpose: data, basis, retention, processors, residency -->
-
-| Purpose | Data | Lawful basis | Retention | Processor(s) | EU residency |
-|---|---|---|---|---|---|
-| Version control and attribution of contributions in a public repository | Commit author name and email address, GitHub handle, the text people write in issues and pull requests | Legitimate interest, Art 6(1)(f): provenance and attribution are what a version-controlled project is for, and a contributor supplies the data by committing | For the life of the repository. Git history is append-only, so erasure or rectification means rewriting history or removing the repository, and both are done on request | GitHub, Inc. (Microsoft) hosts the repository, its Pages site and its Actions runs, and logs visitor IP addresses when the explainer is served | No: United States, under the EU-US Data Privacy Framework. The Commission's adequacy decision stands and the General Court upheld it on 2025-09-03; the appeal (C-703/25 P) is pending at the Court of Justice. Checked 2026-07-31 |
-
-Open `blocked` rows block delivery (`deliver` checks this register). Dates in §1 age: the
-`comply` skill re-verifies them against authoritative sources before every first delivery, at
-the quarterly audit, and sooner when a date here is about to land (its deadline-horizon rule).
-A pass usually covers some rows and not others, so it stamps only the rows it actually checked
-in `Dates verified`. That column is the honest answer to "how current is this?", per row.
+Dates here age: the `comply` skill re-verifies them against authoritative sources before every
+first delivery, at the quarterly audit, and sooner when one of them is about to land (its
+deadline-horizon rule). A pass usually covers some rows and not others, so it stamps only the
+rows it actually checked in `Dates verified`. That column is the honest answer to "how current
+is this?", per row.

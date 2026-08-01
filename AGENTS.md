@@ -83,7 +83,7 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 | Code standards (per stack) | `docs/standards/` |
 | Design system (visual) | `docs/design/DESIGN.md` |
 | Voice & content system | `docs/design/VOICE.md` |
-| EU/NL compliance register | `docs/compliance/COMPLIANCE.md` |
+| EU/NL compliance: this project's register | `docs/compliance/REGISTER.md` (regimes: `docs/compliance/COMPLIANCE.md`) |
 | Operational runbooks | `docs/operations/` |
 | Automated checks (run: `node checks/check.mjs`) | `checks/` |
 | What is done, what is left (run: `node checks/progress.mjs`; `--all` for every project, `--serve` for the same stand as a page on this machine, `--links` for which document points at which, and how many paths point at nothing) | derived from BRIEF + specs + STATE, never stored |

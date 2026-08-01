@@ -113,7 +113,7 @@ Four situations the framework is built for:
 - Free and unmonetised is a compliance constraint here, not only a pricing one: it is what keeps
   the framework outside the CRA and the PLD, both of which turn on supply in the course of a
   commercial activity. Monetising Groundwork in any form is a scope change that pulls both in.
-  See `docs/compliance/COMPLIANCE.md` §2.
+  See `docs/compliance/REGISTER.md`, rows C-1 and C-4.
 - Run budget: a public repo plus Pages. No servers, no paid services, no operational cost.
 
 ## Rollout & adoption
