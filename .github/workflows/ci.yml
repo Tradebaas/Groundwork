@@ -38,6 +38,29 @@ jobs:
       # - name: Secret scan (gitleaks or equivalent)
       # - name: Build
 
+  # Every adoption claim Groundwork makes rests on one walk: a fresh copy reaches a governed
+  # first commit without the maintainer. Proving it once by hand dates the evidence; proving it
+  # on every push means the green tick beside a commit is the claim, and a broken copy route
+  # turns the build red on the commit that broke it. Runbook: docs/operations/evidence-drill.md.
+  # The condition keeps it the framework's own business: a project built on Groundwork inherits
+  # this job dead rather than inheriting an instruction to delete it.
+  drill:
+    if: github.repository == 'Tradebaas/Groundwork'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: The drill must prove it can fail
+        run: node checks/drill.test.mjs
+
+      # --require-walk: on this repository the drill has no business skipping, so a skip is red
+      # here rather than a green tick standing for a walk that never happened.
+      - name: A fresh copy still reaches a governed first commit
+        run: node checks/drill.mjs --require-walk
+
   # The local commit-msg hook can be skipped (--no-verify, or a clone that never ran
   # --install-hooks), so the message gate is re-proven here, where it cannot be bypassed.
   trace:
