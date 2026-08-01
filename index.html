@@ -11,9 +11,9 @@
 <meta property="og:url" content="https://tradebaas.github.io/Groundwork/">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233fae9f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6v16'/%3E%3Cpath d='m19 13 2-1a9 9 0 0 1-18 0l2 1'/%3E%3Cpath d='M9 11h6'/%3E%3Ccircle cx='12' cy='4' r='2'/%3E%3C/svg%3E">
-<!-- Fonts are self-hosted (fonts/), so a normal page load makes zero third-party requests and
-     never leaks a visitor IP to Google. The two ACTIVE families ship as latin woff2; the four
-     customizer-only alternates lazy-load their Google stylesheet on first customizer open. -->
+<!-- Fonts are self-hosted (fonts/), so the page makes zero third-party requests in every state
+     and never leaks a visitor IP. Both families ship as latin woff2; the rest of the picker is
+     system stacks, which cost no bytes in this repo and no request on the visitor's machine. -->
 <link rel="preload" href="fonts/josefin-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <noscript><style>.reveal,.rise{opacity:1!important;transform:none!important}</style></noscript>
@@ -28,22 +28,27 @@ window.GW={
     forest:  {label:"Forest",   dark:["#72c076","#05170a"], light:["#2c6e31","#ffffff"]},
     clay:    {label:"Clay",     dark:["#d98e6a","#2b1206"], light:["#96491f","#ffffff"]}
   },
+  /* Two self-hosted families and three stacks the browser resolves on its own: the picker shows
+     that the look is token-driven and swappable without fetching a byte from anyone. */
   fonts:{
-    josefin: {label:"Josefin Sans",    stack:'"Josefin Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
-    inter:   {label:"Inter",           stack:'"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
-    grotesk: {label:"Space Grotesk",   stack:'"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
-    manrope: {label:"Manrope",         stack:'"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
-    sora:    {label:"Sora",            stack:'"Sora",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
-    playfair:{label:"Playfair Display",stack:'"Playfair Display",Georgia,"Times New Roman",serif'}
+    josefin: {label:"Josefin Sans", stack:'"Josefin Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
+    inter:   {label:"Inter",        stack:'"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
+    system:  {label:"System sans",  stack:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'},
+    georgia: {label:"Georgia",      stack:'Georgia,"Times New Roman",serif'},
+    mono:    {label:"System mono",  stack:'ui-monospace,SFMono-Regular,Menlo,monospace'}
   },
   ls:function(k){try{return localStorage.getItem(k)}catch(e){return null}},
   st:function(k,v){try{localStorage.setItem(k,v)}catch(e){}},
+  /* A stored choice can name a font this page no longer offers, and an inherited name like
+     "constructor" answers to any lookup. One answer to both, so the applied font and the
+     checked radio can never disagree. */
+  fontKey:function(){var k=this.ls("gw-font");return Object.hasOwn(this.fonts,k||"")?k:"josefin"},
   mode:function(){var t=document.documentElement.getAttribute("data-theme");
     if(t)return t;return matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"},
   apply:function(){
     var r=document.documentElement,
         a=this.accents[this.ls("gw-accent")]||this.accents.teal,
-        f=this.fonts[this.ls("gw-font")]||this.fonts.josefin,
+        f=this.fonts[this.fontKey()],
         m=this.mode(), c=m==="light"?a.light:a.dark;
     r.style.setProperty("--accent",c[0]);
     r.style.setProperty("--accent-ink",c[1]);
@@ -914,18 +919,7 @@ fab.innerHTML=ic('palette');closeBtn.innerHTML=ic('x');
 document.getElementById('gl-theme').insertAdjacentHTML('afterbegin',ic('palette'));
 document.getElementById('gl-font').insertAdjacentHTML('afterbegin',ic('type'));
 
-/* The two active families are self-hosted; the four alternates in the picker are optional,
-   so their Google stylesheet only loads the first time someone opens the customizer.
-   A normal page load therefore makes zero third-party requests. */
-var altFontsLoaded=false;
-function loadAltFonts(){
-  if(altFontsLoaded)return;altFontsLoaded=true;
-  var l=document.createElement('link');l.rel='stylesheet';
-  l.href='https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Manrope:wght@400;600;700&family=Sora:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap';
-  document.head.appendChild(l);
-}
 function setSheet(open){
-  if(open)loadAltFonts();
   sheet.classList.toggle('open',open);
   fab.setAttribute('aria-expanded',open);
   if(open)sheet.querySelector('[aria-checked="true"]')?.focus();
@@ -962,7 +956,7 @@ addEventListener('gw-look',function(){ /* keep swatch dots in sync with mode */
 /* fonts */
 var fl=document.getElementById('fontlist');
 Object.keys(GW.fonts).forEach(function(key){
-  var f=GW.fonts[key],cur=(GW.ls('gw-font')||'josefin')===key;
+  var f=GW.fonts[key],cur=GW.fontKey()===key;
   var b=document.createElement('button');b.className='fontopt';b.setAttribute('role','radio');
   b.setAttribute('aria-checked',cur);b.tabIndex=cur?0:-1;
   b.innerHTML='<span>'+f.label+(key==='josefin'?' <span style="color:var(--muted)">(default)</span>':'')+'</span><span class="ag" aria-hidden="true" style="font-family:'+f.stack.replace(/"/g,"&quot;")+'">Ag</span>';
