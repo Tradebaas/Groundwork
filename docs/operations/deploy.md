@@ -49,9 +49,12 @@ There is no server and no build step. What ships is the repository itself, on tw
   working tree it was cut from:
   1. Unpack the release tarball
      (`curl -sL https://github.com/Tradebaas/Groundwork/archive/refs/tags/vX.Y.Z.tar.gz`) into a
-     scratch directory and run `node checks/check.test.mjs` and `node checks/check.mjs` inside it.
-     Expect the self-tests green, the checks green, and enforcement reporting hooks and CI **not**
-     armed with the two commands that arm them: that is what a fresh copy should say.
+     scratch directory. Inside it, run **every** self-test the `gate` job lists in
+     `.github/workflows/ci.yml`, then `node checks/check.mjs`. The list lives there and not here
+     on purpose: this step named one suite file until v0.2.0, and a split had made that a third
+     of the tests while the sentence still said all of them. Expect the self-tests green, the
+     checks green, and enforcement reporting hooks and CI **not** armed with the two commands
+     that arm them: that is what a fresh copy should say.
   2. `.claude/skills` is still a symlink to `../.agents/skills` in the unpacked archive. An archive
      that flattened it would hand every copy a duplicated skill library.
   3. `node checks/progress.mjs` in that copy ends with `now: run begin`.
