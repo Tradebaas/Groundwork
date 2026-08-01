@@ -12,7 +12,8 @@
     { "pattern": "hard (budget|cap|limit) (of )?(≤|<=)? ?150", "why": "retired 0001 claim; since agent-file-cap the scheme is two-tier: working budget 150 for AGENTS.md, hard cap 200 for every agent rulebook file" },
     { "pattern": "pip install ['\"]?markitdown|from markitdown import", "why": "retired ingest snippets; install/CLI/API syntax is read from the markitdown README at use time (skill-author: no code snippets that go stale)" },
     { "pattern": "Groundwork is itself software placed on the EU market", "why": "retired brief claim; unmonetised free and open-source software sits outside both the CRA (Art 2(1) with recital 18) and the PLD (Art 2(2)), verified 2026-07-31. COMPLIANCE.md §2 rows C-1 to C-4 own the current answer, and monetising is what would change it" },
-    { "pattern": "Lucide icons \\(MIT\\)", "why": "wrong licence for the inlined icon set: Lucide is ISC and descends from Feather (MIT), and index.html now names both" }
+    { "pattern": "Lucide icons \\(MIT\\)", "why": "wrong licence for the inlined icon set: Lucide is ISC and descends from Feather (MIT), and index.html now names both" },
+    { "pattern": "definitions cover language|no implementation detail in this file", "why": "retired glossary rule; a CONTEXT.md entry may now settle how a term is measured (which period, which basis, who counts) and stops at the threshold value and the branching, which belong in a spec where a test can execute them (decision 0019)" }
   ],
   "styleBans": [
     { "pattern": "\\bdelve(s|d|ing)?\\b", "why": "AI-tell verb; say 'look at', 'go into' or just state the point" },
