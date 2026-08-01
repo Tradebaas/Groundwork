@@ -31,7 +31,8 @@ function resolveSource() {
 // The five suites CI proves before it trusts any gate, run here inside the copy so it is the
 // copy's own code under test and never this working tree's.
 const SUITES = [
-  'check.test.mjs', 'progress.test.mjs', 'links.test.mjs',
+  'check.test.mjs', 'check-code.test.mjs', 'check-trace.test.mjs',
+  'progress.test.mjs', 'links.test.mjs',
   'cockpit-path.test.mjs', 'cockpit.test.mjs',
 ];
 
