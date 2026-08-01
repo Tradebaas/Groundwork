@@ -154,7 +154,8 @@ keep it, skip `git init` below, and run the rest on the branch they are on.
 
 If `.claude/skills` is not a symlink to `../.agents/skills` (degit and some ZIP tools break it),
 restore it: `ln -sfn ../.agents/skills .claude/skills`. On Windows without symlink support: set
-`"skipSymlinkCheck": true` in `checks/config.json` and point the tool at `.agents/skills/` directly.
+`"skipSymlinkCheck": "<why>"` in `checks/config.json`, the reason as the value, and point the tool
+at `.agents/skills/` directly.
 
 ```bash
 git init -b main

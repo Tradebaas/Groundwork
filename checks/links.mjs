@@ -28,6 +28,15 @@ import { join, relative, resolve, sep, posix, isAbsolute } from 'node:path';
 // so "which directories are not this project" has one answer.
 export const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', 'coverage', '.next']);
 
+// A terminal is a sink too. Every report here quotes back text a document (or a commit message)
+// wrote, and an escape sequence smuggled between backticks would repaint the report around the
+// finding that names it. So the words of the writer pass through here before any printer sees
+// them, in one place rather than per message: the board's HTML sink escapes with escapeHtml
+// (checks/cockpit-page.mjs), and this is the same rule for the terminal. Stripping rather than
+// escaping, because a finding is one line of printable text and a control character in a path
+// carries no meaning worth showing.
+export const forTerminal = (value) => String(value).replace(/[\x00-\x1f\x7f]/g, '');
+
 // A fenced block is a sample, not a pointer: code that shows a path is not the document pointing
 // at it. The gate has always read prose this way.
 const FENCE = /```[\s\S]*?```/g;
@@ -234,9 +243,9 @@ export function renderLinks(project, graph) {
   for (const path of graph.orphans) out.push(`  - ${path}`);
   if (graph.orphans.length) out.push(w.orphansWhy);
   out.push('', graph.unresolved.length ? `${w.unresolved} (${graph.unresolved.length})` : w.noUnresolved);
-  // The only place this report prints text a document wrote rather than text it derived, and a
-  // terminal is a sink: an escape sequence between backticks would repaint the report around it.
-  for (const miss of graph.unresolved) out.push(`  - ${miss.from}: ${miss.raw.replace(/[\x00-\x1f\x7f]/g, '')}`);
+  // The only place this report prints text a document wrote rather than text it derived, so the
+  // one strip above applies here, per line: the report's own newlines are what it is built from.
+  for (const miss of graph.unresolved) out.push(`  - ${miss.from}: ${forTerminal(miss.raw)}`);
   if (graph.unresolved.length) out.push(w.unresolvedWhy);
   out.push('', w.each);
   for (const doc of graph.documents) {
