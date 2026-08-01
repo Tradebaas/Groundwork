@@ -5,12 +5,13 @@ description: Compliance review against Dutch and EU law: GDPR/AVG, EU AI Act, ac
 
 # comply: legal is a gate, not a vibe
 
-`docs/compliance/COMPLIANCE.md` is the register: which regimes apply to *this* project, what
-they require, status per obligation. This skill fills and re-verifies it.
+`docs/compliance/COMPLIANCE.md` holds the regimes and when they bite, the same in every project.
+`docs/compliance/REGISTER.md` is *this* project's register: which of them apply here, status per
+obligation, evidence per row. This skill fills and re-verifies both.
 
 ## 1. Determine what applies (per project, honestly)
 
-Walk the register's trigger table against BRIEF.md and the actual system: personal data?
+Walk that trigger table against BRIEF.md and the actual system: personal data?
 (almost always yes: an email address is enough) → GDPR/AVG. AI features → AI Act, at minimum
 Art 50 transparency. Consumer-facing digital service/e-commerce → European Accessibility Act.
 Product with digital elements sold in the EU → CRA. Software placed on the EU market, which is
@@ -21,13 +22,13 @@ license.
 
 ## 2. Verify current state of the law
 
-Regulations shift (every register row carries its own last-verified date; they age). For each
+Regulations shift (every regime row carries its own last-verified date; they age). For each
 applicable regime, confirm today's status via authoritative sources (EUR-Lex, the Commission's
-pages, the AP (autoriteitpersoonsgegevens.nl) for NL) and update the register's dates. Stamp
-today in `Dates verified` on the rows you actually checked, and leave the other rows' stamps
-alone: a partial pass that stamps the whole table turns a stale row into a fresh-looking one.
-Never assert a deadline or obligation from model memory. Deadline horizon: when any register
-date falls within the next 60 days, re-verify that regime now instead of waiting for the
+pages, the AP (autoriteitpersoonsgegevens.nl) for NL) and update the dates in the regimes table.
+Stamp today in `Dates verified` on the rows you actually checked, and leave the other rows'
+stamps alone: a partial pass that stamps the whole table turns a stale row into a fresh-looking
+one. Never assert a deadline or obligation from model memory. Deadline horizon: when any date
+there falls within the next 60 days, re-verify that regime now instead of waiting for the
 quarterly audit - rules move fastest just before they bite.
 
 ## 3. Apply per obligation: build it in, don't bolt it on
@@ -42,7 +43,7 @@ quarterly audit - rules move fastest just before they bite.
 - **AI Act**: users told they're interacting with AI; AI-generated content marked
   machine-readably (Art 50, binding from 2026-08-02); high-risk uses (Annex III) identified
   early. Obligations land 2027-12-02, design for them now, not then. Art 4 AI literacy:
-  `docs/compliance/AI-LITERACY.md` is the evidence note; keep its "Who is covered" line true
+  `docs/compliance/AI-LITERACY.md` is the evidence note; keep the register's literacy line true
   for this team and re-check the note at the quarterly audit.
 - **Accessibility**: EN 301 549 / WCAG 2.1 AA as the working floor (design-guard checks it per
   delivery; this skill checks the claim holds product-wide).
@@ -55,7 +56,7 @@ quarterly audit - rules move fastest just before they bite.
   secure-by-default posture, and the vulnerability intake channel plus the support period
   published in the root `SECURITY.md` (ships as a working template; fill its marked TBD fields);
   actively exploited vulnerability → reporting duty via ENISA platform (from 2026-09-11). The
-  register's §1 CRA row carries the test in full, and rows C-1 to C-4 there are a worked example.
+  regimes table's CRA row carries that scope test in full: settle it before writing a duty.
 - **PLD**: software is a product with no-fault liability; defectiveness includes cybersecurity
   vulnerabilities, and damage covers users' destroyed or corrupted data. The CRA posture above
   plus a proven restore path (`docs/operations/backup-restore.md`) are the working defense.

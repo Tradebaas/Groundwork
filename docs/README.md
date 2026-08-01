@@ -29,8 +29,10 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `design/DESIGN.md` | REF | Design system: principles, tokens, quality rules |
 | `design/reference/**` ◆ | REF | Brand assets, screenshots, design references |
 | `design/VOICE.md` | REF | Voice & content system: how the product reads |
-| `compliance/COMPLIANCE.md` | LIVE | EU/NL compliance register and obligations |
-| `compliance/AI-LITERACY.md` | REF | AI Act Art 4 literacy evidence: the measures and who they cover |
+| `compliance/REGISTER.md` | LIVE | This project's register: which regimes apply, status and evidence per obligation |
+| `compliance/TEMPLATE-REGISTER.md` | REF | Blank register; `begin` puts it in place of Groundwork's own |
+| `compliance/COMPLIANCE.md` | LIVE | The EU/NL regimes, when they bite, and the date each was verified |
+| `compliance/AI-LITERACY.md` | REF | AI Act Art 4 literacy evidence: the measures, and who they cover per the register |
 | `operations/*.md` ◆ | REF | Runbooks: deploy, incident, backup/restore, monitoring, plus the blank `operations/TEMPLATE-DEPLOY.md` that `begin` puts in place of the deploy one and `operations/evidence-drill.md`, which is Groundwork's own and inert in a project |
 
 Rules: one fact, one owning file; everything else links to it. New file → add a row here in the

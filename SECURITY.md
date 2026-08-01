@@ -6,7 +6,8 @@
      in HTML comments below, marked TBD: the contact route (when the repo is not on GitHub)
      and the support-period line (when the product is placed on the market). `comply` fills
      them; `deliver` checks at first release that the channel works. Regime dates live in
-     docs/compliance/COMPLIANCE.md and are re-verified there, never here. -->
+     docs/compliance/COMPLIANCE.md and are re-verified there, never here; whether a regime
+     reaches this project is docs/compliance/REGISTER.md's answer. -->
 
 ## Report a vulnerability
 
@@ -49,9 +50,10 @@ above. Under those rules we will not pursue legal action.
 
 - **Groundwork itself** (the framework this repo started from) is free and open-source software
   that its maintainer does not monetise, so it is not made available on the market within the
-  meaning of the CRA and carries no published support period. The reasoning and its trigger sit
-  in the register: [C-1 and C-2](docs/compliance/COMPLIANCE.md). Security fixes land on `main`
-  of [Tradebaas/Groundwork](https://github.com/Tradebaas/Groundwork) and are named in the
+  meaning of the CRA and carries no published support period. The scope test behind that, and
+  what would flip it, stand in the CRA row of
+  [the regimes table](docs/compliance/COMPLIANCE.md). Security fixes land on `main` of
+  [Tradebaas/Groundwork](https://github.com/Tradebaas/Groundwork) and are named in the
   changelog of the release that carries them; a copied project starts from the state at copy
   time and receives nothing automatically, so track upstream yourself.
 
@@ -63,5 +65,6 @@ Supported versions: the latest release, unless the line above says otherwise.
 An actively exploited vulnerability or a severe incident in a shipped product triggers the
 CRA Art 14 duty: early warning within 24h, notification within 72h, then a final report on
 the regime's own deadline, via the ENISA single reporting platform and the national CSIRT
-(for NL: NCSC). Current dates and status per regime:
-[the compliance register](docs/compliance/COMPLIANCE.md).
+(for NL: NCSC). Current dates per regime: [the regimes table](docs/compliance/COMPLIANCE.md).
+Which of them reach this project, and the status per obligation:
+[its register](docs/compliance/REGISTER.md).

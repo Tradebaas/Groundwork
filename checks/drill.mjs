@@ -172,6 +172,7 @@ export const STEPS = [
         [at('docs', 'product', 'TEMPLATE-BRIEF.md'), at('docs', 'product', 'BRIEF.md')],
         [at('docs', 'operations', 'TEMPLATE-DEPLOY.md'), at('docs', 'operations', 'deploy.md')],
         [at('docs', 'state', 'TEMPLATE-DEBT.md'), at('docs', 'state', 'DEBT.md')],
+        [at('docs', 'compliance', 'TEMPLATE-REGISTER.md'), at('docs', 'compliance', 'REGISTER.md')],
       ];
       for (const [template, live] of pairs) {
         // Named rather than left to a raw ENOENT: with --ref this is the likeliest failure, and

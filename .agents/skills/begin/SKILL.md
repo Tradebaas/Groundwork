@@ -39,13 +39,12 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   report as this project's. Put the blank ledger back
   (`cp docs/state/TEMPLATE-DEBT.md docs/state/DEBT.md`). The first accepted `defer:` marker fills
   it; on the existing-project door below, the check total lands here as the starting position.
-- `docs/compliance/` carries Groundwork's own answers in two places, and inheriting them would
-  hand this project a register that describes someone else. In `docs/compliance/COMPLIANCE.md`,
-  clear §2 back to its skeleton: the three header bullets to `TBD`, the register table to one
-  `C-1 TBD` row, and the processing record to one `TBD` row. §1 is shared knowledge about the
-  regimes and stays as it is. In `docs/compliance/AI-LITERACY.md`, put "This project's specifics"
-  back to `TBD`. Step 4 fills the header from the interview; `comply` fills the rest before
-  first delivery.
+- `docs/compliance/REGISTER.md` holds Groundwork's own compliance answers, which would read as
+  this project's if they stayed. Put the blank register back
+  (`cp docs/compliance/TEMPLATE-REGISTER.md docs/compliance/REGISTER.md`). Step 4 fills its
+  header from the interview; `comply` fills the rest before first delivery. The two files beside
+  it, `docs/compliance/COMPLIANCE.md` and `docs/compliance/AI-LITERACY.md`, are shared knowledge
+  and stay as they are.
 - Reset `"denylist"` in `checks/config.json` to `[]`: its entries guard the origin repo's
   retired wording, never this project's. Keep `styleBans` intact (those are generic).
 - Keep the numbered records in `docs/decisions/`: they document the system this project just
@@ -135,9 +134,9 @@ section; idea changed, or the owner overruled a real concern → a decision reco
 - Fill the handoff block in `docs/state/STATE.md`: status active, phase `prepare`, Now ▶ next step,
   and the Groundwork version this copy started from (step 1). Without that line nothing can say
   which framework this project holds, which is what makes a later improvement findable.
-- Fill the §2 register header in `docs/compliance/COMPLIANCE.md`: set "Personal data processed",
-  "AI features" and "Applicable regimes", dated. Either first field a yes → `comply` runs before
-  first delivery.
+- Fill the header of `docs/compliance/REGISTER.md`: set "Personal data processed", "AI features"
+  and "Applicable regimes", dated. Either first field a yes → `comply` runs before first
+  delivery.
 - Rewrite `README.md` for *this product*: the top half (what, for whom, how to run once it
   exists) replaces Groundwork's pitch, and "Start a project" goes with it (that section is
   copy-the-template onboarding, done by now). Keep "How it works", "Requirements", "What lives
