@@ -116,8 +116,8 @@ records the reasoning.
 - Node.js ≥ 20 for `checks/` (the only tooling dependency until you choose a stack).
 - On Windows: enable Developer Mode so the `.claude/skills` symlink survives
   `git clone -c core.symlinks=true` or ZIP extraction. No symlink support? Set
-  `"skipSymlinkCheck": true` in `checks/config.json` and point your tool at `.agents/skills/`
-  directly.
+  `"skipSymlinkCheck": "<why>"` in `checks/config.json`, with your reason as the value, and point
+  your tool at `.agents/skills/` directly.
 - After every fresh clone: `node checks/check.mjs --install-hooks` (wires the versioned
   pre-commit and commit-msg gates).
 

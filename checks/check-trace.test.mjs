@@ -183,6 +183,16 @@ expectMsgFail('commit-subject-space-before-colon', 'feat : add a thing\n\nTraces
 expectMsgFail('commit-subject-empty-description', 'feat(checks): \n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
 expectMsgFail('commit-subject-empty-scope', 'feat(): add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
 expectMsgFail('commit-subject-blank-scope', 'feat( ): add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
+{ // A commit message is text a person wrote, and the failure quotes the subject back into a
+  // terminal: same sink and same strip helper as the broken-link gate (checks/links.mjs).
+  const found = checkCommitMessage('Add a thing\x1b[2K\n\nTraces-to: SC-1\n', SCOPED);
+  try {
+    assert.ok(found.some((f) => f.check === 'commit-subject'), `expected commit-subject, got: ${JSON.stringify(found)}`);
+    assert.doesNotMatch(found[0].msg, /[\x00-\x1f\x7f]/, `a finding is one line of printable text, got: ${JSON.stringify(found[0].msg)}`);
+    tally.passed++;
+  } catch (e) { tally.failed.push(`commit-subject-strips-control-characters: ${e.message}`); }
+}
+
 expectMsgClean('commit-subject-bare-type', 'chore: tidy the hook comments\n\nTraces-to: SC-1\n');
 expectMsgClean('commit-subject-breaking', 'feat(api)!: drop the v1 routes\n\nTraces-to: SC-1\n');
 expectMsgClean('commit-subject-slash-scope', 'docs(state/log): rotate the July log\n\nTraces-to: SC-1\n');

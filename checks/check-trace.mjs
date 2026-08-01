@@ -7,6 +7,7 @@ import { existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { isSpecPath } from './progress.mjs';
+import { forTerminal } from './links.mjs';
 
 // The value half of a trace, shared by the three artifacts that carry one: spec files, ticket
 // files, and commit messages.
@@ -41,7 +42,9 @@ function unknownScopeIds(body, known) {
 // system-generated list of "what changed, serving what" can be produced after the fact.
 export function checkCommitMessage(message, known) {
   const failures = [];
-  const fail = (check, msg) => failures.push({ check, msg });
+  // The message is somebody's own text and the failure quotes it back into a terminal, so it
+  // passes the same sink rule as every other finding (checks/links.mjs).
+  const fail = (check, msg) => failures.push({ check, msg: forTerminal(msg) });
   // git strips its own comment lines before storing the message; strip them here too, so a
   // commented-out example trailer in a template cannot satisfy the gate.
   const body = message.replace(/\r\n/g, '\n').split('\n').filter((l) => !l.startsWith('#')).join('\n');

@@ -45,6 +45,19 @@ expectFail('links', ({ put }) =>
 expectClean('links-mention-is-prose', ({ put }) =>
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ write `docs/product/ARCHITECTURE.md`\n'));
 
+{ // The gate quotes back the path a document wrote, and a terminal is a sink: an escape sequence
+  // smuggled into a link would repaint the report around the finding that names it.
+  const fx = fixture();
+  fx.put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ demo\n\nsee [gone](./go\x1b[2Kne.md)\n');
+  const msg = runChecks(fx.root).find((f) => f.check === 'links')?.msg || '';
+  try {
+    assert.match(msg, /broken link to \.\/go\[2Kne\.md/, `the gate should quote the path back, got: ${msg}`);
+    assert.doesNotMatch(msg, /[\x00-\x1f\x7f]/, `a finding is one line of printable text, got: ${JSON.stringify(msg)}`);
+    tally.passed++;
+  } catch (e) { tally.failed.push(`links-message-strips-control-characters: ${e.message}`); }
+  rmSync(fx.root, { recursive: true, force: true });
+}
+
 expectFail('denylist', ({ root, put }) => {
   put('checks/config.json', JSON.stringify({
     denylist: [{ pattern: 'Poppins', why: 'font was retired' }],
@@ -113,10 +126,19 @@ expectFail('config-invariants', withConfig({
 expectFail('config-invariants', withConfig({
   denylist: [{ pattern: 'no-such-text-anywhere', why: 'x', exclude: ['checks/'] }],
 }));
+// A boolean that retires the whole skills-symlink check is the same weakening vector as an
+// exclusion that hides a path, and nothing in the config tells the legitimate case (no symlink
+// support) from the illegitimate one. So the exemption states its case, as allow-length does.
+expectFail('config-invariants', withConfig({ skipSymlinkCheck: true }));
+expectFail('config-invariants', withConfig({ skipSymlinkCheck: '   ' }));
+expectFail('config-invariants', withConfig({ skipSymlinkCheck: 1 }));
 // Lowering the cap is allowed; only raising it is a weakening. And the shipped secretScanExclude
 // names checks/ by construction, which the clean fixture above already proves stays green.
 expectClean('config-invariants-allows-a-lower-cap', withConfig({
   budgets: { ...BASE_BUDGETS, agentFileHardCapLines: 120 },
+}));
+expectClean('config-invariants-allows-a-stated-reason', withConfig({
+  skipSymlinkCheck: 'Windows without Developer Mode',
 }));
 
 expectFail('empty-dirs', ({ root }) =>

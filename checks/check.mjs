@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { parseBrief, parseManifest, isSpecPath, BRIEF_PATH, MANIFEST_PATH } from './progress.mjs';
 // What counts as a link, and which files are this project's documents, are defined once and
 // read here and by the board.
-import { parseLinks, linkTargets, readDocuments, SKIP_DIRS } from './links.mjs';
+import { parseLinks, linkTargets, readDocuments, forTerminal, SKIP_DIRS } from './links.mjs';
 import { enforcementReport, formatReport } from './enforcement.mjs';
 // Two gate families live in their own files, composed into the registry below: what a source
 // file may contain and how long it may be, and the trace chain from brief to commit.
@@ -105,8 +105,11 @@ export function runChecks(root) {
 
   // Which gate is speaking is the runner's bookkeeping, so a family file reports a failure the
   // same way a gate written here does: it calls fail(), and the loop below names the caller.
+  // Several gates quote a file's own words back (a broken link, a skill name, a number an HTML
+  // page states), and every finding ends up on a terminal, so the strip belongs where a finding
+  // is made and not at one message that happened to be noticed.
   let current = '';
-  const fail = (msg) => failures.push({ check: current, msg });
+  const fail = (msg) => failures.push({ check: current, msg: forTerminal(msg) });
   // What the gate families in their own files need, read once here: the walked tree, the config,
   // the SC-ids the brief defines, and this runner's readers. Passed rather than imported back
   // out of this file, so the dependency runs one way and nothing walks the repo twice.
@@ -149,6 +152,16 @@ export function runChecks(root) {
         fail(`checks/config.json budgets.agentFileHardCapLines is ${JSON.stringify(cap)}, which is not a positive whole number of lines: agent-file-cap would fall back to 200 and the value would govern nothing.`);
       } else if (cap !== undefined && cap > 200) {
         fail(`checks/config.json budgets.agentFileHardCapLines is ${cap}: the hard cap is 200 lines and may be lowered, never raised. A rulebook past 200 lines stops being loaded in full.`);
+      }
+      // A boolean that retires a whole check is the same weakening vector as an exclusion that
+      // hides a path, and no reading of the config can tell the legitimate case (a checkout with
+      // no symlink support) from a gate somebody found inconvenient. So the exemption states its
+      // case in the same diff that takes it, the trade this repo already made for
+      // "checks:allow-length: <reason>" and "checks:allow-style". skills-symlink still reads the
+      // key as a plain flag: which value is honest is this gate's question, and one red is enough.
+      const skip = cfg.skipSymlinkCheck;
+      if (skip !== undefined && skip !== false && !(typeof skip === 'string' && skip.trim())) {
+        fail(`checks/config.json skipSymlinkCheck is ${JSON.stringify(skip)}: retiring the skills-symlink check takes a reason in the same file, as a non-empty string (e.g. "Windows without Developer Mode"). Set false to keep the check on.`);
       }
       // An exclusion that reaches these prefixes disarms the gates rather than tuning them:
       // checks/ is where the gates themselves live, docs/standards/ is where a stack's rules do.
@@ -331,7 +344,7 @@ export function runChecks(root) {
           fail('.claude/skills must be a symlink to ../.agents/skills (decision 0002).');
         }
       } catch {
-        fail('.claude/skills symlink is missing or not a symlink. Run: ln -sfn ../.agents/skills .claude/skills. No symlink support (Windows without Developer Mode)? Set "skipSymlinkCheck": true in checks/config.json and point your tool at .agents/skills directly.');
+        fail('.claude/skills symlink is missing or not a symlink. Run: ln -sfn ../.agents/skills .claude/skills. No symlink support (Windows without Developer Mode)? Set "skipSymlinkCheck": "<why>" in checks/config.json, with the reason as the value, and point your tool at .agents/skills directly.');
       }
     },
 
