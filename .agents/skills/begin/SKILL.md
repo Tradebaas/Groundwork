@@ -171,7 +171,7 @@ in text the project already had), and adoption cannot mean cleaning a whole code
 work is possible. Take it in this order: fix what is unsafe to leave, secrets in tracked files
 first; give every file the project already had in `docs/` its row in `docs/README.md`, which is a
 real fix and takes a minute; mark the rest at the site with the escape the check already offers and
-a reason (`checks:allow-length: <reason>`, `checks:allow-style`), never by adding paths to an
+a reason (`checks:allow-length: <reason>` opening a comment, `checks:allow-style`), never by adding paths to an
 exclusion list in `checks/config.json`; and log the total in `docs/state/DEBT.md`. Then
 install the hooks and commit, with `git init` skipped. Report the numbers to the owner: what it
 flagged, what you fixed, what is now marked. If that count is large, it is the finding worth

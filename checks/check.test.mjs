@@ -1,65 +1,22 @@
 #!/usr/bin/env node
-// Self-test for checks/check.mjs. Every check must prove it FAILS on a real violation
-// and stays quiet on a clean repo: an untested gate is false confidence (decision 0005).
+// Self-test for checks/check.mjs: the document, rulebook and config gates it still owns, plus
+// the runner's own wiring (hooks, the enforcement self-report, the handoff nudge). Every check
+// must prove it FAILS on a real violation and stays quiet on a clean repo: an untested gate is
+// false confidence (decision 0005). The two gate families that live in their own files are
+// proven next door, by check-code.test.mjs and check-trace.test.mjs.
 // Run: node checks/check.test.mjs
 
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, unlinkSync, readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
+import { execSync } from 'node:child_process';
+import { join } from 'node:path';
 import assert from 'node:assert/strict';
-import { runChecks, installHooks, checkCommitMessage } from './check.mjs';
+import { runChecks, installHooks } from './check.mjs';
 import { needsHandoffNudge } from './handoff-nudge.mjs';
 import { enforcementReport, formatReport } from './enforcement.mjs';
-
-function fixture() {
-  const root = mkdtempSync(join(tmpdir(), 'groundwork-test-'));
-  const put = (p, body) => {
-    mkdirSync(dirname(join(root, p)), { recursive: true });
-    writeFileSync(join(root, p), body);
-  };
-  put('checks/config.json', JSON.stringify({
-    denylist: [],
-    budgets: { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024 },
-    allowedEmptyDirs: [],
-    secretScanExclude: ['checks/'],
-  }));
-  put('AGENTS.md', '# rules\n\nskills: `demo`\n');
-  put('CLAUDE.md', '@AGENTS.md\n');
-  put('.gemini/settings.json', '{"context":{"fileName":["AGENTS.md"]}}');
-  put('docs/README.md', '# manifest\n\n| `state/STATE.md` | LIVE | state |\n');
-  put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ demo\n');
-  put('.agents/skills/demo/SKILL.md', '---\nname: demo\ndescription: Demo skill for the self-test.\n---\n\n# demo\n');
-  mkdirSync(join(root, '.claude'), { recursive: true });
-  symlinkSync('../.agents/skills', join(root, '.claude', 'skills'));
-  return { root, put };
-}
-
-let passed = 0;
-const failedTests = [];
-
-function expectClean(label = 'clean-fixture', mutate = () => {}) {
-  const fx = fixture();
-  mutate(fx);
-  const found = runChecks(fx.root);
-  try {
-    assert.equal(found.length, 0, `${label} should pass, got: ${JSON.stringify(found)}`);
-    passed++;
-  } catch (e) { failedTests.push(`${label}: ${e.message}`); }
-  rmSync(fx.root, { recursive: true, force: true });
-}
-
-function expectFail(name, mutate) {
-  const fx = fixture();
-  mutate(fx);
-  const found = runChecks(fx.root);
-  try {
-    assert.ok(found.some((f) => f.check === name),
-      `expected check "${name}" to fail, got: ${JSON.stringify(found.map((f) => f.check))}`);
-    passed++;
-  } catch (e) { failedTests.push(`${name}: ${e.message}`); }
-  rmSync(fx.root, { recursive: true, force: true });
-}
+import {
+  fixture, expectClean, expectFail, withConfig, BASE_BUDGETS, tally, report,
+} from './check-fixture.mjs';
 
 expectClean();
 
@@ -122,13 +79,10 @@ expectFail('skills-symlink', ({ root }) =>
   try {
     assert.ok(!found.some((f) => f.check === 'empty-dirs'),
       `empty-dirs should stay quiet on .claude/, got: ${JSON.stringify(found.map((f) => f.check))}`);
-    passed++;
-  } catch (e) { failedTests.push(`empty-dirs-claude: ${e.message}`); }
+    tally.passed++;
+  } catch (e) { tally.failed.push(`empty-dirs-claude: ${e.message}`); }
   rmSync(fx.root, { recursive: true, force: true });
 }
-
-expectFail('secrets', ({ put }) =>
-  put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ demo\n- key AKIAIOSFODNN7EXAMPLE\n')); // checks:allow-secret
 
 expectFail('prose-style', ({ put }) =>
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ ship it — fast\n')); // em dash
@@ -140,42 +94,6 @@ expectFail('prose-style', ({ root, put }) => { // config-driven phrase ban
     allowedEmptyDirs: [], secretScanExclude: ['checks/'],
   }));
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ a seamlessly integrated flow\n');
-});
-
-expectFail('defer-markers', ({ put }) =>
-  put('src/app.js', 'export const x = 1;\n// defer: global lock. ceiling: 100 users.\n'));
-
-// Several tests below need a config that differs from the fixture's in one key. One helper
-// beats six copies of the base object, and keeps each test's intent on one line.
-const BASE_BUDGETS = { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024 };
-const withConfig = (extra) => ({ put }) => put('checks/config.json', JSON.stringify({
-  denylist: [], allowedEmptyDirs: [], secretScanExclude: ['checks/'], budgets: BASE_BUDGETS, ...extra,
-}));
-const APOLOGY = [{ pattern: '\\bfor now\\b', why: 'unmarked deferral' }];
-const withApology = (extra = {}) => withConfig({ commentBans: APOLOGY, ...extra });
-
-// The commentBans half of the defer contract: an apology in a comment is a deferral that
-// skipped the marker, so nothing can grep for it later.
-expectFail('defer-markers', (fx) => {
-  withApology()(fx);
-  fx.put('src/app.js', 'export const x = 1;\n// one global lock for now.\n');
-});
-// ... and the four ways it must stay quiet, because a noisy gate gets switched off.
-expectClean('comment-ban-ignores-non-comment', (fx) => {
-  withApology()(fx);
-  fx.put('src/app.js', 'export const label = "closed for now";\n');
-});
-expectClean('comment-ban-is-code-only', (fx) => {
-  withApology()(fx);
-  fx.put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ good enough for now\n');
-});
-expectClean('comment-ban-skips-vendored', (fx) => {
-  withApology({ codeFileCapExclude: ['vendor/'] })(fx);
-  fx.put('vendor/bundle.js', '// patched for now\n');
-});
-expectClean('comment-ban-yields-to-marker', (fx) => {
-  withApology()(fx);
-  fx.put('src/app.js', '// defer: one lock for now. ceiling: 100 users. upgrade-when: 100 users.\n');
 });
 
 // config-invariants: the config may be tuned, never disarmed.
@@ -201,32 +119,8 @@ expectClean('config-invariants-allows-a-lower-cap', withConfig({
   budgets: { ...BASE_BUDGETS, agentFileHardCapLines: 120 },
 }));
 
-expectFail('zombie-code', ({ put }) =>
-  put('src/app.js', 'export const x = 1;\n// const old = 2;\n// function dead() {\n// return old;\n'));
-
 expectFail('empty-dirs', ({ root }) =>
   mkdirSync(join(root, 'src', 'hollow'), { recursive: true }));
-
-expectFail('code-file-cap', ({ put }) => // 501 lines of code, budget 500
-  put('src/big.js', 'export const x = 1;\n'.repeat(501)));
-
-expectFail('code-file-cap', ({ put }) => // escape marker without a reason does not suppress
-  put('src/big.js', `// checks:allow-length\n${'export const x = 1;\n'.repeat(510)}`));
-
-// Ticket fixtures need a manifest row so docs-manifest stays quiet and only 'tickets' speaks.
-const ticketManifest = '# manifest\n\n| `state/STATE.md` | LIVE | state |\n| `specs/**` | LIVE | specs |\n';
-
-expectFail('tickets', ({ put }) => { // invalid status value
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/tickets/01-a.md',
-    '# 01: A\n\n- **Blocked by:** none\n- **Status:** shipped\n\n**What to build:** demo.\n');
-});
-
-expectFail('tickets', ({ put }) => { // Blocked-by names a missing sibling
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/tickets/01-a.md',
-    '# 01: A\n\n- **Blocked by:** 99-ghost\n- **Status:** ready\n\n**What to build:** demo.\n');
-});
 
 // The explainer's numbers. The fixture holds exactly one skill directory, so a page claiming
 // one skill is in sync and any other number is drift. The gates key is proven by the absurd
@@ -283,23 +177,9 @@ expectFail('state-file', ({ put }) =>
 expectFail('skills', ({ put }) =>
   put('.agents/skills/demo/SKILL.md', '---\nname: demo\n---\n\n# no description\n'));
 
-expectFail('tickets', ({ put }) => { // no Status line at all
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/tickets/01-a.md', '# 01: A\n\n- **Blocked by:** none\n\n**What to build:** demo.\n');
-});
-
-expectFail('tickets', ({ put }) => { // no What to build line
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/tickets/01-a.md', '# 01: A\n\n- **Blocked by:** none\n- **Status:** ready\n');
-});
-
 expectFail('skills', ({ put }) =>
   put('.agents/skills/demo/SKILL.md',
     `---\nname: demo\ndescription: Oversized body.\n---\n${'line\n'.repeat(510)}`));
-
-expectFail('secrets', ({ put }) => // checks:allow-secret
-  put('docs/state/STATE.md',
-    `# STATE\n\n## Handoff\n\n- Now ▶ demo\n- jwt eyJ${'a'.repeat(30)}.${'b'.repeat(30)}.${'c'.repeat(15)}\n`));
 
 expectFail('skills-symlink', ({ root }) => {
   unlinkSync(join(root, '.claude', 'skills'));
@@ -328,202 +208,11 @@ expectClean('local-files-are-exempt', ({ put }) => // personal, never shared: no
 expectClean('prose-style-allow-escape', ({ put }) =>
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ quote the source verbatim — as written checks:allow-style\n'));
 
-expectClean('code-file-cap-at-budget', ({ put }) =>
-  put('src/ok.js', 'export const x = 1;\n'.repeat(499)));
-
-expectClean('code-file-cap-allow-marker', ({ put }) =>
-  put('src/generated.js', `// checks:allow-length: generated fixture for the self-test\n${'export const x = 1;\n'.repeat(510)}`));
-
-expectClean('code-file-cap-exclude', ({ put }) => {
-  put('checks/config.json', JSON.stringify({
-    denylist: [], codeFileCapExclude: ['src/vendor/'],
-    budgets: { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024 },
-    allowedEmptyDirs: [], secretScanExclude: ['checks/'],
-  }));
-  put('src/vendor/lib.js', 'export const x = 1;\n'.repeat(510));
-});
-
-expectClean('tickets-valid', ({ put }) => {
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/tickets/01-a.md',
-    '# 01: A\n\n- **Blocked by:** none\n- **Status:** done\n- **Traces to:** BRIEF SC-1\n\n**What to build:** demo.\n');
-  put('docs/specs/001-demo/tickets/02-b.md',
-    '# 02: B\n\n- **Blocked by:** 01-a\n- **Status:** ready <!-- ready | building | done -->\n- **Traces to:** BRIEF SC-2\n\n**What to build:** demo.\n');
-});
-
-expectFail('tickets', ({ put }) => { // Traces to left on the template placeholder
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/tickets/01-a.md',
-    '# 01: A\n\n- **Blocked by:** none\n- **Status:** ready\n- **Traces to:** BRIEF SC-<n>\n\n**What to build:** demo.\n');
-});
-
-// A spec that names no scope item makes the progress overview count that item as not started
-// while the work is happening (checks/progress.mjs). Silent miscounting is the failure to gate.
-expectFail('spec-traces', ({ put }) => { // no Traces to line at all
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n');
-});
-
-expectFail('spec-traces', ({ put }) => { // Traces to left unfilled
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** TBD\n');
-});
-
-expectClean('spec-traces-valid', ({ put }) => {
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** BRIEF SC-2\n');
-  put('docs/specs/archive/000-old/spec.md', '# 000: old\n\n- **Status:** done\n');
-});
-
-// Once the brief defines scope, an SC-id becomes checkable. An invented or typo'd id reads as
-// a trace while tracing nowhere, so it passes the eye and fails the rule.
-const scopedManifest = `${ticketManifest}| \`product/BRIEF.md\` | LIVE | brief |\n`;
-const BRIEF_SC1 = '# BRIEF\n\n## In scope\n\n- SC-1 the one real scope item\n';
-
-expectFail('spec-traces', ({ put }) => { // spec names an SC-item the brief does not define
-  put('docs/README.md', scopedManifest);
-  put('docs/product/BRIEF.md', BRIEF_SC1);
-  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** BRIEF SC-9\n');
-});
-
-expectFail('tickets', ({ put }) => { // ticket names an SC-item the brief does not define
-  put('docs/README.md', scopedManifest);
-  put('docs/product/BRIEF.md', BRIEF_SC1);
-  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** BRIEF SC-1\n');
-  put('docs/specs/001-demo/tickets/01-a.md',
-    '# 01: A\n\n- **Blocked by:** none\n- **Status:** ready\n- **Traces to:** BRIEF SC-9\n\n**What to build:** demo.\n');
-});
-
-expectClean('spec-traces-known-id', ({ put }) => {
-  put('docs/README.md', scopedManifest);
-  put('docs/product/BRIEF.md', BRIEF_SC1);
-  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** BRIEF SC-1\n');
-});
-
-// AGENTS.md allows tracing to an explicit request instead of an SC-item, so a line that names
-// no id at all must stay clean: this gate checks ids, it does not force specs to carry one.
-expectClean('spec-traces-explicit-request', ({ put }) => {
-  put('docs/README.md', scopedManifest);
-  put('docs/product/BRIEF.md', BRIEF_SC1);
-  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** building\n- **Traces to:** explicit request from the owner, 2026-07-20\n');
-});
-
-// progress.mjs counts a single .md sitting directly in docs/specs/ as a spec (specFiles), so
-// the trace gate covers that shape too: a spec that counts toward progress but escapes the
-// gate could steer work while naming no scope item.
-expectFail('spec-traces', ({ put }) => { // single-file spec, no trace
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/002-single.md', '# 002: single-file spec\n\n- **Status:** building\n');
-});
-
-expectClean('spec-traces-single-file-valid', ({ put }) => {
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/002-single.md', '# 002: single\n\n- **Status:** building\n- **Traces to:** explicit request from the owner, 2026-07-22\n');
-});
-
-expectClean('spec-traces-templates-skipped', ({ put }) => { // the shipped templates sit directly in docs/specs/ with placeholder traces
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/TEMPLATE.md', '# spec template\n\n- **Traces to:** BRIEF SC-<n> / explicit request: <link or quote>\n');
-});
-
-expectClean('tickets-archive-skipped', ({ put }) => {
-  put('docs/README.md', ticketManifest);
-  put('docs/specs/archive/001-old/tickets/01-a.md', '# 01: A\n\n- **Status:** shipped\n');
-});
-
 expectClean('manifest-glob-classes', ({ put }) => {
   put('docs/README.md', '# manifest\n\n| `state/STATE.md` | LIVE | state |\n| `decisions/[0-9]*.md` | REF | records |\n| `specs/[0-9]*/**` | LIVE | specs |\n');
   put('docs/decisions/0001-demo.md', '# 0001\n');
   put('docs/specs/001-demo/notes.md', '# notes\n');
 });
-
-// --- commit-trace: the trailer that carries the trace into the shipped history ---
-// Same two directions as every gate above: it must block a commit that names no scope item,
-// and stay silent on the shapes git composes itself.
-const SCOPED = new Set(['SC-1']);
-
-function expectMsgFail(label, message, known = SCOPED, check = null) {
-  const found = checkCommitMessage(message, known);
-  try {
-    assert.ok(found.length, `expected "${label}" to be blocked, but it passed`);
-    // Pin the failing check when named, so a case cannot silently pass for another reason.
-    if (check) assert.ok(found.some((f) => f.check === check), `expected "${label}" to fail on ${check}, got: ${JSON.stringify(found)}`);
-    passed++;
-  } catch (e) { failedTests.push(`${label}: ${e.message}`); }
-}
-
-function expectMsgClean(label, message, known = SCOPED) {
-  const found = checkCommitMessage(message, known);
-  try {
-    assert.equal(found.length, 0, `"${label}" should pass, got: ${JSON.stringify(found)}`);
-    passed++;
-  } catch (e) { failedTests.push(`${label}: ${e.message}`); }
-}
-
-expectMsgFail('commit-trace-missing', 'feat(checks): add a thing\n\nA body that explains why.\n');
-expectMsgFail('commit-trace-empty', 'feat(checks): add a thing\n\nTraces-to:\n');
-expectMsgFail('commit-trace-placeholder', 'feat(checks): add a thing\n\nTraces-to: <SC-id>\n');
-expectMsgFail('commit-trace-tbd', 'feat(checks): add a thing\n\nTraces-to: TBD\n');
-expectMsgFail('commit-trace-unknown-id', 'feat(checks): add a thing\n\nTraces-to: SC-99\n');
-// git strips its own comments, so a trailer that only exists in the template help text is absent.
-expectMsgFail('commit-trace-commented-out', 'feat(checks): add a thing\n\n# Traces-to: SC-1\n');
-
-// Git reads only the final block as trailers. A trace anywhere else is invisible to
-// `git log --format='%(trailers:key=Traces-to)'`, so a gate that accepted it would report green
-// while producing nothing. These four are the shapes that actually shipped that bug once.
-expectMsgFail('commit-trace-footer-after', 'feat(x): y\n\nTraces-to: SC-1\n\nGenerated with a tool\n');
-expectMsgFail('commit-trace-prose-after', 'feat(x): y\n\nTraces-to: SC-1\n\nOne more thought.\n');
-expectMsgFail('commit-trace-value-wrapped', 'feat(x): y\n\nTraces-to: explicit request: a value that\nwrapped onto a second line\n');
-expectMsgClean('commit-trace-footer-before', 'feat(x): y\n\nbody\n\nGenerated with a tool\n\nTraces-to: SC-1\n');
-
-expectMsgClean('commit-trace-sc-id', 'feat(checks): add a thing\n\nWhy it changed.\n\nTraces-to: SC-1\n');
-expectMsgClean('commit-trace-two-ids', 'feat(checks): add a thing\n\nTraces-to: SC-1, SC-1\n');
-// AGENTS.md allows tracing to an explicit request, so a trace naming no id is a valid trace.
-expectMsgClean('commit-trace-explicit-request', 'fix(docs): reword\n\nTraces-to: explicit request: owner asked in session\n');
-expectMsgClean('commit-trace-before-coauthor', 'feat(x): y\n\nTraces-to: SC-1\nCo-Authored-By: A B <a@b.c>\n');
-// Composed by git, not authored: a merge has no scope item of its own, a revert names the sha
-// it undoes, and an autosquash message is replaced when the rebase runs.
-expectMsgClean('commit-trace-merge', 'Merge branch \'main\' into feat/x\n');
-expectMsgClean('commit-trace-revert', 'Revert "feat(x): y"\n\nThis reverts commit abc1234.\n');
-expectMsgClean('commit-trace-fixup', 'fixup! feat(x): y\n');
-// A fresh copy has no scope written down yet and must not be blocked for it, exactly as
-// spec-traces and tickets already behave. The trailer is still required; only the id is unchecked.
-expectMsgClean('commit-trace-unscoped-brief', 'feat(x): y\n\nTraces-to: SC-99\n', null);
-expectMsgFail('commit-trace-unscoped-still-needs-trailer', 'feat(x): y\n\nno trailer here\n', null);
-
-// --- commit-subject: the Conventional Commit shape GLOBAL.md mandates ---
-// Format only, on the same parsed subject and the same git-composed exemptions as commit-trace
-// (the merge/revert/fixup cases above prove the exemptions for both checks). The type list stays
-// open: GLOBAL.md's own list ends in "...", and v1.0.0 allows types beyond feat and fix.
-expectMsgFail('commit-subject-no-type', 'Add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
-expectMsgFail('commit-subject-uppercase-type', 'Feat(checks): add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
-expectMsgFail('commit-subject-colon-missing', 'feat add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
-expectMsgFail('commit-subject-space-missing', 'feat:add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
-expectMsgFail('commit-subject-space-before-colon', 'feat : add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
-expectMsgFail('commit-subject-empty-description', 'feat(checks): \n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
-expectMsgFail('commit-subject-empty-scope', 'feat(): add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
-expectMsgFail('commit-subject-blank-scope', 'feat( ): add a thing\n\nTraces-to: SC-1\n', SCOPED, 'commit-subject');
-expectMsgClean('commit-subject-bare-type', 'chore: tidy the hook comments\n\nTraces-to: SC-1\n');
-expectMsgClean('commit-subject-breaking', 'feat(api)!: drop the v1 routes\n\nTraces-to: SC-1\n');
-expectMsgClean('commit-subject-slash-scope', 'docs(state/log): rotate the July log\n\nTraces-to: SC-1\n');
-
-// installHooks wires the versioned hook path (needs git on PATH).
-{
-  const fx = fixture();
-  writeFileSync(join(fx.root, 'checks', 'hooks-placeholder'), '');
-  mkdirSync(join(fx.root, 'checks', 'hooks'), { recursive: true });
-  for (const hook of ['pre-commit', 'commit-msg']) {
-    writeFileSync(join(fx.root, 'checks', 'hooks', hook), '#!/bin/sh\nnode checks/check.mjs || exit 1\n');
-  }
-  try {
-    execSync('git init -q', { cwd: fx.root });
-    installHooks(fx.root);
-    const hooksPath = execSync('git config core.hooksPath', { cwd: fx.root }).toString().trim();
-    assert.equal(hooksPath, 'checks/hooks');
-    passed++;
-  } catch (e) { failedTests.push(`install-hooks: ${e.message}`); }
-  rmSync(fx.root, { recursive: true, force: true });
-}
 
 // --- enforcement self-report: report, never block (GAP C-2) ---
 // Each signal proves both directions, like every gate above; the report itself must never
@@ -538,8 +227,8 @@ function expectSignal(label, mutate, name, armed, needle = null) {
     const s = report.find((x) => x.signal === name);
     assert.equal(s.armed, armed, `${label}: expected ${name} armed=${armed}, got: ${JSON.stringify(s)}`);
     if (needle) assert.ok(s.detail.includes(needle), `${label}: detail should mention "${needle}", got: ${s.detail}`);
-    passed++;
-  } catch (e) { failedTests.push(`${label}: ${e.message}`); }
+    tally.passed++;
+  } catch (e) { tally.failed.push(`${label}: ${e.message}`); }
 }
 
 expectSignal('enforcement-hooks-no-git', () => {}, 'hooks', false, 'git init');
@@ -575,8 +264,8 @@ expectSignal('enforcement-adapter-wired', ({ put }) =>
     const lines = formatReport(report);
     assert.ok(lines[0].startsWith('enforcement: '), 'summary line names the tier');
     assert.equal(lines.length, 4, 'three degraded signals get three fix lines under the summary');
-    passed++;
-  } catch (e) { failedTests.push(`enforcement-bare-dir: ${e.message}`); }
+    tally.passed++;
+  } catch (e) { tally.failed.push(`enforcement-bare-dir: ${e.message}`); }
   rmSync(bare, { recursive: true, force: true });
 }
 
@@ -591,8 +280,8 @@ for (const [label, text, want] of [
 ]) {
   try {
     assert.equal(needsHandoffNudge(text), want, label);
-    passed++;
-  } catch (e) { failedTests.push(`handoff-nudge ${label}: ${e.message}`); }
+    tally.passed++;
+  } catch (e) { tally.failed.push(`handoff-nudge ${label}: ${e.message}`); }
 }
 
 // The wave-2 bans ship as data, so prove the real list bites rather than a test stand-in:
@@ -618,12 +307,24 @@ try {
     }
   }
   assert.deepEqual(broken, [], 'shipped config patterns must all compile and explain themselves');
-  passed++;
-} catch (e) { failedTests.push(`shipped-config-patterns: ${e.message}`); }
-
-if (failedTests.length) {
-  for (const f of failedTests) console.error(`TEST FAIL ${f}`);
-  console.error(`\n${passed} passed, ${failedTests.length} failed.`);
-  process.exit(1);
+  tally.passed++;
+} catch (e) { tally.failed.push(`shipped-config-patterns: ${e.message}`); }
+// installHooks wires the versioned hook path (needs git on PATH).
+{
+  const fx = fixture();
+  writeFileSync(join(fx.root, 'checks', 'hooks-placeholder'), '');
+  mkdirSync(join(fx.root, 'checks', 'hooks'), { recursive: true });
+  for (const hook of ['pre-commit', 'commit-msg']) {
+    writeFileSync(join(fx.root, 'checks', 'hooks', hook), '#!/bin/sh\nnode checks/check.mjs || exit 1\n');
+  }
+  try {
+    execSync('git init -q', { cwd: fx.root });
+    installHooks(fx.root);
+    const hooksPath = execSync('git config core.hooksPath', { cwd: fx.root }).toString().trim();
+    assert.equal(hooksPath, 'checks/hooks');
+    tally.passed++;
+  } catch (e) { tally.failed.push(`install-hooks: ${e.message}`); }
+  rmSync(fx.root, { recursive: true, force: true });
 }
-console.log(`OK: ${passed} self-tests passed: every gate fails when it should.`);
+
+report('runner and document gate');

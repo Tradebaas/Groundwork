@@ -18,6 +18,14 @@ import { parseBrief, parseManifest, isSpecPath, BRIEF_PATH, MANIFEST_PATH } from
 // read here and by the board.
 import { parseLinks, linkTargets, readDocuments, SKIP_DIRS } from './links.mjs';
 import { enforcementReport, formatReport } from './enforcement.mjs';
+// Two gate families live in their own files, composed into the registry below: what a source
+// file may contain and how long it may be, and the trace chain from brief to commit.
+import { codeChecks } from './check-code.mjs';
+import { checkCommitMessage, traceChecks } from './check-trace.mjs';
+
+// The commit-msg hook and the self-test have always imported this from here; it is authored in
+// check-trace.mjs with the rest of the chain, and stays reachable at its published address.
+export { checkCommitMessage };
 
 const TEXT_EXT = new Set([
   '.md', '.json', '.yml', '.yaml', '.txt', '.toml', '.xml', '.svg', '.html', '.css',
@@ -70,27 +78,6 @@ function globToRegex(glob) {
   return new RegExp(`^${re}$`);
 }
 
-// The value half of a trace, shared by the three artifacts that carry one: spec files, ticket
-// files, and commit messages. One reading of "filled in" and one reading of "which SC-ids does
-// this name", so the three gates cannot drift apart as they are edited.
-const traceValue = (line) => (line || '').replace(/<!--[\s\S]*$/, '').trim();
-const traceFilled = (line) => {
-  const v = traceValue(line);
-  return Boolean(v) && !v.includes('<') && !/^TBD\b/i.test(v);
-};
-const traceUnknownIds = (line, known) => {
-  if (!known) return [];
-  const named = new Set([...traceValue(line).matchAll(/SC-\d+/g)].map((m) => m[0]));
-  return [...named].filter((id) => !known.has(id));
-};
-
-const traceLine = (body) => (body.match(/^- \*\*Traces to:\*\*\s*(.+)$/m) || [])[1];
-
-// A filled-in "Traces to:" line: present, and not still carrying the template's placeholders.
-function tracesTo(body) {
-  return traceFilled(traceLine(body));
-}
-
 // The SC-ids the brief actually defines, or null when scope is not written down yet. A project
 // that has not run `scope` has nothing to validate against and must not be blocked for it.
 function scopeIds(root) {
@@ -98,61 +85,6 @@ function scopeIds(root) {
   if (!existsSync(p)) return null;
   const { items } = parseBrief(read(p));
   return items.length ? new Set(items.map((i) => i.id)) : null;
-}
-
-// SC-ids named in a "Traces to:" line that the brief does not define. A typo'd or invented id
-// reads as a trace while tracing nowhere, which is exactly what "no trace, no build" forbids.
-// Work may also trace to an explicit request instead, so a line naming no SC-id is left alone.
-function unknownScopeIds(body, known) {
-  return traceUnknownIds(traceLine(body), known);
-}
-
-// The commit message is the only artifact that survives into the shipped history, so the trace
-// has to be on it: given a sha, the SC-id resolves back through the brief to the requirement it
-// served. Without this the chain runs BRIEF -> spec -> ticket and then goes dark, and no
-// system-generated list of "what changed, serving what" can be produced after the fact.
-export function checkCommitMessage(message, known) {
-  const failures = [];
-  const fail = (check, msg) => failures.push({ check, msg });
-  // git strips its own comment lines before storing the message; strip them here too, so a
-  // commented-out example trailer in a template cannot satisfy the gate.
-  const body = message.replace(/\r\n/g, '\n').split('\n').filter((l) => !l.startsWith('#')).join('\n');
-  const subject = body.trim().split('\n')[0] || '';
-
-  // Not authored units of work: git composes merge and revert subjects itself (a revert names
-  // the sha it undoes, which is already a trace), and autosquash messages are replaced on rebase.
-  if (!subject) return failures;
-  if (/^(Merge|Revert) /.test(subject) || /^(fixup|squash)! /.test(subject)) return failures;
-
-  // GLOBAL.md mandates Conventional Commits v1.0.0; this is the mechanical shape of that
-  // mandate: lowercase type, optional (scope), optional ! for a breaking change, then ": "
-  // and a description. v1.0.0 itself reads types case-insensitively; this repo canonicalizes
-  // on lowercase, as GLOBAL.md's examples do. The type list stays open on purpose (GLOBAL.md's
-  // list ends in "...", and v1.0.0 allows types beyond feat and fix); imperative mood and
-  // "scoped small" need judgment and stay with review.
-  if (!/^[a-z]+(\([^\s()]+\))?!?: \S/.test(subject)) {
-    fail('commit-subject', `subject "${subject}" is not a Conventional Commit. Shape: "type(scope): what changed", e.g. "fix(checks): reject empty scopes" - lowercase type (feat, fix, docs, chore, ...), scope optional, "!" before ":" for a breaking change.`);
-  }
-
-  // Git decides what a trailer is: the last block of the message, on one line, with nothing but
-  // trailers after it. Matching the key anywhere in the text instead would pass a message whose
-  // trailer `git log --format='%(trailers:key=Traces-to)'` cannot read, leaving the gate green
-  // and the artifact it exists to produce empty. Use the reader's own parser, so the two cannot
-  // disagree. Git missing or failing here raises, and a crashed gate is a failed gate.
-  const parsed = execSync('git interpret-trailers --parse', { input: body, encoding: 'utf8' });
-  const entry = parsed.split('\n').find((t) => /^Traces-to:/i.test(t));
-  if (entry === undefined) {
-    fail('commit-trace', 'missing "Traces-to:" trailer. The LAST block of the message must be trailers only, with the trace on one line: "Traces-to: SC-3", or "Traces-to: explicit request: <what was asked>". A line of prose (or a footer) after it puts the trace outside the block and git stops reading it as a trailer.');
-    return failures;
-  }
-  const line = entry.replace(/^Traces-to:[ \t]*/i, '');
-  if (!traceFilled(line)) {
-    fail('commit-trace', '"Traces-to:" is empty or still a placeholder: a trailer that names nothing traces nowhere.');
-  }
-  for (const id of traceUnknownIds(line, known)) {
-    fail('commit-trace', `Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
-  }
-  return failures;
 }
 
 export function runChecks(root) {
@@ -170,6 +102,15 @@ export function runChecks(root) {
   // What counts as generated or vendored code is one fact, read by the length cap and by the
   // deferral contract. Written once so the two can never drift apart.
   const isVendored = (r) => (cfg.codeFileCapExclude || []).some((x) => r.startsWith(x) || r.endsWith(x));
+
+  // Which gate is speaking is the runner's bookkeeping, so a family file reports a failure the
+  // same way a gate written here does: it calls fail(), and the loop below names the caller.
+  let current = '';
+  const fail = (msg) => failures.push({ check: current, msg });
+  // What the gate families in their own files need, read once here: the walked tree, the config,
+  // the SC-ids the brief defines, and this runner's readers. Passed rather than imported back
+  // out of this file, so the dependency runs one way and nothing walks the repo twice.
+  const ctx = { root, cfg, tree, textFiles, known, isVendored, fail, read, lines, rel, CODE_EXT };
 
   const checks = {
     'budget-agents'() {
@@ -394,148 +335,8 @@ export function runChecks(root) {
       }
     },
 
-    'secrets'() {
-      const patterns = [
-        [/-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY(?: BLOCK)?-----/, 'private key material'],
-        [/\bAKIA[0-9A-Z]{16}\b/, 'AWS access key id'],
-        [/\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}\b/, 'JWT'],
-        [/\b(api[_-]?key|client[_-]?secret|password|auth[_-]?token)\b["']?\s*[:=]\s*["'][^"'\s]{16,}["']/i, 'hardcoded credential'],
-      ];
-      for (const f of textFiles) {
-        const r = rel(root, f);
-        if ((cfg.secretScanExclude || []).some((x) => r.startsWith(x) || r.endsWith(x))) continue;
-        lines(f).forEach((line, i) => {
-          if (line.includes('checks:allow-secret')) return;
-          for (const [re, what] of patterns) {
-            if (re.test(line)) fail(`${r}:${i + 1} looks like a ${what}. Real secret? Rotate it NOW, then use the environment. False positive (an example string)? Append "checks:allow-secret" to that line.`);
-          }
-        });
-      }
-    },
-
-    'defer-markers'() {
-      // Two halves of one contract. The marker half: a defer: that names no trigger rots.
-      // The commentBans half is its negative image - a comment that apologises for a
-      // simplification ("for now", "in a real app") is a deferral that skipped the marker, so
-      // nothing can ever grep for it. Comment lines in code files only: "for now" is legitimate
-      // in a string, a UI label or prose, and only a comment can apologise for the code below it.
-      const apologies = (cfg.commentBans || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
-      const commentLine = /^\s*(\/\/|#|\*|<!--)|\/\*/;
-      for (const f of textFiles) {
-        const r = rel(root, f);
-        if (r.startsWith('checks/')) continue;
-        // Generated and vendored code is not this project's deferral to make or to mark, and it
-        // is already named once in config for the length cap. One list, both meanings.
-        const vendored = isVendored(r);
-        const isCode = CODE_EXT.has(extname(f));
-        const content = lines(f);
-        content.forEach((line, i) => {
-          // A wrapped marker may carry its trigger on the next line or two.
-          const vicinity = content.slice(i, i + 3).join(' ');
-          if (/(\/\/|#|<!--)\s*defer:/i.test(line) && !/upgrade-when:/i.test(vicinity)) {
-            fail(`${r}:${i + 1} defer: marker without "upgrade-when:": untriggered deferrals rot silently (AGENTS.md format).`);
-          }
-          if (!isCode || vendored || !commentLine.test(line) || line.includes('checks:allow-style')) return;
-          // A line that already carries the marker is the documented case, not the apology.
-          if (/defer:/i.test(vicinity)) return;
-          for (const e of apologies) {
-            if (e.re.test(line)) {
-              fail(`${r}:${i + 1} comment defers without a marker (/${e.pattern}/): ${e.why}. Deliberate wording? Append "checks:allow-style" to that line.`);
-            }
-          }
-        });
-      }
-    },
-
-    'zombie-code'() {
-      const looksLikeCode = /^\s*(\/\/|#)\s*(.*[;{}]\s*$|(const|let|var|function|def |import |return |if\s*\(|for\s*\())/;
-      for (const f of tree.files.filter((x) => CODE_EXT.has(extname(x)))) {
-        const r = rel(root, f);
-        if (r.startsWith('checks/')) continue;
-        let run = 0;
-        lines(f).forEach((line, i) => {
-          run = looksLikeCode.test(line) ? run + 1 : 0;
-          if (run === 3) fail(`${r}:${i - 1} 3+ consecutive lines of commented-out code: delete it; git remembers.`);
-        });
-      }
-    },
-
-    'code-file-cap'() {
-      // A source file past this size stops fitting in one read for a reviewer or an agent, so
-      // the gate turns red before the file turns unreadable. Rare legitimate case (generated
-      // files, vendored code): a "checks:allow-length: <reason>" line in the file, or a
-      // codeFileCapExclude path in config, mirroring the secrets-check exclude discipline.
-      // Older configs without the key fall back to 500.
-      const cap = cfg.budgets.codeFileMaxLines ?? 500;
-      for (const f of tree.files.filter((x) => CODE_EXT.has(extname(x)))) {
-        const r = rel(root, f);
-        if ((cfg.codeFileCapExclude || []).some((x) => r.startsWith(x) || r.endsWith(x))) continue;
-        const content = lines(f);
-        if (content.length <= cap) continue;
-        const marker = content.find((l) => l.includes('checks:allow-length'));
-        if (marker) {
-          if (!/checks:allow-length\s*:?\s*\S/.test(marker)) {
-            fail(`${r}: checks:allow-length needs a reason (e.g. "checks:allow-length: generated file"), so the exception stays auditable.`);
-          }
-          continue;
-        }
-        fail(`${r} is ${content.length} lines (budget ${cap}): split it by responsibility. Generated or vendored? Add "checks:allow-length: <reason>" in the file or a codeFileCapExclude entry in checks/config.json.`);
-      }
-    },
-
-    'tickets'() {
-      // Ticket files carry the build frontier (spec skill, docs/specs/TEMPLATE-TICKET.md). A
-      // typo'd status or a Blocked-by naming a missing sibling silently corrupts the frontier
-      // rule, so the machine-read fields are gated. Archived specs are history, not live work.
-      const STATUSES = ['ready', 'building', 'done'];
-      for (const f of tree.files) {
-        const r = rel(root, f);
-        if (!/^docs\/specs\/.+\/tickets\/[^/]+\.md$/.test(r) || r.startsWith('docs/specs/archive/')) continue;
-        const body = read(f);
-        const status = (body.match(/^- \*\*Status:\*\*\s*(\S+)/m) || [])[1];
-        if (!status) fail(`${r}: missing "- **Status:**" line (${STATUSES.join(' | ')}).`);
-        else if (!STATUSES.includes(status)) fail(`${r}: status "${status}" is not one of ${STATUSES.join(' | ')}.`);
-        const blocked = (body.match(/^- \*\*Blocked by:\*\*\s*(.+)$/m) || [])[1]?.trim();
-        if (!blocked) fail(`${r}: missing "- **Blocked by:**" line (sibling ticket names, or "none").`);
-        else if (blocked !== 'none') {
-          for (const entry of blocked.split(',').map((s) => s.trim()).filter(Boolean)) {
-            const sibling = join(dirname(f), entry.endsWith('.md') ? entry : `${entry}.md`);
-            if (!existsSync(sibling)) fail(`${r}: Blocked-by "${entry}" names no sibling ticket file.`);
-          }
-        }
-        if (!/^\*\*What to build:\*\*/m.test(body)) {
-          fail(`${r}: missing "**What to build:**" line: a ticket without behavior is not buildable.`);
-        }
-        if (!tracesTo(body)) {
-          fail(`${r}: missing or unfilled "- **Traces to:**" line: work that names no scope item cannot be attributed to one.`);
-        }
-        for (const id of unknownScopeIds(body, known)) {
-          fail(`${r}: Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
-        }
-      }
-    },
-
-    'spec-traces'() {
-      // A spec that does not name the scope item it serves breaks two things at once: the
-      // AGENTS.md rule "no trace, no build", and the progress overview, which then reports the
-      // scope item as not started while the work is happening. A silently wrong count is worse
-      // than no count, so this is a gate rather than a note. Archived specs are history.
-      for (const f of tree.files) {
-        const r = rel(root, f);
-        // What counts as a spec file is progress.mjs's isSpecPath: one definition, so the
-        // counted set and the gated set cannot drift apart. Two deliberate differences remain:
-        // archived specs are history (skipped here), and *.local.md files never reach this
-        // loop at all (dropped from tree.files above): personal specs are counted, never gated.
-        if (!isSpecPath(r) || r.startsWith('docs/specs/archive/')) continue;
-        const body = read(f);
-        if (!tracesTo(body)) {
-          fail(`${r}: missing or unfilled "- **Traces to:**" line. Name the BRIEF SC-item this change serves, or the explicit request it answers (run \`scope\` first if neither exists).`);
-        }
-        for (const id of unknownScopeIds(body, known)) {
-          fail(`${r}: Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
-        }
-      }
-    },
+    ...codeChecks(ctx),
+    ...traceChecks(ctx),
 
     'explainer-stats'() {
       // The explainer page states counts of what this repo holds. A typed count goes stale the
@@ -614,8 +415,6 @@ export function runChecks(root) {
     },
   };
 
-  let current = '';
-  const fail = (msg) => failures.push({ check: current, msg });
   for (const [name, fn] of Object.entries(checks)) {
     current = name;
     try {
