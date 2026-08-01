@@ -101,8 +101,9 @@ records the reasoning.
   integrity, skill format, secrets, and more: zero model tokens spent. CI runs it on every push.
   A `commit-msg` hook adds the last link in the chain: every commit names the scope item it
   serves, so a sha resolves back to a requirement instead of to someone's memory.
-  The checks test themselves (`node checks/check.test.mjs`): a gate that isn't tested is false
-  confidence. The same directory holds `node checks/progress.mjs`: a read-only, plain-language
+  The checks test themselves: every gate has to prove it fails on a violation before it is
+  trusted, and `.github/workflows/ci.yml` runs those suites ahead of the checks, because a gate
+  that isn't tested is false confidence. The same directory holds `node checks/progress.mjs`: a read-only, plain-language
   answer to "what is done and what is left", derived from the brief, the specs and the handoff,
   with `--all` covering every project you have started this way. Add `--serve` and the same
   answer opens as a page on this machine only: the goal, the stand, the next step, which file
