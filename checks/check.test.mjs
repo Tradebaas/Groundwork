@@ -2,8 +2,8 @@
 // Self-test for checks/check.mjs: the document, rulebook and config gates it still owns, plus
 // the runner's own wiring (hooks, the enforcement self-report, the handoff nudge). Every check
 // must prove it FAILS on a real violation and stays quiet on a clean repo: an untested gate is
-// false confidence (decision 0005). The two gate families that live in their own files are
-// proven next door, by check-code.test.mjs and check-trace.test.mjs.
+// false confidence (decision 0005). The three gate families that live in their own files are
+// proven next door, by check-code.test.mjs, check-trace.test.mjs and check-stack.test.mjs.
 // Run: node checks/check.test.mjs
 
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, unlinkSync, readFileSync } from 'node:fs';

@@ -22,6 +22,7 @@ import { enforcementReport, formatReport } from './enforcement.mjs';
 // file may contain and how long it may be, and the trace chain from brief to commit.
 import { codeChecks } from './check-code.mjs';
 import { checkCommitMessage, traceChecks } from './check-trace.mjs';
+import { stackChecks } from './check-stack.mjs';
 
 // The commit-msg hook and the self-test have always imported this from here; it is authored in
 // check-trace.mjs with the rest of the chain, and stays reachable at its published address.
@@ -350,6 +351,7 @@ export function runChecks(root) {
 
     ...codeChecks(ctx),
     ...traceChecks(ctx),
+    ...stackChecks(ctx),
 
     'explainer-stats'() {
       // The explainer page states counts of what this repo holds. A typed count goes stale the

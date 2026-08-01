@@ -28,10 +28,11 @@ function resolveSource() {
   return dirname(dirname(fileURLToPath(import.meta.url)));
 }
 
-// The five suites CI proves before it trusts any gate, run here inside the copy so it is the
-// copy's own code under test and never this working tree's.
+// The suites CI proves before it trusts any gate, run here inside the copy so it is the copy's
+// own code under test and never this working tree's. Keep in step with the `gate` job in
+// .github/workflows/ci.yml, which is the list this one mirrors.
 const SUITES = [
-  'check.test.mjs', 'check-code.test.mjs', 'check-trace.test.mjs',
+  'check.test.mjs', 'check-code.test.mjs', 'check-trace.test.mjs', 'check-stack.test.mjs',
   'progress.test.mjs', 'links.test.mjs',
   'cockpit-path.test.mjs', 'cockpit.test.mjs',
 ];
