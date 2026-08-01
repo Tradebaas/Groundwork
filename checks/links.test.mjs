@@ -136,6 +136,28 @@ test('one dead file is one row, however many spellings point at it', () => {
   assert.deepEqual(graph.unresolved, [{ from: 'AGENTS.md', raw: 'docs/gone.md#top' }]);
 });
 
+test('a record of what was true then cites the past, so its mentions are history, not residual', () => {
+  // What a record names is what the project called it at the time, and that citation must not
+  // start decaying into the number that exists to catch a rename somebody missed. checks/check.mjs
+  // skips these same three directories for the denylist and the phrase bans, for the same reason.
+  const graph = linkGraph([
+    { path: 'docs/decisions/0003-state-on-disk.md', text: 'we wrote `DEBT.md` and `INTAKE.md` then' },
+    { path: 'docs/specs/archive/001-old/spec.md', text: 'it read `docs/old/PLAN.md` at the time' },
+    { path: 'docs/state/log/2026-07.md', text: 'that session touched `checks/gone.mjs`' },
+    { path: 'AGENTS.md', text: 'the ledger `docs/state/DEBT.md`' },
+  ]);
+  assert.deepEqual(graph.unresolved, [{ from: 'AGENTS.md', raw: 'docs/state/DEBT.md' }]);
+});
+
+test('a record still asserts what it makes clickable, so a broken link there is still reported', () => {
+  // The gate fails on an asserted link wherever it is written (checks/check.mjs, links), so the
+  // report has to name it too, or the two would describe the same file differently.
+  const graph = linkGraph([
+    { path: 'docs/decisions/0003-state-on-disk.md', text: 'see [the ledger](../state/DEBT.md), once `DEBT.md`' },
+  ]);
+  assert.deepEqual(graph.unresolved, [{ from: 'docs/decisions/0003-state-on-disk.md', raw: '../state/DEBT.md' }]);
+});
+
 test('without a filesystem to ask, every path that is no document counts as residual', () => {
   // The derivation stays pure: the default answers "no such file", so a caller that forgets to
   // pass the question gets an over-count it can see, never a silently emptied number.
