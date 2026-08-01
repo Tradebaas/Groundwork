@@ -16,7 +16,7 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `product/BRIEF.md` | LIVE | Scope: what this project is and is not |
 | `product/TEMPLATE-BRIEF.md` | REF | Blank brief skeleton; `begin` puts it in place of Groundwork's own |
 | `product/CONTEXT.md` | LIVE | Domain glossary: shared vocabulary, banned synonyms |
-| `product/ARCHITECTURE.md` | REF | System map: modules, data, contracts, environments (made by `architect`; absent until then) |
+| `product/ARCHITECTURE.md` | REF | System map: modules, data, what the system decides, contracts, environments (made by `architect`; absent until then) |
 | `specs/TEMPLATE.md` | REF | Spec skeleton + tier rules (S/M/L) |
 | `specs/TEMPLATE-PLAN.md` | REF | Plan skeleton for tier L: build order, seams, rollback, verification |
 | `specs/TEMPLATE-TICKET.md` | REF | Ticket skeleton: one vertical slice per file, session-sized |
