@@ -48,6 +48,15 @@ const EXTERNAL = /^(https?:|mailto:)/;
 // (`standards/*.md`), a placeholder (`docs/standards/<stack>.md`), a home path (`~/.claude`), or
 // a tool's own prefix (`@AGENTS.md`).
 const NOT_A_PATH = /[\s*?<>[\]|"']|^[~@]|:\/\//;
+// Three kinds of document record what was true then rather than what is true now: a decision
+// record, an archived spec, and a rotated log entry. They name files as the project named them
+// at the time, so a citation there is history and not a pointer that rotted, and it must not
+// decay into the number that exists to catch a rename somebody missed. checks/check.mjs skips
+// these same three for the denylist and the phrase bans, on the same reading of what the
+// document is for. Mentions only: a markdown link is an assertion its writer made clickable,
+// the gate fails on it wherever it stands, and the report says what the gate says.
+const HISTORY_DIRS = ['docs/decisions/', 'docs/specs/archive/', 'docs/state/log/'];
+const citesThePast = (path) => HISTORY_DIRS.some((d) => path.startsWith(d));
 const HAS_EXTENSION = /\.[a-z0-9]{1,6}$/i;
 
 // A malformed escape is a broken link, never a crashed check: the path is read as written.
@@ -114,8 +123,10 @@ export function linkGraph(documents, { exists = () => false } = {}) {
       const hit = candidates.find((c) => rows.has(c));
       if (!hit) {
         // A markdown link among these is also a red gate (checks/check.mjs, links); a mention is
-        // only ever reported. Both are the same fact to a reader deciding whether a path is dead.
-        if (!asked.has(link.target) && !candidates.some(exists)) unresolved.push({ from: doc.path, raw: link.raw });
+        // only ever reported. Both are the same fact to a reader deciding whether a path is dead,
+        // except where the document is a record of what was true then (HISTORY_DIRS above).
+        const cited = !link.asserted && citesThePast(doc.path);
+        if (!cited && !asked.has(link.target) && !candidates.some(exists)) unresolved.push({ from: doc.path, raw: link.raw });
         asked.add(link.target);
         continue;
       }
@@ -197,7 +208,7 @@ export const LINK_WORDS = {
     orphansWhy: 'A file is named without a path too: the rulebook names a skill by its name and points at the decision records by their directory, so no path leads to those.',
     noOrphans: 'Every document is pointed at by at least one other.',
     unresolved: 'Paths that point at nothing',
-    unresolvedWhy: 'Written as a path, and nothing is there when you follow it: a rename nobody followed, a name shortened to its bare filename, or prose shaped like a path.',
+    unresolvedWhy: 'Written as a path, and nothing is there when you follow it: a rename nobody followed, a name shortened to its bare filename, or prose shaped like a path. A file named inside a decision record, an archived spec or a rotated log entry is not counted: that is what the project called it at the time.',
     noUnresolved: 'Every path spelled out lands on a document or on a file.',
     each: 'Every document, and what it points at',
     pointsAt: 'Points at',
@@ -217,7 +228,7 @@ export const LINK_WORDS = {
     orphansWhy: 'Een bestand wordt ook zonder pad genoemd: het rulebook noemt een skill bij naam en wijst de decision records per map aan, dus daar leidt geen pad heen.',
     noOrphans: 'Elk document wordt door minstens een ander aangewezen.',
     unresolved: 'Paden die nergens heen wijzen',
-    unresolvedWhy: 'Uitgeschreven als pad, en er staat niets waar het heen wijst: een hernoeming die niemand volgde, een naam ingekort tot alleen de bestandsnaam, of proza in de vorm van een pad.',
+    unresolvedWhy: 'Uitgeschreven als pad, en er staat niets waar het heen wijst: een hernoeming die niemand volgde, een naam ingekort tot alleen de bestandsnaam, of proza in de vorm van een pad. Een bestand dat genoemd wordt in een decision record, een gearchiveerde spec of een gearchiveerd logboek telt niet mee: zo heette het toen.',
     noUnresolved: 'Elk uitgeschreven pad komt uit bij een document of een bestand.',
     each: 'Elk document, en waar het naar wijst',
     pointsAt: 'Wijst naar',
