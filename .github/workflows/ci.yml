@@ -21,6 +21,7 @@ jobs:
         run: |
           node checks/check.test.mjs
           node checks/check-code.test.mjs
+          node checks/check-config.test.mjs
           node checks/check-trace.test.mjs
           node checks/check-stack.test.mjs
           node checks/progress.test.mjs

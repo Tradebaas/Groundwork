@@ -100,7 +100,8 @@ export const codeChecks = ({ root, cfg, tree, textFiles, isVendored, fail, lines
     const looksLikeCode = /^\s*(\/\/|#)\s*(.*[;{}]\s*$|(const|let|var|function|def |import |return |if\s*\(|for\s*\())/;
     for (const f of tree.files.filter((x) => CODE_EXT.has(extname(x)))) {
       const r = rel(root, f);
-      if (r.startsWith('checks/')) continue;
+      // What another project left in its own comments is not this project's discipline to keep.
+      if (r.startsWith('checks/') || isVendored(r)) continue;
       let run = 0;
       lines(f).forEach((line, i) => {
         run = looksLikeCode.test(line) ? run + 1 : 0;
@@ -122,7 +123,7 @@ export const codeChecks = ({ root, cfg, tree, textFiles, isVendored, fail, lines
     const cap = cfg.budgets.codeFileMaxLines ?? 500;
     for (const f of tree.files.filter((x) => CODE_EXT.has(extname(x)))) {
       const r = rel(root, f);
-      if ((cfg.codeFileCapExclude || []).some((x) => r.startsWith(x) || r.endsWith(x))) continue;
+      if (isVendored(r)) continue;
       const content = lines(f);
       if (content.length <= cap) continue;
       const marker = content.map(commentOn).find((c) => c !== null && /^\s*checks:allow-length\b/.test(c));

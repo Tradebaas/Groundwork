@@ -138,4 +138,19 @@ expectClean('code-file-cap-exclude', ({ put }) => {
   put('src/vendor/lib.js', 'export const x = 1;\n'.repeat(510));
 });
 
+// A declared third-party payload is code this project did not write: neither its length budget
+// nor its comment discipline is ours to enforce. The declaration is the only difference between
+// this fixture and the two failing ones above, and the secrets gate still reads every line of it.
+expectClean('code-gates-skip-a-declared-payload', ({ put }) => {
+  put('checks/config.json', JSON.stringify({
+    denylist: [],
+    budgets: { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024 },
+    allowedEmptyDirs: [], secretScanExclude: ['checks/'],
+    thirdParty: [{ path: 'vendor/upstream/', why: 'installed at its current release, not written here' }],
+  }));
+  put('vendor/upstream/big.js', 'export const x = 1;\n'.repeat(510));
+  put('vendor/upstream/dead.js', 'export const x = 1;\n// const old = 2;\n// function dead() {\n// return old;\n');
+  put('vendor/upstream/apology.js', '// patched for now\n');
+});
+
 report('code-gate');

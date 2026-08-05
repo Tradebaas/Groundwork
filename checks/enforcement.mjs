@@ -1,8 +1,9 @@
 // Groundwork enforcement self-report: which enforcement tier does this environment run at?
-// A fresh copy silently loses three machine-local layers: git hooks (core.hooksPath is set per
-// clone), CI (a workflow only runs when a GitHub remote exists to push to), and the Claude
-// adapter's suggest-hooks (.claude/settings.json). Without this report, a hookless clone with
-// no remote runs with zero hard gates and no warning (GAP C-2, INTAKE 2026-07-22).
+// A fresh copy silently loses four machine-local layers: git hooks (core.hooksPath is set per
+// clone), CI (a workflow only runs when a GitHub remote exists to push to), the Claude adapter's
+// suggest-hooks (.claude/settings.json), and the design method, whose payload is installed per
+// project and gitignored like a dependency. Without this report, a hookless clone with no remote
+// runs with zero hard gates and no warning (GAP C-2, INTAKE 2026-07-22).
 // Report, never block: a weak environment is information, not a violation. The exit code
 // belongs to the checks alone; checks/check.mjs prints this on every direct run and skips it
 // under CI, where the runner's own clone (no hooksPath, ephemeral remote) would misread as
@@ -11,13 +12,16 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
+// Whether the design method is installed, and at which version, is read where its install route
+// lives, so the report and the installer can never disagree about where the payload sits.
+import { designMethodSignal } from './design-method.mjs';
 
 // stderr is swallowed: "not a repo" or "key unset" are expected degraded states, not errors.
 const git = (root, args) => execSync(`git ${args}`, {
   cwd: root, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8',
 }).trim();
 
-// The three signals, each { signal, armed, detail }. Never throws, whatever the directory
+// The four signals, each { signal, armed, detail }. Never throws, whatever the directory
 // looks like: a missing piece is a degraded signal, not a crash.
 export function enforcementReport(root) {
   const signals = [];
@@ -66,6 +70,10 @@ export function enforcementReport(root) {
   } else {
     signals.push({ signal: 'adapter hooks', armed: false, detail: 'Claude adapter hooks not wired (.claude/settings.json): the progress line and handoff nudge never fire.' });
   }
+
+  // 4. The design method. Its payload is installed per project and gitignored, so a clone starts
+  //    without it and nothing in the repo can tell from the files alone that it should be there.
+  signals.push(designMethodSignal(root));
 
   return signals;
 }
