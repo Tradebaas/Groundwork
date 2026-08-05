@@ -23,6 +23,8 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative, resolve, sep, posix, isAbsolute } from 'node:path';
+// Which paths this project did not write is declared in checks/config.json and read there.
+import { thirdPartyForRoot } from './check-config.mjs';
 
 // Not part of the project: build output and other people's code. Shared with the gate's own walk
 // so "which directories are not this project" has one answer.
@@ -153,9 +155,12 @@ export function linkGraph(documents, { exists = () => false } = {}) {
 }
 
 // The project's documents, read once for whoever asks: the gate polices exactly the set the
-// board draws.
+// board draws. A declared third-party payload (checks/config.json) is not this project's
+// writing, so it is neither policed nor drawn: an installed methodology ships hundreds of its
+// own pages, and counting them would bury the map of what this project actually says.
 export function readDocuments(root) {
   const documents = [];
+  const third = thirdPartyForRoot(root);
   const walk = (dir) => {
     let entries;
     try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return; }
@@ -164,12 +169,11 @@ export function readDocuments(root) {
       // project entirely.
       if (entry.isSymbolicLink()) continue;
       const full = join(dir, entry.name);
+      const path = relative(root, full).split('\\').join('/');
+      if (third(path)) continue;
       if (entry.isDirectory()) { if (!SKIP_DIRS.has(entry.name)) walk(full); continue; }
       if (!entry.name.endsWith('.md')) continue;
-      documents.push({
-        path: relative(root, full).split('\\').join('/'),
-        text: readFileSync(full, 'utf8').replace(/\r\n/g, '\n'),
-      });
+      documents.push({ path, text: readFileSync(full, 'utf8').replace(/\r\n/g, '\n') });
     }
   };
   walk(root);

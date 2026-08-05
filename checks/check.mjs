@@ -18,11 +18,13 @@ import { parseBrief, parseManifest, isSpecPath, BRIEF_PATH, MANIFEST_PATH } from
 // read here and by the board.
 import { parseLinks, linkTargets, readDocuments, forTerminal, SKIP_DIRS } from './links.mjs';
 import { enforcementReport, formatReport } from './enforcement.mjs';
-// Two gate families live in their own files, composed into the registry below: what a source
-// file may contain and how long it may be, and the trace chain from brief to commit.
+// Gate families live in their own files, composed into the registry below: what a source file
+// may contain and how long it may be, the trace chain from brief to commit, whether a stack's
+// own gates are wired, and the config's self-gate, which also owns the third-party declaration.
 import { codeChecks } from './check-code.mjs';
 import { checkCommitMessage, traceChecks } from './check-trace.mjs';
 import { stackChecks } from './check-stack.mjs';
+import { configChecks, thirdPartyMatcher } from './check-config.mjs';
 
 // The commit-msg hook and the self-test have always imported this from here; it is authored in
 // check-trace.mjs with the rest of the chain, and stays reachable at its published address.
@@ -100,9 +102,13 @@ export function runChecks(root) {
   // STATE.local.md could fail the pre-commit hook. Drop them from every file-based check.
   tree.files = tree.files.filter((f) => !basename(f).endsWith('.local.md'));
   const textFiles = tree.files.filter((f) => TEXT_EXT.has(extname(f)) || f.endsWith('.gitignore'));
+  // What this project did not write: a declared third-party payload (checks/config.json), read
+  // by every gate that measures this repo's own writing. House style governs what this repo
+  // writes; measuring somebody else's payload would force a patch on every upstream release.
+  const isThirdParty = thirdPartyMatcher(cfg);
   // What counts as generated or vendored code is one fact, read by the length cap and by the
   // deferral contract. Written once so the two can never drift apart.
-  const isVendored = (r) => (cfg.codeFileCapExclude || []).some((x) => r.startsWith(x) || r.endsWith(x));
+  const isVendored = (r) => isThirdParty(r) || (cfg.codeFileCapExclude || []).some((x) => r.startsWith(x) || r.endsWith(x));
 
   // Which gate is speaking is the runner's bookkeeping, so a family file reports a failure the
   // same way a gate written here does: it calls fail(), and the loop below names the caller.
@@ -133,66 +139,10 @@ export function runChecks(root) {
       for (const f of tree.files) {
         const base = basename(f);
         if (base !== 'AGENTS.md' && base !== 'CLAUDE.md') continue;
+        if (isThirdParty(rel(root, f))) continue;
         const n = lines(f).length;
         if (n > cap) {
           fail(`${rel(root, f)} is ${n} lines (hard cap ${cap}): an AGENTS.md/CLAUDE.md past ${cap} lines stops being read in full. Move detail into a skill or docs/.`);
-        }
-      }
-    },
-
-    'config-invariants'() {
-      // checks/config.json is the one file that can weaken every other gate, in the same commit
-      // as the violation it hides: raise a budget past the rule it encodes, or add an exclusion
-      // that steers a check away from the paths it exists to police. So the config gates itself.
-      // Both invariants come from a rule written down elsewhere, never from taste.
-      const cap = cfg.budgets?.agentFileHardCapLines;
-      // 200 is not a preference: past it an agent rulebook stops being read in full, so a higher
-      // cap does not buy a longer file, it buys a file that silently stops governing. The two
-      // ways to break it read differently, so they are reported differently.
-      if (cap !== undefined && !(Number.isInteger(cap) && cap > 0)) {
-        fail(`checks/config.json budgets.agentFileHardCapLines is ${JSON.stringify(cap)}, which is not a positive whole number of lines: agent-file-cap would fall back to 200 and the value would govern nothing.`);
-      } else if (cap !== undefined && cap > 200) {
-        fail(`checks/config.json budgets.agentFileHardCapLines is ${cap}: the hard cap is 200 lines and may be lowered, never raised. A rulebook past 200 lines stops being loaded in full.`);
-      }
-      // A boolean that retires a whole check is the same weakening vector as an exclusion that
-      // hides a path, and no reading of the config can tell the legitimate case (a checkout with
-      // no symlink support) from a gate somebody found inconvenient. So the exemption states its
-      // case in the same diff that takes it, the trade this repo already made for
-      // "checks:allow-length: <reason>" and "checks:allow-style". skills-symlink still reads the
-      // key as a plain flag: which value is honest is this gate's question, and one red is enough.
-      const skip = cfg.skipSymlinkCheck;
-      if (skip !== undefined && skip !== false && !(typeof skip === 'string' && skip.trim())) {
-        fail(`checks/config.json skipSymlinkCheck is ${JSON.stringify(skip)}: retiring the skills-symlink check takes a reason in the same file, as a non-empty string (e.g. "Windows without Developer Mode"). Set false to keep the check on.`);
-      }
-      // An exclusion that reaches these prefixes disarms the gates rather than tuning them:
-      // checks/ is where the gates themselves live, docs/standards/ is where a stack's rules do.
-      // secretScanExclude names checks/ by construction (the detector patterns are in check.mjs
-      // and would match themselves), so it is the one list allowed to, and only for that prefix.
-      const protectedPrefixes = ['checks/', 'docs/standards/'];
-      // Each list is read back by its own matching rule, so the invariant has to test the rule
-      // that will actually run, or it guarantees less than its message claims. An affix list
-      // (code-file-cap, secrets) hides a path when either end of it matches; a substring list
-      // (denylist) hides it when the value appears anywhere inside it. Testing only the prefix
-      // would let "s/" and "heck" walk past a gate whose whole job is to stop exactly that.
-      const hides = (mode, v, p) => v === '' || v.startsWith(p)
-        || (mode === 'affix' ? p.startsWith(v) || p.endsWith(v) : p.includes(v));
-      const lists = [
-        ['codeFileCapExclude', cfg.codeFileCapExclude || [], protectedPrefixes, 'affix'],
-        ['secretScanExclude', cfg.secretScanExclude || [], ['docs/standards/'], 'affix'],
-        ...(cfg.denylist || []).map((e, i) => [`denylist[${i}].exclude`, e.exclude || [], protectedPrefixes, 'substring']),
-      ];
-      for (const [where, values, guarded, mode] of lists) {
-        for (const v of values) {
-          if (typeof v !== 'string') {
-            fail(`checks/config.json ${where} holds ${JSON.stringify(v)}: an exclusion is a path string, and a non-string silently excludes nothing.`);
-            continue;
-          }
-          // Overlap in either direction is a hit: "docs/" swallows docs/standards/ from above,
-          // "docs/standards/react.md" carves it out from within, "" swallows everything.
-          const hit = guarded.find((p) => hides(mode, v, p));
-          if (hit) {
-            fail(`checks/config.json ${where} excludes "${v}", which hides ${hit}: that is where the gates (or a stack's standards) live, so excluding it disarms a check instead of tuning it. Narrow the exclusion.`);
-          }
         }
       }
     },
@@ -247,7 +197,7 @@ export function runChecks(root) {
       for (const f of textFiles) {
         const r = rel(root, f);
         if (r.startsWith('checks/') || r.startsWith('docs/specs/archive/')
-          || r.startsWith('docs/state/log/') || r.startsWith('docs/decisions/')) continue;
+          || r.startsWith('docs/state/log/') || r.startsWith('docs/decisions/') || isThirdParty(r)) continue;
         const content = lines(f);
         for (const e of entries) {
           if ((e.exclude || []).some((x) => r.includes(x))) continue;
@@ -280,7 +230,7 @@ export function runChecks(root) {
         || r === 'docs/design/VOICE.md';
       for (const f of textFiles) {
         const r = rel(root, f);
-        if (r.startsWith('checks/')) continue;
+        if (r.startsWith('checks/') || isThirdParty(r)) continue;
         const scanPhrases = !phraseSkip(r);
         lines(f).forEach((line, i) => {
           if (line.includes('checks:allow-style')) return;
@@ -316,6 +266,11 @@ export function runChecks(root) {
       for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
         if (!entry.isDirectory()) continue;
         dirs.add(entry.name);
+        // A declared third-party skill is somebody else's work, installed rather than authored
+        // here: it carries no row in our routing table and is not held to our frontmatter
+        // budgets. It stays in `dirs`, so the reverse direction below still catches a table row
+        // whose directory is gone.
+        if (isThirdParty(`.agents/skills/${entry.name}`)) continue;
         const p = join(skillsDir, entry.name, 'SKILL.md');
         if (!existsSync(p)) { fail(`skill "${entry.name}" has no SKILL.md`); continue; }
         const body = read(p);
@@ -352,6 +307,7 @@ export function runChecks(root) {
     ...codeChecks(ctx),
     ...traceChecks(ctx),
     ...stackChecks(ctx),
+    ...configChecks(ctx),
 
     'explainer-stats'() {
       // The explainer page states counts of what this repo holds. A typed count goes stale the
@@ -379,7 +335,11 @@ export function runChecks(root) {
         // The registry this runner walks, plus those. Reading the object itself is what keeps
         // the number honest: a gate added or removed moves the count the same day.
         gates: () => Object.keys(checks).length + hookGates.length,
-        skills: () => count(join('.agents', 'skills'), (e) => e.isDirectory()),
+        // Skills this project wrote. A declared third-party payload is installed, not authored,
+        // and it is gitignored, so counting it would make the page say a different number on a
+        // machine that has run the install than on a fresh clone.
+        skills: () => count(join('.agents', 'skills'),
+          (e) => e.isDirectory() && !isThirdParty(`.agents/skills/${e.name}`)),
         // Numbered records only: TEMPLATE.md is the form to fill in, not a decision.
         decisions: () => count(join('docs', 'decisions'), (e) => e.isFile() && /^\d+-.+\.md$/.test(e.name)),
       };

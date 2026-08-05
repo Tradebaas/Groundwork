@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-// Self-test for checks/check.mjs: the document, rulebook and config gates it still owns, plus
+// Self-test for checks/check.mjs: the document and rulebook gates it still owns, plus
 // the runner's own wiring (hooks, the enforcement self-report, the handoff nudge). Every check
 // must prove it FAILS on a real violation and stays quiet on a clean repo: an untested gate is
-// false confidence (decision 0005). The three gate families that live in their own files are
-// proven next door, by check-code.test.mjs, check-trace.test.mjs and check-stack.test.mjs.
+// false confidence (decision 0005). The four gate families that live in their own files are
+// proven next door, by check-code.test.mjs, check-config.test.mjs, check-trace.test.mjs and
+// check-stack.test.mjs.
 // Run: node checks/check.test.mjs
 
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, unlinkSync, readFileSync } from 'node:fs';
@@ -109,37 +110,40 @@ expectFail('prose-style', ({ root, put }) => { // config-driven phrase ban
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ a seamlessly integrated flow\n');
 });
 
-// config-invariants: the config may be tuned, never disarmed.
-expectFail('config-invariants', withConfig({ budgets: { ...BASE_BUDGETS, agentFileHardCapLines: 400 } }));
-expectFail('config-invariants', withConfig({ budgets: { ...BASE_BUDGETS, agentFileHardCapLines: '200' } }));
-expectFail('config-invariants', withConfig({ codeFileCapExclude: ['checks/'] }));
-expectFail('config-invariants', withConfig({ codeFileCapExclude: ['docs/'] })); // swallows docs/standards/
-expectFail('config-invariants', withConfig({ codeFileCapExclude: [''] })); // swallows everything
-expectFail('config-invariants', withConfig({ codeFileCapExclude: [123] }));
-expectFail('config-invariants', withConfig({ secretScanExclude: ['checks/', 'docs/standards/'] }));
-// The evasions a prefix-only invariant would wave through: code-file-cap also matches a
-// suffix, and a denylist exclude matches a substring anywhere in the path.
-expectFail('config-invariants', withConfig({ codeFileCapExclude: ['s/'] }));
-expectFail('config-invariants', withConfig({
-  denylist: [{ pattern: 'no-such-text-anywhere', why: 'x', exclude: ['heck'] }],
+// A declared third-party payload (checks/config.json) is somebody else's work, installed rather
+// than authored here. The gates that measure this project's own writing skip it; the same text
+// at an undeclared path is still this project's, and still fails. Both directions, one fixture
+// each, because an exemption that cannot be shown to be bounded is a hole.
+const PAYLOAD = { path: 'vendor/upstream/', why: 'installed at its current release, not written here' };
+const declaring = (mutate) => ({ put, root }) => {
+  put('checks/config.json', JSON.stringify({
+    denylist: [{ pattern: 'the retired wording', why: 'it was retired' }],
+    allowedEmptyDirs: [], secretScanExclude: ['checks/'], budgets: BASE_BUDGETS, thirdParty: [PAYLOAD],
+  }));
+  mutate({ put, root });
+};
+const foreignText = 'a line with an em dash — and the retired wording\n';
+
+expectClean('third-party-payload-is-not-measured', declaring(({ put }) => {
+  put('vendor/upstream/README.md', foreignText);
+  put('vendor/upstream/AGENTS.md', `# their rulebook\n${'filler line\n'.repeat(205)}`);
 }));
-expectFail('config-invariants', withConfig({
-  denylist: [{ pattern: 'no-such-text-anywhere', why: 'x', exclude: ['checks/'] }],
-}));
-// A boolean that retires the whole skills-symlink check is the same weakening vector as an
-// exclusion that hides a path, and nothing in the config tells the legitimate case (no symlink
-// support) from the illegitimate one. So the exemption states its case, as allow-length does.
-expectFail('config-invariants', withConfig({ skipSymlinkCheck: true }));
-expectFail('config-invariants', withConfig({ skipSymlinkCheck: '   ' }));
-expectFail('config-invariants', withConfig({ skipSymlinkCheck: 1 }));
-// Lowering the cap is allowed; only raising it is a weakening. And the shipped secretScanExclude
-// names checks/ by construction, which the clean fixture above already proves stays green.
-expectClean('config-invariants-allows-a-lower-cap', withConfig({
-  budgets: { ...BASE_BUDGETS, agentFileHardCapLines: 120 },
-}));
-expectClean('config-invariants-allows-a-stated-reason', withConfig({
-  skipSymlinkCheck: 'Windows without Developer Mode',
-}));
+
+expectFail('prose-style', declaring(({ put }) => put('vendor/ours/README.md', foreignText)));
+expectFail('denylist', declaring(({ put }) => put('vendor/ours/README.md', foreignText)));
+expectFail('agent-file-cap', declaring(({ put }) =>
+  put('vendor/ours/AGENTS.md', `# rules\n${'filler line\n'.repeat(205)}`)));
+
+// A declared third-party skill carries no row in the routing table: it was installed, not
+// written here. An ordinary skill still must appear, which the "ghost" fixture above proves.
+expectClean('third-party-skill-needs-no-routing-row', ({ put }) => {
+  put('checks/config.json', JSON.stringify({
+    denylist: [], allowedEmptyDirs: [], secretScanExclude: ['checks/'], budgets: BASE_BUDGETS,
+    thirdParty: [{ path: '.agents/skills/installed/', why: 'installed at its current release' }],
+  }));
+  put('.agents/skills/installed/SKILL.md', '---\nname: something-else\n---\n');
+  put('index.html', '<div class="stat"><div class="n" data-derive="skills">1</div></div>\n');
+});
 
 expectFail('empty-dirs', ({ root }) =>
   mkdirSync(join(root, 'src', 'hollow'), { recursive: true }));
@@ -278,14 +282,21 @@ expectSignal('enforcement-adapter-wired', ({ put }) =>
   put('.claude/settings.json', '{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"node x"}]}]}}'),
 'adapter hooks', true);
 
-{ // a bare directory still yields all three signals, formatted with a fix line per degraded one
+// The design method's payload is gitignored, so a clone starts without it and the report says so
+// rather than assuming it. Installed, it reports the version it found.
+expectSignal('enforcement-design-method-absent', () => {}, 'design method', false, '--install');
+expectSignal('enforcement-design-method-installed', ({ put }) =>
+  put('.agents/skills/impeccable/SKILL.md', '---\nname: impeccable\nversion: 9.9.9\n---\n'),
+'design method', true, '9.9.9');
+
+{ // a bare directory still yields all four signals, formatted with a fix line per degraded one
   const bare = mkdtempSync(join(tmpdir(), 'groundwork-bare-'));
   try {
     const report = enforcementReport(bare);
-    assert.equal(report.length, 3, 'always exactly three signals');
+    assert.equal(report.length, 4, 'always exactly four signals');
     const lines = formatReport(report);
     assert.ok(lines[0].startsWith('enforcement: '), 'summary line names the tier');
-    assert.equal(lines.length, 4, 'three degraded signals get three fix lines under the summary');
+    assert.equal(lines.length, 5, 'four degraded signals get four fix lines under the summary');
     tally.passed++;
   } catch (e) { tally.failed.push(`enforcement-bare-dir: ${e.message}`); }
   rmSync(bare, { recursive: true, force: true });
