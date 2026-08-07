@@ -8,9 +8,10 @@ description: Judgment check before delivering any UI or user-facing output: scre
 Render the thing (screenshot, preview, generated document) and check *that*, not the source.
 DESIGN.md and VOICE.md are the measuring stick; this catches what automation can't.
 
-Is it a persuasion page (landing, marketing, portfolio, explainer)? Then skill `taste` carried
-the build rules and its pre-flight already ran; this guard re-checks the rendered result, and
-every `taste` section 11 tell that survived into the render is a finding here.
+Is it a frontend? Then the installed design method built it, its craft floor and its detector
+already ran, and a finish reviewer already scored it. Start from that verdict: re-check the render
+against the direction contract in the artifact's opening comment, and report what is still open
+rather than opening a fresh hunt.
 
 ## Visual
 

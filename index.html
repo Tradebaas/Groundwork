@@ -236,7 +236,6 @@ window.GW={
   .glabel{font-size:14.5px;font-weight:600;color:var(--ink);letter-spacing:-.01em;padding-top:2px}
   .glabel small{display:block;font-size:12.5px;color:var(--muted);font-weight:400;margin-top:5px}
   .gcards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .gcards.g3{grid-template-columns:repeat(3,1fr)}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
     padding:18px 20px;transition:border-color .2s}
   .card:hover{border-color:var(--line2)}
@@ -244,7 +243,7 @@ window.GW={
     font-weight:600;color:var(--ink)}
   .card p{color:var(--ink2);font-size:13.5px;line-height:1.6;margin-top:7px}
   @media(max-width:820px){.sgroup{grid-template-columns:1fr;gap:16px}}
-  @media(max-width:600px){.gcards,.gcards.g3{grid-template-columns:1fr}}
+  @media(max-width:600px){.gcards{grid-template-columns:1fr}}
 
   .reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s cubic-bezier(.2,.7,.2,1)}
   .reveal.vis{opacity:1;transform:none}
@@ -462,9 +461,9 @@ window.GW={
        the owning directory and turns red when this page drifts. The two unmarked stats are
        claims, not counts. Copied this repo to start a product? `begin` drops these markers:
        the numbers then describe the framework you copied, not what you are building. -->
-  <div class="stat"><div class="n" data-derive="skills">21</div><div class="l">Skills on demand</div></div>
+  <div class="stat"><div class="n" data-derive="skills">20</div><div class="l">Skills on demand</div></div>
   <div class="stat"><div class="n" data-derive="gates">22</div><div class="l">Automated checks</div></div>
-  <div class="stat"><div class="n" data-derive="decisions">19</div><div class="l">Recorded decisions</div></div>
+  <div class="stat"><div class="n" data-derive="decisions">20</div><div class="l">Recorded decisions</div></div>
   <div class="stat"><div class="n">1</div><div class="l">Rulebook, every tool</div></div>
   <div class="stat"><div class="n"><em>0</em></div><div class="l">Tokens for the checks</div></div>
 </div>
@@ -839,8 +838,7 @@ var skillGroups=[
   ['Laying the foundation','technology, structure and taste',[
     ['stack','Chooses the technology and looks up live what the right, safe way to use it is today.'],
     ['architect','Designs the system: the boundaries, the data, the integrations and the threats it faces.'],
-    ['design','Sets up the visual system and the writing style, tuned to your taste and your audience.'],
-    ['taste','Build rules against the default AI look for landing pages, marketing and portfolios: read the brief first, then design past the templates.']]],
+    ['design','Sets up the visual system and the writing style, tuned to your taste and your audience, and runs the making of a screen through the installed design method.']]],
   ['Guarding quality','fresh eyes on every result',[
     ['scope-guard','The last check before work is called "done": was nothing extra built that nobody asked for?'],
     ['design-guard','The last check on screens and texts before they go out the door.'],
@@ -861,7 +859,7 @@ var skillGroups=[
 var sg=document.getElementById('skillgrid');
 sg.innerHTML=skillGroups.map(function(g){
   return '<div class="sgroup"><h3 class="glabel reveal">'+g[0]+'<small>'+g[1]+'</small></h3>'+
-    '<div class="gcards'+(g[2].length===3?' g3':'')+'">'+g[2].map(function(s){
+    '<div class="gcards">'+g[2].map(function(s){
       return '<div class="card reveal"><span class="tag">'+s[0]+'</span><p>'+s[1]+'</p></div>';
     }).join('')+'</div></div>';
 }).join('');
