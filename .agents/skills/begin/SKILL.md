@@ -31,6 +31,10 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   the record of what the framework itself had already shipped. Counted against this project they
   would report someone else's work as done here. Put the blank brief back
   (`cp docs/product/TEMPLATE-BRIEF.md docs/product/BRIEF.md`) and delete the baseline folder.
+- `docs/PRODUCT.md` is Groundwork's own record of the surfaces this framework renders, which the
+  design method would read as this project's product truth. Delete it: the method's own init writes
+  this project's, in the same place, from what the interview below already captured.
+  `docs/DESIGN.md` stays: sections 1 and 2 ship with Groundwork and are input to that method.
 - `docs/operations/deploy.md` holds Groundwork's own release route, which would read as this
   project's if it stayed. Put the blank runbook back
   (`cp docs/operations/TEMPLATE-DEPLOY.md docs/operations/deploy.md`). `deliver` fills it at first

@@ -22,6 +22,16 @@ one place. The owner chose retirement over coexistence on 2026-08-05.
 3. **Keep `taste` as the house overlay on top of the method:** an overlay is a patch on somebody
    else's file by another name, and it re-creates the update cost the per-project install exists to
    avoid (spec 011's settled decisions).
+4. **Write a deeper in-house method instead of installing one:** rejected, and this is the choice
+   underneath the other three. What was missing was never a longer list of rules; it was the two
+   things a list cannot buy. The owner had to be asked before the look was decided rather than
+   after, and something had to measure a rendered page mechanically. Building that here means a
+   direction round with a browser decision page, rendered compositions, a reviewer that never saw
+   the build thread, and a detector with dozens of rules that stays current as the machine default
+   look moves. That is a product, not a skill, and it would compete for the same sessions as the
+   framework itself. Installing it costs an upstream dependency and buys the whole apparatus at
+   its current release. Groundwork's own claim, use what exists before you write it, applies to
+   Groundwork.
 
 ## Where each retired rule went
 
@@ -46,6 +56,36 @@ fixed before the owner sees anything, which is precisely the unwatched stretch s
 close. The method decides the same things in the open and further down: a committed direction
 contract, a color strategy chosen at page scale, and motion authored once as the form's own. A
 numeric knob beside that contract would be a second, weaker answer to a question already settled.
+
+## What it costs, and where that is paid
+
+Decision 0015 says every addition names its tier. Measured over the whole of spec 011:
+
+| Tier | What landed | Standing cost |
+|---|---|---|
+| 1 Artifact | This record, `docs/PRODUCT.md`, and the tracked `.impeccable/config.json` with its waivers and their reasons | Read once, by whoever needs it |
+| 2 Template | None added. `docs/DESIGN.md` keeps the role it had, and the method's own init writes the product record, so no blank one is carried here | Nothing until filled |
+| 3 On-demand skill | The installed payload, loaded only in a design session, and declared third-party so no gate measures its prose. The registry went from 21 skills to 20: `taste` left and the payload is not listed | Tokens in a design session only |
+| 4 Gate | The detector as a CI job, and the second half of `stack-gates` that proves the job actually runs it. The registry still names 22 gates | CI seconds, outside the model's context |
+| 5 Per-action rule | `begin` gained an install step and one cleanup line, `design` routes to the method and holds three decision points, `maintain`'s dependency round refreshes it, `stack` wires the detector. `design-guard` got shorter by more than the others gained | Only when that action runs |
+| 6 AGENTS.md | Net minus one line: the `taste` row is gone and the design row now names both documents the method reads. 126 lines before this spec, 125 after | Every session, on every model |
+
+The bill lands where 0015 says it should: the expensive tier shrank, and what grew is an artifact,
+a gate and a handful of per-action lines inside skills that only fire in a design session.
+
+## Where the two documents live
+
+The method resolves its context from the project root, `.agents/context/`, then `docs/`, and it
+reads no configuration for that. So the design system moved up one directory to `docs/DESIGN.md`
+and the product record it writes sits beside it at `docs/PRODUCT.md`. `docs/design/` keeps VOICE.md
+and the reference material, which the method does not read. The old design path is in the denylist,
+and the two rows in the AGENTS.md map name the new one so nobody searches for it.
+
+The product record holds what `docs/product/BRIEF.md` does not own (platform, brand commitments,
+evidence on hand, accessibility needs) and points at the brief for scope, users and purpose. A
+fresh copy gets the design system with sections 1 and 2 filled and no product record at all:
+`begin` deletes Groundwork's own, and the method's init writes that project's from what `begin`
+already captured.
 
 ## Decision & consequences
 

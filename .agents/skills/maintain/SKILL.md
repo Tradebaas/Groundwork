@@ -28,7 +28,13 @@ First maintenance session: confirm the minimum exists, or create it and record i
    solutions and store apps, plugins and custom code registered in the instance, and the
    vendor's own release and deprecation notices. Those last ones move on the vendor's schedule
    rather than yours, which is what makes a platform go stale while every project file sits
-   untouched.
+   untouched. The installed design method is a dependency too, and the only one that is not in a
+   manifest: re-run `node checks/design-method.mjs --install` to take its current release (it
+   reports the installed version and changes nothing when that is already the newest), read the
+   version back from the enforcement line at the top of `node checks/check.mjs`, and note it in
+   STATE.md when it moved. Read the release notes for a rule that was dropped: decision 0020
+   credits rules to that method, and one that disappears upstream comes back into a Groundwork
+   file rather than being forked there.
 3. **Debt harvest**: `grep -rn "defer:" --exclude-dir=.git .` → reconcile with DEBT.md. Flag
    markers whose upgrade trigger has fired, and `no-trigger` markers (those rot silently).
    Paying debt is a proposed, owner-approved task like any other.

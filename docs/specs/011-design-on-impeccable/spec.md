@@ -48,7 +48,7 @@ type, at a level that reads as the work of a senior studio.
    points, in this order: the visual direction, the rendered compositions, and the finish verdict.
    No production code for a new visual world is written before the direction is chosen, and the
    finish verdict is reported with its open items intact, never summarized into a pass.
-5. `docs/design/DESIGN.md` sections 1 and 2 (the ten principles and the owner's standing taste)
+5. `docs/DESIGN.md` sections 1 and 2 (the ten principles and the owner's standing taste)
    SHALL remain binding input that impeccable reads before choosing a direction, and section 3
    SHALL be written from the built world after the finish review, not before the build.
 6. PRODUCT.md SHALL hold only what `docs/product/BRIEF.md` does not already own (platform, stack,
