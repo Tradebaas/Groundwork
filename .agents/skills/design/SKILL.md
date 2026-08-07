@@ -11,10 +11,17 @@ the top of `node checks/check.mjs` says whether this project has it, and which r
 is the Groundwork side of that seam. It carries what is genuinely ours, hands it over as binding
 input, and holds open the three points where the owner decides.
 
-`docs/design/DESIGN.md` sections 1 and 2 and `docs/design/VOICE.md` carry the durable principles
-and the owner's standing defaults. DESIGN.md **section 3 is not written here**: it is recorded from
-the world that was actually built, after the finish review (step 4). A rulebook written before the
+`docs/DESIGN.md` sections 1 and 2 and `docs/design/VOICE.md` carry the durable principles and the
+owner's standing defaults. DESIGN.md **section 3 is not written here**: it is recorded from the
+world that was actually built, after the finish review (step 4). A rulebook written before the
 build gets defended against reality instead of describing it.
+
+**Where the two documents live.** The method reads `docs/DESIGN.md` and writes its product record
+to `docs/PRODUCT.md`, because `docs/` is one of the directories it searches by itself. Neither
+path is configured anywhere, and neither moves. The product record holds what
+`docs/product/BRIEF.md` does not own (platform, stack, brand commitments, evidence on hand,
+accessibility needs) and points at the brief for scope, users and purpose: a fact that stands in
+both files is a fact that will disagree with itself later.
 
 No design method installed (a project that started without an interface, a failed install recorded
 in STATE.md)? Install it first. Everything below assumes it is there.
@@ -73,11 +80,12 @@ Then hand the method its input, once, and let it run:
 - **Product truth it must not ask twice for.** `docs/product/BRIEF.md` and
   `docs/product/CONTEXT.md` already hold the users, the purpose, the positioning, the constraints
   and the domain terms, captured by `begin` in the owner's own words. The method's `init` step
-  writes its own product record: give it those two files as the source, play the extracted answers
-  back for a one-line confirmation each, and let it interview only for what it genuinely adds and
-  Groundwork never captured: platform (web, iOS, Android, adaptive), brand commitments, the
-  evidence actually on hand, and accessibility needs beyond the floor. An owner who has just sat
-  through `begin`'s interview answers nothing here twice.
+  writes `docs/PRODUCT.md` from that: give it those two files as the source, play the extracted
+  answers back for a one-line confirmation each, and let it interview only for what it genuinely
+  adds and Groundwork never captured: platform (web, iOS, Android, adaptive), brand commitments,
+  the evidence actually on hand, and accessibility needs beyond the floor. What the brief already
+  owns is pointed at from the record, never copied into it. An owner who has just sat through
+  `begin`'s interview answers nothing here twice.
 - **The binding design input.** DESIGN.md section 1 (the ten principles) is a floor: a direction
   may build any world it likes on top of it, and may not break it. Section 2 (the owner's standing
   taste) is the pinned seed, and the method honors a pinned brief. The owner may replace section 2
@@ -118,6 +126,14 @@ The owner decides at three points, in this order. This is the order of work:
    a table. Report it **as it stands, open items intact**, under the reviewer's own word for it. A
    table with open findings is never handed back as a pass, and never summarized into one. Whether
    to fund another round or ship as it stands is the owner's call.
+
+   **Where the reviewer comes from on this harness.** The method ships native reviewer definitions
+   for Copilot and Cursor only; measured on a clean install, 2026-08-07, a Claude Code install
+   writes no agent definitions at all, so `impeccable-finish-reviewer` is not a name this harness
+   can spawn. Spawn a fresh subagent instead and hand it
+   `.agents/skills/impeccable/reference/degraded/finish-reviewer.md` as its brief, together with the
+   input packet that reference asks for. That keeps what the point is for, a reviewer with none of
+   the build thread in its context, and it is disclosed to the owner in one line at finish.
 
 An addition inside a surface that already exists inherits that surface: it is not a new identity
 exercise, and it does not run this round again.

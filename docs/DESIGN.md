@@ -1,7 +1,14 @@
 # DESIGN: the design system
 
-<!-- TEMPLATE: sections 1-2 are durable and ship with Groundwork; section 3 is filled per
-     project by the `design` skill and mirrors the tokens implemented in code (code is the SSOT). -->
+<!-- TEMPLATE: sections 1 and 2 are durable and ship with Groundwork. They are input: the design
+     method reads them before it chooses a direction, and a direction may build on top of them
+     but may not break them. Section 3 is written from the world that was actually built, after
+     the finish review (`design` step 4), and mirrors the tokens implemented in code (code is the
+     SSOT). A section 3 written before the build gets defended against reality instead of
+     describing it.
+
+     This file sits in `docs/` because that is where the design method looks for it, with no
+     configuration. `PRODUCT.md` beside it is the product record the same method reads. -->
 
 ## 1. Principles: why things look right
 
@@ -54,7 +61,8 @@ with dark ink `#222228`, a proven starting pair, re-derive per brand). Flat card
 borders, soft-but-adult radius (12-16px containers). Confirm this direction per project with
 the `design` skill; deviate only on the owner's say-so.
 
-## 3. Tokens: THIS PROJECT <!-- filled by `design`; mirrors the code SSOT -->
+## 3. Tokens: THIS PROJECT <!-- written by `design` step 4 from the built world, after the finish
+     review; mirrors the code SSOT -->
 
 - **UI foundation:** TBD <!-- set by `design`: component library name + major version, or
      "bespoke". Compare options in design/reference/ui-library-showcase.html; record the choice

@@ -81,7 +81,7 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 | System map (architecture) | `docs/product/ARCHITECTURE.md` (made by `architect`) |
 | Architecture & other decisions | `docs/decisions/` |
 | Code standards (per stack) | `docs/standards/` |
-| Design system (visual) | `docs/design/DESIGN.md` |
+| Design system (visual), and the product record beside it | `docs/DESIGN.md` and `docs/PRODUCT.md`: the two files the design method reads from `docs/` with no configuration |
 | Voice & content system | `docs/design/VOICE.md` |
 | EU/NL compliance: this project's register | `docs/compliance/REGISTER.md` (regimes: `docs/compliance/COMPLIANCE.md`) |
 | Operational runbooks | `docs/operations/` |

@@ -122,7 +122,7 @@ export function formatSize(bytes) {
 
 // defer: the few token values below are copied from the explainer (index.html) instead of read
 // from a token file. ceiling: a third surface, or the owner moving the accent, makes the copies
-// drift. upgrade-when: this project's own token section in docs/design/DESIGN.md is filled.
+// drift. upgrade-when: this project's own token section in docs/DESIGN.md is filled.
 const STYLE = `:root{color-scheme:dark light;
   --bg:#0a0b0b;--surface:rgba(255,255,255,.025);--line:rgba(255,255,255,.08);
   --ink:#f2f3f1;--ink2:#c3c6c0;--muted:#8f938a;--accent:#3fae9f;--tint:#3fae9f17;
