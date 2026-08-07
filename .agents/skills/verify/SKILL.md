@@ -24,7 +24,9 @@ Run the full chain and paste real results, not summaries of results:
   explained and traced to a rule before the criterion counts as met.
 - Probe the edges the criteria imply: empty input, wrong input, unauthorized user, the second
   run (idempotency), the slow path. The first bug is usually one step off the happy path.
-- UI change → also run `design-guard` on what appeared on screen.
+- User-facing output → also run `design-guard` on what rendered. A built interface gets re-checked
+  against its direction contract and the finish verdict; a document, e-mail, export or error
+  string gets judged there in full, because the design method does not carry those.
 - Bug fix → reproduce the bug first on the old behavior (or its regression test), then show it
   gone. A fix you never saw fail is a guess. Cause unknown, or a fix attempt already failed?
   Run the `debug` skill's loop before trying again.
