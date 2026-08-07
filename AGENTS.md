@@ -106,7 +106,7 @@ trigger applies. The library:
 | `architect` | System design before building: boundaries, data, contracts, threats |
 | `design` | Standing up the project's design & voice system |
 | `scope-guard` | Before calling work done or proposing a commit |
-| `design-guard` | Before delivering any UI or user-facing output |
+| `design-guard` | Before delivering documents, e-mails, exports or error text, and to re-check a built interface |
 | `verify` | Verifying a change actually works, end to end |
 | `debug` | A bug, crash or failing test with no obvious cause; a fix attempt that did not work |
 | `code-review` | After `verify`, before committing substantial work: fresh-eyes review of the diff by independent axes |
