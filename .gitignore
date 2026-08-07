@@ -6,6 +6,9 @@ Thumbs.db
 CLAUDE.local.md
 *.local.md
 .claude/scheduled_tasks.lock
+# Where the design method's edit hook is wired for this machine. It names a path inside the
+# gitignored payload, so a shared copy of it would point every clone at a file it does not have.
+.claude/settings.local.json
 .idea/
 .vscode/*
 !.vscode/settings.json

@@ -64,4 +64,43 @@ expectClean('stack-gates-armed', (fx) => {
 // report to make. A project on GitLab must not be failed here for not being on GitHub.
 expectClean('stack-gates-another-ci-host', stack);
 
+// --- The design half: the detector counts as wired only when a workflow runs it -------------
+
+const DESIGN_CONFIG = JSON.stringify({ detector: { ignoreRules: [], ignoreFiles: [], ignoreValues: [] } });
+const design = ({ put }) => put('.impeccable/config.json', DESIGN_CONFIG);
+
+const detectStep = '      - name: Design detector\n        run: npx -y impeccable@latest detect index.html\n';
+
+// A project that judges its interface with the design method, and a CI run that never looks at
+// what that interface renders. This is the window the design half exists for.
+expectFail('stack-gates', (fx) => {
+  design(fx);
+  fx.put('.github/workflows/ci.yml', ARMED_CI);
+});
+
+// The evidence rule, stated as a test: a stage that is only talked about is not a stage. Without
+// this one the gate would accept the placeholder it was written to refuse.
+expectFail('stack-gates', (fx) => {
+  design(fx);
+  fx.put('.github/workflows/ci.yml', `${ARMED_CI}      # - name: Design detector\n      #   run: npx impeccable detect index.html\n`);
+});
+
+// Wired for real, and the gate goes quiet.
+expectClean('stack-gates-detector-wired', (fx) => {
+  design(fx);
+  fx.put('.github/workflows/ci.yml', ARMED_CI + detectStep);
+});
+
+// A copy that has not stood up the design method has no config to declare one, and must not be
+// failed for missing a scan of an interface it does not have.
+expectClean('stack-gates-quiet-without-the-design-method', ({ put }) =>
+  put('.github/workflows/ci.yml', ARMED_CI));
+
+// The two halves are independent: a stack file is not what arms the design half, and a wired
+// detector does not excuse a workflow whose stack gates are still commented out.
+expectClean('stack-gates-detector-alone-needs-no-stack-file', (fx) => {
+  design(fx);
+  fx.put('.github/workflows/ci.yml', PLACEHOLDER_CI + detectStep);
+});
+
 report('stack-gate');
