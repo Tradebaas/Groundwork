@@ -127,6 +127,14 @@ The owner decides at three points, in this order. This is the order of work:
    table with open findings is never handed back as a pass, and never summarized into one. Whether
    to fund another round or ship as it stands is the owner's call.
 
+   **Where the reviewer comes from on this harness.** The method ships native reviewer definitions
+   for Copilot and Cursor only; measured on a clean install, 2026-08-07, a Claude Code install
+   writes no agent definitions at all, so `impeccable-finish-reviewer` is not a name this harness
+   can spawn. Spawn a fresh subagent instead and hand it
+   `.agents/skills/impeccable/reference/degraded/finish-reviewer.md` as its brief, together with the
+   input packet that reference asks for. That keeps what the point is for, a reviewer with none of
+   the build thread in its context, and it is disclosed to the owner in one line at finish.
+
 An addition inside a surface that already exists inherits that surface: it is not a new identity
 exercise, and it does not run this round again.
 

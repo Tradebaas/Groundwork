@@ -1,6 +1,15 @@
 # 011: design runs on impeccable, and the owner decides at three points
 
-- **Status:** building
+- **Status:** done <!-- all twelve criteria met; 1, 2 and 4 exercised on a scratch project 2026-08-07 -->
+- **Verified:** 2026-08-07, `verify` over the whole spec. Criterion 1 on a scratch copy of this repo
+  (fresh copy reports the method not armed, `--install` prints `impeccable 4.0.4 installed`, payload
+  gitignored, symlink restored, `check.mjs` green). Criterion 2 by cutting the network at the
+  registry: one line, exit 1, nothing written, setup continues; the Node-floor refusal proven the
+  same way. Criterion 4's first approval point end to end: the roll assigned, the decision page
+  served and blocked on the owner, the choice came back, and the project held no artifact code at
+  that moment. Approval points 2 and 3 could not be exercised without a real surface to build and an
+  owner to answer; what that surfaced about the finish reviewer on this harness is written into the
+  `design` skill.
 - **Traces to:** BRIEF SC-8 ("What ships does not read or look machine-made: the design and the
   words follow a system the owner chose") plus the owner's explicit request of 2026-08-05:
   "Ik wil https://github.com/pbakaus/impeccable vooral als de methodiek om het design te maken.
