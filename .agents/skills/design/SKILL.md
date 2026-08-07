@@ -11,10 +11,17 @@ the top of `node checks/check.mjs` says whether this project has it, and which r
 is the Groundwork side of that seam. It carries what is genuinely ours, hands it over as binding
 input, and holds open the three points where the owner decides.
 
-`docs/design/DESIGN.md` sections 1 and 2 and `docs/design/VOICE.md` carry the durable principles
-and the owner's standing defaults. DESIGN.md **section 3 is not written here**: it is recorded from
-the world that was actually built, after the finish review (step 4). A rulebook written before the
+`docs/DESIGN.md` sections 1 and 2 and `docs/design/VOICE.md` carry the durable principles and the
+owner's standing defaults. DESIGN.md **section 3 is not written here**: it is recorded from the
+world that was actually built, after the finish review (step 4). A rulebook written before the
 build gets defended against reality instead of describing it.
+
+**Where the two documents live.** The method reads `docs/DESIGN.md` and writes its product record
+to `docs/PRODUCT.md`, because `docs/` is one of the directories it searches by itself. Neither
+path is configured anywhere, and neither moves. The product record holds what
+`docs/product/BRIEF.md` does not own (platform, stack, brand commitments, evidence on hand,
+accessibility needs) and points at the brief for scope, users and purpose: a fact that stands in
+both files is a fact that will disagree with itself later.
 
 No design method installed (a project that started without an interface, a failed install recorded
 in STATE.md)? Install it first. Everything below assumes it is there.
@@ -73,11 +80,12 @@ Then hand the method its input, once, and let it run:
 - **Product truth it must not ask twice for.** `docs/product/BRIEF.md` and
   `docs/product/CONTEXT.md` already hold the users, the purpose, the positioning, the constraints
   and the domain terms, captured by `begin` in the owner's own words. The method's `init` step
-  writes its own product record: give it those two files as the source, play the extracted answers
-  back for a one-line confirmation each, and let it interview only for what it genuinely adds and
-  Groundwork never captured: platform (web, iOS, Android, adaptive), brand commitments, the
-  evidence actually on hand, and accessibility needs beyond the floor. An owner who has just sat
-  through `begin`'s interview answers nothing here twice.
+  writes `docs/PRODUCT.md` from that: give it those two files as the source, play the extracted
+  answers back for a one-line confirmation each, and let it interview only for what it genuinely
+  adds and Groundwork never captured: platform (web, iOS, Android, adaptive), brand commitments,
+  the evidence actually on hand, and accessibility needs beyond the floor. What the brief already
+  owns is pointed at from the record, never copied into it. An owner who has just sat through
+  `begin`'s interview answers nothing here twice.
 - **The binding design input.** DESIGN.md section 1 (the ten principles) is a floor: a direction
   may build any world it likes on top of it, and may not break it. Section 2 (the owner's standing
   taste) is the pinned seed, and the method honors a pinned brief. The owner may replace section 2

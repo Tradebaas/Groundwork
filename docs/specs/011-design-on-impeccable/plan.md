@@ -29,7 +29,7 @@ real, because every later ticket assumes a payload that a green check run tolera
   exempt from the registry requirement; an ordinary skill still must appear.
 - **The skills themselves (`begin`, `design`, `design-guard`, `verify`, `stack`, `maintain`).**
   Their seam is their trigger and their handoff, not their internals.
-- **`docs/design/DESIGN.md`, `docs/product/BRIEF.md` and PRODUCT.md.** The seam is which file owns
+- **`docs/DESIGN.md`, `docs/product/BRIEF.md` and PRODUCT.md.** The seam is which file owns
   which fact; the links gate and the docs manifest prove the pointers.
 
 ## Migration / rollback
