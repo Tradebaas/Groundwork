@@ -1,7 +1,7 @@
 # 05: the first mechanical check on rendered quality
 
 - **Blocked by:** 01-install-route-and-declaration.md
-- **Status:** ready
+- **Status:** done
 - **Traces to:** BRIEF SC-8
 
 **What to build:** A project with a frontend cannot ship a page full of the tells this framework

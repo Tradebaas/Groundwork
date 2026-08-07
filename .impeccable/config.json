@@ -20,6 +20,24 @@
         ],
         "createdAt": "2026-08-07T19:36:56.224Z",
         "reason": "Owner confirmed 2026-08-07: the tool band is decorative (aria-hidden), pauses on hover, and is disabled under reduced motion."
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-08-07T19:52:47.881Z",
+        "reason": "Measured false positive 2026-08-07: the three hits are .stat cells whose padding-left:0 always travels with border-left:0 (.stat:first-child, and :nth-child(odd) plus :last-child below 760px). The static engine merges those selectors and reads a zero inset against a border that cell does not have. Reproduced in a five-line fixture, and absent as soon as the pairing is removed."
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-08-07T19:52:47.911Z",
+        "reason": "Owner confirmed 2026-08-07: the rule wants roughly 1.25x between every step, measured on a 12.5/14/16 fixture that still fires, so passing it means running this page on two body sizes. It is dense UI (stat labels, code chips, captions, sheet hints) and that ramp would flatten those distinctions into body text."
       }
     ]
   }

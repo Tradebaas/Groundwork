@@ -109,13 +109,12 @@ window.GW={
   .wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
   section{padding-top:104px;padding-bottom:104px}
   @media(max-width:640px){section{padding-top:72px;padding-bottom:72px}:root{--pad:20px}
-    .eyebrow{font-size:11px;letter-spacing:.09em;line-height:1.5}
-    /* on a narrow screen the pill wraps and competes with the h1: keep it a plain micro-label */
-    .hero .eyebrow{border:0;background:none;padding:0;border-radius:0}}
+    .eyebrow{font-size:13px}}
 
-  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;letter-spacing:.14em;
-    line-height:1;text-transform:uppercase;color:var(--ink2);border:1px solid var(--line);
-    background:var(--surface);padding:9px 15px 8px;border-radius:999px}
+  /* A tracked-caps pill above the headline is the tell every AI landing page shares, and the
+     design method's detector names it. Same words, said quietly: sentence case, no pill. */
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:14px;
+    line-height:1.4;color:var(--ink2)}
   .eyebrow svg{color:var(--accent);width:14px;height:14px;transform:translateY(-0.5px)}
   .sec-head{max-width:64ch;margin-bottom:48px}
   h2{font-family:var(--font-display);font-size:clamp(27px,4vw,40px);line-height:1.14;
@@ -160,7 +159,7 @@ window.GW={
   .rulebook .rb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface2)}
   .rulebook .rb-bar strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;font-weight:600}
-  .rulebook .rb-bar span{font-size:11.5px;color:var(--muted)}
+  .rulebook .rb-bar span{font-size:12.5px;color:var(--muted)}
   .rulebook pre{margin:0;padding:20px 18px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
     font-size:12.5px;line-height:1.75;color:var(--ink2);white-space:pre-wrap;overflow-x:auto}
   .rulebook pre b{color:var(--ink);font-weight:600}
@@ -362,8 +361,8 @@ window.GW={
     transition:opacity .25s ease,transform .25s cubic-bezier(.2,.7,.2,1),visibility .25s}
   .sheet.open{opacity:1;transform:none;pointer-events:auto;visibility:visible}
   .sheet .shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-  .sheet .shead h4{font-size:15px;font-weight:700;letter-spacing:-.01em}
-  .sheet .grouplabel{display:flex;align-items:center;gap:8px;font-size:11.5px;letter-spacing:.1em;
+  .sheet .shead h3{font-size:15px;font-weight:700;letter-spacing:-.01em}
+  .sheet .grouplabel{display:flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:.1em;
     text-transform:uppercase;color:var(--muted);margin:18px 0 12px}
   .sheet .grouplabel svg{width:13px;height:13px}
   .swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
@@ -371,7 +370,7 @@ window.GW={
   .swatch .dot{width:32px;height:32px;border-radius:50%;border:2px solid transparent;transition:transform .18s,border-color .18s}
   .swatch[aria-checked="true"] .dot{border-color:var(--ink);transform:scale(1.12)}
   .swatch:hover .dot{transform:scale(1.12)}
-  .swatch .nm{font-size:11.5px;color:var(--muted)}
+  .swatch .nm{font-size:12.5px;color:var(--muted)}
   .fontlist{display:grid;gap:8px}
   .fontopt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
     padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);
@@ -380,7 +379,7 @@ window.GW={
   .fontopt[aria-checked="true"]{border-color:var(--accent);color:var(--ink)}
   .fontopt .ag{font-size:16px;color:var(--ink2)}
   .fontopt[aria-checked="true"] .ag{color:var(--accent)}
-  .sheet .hint{font-size:11.5px;color:var(--muted);margin-top:18px}
+  .sheet .hint{font-size:12.5px;color:var(--muted);margin-top:18px}
 
   footer{padding-top:88px;padding-bottom:120px;border-top:1px solid var(--line);text-align:center;color:var(--muted)}
   footer .logo{margin-bottom:24px}
@@ -629,7 +628,7 @@ window.GW={
 <button class="fab" id="fab" aria-label="Adjust theme and font" aria-expanded="false" aria-controls="sheet"></button>
 <div class="sheet" id="sheet" role="dialog" aria-label="Adjust the look">
   <div class="shead">
-    <h4>Look</h4>
+    <h3>Look</h3>
     <button class="iconbtn" id="sheetclose" aria-label="Close"></button>
   </div>
   <div class="grouplabel" id="gl-theme">Color theme</div>
