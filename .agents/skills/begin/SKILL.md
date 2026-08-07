@@ -177,6 +177,25 @@ install the hooks and commit, with `git init` skipped. Report the numbers to the
 flagged, what you fixed, what is now marked. If that count is large, it is the finding worth
 discussing before anything else gets built.
 
+**The design method, when this product has an interface.** Groundwork does not make interfaces
+itself: making one runs on impeccable, installed per project, and `design` carries the Groundwork
+side of it. Whether this product has an interface is already visible in the interview (question 2
+named the devices, question 3 the capabilities): play that read back as one yes/no question. It is
+asked here and nowhere else.
+
+- **Yes** → `node checks/design-method.mjs --install`. Report the single line it prints, installed
+  version included, so the owner knows which release this project holds. The payload is gitignored
+  like a dependency, so it does not enter the commit above; the enforcement line at the top of
+  `node checks/check.mjs` is what says it is there.
+- **No** → skip it, and record in STATE.md that this product has no interface and therefore no
+  design method. A later screen starts by installing it.
+
+The install refuses **before writing anything** when it cannot finish: no npm, no network, or a
+Node below the floor impeccable itself states. Report its line as it comes, name in one line what
+is unavailable until it installs (design work would otherwise run on model defaults), put that in
+STATE.md under "Blocked on:", and carry on. Setup does not fail on it, and nothing else in this
+step depends on it.
+
 If the owner has a remote (GitHub gets CI from `.github/workflows/ci.yml`; another host needs
 its equivalent: port it before first delivery), wire it and push. If not, note in STATE.md
 that CI is a `deliver` precondition still to be wired. On GitHub, also enable private
