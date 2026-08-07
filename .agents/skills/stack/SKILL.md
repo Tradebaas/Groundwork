@@ -81,6 +81,10 @@ cover at least:
     this stage and counts the detector as wired only when a workflow actually runs it. The edit
     hook needs nothing here: it is installed with the payload by
     `node checks/design-method.mjs --install`, and it reports while the code is being written.
+    Run the CI command itself to reproduce a CI finding locally. Measured on 2026-08-07: the
+    detector bundled with the installed payload reports less than the published CLI on the same
+    file (9 findings against 0 on this repo's own page), so the hook's silence is not the gate's
+    verdict.
 - Add this ecosystem's file extensions to `extraTextExtensions`/`extraCodeExtensions` in
   `checks/config.json` so the denylist/secrets/zombie checks cover the product code.
 - Add the chosen tools' commands to the stack standards file so any agent can run them. Where
