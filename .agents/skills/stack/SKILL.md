@@ -65,9 +65,31 @@ cover at least:
   - **Supply-chain floor**, as soon as the stack has dependencies: an SBOM (software bill of
     materials) of at least top-level dependencies - the CRA legal floor - plus dependency
     audit and license scan, all wired into CI with this ecosystem's current tools.
+  - **Design detector**, when the product has a user interface: a CI stage that runs the design
+    method's own detector over the surfaces this project ships, beside the typecheck and the
+    tests. It is deterministic, model-free and needs no key, so it belongs with the mechanical
+    gates rather than with the design skill. Give the stage a runner that meets the method's
+    stated `engines.node`, which can be higher than the one the rest of CI uses:
+
+    ```yaml
+    - name: The shipped surfaces carry none of the tells this framework refuses
+      run: npx -y impeccable@latest detect <the paths this project ships>
+    ```
+
+    No `continue-on-error` and no fallback: a detector that cannot install is a red job, because
+    a green tick standing for a scan that never ran is worse than no scan. `stack-gates` reads
+    this stage and counts the detector as wired only when a workflow actually runs it. The edit
+    hook needs nothing here: it is installed with the payload by
+    `node checks/design-method.mjs --install`, and it reports while the code is being written.
 - Add this ecosystem's file extensions to `extraTextExtensions`/`extraCodeExtensions` in
   `checks/config.json` so the denylist/secrets/zombie checks cover the product code.
-- Add the chosen tools' commands to the stack standards file so any agent can run them.
+- Add the chosen tools' commands to the stack standards file so any agent can run them. Where
+  the detector is wired, that file also says what it looks at (the tells a rendered interface
+  gives away: type, layout, color, motion, contrast, design-system drift) and how a false
+  positive is retired: the narrowest exception that fits, recorded with its reason in
+  `.impeccable/config.json` through the method's own `hooks ignore-value` command, never by
+  editing the config by hand and never by widening the rule off the whole project. A finding
+  nobody examined is not a false positive.
 - Prove the gates work: introduce a deliberate violation, watch the gate fail, revert.
   An untested gate is false confidence.
 

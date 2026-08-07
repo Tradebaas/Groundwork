@@ -42,6 +42,31 @@ jobs:
       # - name: Secret scan (gitleaks or equivalent)
       # - name: Build
 
+  # The first mechanical check this framework has ever had on what an interface renders
+  # (spec 011). The design method is installed per project and gitignored like a dependency, so
+  # this job fetches it at its current release instead of reading it out of the tree. A project
+  # on Groundwork with no interface deletes this job; one with more surfaces adds them to the
+  # scan. `stack-gates` reads this stage: while .impeccable/config.json declares the method, a
+  # workflow has to actually run the detector.
+  design:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          # The design method's own floor (its `engines.node`: 22.12 or newer at v4.0.4). The
+          # jobs beside it stay on 20; this one does not settle that question for them.
+          node-version: 22
+
+      # index.html is what this repository publishes. docs/design/reference/ stays out of the
+      # scan on purpose: each of its pages mimics one UI library's look so the owner can compare
+      # foundations, so a tell there is the file doing its job. Findings that were examined and
+      # accepted live with their reason in .impeccable/config.json, which this run reads.
+      # Nothing here falls back to green: a detector that cannot install fails the job, because
+      # a green tick standing for a scan that never ran is worse than no scan at all.
+      - name: The published page carries none of the tells this framework refuses
+        run: npx -y impeccable@latest detect index.html
+
   # Every adoption claim Groundwork makes rests on one walk: a fresh copy reaches a governed
   # first commit without the maintainer. Proving it once by hand dates the evidence; proving it
   # on every push means the green tick beside a commit is the claim, and a broken copy route

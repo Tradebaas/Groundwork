@@ -7,8 +7,13 @@
 // The install lands in .claude/skills, which is a symlink into .agents/skills here (decision
 // 0002), and upstream deliberately drops such a link so each harness gets its own build. So the
 // route installs the Claude build, then puts the payload where our skills live and restores the
-// link: the same files, reachable under both names, with the symlink gate still green. The
-// detector hook is not wired here; `stack` owns that, beside the ecosystem's own gates.
+// link: the same files, reachable under both names, with the symlink gate still green.
+//
+// The edit hook comes with the payload, because that is the half that has to be there while the
+// code is being written; it is wired per machine in the gitignored .claude/settings.local.json,
+// and its command is guarded so a clone without the payload is a no-op rather than an error. The
+// other half, the detector as a CI stage, is `stack`'s to wire beside the ecosystem's own gates,
+// where `stack-gates` can see whether a workflow really runs it.
 
 import {
   existsSync, readFileSync, renameSync, rmSync, symlinkSync, lstatSync, readdirSync, rmdirSync,
@@ -108,7 +113,7 @@ export function install(root) {
     throw new Error(`Node ${process.versions.node} is below ${PACKAGE}'s requirement (${want.range}): upgrade Node first, nothing was written.`);
   }
   console.log(`Node ${process.versions.node} meets ${PACKAGE} ${want.range || '(no stated range)'}. Installing...`);
-  run('npx', ['-y', `${PACKAGE}@latest`, 'install', '--providers=claude', '--scope=project', '--yes', '--no-hooks'],
+  run('npx', ['-y', `${PACKAGE}@latest`, 'install', '--providers=claude', '--scope=project', '--yes'],
     { cwd: root, stdio: ['ignore', 'inherit', 'inherit'] });
   const what = adopt(root);
   const { version } = designMethod(root);

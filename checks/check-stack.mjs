@@ -20,29 +20,50 @@ const stackFiles = (standards) => readdirSync(standards, { withFileTypes: true }
     && e.name !== 'GLOBAL.md' && !e.name.startsWith('TEMPLATE-'))
   .map((e) => e.name);
 
+// A line that runs the design detector, as opposed to one that talks about it. Comments are
+// excluded on purpose: a commented stage is the exact state this gate exists to catch, and it is
+// how a workflow claims a check it never performs.
+const runsDetector = (line) => !/^\s*#/.test(line) && /impeccable/i.test(line) && /\bdetect\b/.test(line);
+
 export const stackChecks = ({ root, fail, lines }) => ({
   'stack-gates'() {
-    const standards = join(root, 'docs', 'standards');
-    if (!existsSync(standards)) return;
-    const stacks = stackFiles(standards);
-    if (!stacks.length) return;
-
     // Another CI host is explicitly allowed (`stack` section 3: "or this host's equivalent"),
     // and whether CI exists at all is enforcement.mjs's report to make. One fact, one place.
     const wfDir = join(root, '.github', 'workflows');
     if (!existsSync(wfDir)) return;
+    const workflows = readdirSync(wfDir).filter((n) => /\.ya?ml$/.test(n));
 
-    for (const name of readdirSync(wfDir).filter((n) => /\.ya?ml$/.test(n))) {
-      lines(join(wfDir, name)).forEach((line, i) => {
-        if (!/^\s*#\s*(-\s*name:|---\s*Stack gates)/.test(line)) return;
-        fail(`.github/workflows/${name}:${i + 1} still carries a commented-out stack gate while docs/standards/ names a stack (${stacks.join(', ')}). Until that stage is filled in, CI proves Groundwork's own rules and nothing about this project's code. Replace the placeholders with this stack's real gates per the skill \`stack\` section 3, and delete the ones this stack has no equivalent for instead of leaving them commented.`);
-      });
+    const standards = join(root, 'docs', 'standards');
+    const stacks = existsSync(standards) ? stackFiles(standards) : [];
+    if (stacks.length) {
+      for (const name of workflows) {
+        lines(join(wfDir, name)).forEach((line, i) => {
+          if (!/^\s*#\s*(-\s*name:|---\s*Stack gates)/.test(line)) return;
+          fail(`.github/workflows/${name}:${i + 1} still carries a commented-out stack gate while docs/standards/ names a stack (${stacks.join(', ')}). Until that stage is filled in, CI proves Groundwork's own rules and nothing about this project's code. Replace the placeholders with this stack's real gates per the skill \`stack\` section 3, and delete the ones this stack has no equivalent for instead of leaving them commented.`);
+        });
+      }
+    }
+
+    // The design method's half of the same window. The detector is the first mechanical check
+    // this framework has on what an interface renders (spec 011), and it is the one gate whose
+    // payload is deliberately absent from a clone: it is gitignored like a dependency. So the
+    // question "does this project have an interface it judges with the method" is answered by
+    // the tracked artifact the method writes, never by looking for the payload on disk.
+    if (!existsSync(join(root, '.impeccable', 'config.json'))) return;
+    const wired = workflows.some((name) => lines(join(wfDir, name)).some(runsDetector));
+    if (!wired) {
+      fail(`.impeccable/config.json declares the design method for this project, but no workflow in .github/workflows/ runs its detector, so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y impeccable@latest detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing.`);
     }
   },
 });
 
-// What this gate deliberately does not do: name the tools it expects to find. A list of blessed
-// commands per ecosystem is the kind of allowance list that rots, and it would turn every new
-// language into a change here. So the mechanical half is "the placeholders were dealt with",
-// and proving the wired gates actually bite stays where `stack` section 3 already puts it:
-// introduce a violation, watch the gate fail, revert.
+// What this gate deliberately does not do: name the tools it expects to find per ecosystem. A
+// list of blessed commands per language is the kind of allowance list that rots, and it would
+// turn every new language into a change here. So the stack half is "the placeholders were dealt
+// with", and proving the wired gates actually bite stays where `stack` section 3 already puts
+// it: introduce a violation, watch the gate fail, revert.
+//
+// The design half names one tool, because there is one: the project chose impeccable as its
+// design method (decision 0020), the same way it chose a stack. What it still does not name is
+// which surfaces to scan or which flags to pass, so a project can widen or narrow its own scan
+// without touching this file.

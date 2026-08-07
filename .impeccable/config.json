@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-08-07T19:36:56.195Z",
+        "reason": "Owner confirmed 2026-08-07: Inter is the explainer's body face by choice. The picker swaps the display face only, and both faces are self-hosted so the page fetches nothing."
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-08-07T19:36:56.224Z",
+        "reason": "Owner confirmed 2026-08-07: the tool band is decorative (aria-hidden), pauses on hover, and is disabled under reduced motion."
+      }
+    ]
+  }
+}
