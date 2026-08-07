@@ -16,7 +16,10 @@
     { "pattern": "skipSymlinkCheck\"?\\s*:\\s*true", "why": "retired instruction; skipSymlinkCheck takes the reason as a string value and config-invariants rejects a bare true, so an exemption states its case (INTAKE row 58)" },
     { "pattern": "COMPLIANCE\\.md.{0,4}§ ?[12]|§ ?[12].{0,40}COMPLIANCE\\.md", "why": "retired pointer; COMPLIANCE.md is one table of regimes with no numbered sections, and this project's register moved to docs/compliance/REGISTER.md, which begin copies from TEMPLATE-REGISTER.md" },
     { "pattern": "clear §2 back to its skeleton", "why": "retired begin instruction; the register is a cp from docs/compliance/TEMPLATE-REGISTER.md now, like the brief, the deploy runbook and the debt ledger" },
-    { "pattern": "definitions cover language|no implementation detail in this file", "why": "retired glossary rule; a CONTEXT.md entry may now settle how a term is measured (which period, which basis, who counts) and stops at the threshold value and the branching, which belong in a spec where a test can execute them (decision 0019)" }
+    { "pattern": "definitions cover language|no implementation detail in this file", "why": "retired glossary rule; a CONTEXT.md entry may now settle how a term is measured (which period, which basis, who counts) and stops at the threshold value and the branching, which belong in a spec where a test can execute them (decision 0019)" },
+    { "pattern": "\\btaste dials\\b|VARIANCE ?/ ?MOTION ?/ ?DENSITY", "why": "retired taste-skill machinery; a page is no longer configured by three numeric knobs set before the owner sees anything. The installed design method commits a direction contract, a color strategy and one authored motion instead (decision 0020)" },
+    { "pattern": "leonxlnx/taste-skill", "why": "retired upstream pointer; the frontend rulebook this repo adapted from it is gone and the installed design method owns that ground now (decision 0020 supersedes 0012)" },
+    { "pattern": "skill `taste`|\\.agents/skills/taste", "why": "retired skill; taste was removed on 2026-08-07 and nothing may point at it again. What each of its rules became is the table in decision 0020", "exclude": ["docs/specs/011-design-on-impeccable/"] }
   ],
   "styleBans": [
     { "pattern": "\\bdelve(s|d|ing)?\\b", "why": "AI-tell verb; say 'look at', 'go into' or just state the point" },

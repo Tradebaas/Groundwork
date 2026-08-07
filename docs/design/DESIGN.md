@@ -25,7 +25,10 @@
 6. **States are designed, not inherited.** Hover, visible focus, disabled, loading, empty,
    error: every component ships with all of them. Empty states say what to do, not just "no data".
 7. **Motion is physics, not decoration.** 120-200ms ease-out on state changes; nothing bounces,
-   nothing autoplays, nothing moves that the user didn't cause.
+   nothing autoplays, nothing moves that the user didn't cause. A chosen direction may author more
+   motion than that on a surface meant to persuade, and whatever it authors collapses to static
+   under the user's reduced-motion preference: loops, parallax, scroll-driven choreography and
+   pointer physics all go still there, with the content still readable.
 8. **Accessible by construction.** Contrast of at least 4.5:1 for text, focus always visible,
    touch targets at least 44px, semantics before ARIA. WCAG 2.1 AA is the legal floor, not the
    ambition.
@@ -38,10 +41,9 @@
     gradient, and blue or purple as a reflex accent, are banned as defaults; pick the project's
     own accent (seed: the owner's deep teal). A gradient is only ever a small, deliberate,
     owner-approved accent, never the baseline. Any background motion stays subtle and secondary
-    to reading; usability wins over decoration. For pages meant to persuade (landing, marketing,
-    portfolio, explainer) the full anti-slop rulebook is skill `taste`: brief read first, three
-    dials, layout and motion rules, forbidden tells. There a deliberately higher motion level
-    may override principle 7, within `taste`'s reduced-motion and motivation rules.
+    to reading; usability wins over decoration. The full rulebook against the default look is the
+    installed design method's craft floor and its detector, which the skill `design` runs; these
+    ten principles are the floor it builds on top of and may not break.
 
 ## 2. Standing default direction (the owner's taste: seed, not straitjacket)
 
@@ -68,8 +70,6 @@ the `design` skill; deviate only on the owner's say-so.
 | Accent | `--color-accent` | TBD | one family, sparingly |
 | Danger / Warning / Success / Info | `--color-...` | TBD | used via opacity only |
 
-- **Taste dials:** TBD <!-- VARIANCE / MOTION / DENSITY, 1-10, set by `design` step 4 with
-     skill `taste`, e.g. 5 / 3 / 3 for a minimal register. Governs persuasion pages. -->
 - **Type scale:** TBD <!-- e.g. 32/24/18/16/14 + line heights; font family + weights -->
 - **Spacing ladder:** TBD <!-- e.g. 4 / 8 / 12 / 16 / 24 / 32 / 48 -->
 - **Radius:** TBD <!-- container / control / pill -->

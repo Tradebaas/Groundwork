@@ -1,6 +1,10 @@
 # 0012: Frontend persuasion pages follow the `taste` skill, adapted from leonxlnx/taste-skill
 
-- **Date:** 2026-07-11 · **Status:** accepted · **Decider:** owner (Remon) + agent
+- **Date:** 2026-07-11 · **Status:** superseded by 0020 · **Decider:** owner (Remon) + agent
+
+<!-- Superseded 2026-08-07 by decision 0020: the design method impeccable now owns the making of an
+     interface, and `taste` is gone. The reasoning below stays readable as the record of why an
+     in-house rulebook was the right answer while nothing better was installed. -->
 
 ## Context
 

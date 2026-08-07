@@ -13,7 +13,7 @@ input, and holds open the three points where the owner decides.
 
 `docs/design/DESIGN.md` sections 1 and 2 and `docs/design/VOICE.md` carry the durable principles
 and the owner's standing defaults. DESIGN.md **section 3 is not written here**: it is recorded from
-the world that was actually built, after the finish review (step 5). A rulebook written before the
+the world that was actually built, after the finish review (step 4). A rulebook written before the
 build gets defended against reality instead of describing it.
 
 No design method installed (a project that started without an interface, a failed install recorded
@@ -85,6 +85,14 @@ Then hand the method its input, once, and let it run:
   hand over VOICE.md section 3 and the foundation decision from step 2.
 - **The accessibility floor** in principle 8 and `docs/compliance/COMPLIANCE.md` is not negotiable
   by any direction.
+- **The live-surface contract, on a redesign.** A surface that already has visitors carries
+  commitments the method does not know about and will not preserve on its own: URL structure and
+  slugs, page titles and structured data, primary navigation labels, form field names and their
+  order, analytics event and field names, the logo or wordmark, and legal or consent copy. Write
+  that list down from the live site before the direction round, hand it over as a constraint, and
+  check the built result against it. Anything on it that does change, changes on the owner's say-so
+  and ships with redirects. Losing the search ranking is the most expensive way a redesign can
+  succeed visually and fail commercially.
 
 The owner decides at three points, in this order. This is the order of work:
 
@@ -114,14 +122,7 @@ The owner decides at three points, in this order. This is the order of work:
 An addition inside a surface that already exists inherits that surface: it is not a new identity
 exercise, and it does not run this round again.
 
-## 4. Set the taste dials
-
-For pages meant to persuade (landing, marketing, portfolio, explainer), skill `taste` carries
-the per-page execution rules. Set its three dials (VARIANCE / MOTION / DENSITY) here, from the
-direction the owner chose, and record them in DESIGN.md section 3 so every later page build starts
-from the same read.
-
-## 5. Record
+## 4. Record
 
 After the finish review, DESIGN.md section 3 is written from the built world: the foundation from
 step 2, the tokens as they exist in code (code is the SSOT, DESIGN.md mirrors it), the component
