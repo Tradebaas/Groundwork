@@ -274,8 +274,13 @@ export function derive({ scopeItems, specs: allSpecs }) {
     let state = 'todo';
     if (mine.some((s) => s.status === SPEC_DONE)) state = 'done';
     else if (mine.length) state = 'doing';
-    if (mine.length > 1) {
-      warnings.push({ kind: 'doubleClaim', title: item.title, specs: mine.map((s) => s.file) });
+    // Only plans still in flight can be working on it at once. A finished spec has shipped its
+    // part and a later spec supersedes that claim, which is ordinary history: a scope item worth
+    // two rounds of work carries two specs forever, and warning about it every run teaches the
+    // reader to skim the heads-up. Two unfinished plans on one item is the real clash.
+    const together = mine.filter((s) => s.status !== SPEC_DONE);
+    if (together.length > 1) {
+      warnings.push({ kind: 'doubleClaim', title: item.title, specs: together.map((s) => s.file) });
     }
     return { ...item, state, specs: mine.map((s) => s.file) };
   });
