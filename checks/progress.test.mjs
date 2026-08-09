@@ -124,16 +124,40 @@ test('a spec pointing at an unknown scope item is surfaced, not swallowed', () =
   assert.deepEqual(p.warnings, [{ kind: 'unknownItem', spec: 'ghost' }]);
 });
 
-test('two specs claiming one scope item: the furthest wins and the clash is reported', () => {
+test('two unfinished specs claiming one scope item: the furthest wins and the clash is reported', () => {
   const p = derive({
     scopeItems: items,
     specs: [
       { file: 'a', status: 'building', traces: ['SC-1'] },
+      { file: 'b', status: 'approved', traces: ['SC-1'] },
+    ],
+  });
+  assert.equal(p.items[0].state, 'doing');
+  assert.deepEqual(p.warnings, [{ kind: 'doubleClaim', title: items[0].title, specs: ['a', 'b'] }]);
+});
+
+test('a later spec supersedes a finished claim: the item still counts done, and nobody is warned', () => {
+  const p = derive({
+    scopeItems: items,
+    specs: [
+      { file: 'shipped-it-first', status: 'done', traces: ['SC-1'] },
+      { file: 'doing-it-again', status: 'building', traces: ['SC-1'] },
+    ],
+  });
+  assert.equal(p.items[0].state, 'done');
+  assert.deepEqual(p.warnings, []);
+});
+
+test('two finished specs on one scope item are history, not a clash', () => {
+  const p = derive({
+    scopeItems: items,
+    specs: [
+      { file: 'a', status: 'done', traces: ['SC-1'] },
       { file: 'b', status: 'done', traces: ['SC-1'] },
     ],
   });
   assert.equal(p.items[0].state, 'done');
-  assert.deepEqual(p.warnings, [{ kind: 'doubleClaim', title: items[0].title, specs: ['a', 'b'] }]);
+  assert.deepEqual(p.warnings, []);
 });
 
 test('no scope items means not defined, never a zero count', () => {
@@ -167,7 +191,7 @@ test('warnings speak the project language and name no internal identifiers', () 
 
   const clash = derive({
     scopeItems: items,
-    specs: [{ file: 'a', status: 'building', traces: ['SC-1'] }, { file: 'b', status: 'done', traces: ['SC-1'] }],
+    specs: [{ file: 'a', status: 'building', traces: ['SC-1'] }, { file: 'b', status: 'draft', traces: ['SC-1'] }],
   });
   const en = renderFull(project({ lang: 'en' }), clash);
   assert.match(en, /is being worked on from 2 plans at once \(a, b\)/);
