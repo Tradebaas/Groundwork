@@ -5,6 +5,16 @@
   project starts at phase 0 and moves on to phase 1), and a feature hangs on exactly one of them.
   So the epic became a folder like the feature already was, and the levels below it are read
   through it. The rest of this record stands as written.
+- **Amended again 2026-08-24** by the owner, on what happens when a story is finished: the review
+  lane is where the relevant roles look at the finished work **and everything it touched**, and two
+  human approvals sit beside the agent lenses. The owner can open every change in text and code, or
+  click approved without doing so; the customer, the person the product is for, can be asked to
+  judge functionally whether it does what it should. Both are **optional per story**, because a
+  story that touches nothing the customer can see does not need their eyes. When a human is needed,
+  they receive a link to the project's own artifact rather than a request to open a repository. And
+  an epic is not finished when its stories are merged: it is finished when it runs in production
+  and can keep running. The lane is therefore called **review**, the word rule 6 and the story
+  file's own section already use.
 
 ## Context
 
@@ -110,17 +120,21 @@ its own.
 3. A story lives in exactly one feature folder.
 4. Ready: a value sentence, testable criteria, its tasks, a size, its dependencies, and the owner's
    sign-off.
-5. Done: criteria demonstrated, `verify` green, the review verdicts approved, merged.
+5. Done: criteria demonstrated, `verify` green, the review verdicts approved, and the human
+   approvals that this story needs given, merged. Which human approvals a story needs is decided
+   when it is refined, and "none" is a legitimate answer for work nobody outside the build can see.
 6. Work in progress: one story being built, two in review.
 7. Everything else goes to the inbox and is not built.
 
-### Four agent roles and one human
+### Four agent roles and two human ones
 
 A role earns its place only by being a different viewpoint, because one agent reviewing its own
 work is blind. That gives a refiner, a builder, and three review lenses (technical, functional,
-architectural), all played by the agent through the skills that already exist. The owner is the one
-human role: he orders the work, signs off readiness, and looks at the result himself after the
-lenses have passed. There is no scrum master, because the work that accountability exists for -
+architectural), all played by the agent through the skills that already exist. The owner orders the
+work, signs off readiness, and looks at the result himself after the lenses have passed - reading
+every change, or approving without reading, as he chooses. The customer is the second human role
+and the only one who can answer whether the thing does what it was wanted for; they are asked when
+the story has something they can judge, and never as ceremony. There is no scrum master, because the work that accountability exists for -
 making impediments visible - is derived on the board from the files. There are no sprints, because
 the cadence here is the session and the feature, not a time box borrowed from a team of nine.
 

@@ -143,12 +143,12 @@ test('a maintainer-local file is read like the tracked one, and wins where both 
   const fx = tree({
     'docs/work/E-01-picture/epic.local.md': EPIC.replace('One picture', 'The local goal'),
     'docs/work/E-01-picture/F-01-reading/S-03-third.local.md': story({ id: 'S-03', title: 'Local only' }),
-    'docs/work/E-01-picture/F-01-reading/S-01-first.local.md': story({ id: 'S-01', status: 'preview', title: 'The local first slice' }),
+    'docs/work/E-01-picture/F-01-reading/S-01-first.local.md': story({ id: 'S-01', status: 'review', title: 'The local first slice' }),
   });
   const work = readWork(fx.root);
   assert.equal(work.epics[0].title, 'The local goal');
   assert.equal(storyOf(work, 'E-01/F-01/S-01').title, 'The local first slice');
-  assert.equal(storyOf(work, 'E-01/F-01/S-01').lane, 'preview');
+  assert.equal(storyOf(work, 'E-01/F-01/S-01').lane, 'review');
   assert.equal(storyOf(work, 'E-01/F-01/S-03').title, 'Local only');
   assert.equal(work.stories.length, 3, 'the same story is not counted twice');
   fx.clean();

@@ -51,7 +51,9 @@ import { fileURLToPath } from 'node:url';
 export const WORK_DIR = 'docs/work';
 // The six lanes of decision 0021, in board order. The status word and the lane are the same
 // word on purpose: one word per thing, so no mapping table can drift.
-export const LANES = ['backlog', 'refinement', 'to do', 'in progress', 'preview', 'done'];
+export const LANES = ['backlog', 'refinement', 'to do', 'in progress', 'review', 'done'];
+// "review", not "preview": rule 6 of the decision and the story file's own section already use
+// that word, and one word per thing is the rule this whole rebuild is built on.
 export const ROLES = [['tech', 'Technical'], ['func', 'Functional'], ['arch', 'Architecture']];
 
 const read = (p) => (existsSync(p) && statSync(p).isFile() ? readFileSync(p, 'utf8').replace(/\r\n/g, '\n') : null);
