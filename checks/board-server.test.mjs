@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 // Self-test for the pages beside the board and the server that carries every one of them
-// (checks/cockpit-page.mjs and checks/cockpit.mjs): a file as it lies on disk, the notice that
+// (checks/board-document.mjs and checks/board-server.mjs): a file as it lies on disk, the notice that
 // stands in for a page this server will not give, and the headers and refusals every answer is
-// served under. What may be opened is proven next door in checks/cockpit-path.test.mjs; the
+// served under. What may be opened is proven next door in checks/board-path.test.mjs; the
 // board itself in checks/board.test.mjs and checks/board-strip.test.mjs.
-// Run: node --test checks/cockpit.test.mjs
+// Run: node --test checks/board-server.test.mjs
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture, visible, get, listen } from './cockpit-fixture.mjs';
-import { formatSize, renderFile, renderNotice } from './cockpit-page.mjs';
-import { createBoardServer } from './cockpit.mjs';
+import { fixture, visible, get, listen } from './board-fixture.mjs';
+import { formatSize, renderFile, renderNotice } from './board-document.mjs';
+import { createBoardServer } from './board-server.mjs';
 
 const BRIEF = (items) => `# BRIEF
 

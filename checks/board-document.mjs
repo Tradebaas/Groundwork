@@ -1,13 +1,13 @@
 // The two pages beside the board: one file as it lies on disk, and the notice that stands in for
 // a page this server will not give. Both render in the same shell as the board itself
 // (checks/board-shell.mjs), so a reader who follows a name off the board stays in one place.
-// What may be opened is decided in checks/cockpit-path.mjs; serving is checks/cockpit.mjs; the
+// What may be opened is decided in checks/board-path.mjs; serving is checks/board-server.mjs; the
 // board is checks/board-page.mjs. Nothing here touches the network.
 //
 // Until E-01/F-04/S-04 this file also held six cards on a page of their own at /overview. That
 // page is retired: what it answered is on the board, where the four shelves (checks/shelves.mjs)
 // replaced its file map and the two lines under them (checks/board-strip.mjs) its gates and its
-// links. Spec: docs/specs/010-cockpit (maintainer-local).
+// links. Spec: 010, archived and maintainer-local.
 
 import { shelfFor, SHELF_WORDS } from './shelves.mjs';
 import { shellWords, escapeHtml, page } from './board-shell.mjs';

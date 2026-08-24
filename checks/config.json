@@ -20,7 +20,8 @@
     { "pattern": "\\btaste dials\\b|VARIANCE ?/ ?MOTION ?/ ?DENSITY", "why": "retired taste-skill machinery; a page is no longer configured by three numeric knobs set before the owner sees anything. The installed design method commits a direction contract, a color strategy and one authored motion instead (decision 0020)" },
     { "pattern": "leonxlnx/taste-skill", "why": "retired upstream pointer; the frontend rulebook this repo adapted from it is gone and the installed design method owns that ground now (decision 0020 supersedes 0012)" },
     { "pattern": "docs/design/DESIGN\\.md", "why": "retired path; the design system is docs/DESIGN.md since 2026-08-07, beside docs/PRODUCT.md, because that is where the installed design method reads both without configuration (decision 0020). docs/design/ still owns VOICE.md and reference/", "exclude": ["011-design-on-impeccable/"] },
-    { "pattern": "skill `taste`|\\.agents/skills/taste", "why": "retired skill; taste was removed on 2026-08-07 and nothing may point at it again. What each of its rules became is the table in decision 0020", "exclude": ["011-design-on-impeccable/"] }
+    { "pattern": "skill `taste`|\\.agents/skills/taste", "why": "retired skill; taste was removed on 2026-08-07 and nothing may point at it again. What each of its rules became is the table in decision 0020", "exclude": ["011-design-on-impeccable/"] },
+    { "pattern": "\\bcockpit\\b", "why": "retired name for the local board: the page is the board (decision 0021), and since 2026-08-24 the modules that build, serve and guard it are checks/board-*.mjs. A document, a workflow or a page that still says it points at a module that is gone (E-01/F-04/S-06)" }
   ],
   "styleBans": [
     { "pattern": "\\bdelve(s|d|ing)?\\b", "why": "AI-tell verb; say 'look at', 'go into' or just state the point" },

@@ -7,7 +7,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture } from './cockpit-fixture.mjs';
+import { fixture } from './board-fixture.mjs';
 import { derive, readProject } from './progress.mjs';
 import { renderFull, renderLine, warningText, WORDS } from './progress-report.mjs';
 

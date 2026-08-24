@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { rmSync } from 'node:fs';
-import { fixture } from './cockpit-fixture.mjs';
+import { fixture } from './board-fixture.mjs';
 import { readWork, render, field, section, numbered, taskList, verdicts, lane, LANES } from './work.mjs';
 
 const EPIC = `# EPIC: One picture

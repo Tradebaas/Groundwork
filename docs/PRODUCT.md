@@ -60,7 +60,7 @@ What binds an interface here, and is stated nowhere else:
   by being what it describes.
 - Its content stays readable with JavaScript off. Motion is progressive enhancement, never the
   thing that reveals the text.
-- The cockpit is rendered by a check script, so its styling lives in that script. That copy of the
+- The board is rendered by a check script, so its styling lives in that script. That copy of the
   page's colors is the one piece of known debt on this surface: `docs/state/DEBT.md`, DEBT-001.
 
 ## Brand Commitments

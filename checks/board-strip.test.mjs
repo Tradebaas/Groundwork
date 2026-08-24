@@ -8,7 +8,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { visible } from './cockpit-fixture.mjs';
+import { visible } from './board-fixture.mjs';
 import { renderStrip } from './board-strip.mjs';
 import { linkGraph } from './links.mjs';
 

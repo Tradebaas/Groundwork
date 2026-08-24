@@ -4,7 +4,7 @@
 // Both sentences are the readers' own (checks/enforcement.mjs, checks/links.mjs), quoted rather
 // than reworded: the terminal and the board must never word one fact differently.
 // Moved here when the four shelves took the board and /overview was retired
-// (E-01/F-04/S-04); until then these were two of the six cards in checks/cockpit-page.mjs.
+// (E-01/F-04/S-04); until then these were two of the six cards in checks/board-document.mjs.
 
 import { enforcementReport } from './enforcement.mjs';
 import { projectGraph, LINK_WORDS, HUB_MIN } from './links.mjs';

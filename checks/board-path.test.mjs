@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-// Self-test for checks/cockpit-path.mjs: what the board may open, and who may ask.
+// Self-test for checks/board-path.mjs: what the board may open, and who may ask.
 // The file route is the one place where this repository serves anything at all, so its decision
 // is proven here directly, in every spelling that has ever been used to leave a root, and never
 // through the server. It has its own page for the same reason the decision does: a security seam
 // is easier to keep honest when nothing else shares the page it is on.
-// Run: node --test checks/cockpit-path.test.mjs
+// Run: node --test checks/board-path.test.mjs
 
 import { writeFileSync, symlinkSync, unlinkSync, rmSync, realpathSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decidePath, hostAllowed, ignoreLookup } from './cockpit-path.mjs';
-import { fixture } from './cockpit-fixture.mjs';
+import { decidePath, hostAllowed, ignoreLookup } from './board-path.mjs';
+import { fixture } from './board-fixture.mjs';
 
 // ---------------------------------------------------------------- the path decision
 
@@ -28,15 +28,15 @@ test('a normal project file inside the root is served', () => {
 // time, so a caller learns nothing from which refusal it got.
 test('a path that leaves the root is refused, in every spelling', () => {
   const f = fixture({ 'docs/inside.md': 'inside' });
-  writeFileSync(join(f.root, '..', 'groundwork-cockpit-outside.md'), 'secret');
+  writeFileSync(join(f.root, '..', 'groundwork-board-outside.md'), 'secret');
   const nope = { isIgnored: () => false };
   for (const spelling of [
-    '../groundwork-cockpit-outside.md',
-    'docs/../../groundwork-cockpit-outside.md',
-    './../groundwork-cockpit-outside.md',
-    '..%2Fgroundwork-cockpit-outside.md',
-    '%2e%2e/groundwork-cockpit-outside.md',
-    '..\\groundwork-cockpit-outside.md',
+    '../groundwork-board-outside.md',
+    'docs/../../groundwork-board-outside.md',
+    './../groundwork-board-outside.md',
+    '..%2Fgroundwork-board-outside.md',
+    '%2e%2e/groundwork-board-outside.md',
+    '..\\groundwork-board-outside.md',
     '/etc/hosts',
     // An absolute path is refused as a spelling, even when it names a file that is inside the
     // project. Both forms of the root are asked for: on a machine where the temp directory is
@@ -50,14 +50,14 @@ test('a path that leaves the root is refused, in every spelling', () => {
   ]) {
     assert.deepEqual(decidePath(f.root, spelling, nope), { ok: false }, `permitted: ${spelling}`);
   }
-  rmSync(join(f.root, '..', 'groundwork-cockpit-outside.md'), { force: true });
+  rmSync(join(f.root, '..', 'groundwork-board-outside.md'), { force: true });
   f.clean();
 });
 
 // A link is judged by where it lands, not by where it sits.
 test('a symlink whose target is outside the root is refused', () => {
   const f = fixture({ 'docs/inside.md': 'inside' });
-  const outside = join(f.root, '..', 'groundwork-cockpit-target.md');
+  const outside = join(f.root, '..', 'groundwork-board-target.md');
   writeFileSync(outside, 'secret');
   symlinkSync(outside, join(f.root, 'docs', 'escape.md'));
   assert.deepEqual(decidePath(f.root, 'docs/escape.md', { isIgnored: () => false }), { ok: false });
@@ -69,7 +69,7 @@ test('a symlink whose target is outside the root is refused', () => {
 // through a link outside the root.
 test('a path spelled from outside the root is refused even when it lands inside', () => {
   const f = fixture({ 'docs/inside.md': 'inside' });
-  const loop = join(f.root, '..', 'groundwork-cockpit-loop');
+  const loop = join(f.root, '..', 'groundwork-board-loop');
   // unlink, not rm: the link points at a directory, and only the link may go.
   const drop = () => { try { unlinkSync(loop); } catch { /* not there */ } };
   drop();

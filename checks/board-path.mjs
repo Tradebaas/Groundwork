@@ -1,9 +1,9 @@
-// The cockpit path decision: what the board may open, and who may ask.
+// The board path decision: what the board may open, and who may ask.
 // Two answers, both pure, both testable without a server, and both the only thing standing
 // between a loopback page and the rest of the disk. They live in their own file because the
 // file route is the one real attack surface this repository has (spec 010, criteria 14 to 17),
 // and a security seam is easier to keep honest when nothing else shares the page it is on.
-// Tested directly in checks/cockpit.test.mjs, never through the server.
+// Tested directly in checks/board-path.test.mjs, never through the server.
 
 import { realpathSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';

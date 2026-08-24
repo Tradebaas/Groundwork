@@ -6,8 +6,8 @@
 // checks/progress.mjs already exposes, so moving one story's status line moves its card and no
 // second administration exists to keep in step (decision 0021).
 // The shelves are checks/shelves.mjs, the two lines checks/board-strip.mjs, the shell they render
-// in checks/board-shell.mjs; serving is checks/cockpit.mjs and the file page
-// checks/cockpit-page.mjs.
+// in checks/board-shell.mjs; serving is checks/board-server.mjs and the file page
+// checks/board-document.mjs.
 // One derivation, two outputs (decision 0021): served on this machine, or printed as one
 // self-contained file (`--page`, E-01/F-04/S-05). The file is the picture of the repository at
 // the moment it was made, so it carries that moment and opens nothing; everything else on it is
@@ -17,7 +17,7 @@
 import { readProject, readBrief, readHandoff, derive, BRIEF_PATH } from './progress.mjs';
 import { WORDS, warningText, headline, nothingPlanned } from './progress-report.mjs';
 import { LANES } from './work.mjs';
-import { decidePath, ignoreLookup } from './cockpit-path.mjs';
+import { decidePath, ignoreLookup } from './board-path.mjs';
 import { shelfDocuments, renderShelves, SHELF_WORDS } from './shelves.mjs';
 import { readStrip, stripPaths, renderStrip } from './board-strip.mjs';
 import {

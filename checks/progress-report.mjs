@@ -2,12 +2,12 @@
 // What the stand is called: the framing words in both languages, and the two shapes the report
 // takes - the full report and the one line the Stop hook shows. Split out of progress.mjs when
 // that file outgrew its budget; the judgment (what is done, what is left) stays there, and this
-// file only says it. The board (checks/cockpit-page.mjs) renders the same facts through the same
+// file only says it. The board (checks/board-page.mjs) renders the same facts through the same
 // words, so the page and the terminal can never word the stand differently.
 
 // The framing words. Content always comes from the project's own documents, so only these
 // connectors need translating. VOICE.md decides which set is used. Exported because the board
-// (checks/cockpit.mjs) renders the same facts and must say them in the same words.
+// (checks/board-page.mjs) renders the same facts and must say them in the same words.
 export const WORDS = {
   en: {
     doneOfTotal: (d, t) => `${d} of the ${t} things are done`,

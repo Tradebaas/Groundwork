@@ -1,5 +1,5 @@
 // What counts as a link, in one place: the broken-link gate (checks/check.mjs) and the board's
-// link card (checks/cockpit-page.mjs) read it from here. Two copies would drift, and a board
+// link line (checks/board-strip.mjs) read it from here. Two copies would drift, and a board
 // that shows links nobody polices is worse than no card at all (spec 010, criterion 21).
 //
 // A document points at another one in two spellings, and this project uses both:
@@ -19,7 +19,7 @@
 // The derivation itself is pure: documents in, who points at whom out. The one filesystem
 // question it needs (does this path exist?) is injected, so it can be tested against fixtures
 // directly; `projectGraph` is where that question gets its real answer.
-// Spec: docs/specs/010-cockpit (maintainer-local).
+// Spec: 010, archived and maintainer-local.
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative, resolve, sep, posix, isAbsolute } from 'node:path';
@@ -34,7 +34,7 @@ export const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', 'cove
 // wrote, and an escape sequence smuggled between backticks would repaint the report around the
 // finding that names it. So the words of the writer pass through here before any printer sees
 // them, in one place rather than per message: the board's HTML sink escapes with escapeHtml
-// (checks/cockpit-page.mjs), and this is the same rule for the terminal. Stripping rather than
+// (checks/board-shell.mjs), and this is the same rule for the terminal. Stripping rather than
 // escaping, because a finding is one line of printable text and a control character in a path
 // carries no meaning worth showing.
 export const forTerminal = (value) => String(value).replace(/[\x00-\x1f\x7f]/g, '');
@@ -185,7 +185,7 @@ export function readDocuments(root) {
 //
 // A candidate that climbs out of the project is not this project's file, and answering "that one
 // is fine" about it would hide a dead path behind a stat of the disk outside the root. Containment
-// is decided the way checks/cockpit-path.mjs decides it, because a spelling test is not
+// is decided the way checks/board-path.mjs decides it, because a spelling test is not
 // containment: `../..` normalizes to `..`, which starts with no `../` at all, and a Windows
 // checkout can spell the same climb with backslashes that posix normalizing leaves alone.
 // resolve() folds every spelling into one absolute path, and only then is it compared.
