@@ -24,6 +24,8 @@ export const WORDS = {
     headTodo: 'Not started yet',
     now: 'now',
     next: 'next',
+    nextStep: 'Next step',
+    noNextStep: 'The handoff names no next step. Run the `checkpoint` skill to write down where the work stands.',
     noScope: 'Scope is not defined yet. Run the `scope` skill to write down what this project '
       + 'will do, then this overview can report on it.',
     heads: 'Heads up',
@@ -52,6 +54,8 @@ export const WORDS = {
     headTodo: 'Nog niet begonnen',
     now: 'nu',
     next: 'daarna',
+    nextStep: 'Volgende stap',
+    noNextStep: 'De handoff noemt geen volgende stap. Draai de `checkpoint`-skill om vast te leggen waar het werk staat.',
     noScope: 'De scope is nog niet bepaald. Draai de `scope`-skill om vast te leggen wat dit '
       + 'project gaat doen, dan kan dit overzicht erover rapporteren.',
     heads: 'Let op',
