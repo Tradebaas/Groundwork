@@ -1,18 +1,18 @@
-// Groundwork cockpit: one page that shows where the project stands, served on this machine only.
+// Groundwork board server: the page that shows where the project stands, on this machine only.
 // Started from the progress command: node checks/progress.mjs --serve [--port <n>]
 //
 // This file is the HTTP layer and nothing else: which requests are answered at all, which route
 // they reach, and what headers every answer carries. What may be opened is decided in
-// checks/cockpit-path.mjs; the board is built in checks/board-page.mjs, the file page beside it
-// in checks/cockpit-page.mjs, and the shell both render in is checks/board-shell.mjs.
-// Spec: docs/specs/010-cockpit (maintainer-local); the lanes: E-01/F-04/S-03; the shelves and
+// checks/board-path.mjs; the board is built in checks/board-page.mjs, the file page beside it
+// in checks/board-document.mjs, and the shell both render in is checks/board-shell.mjs.
+// Spec: 010, archived and maintainer-local; the lanes: E-01/F-04/S-03; the shelves and
 // the retirement of /overview: E-01/F-04/S-04.
 
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
-import { decidePath, hostAllowed } from './cockpit-path.mjs';
+import { decidePath, hostAllowed } from './board-path.mjs';
 import { page, escapeHtml } from './board-shell.mjs';
-import { words, formatSize, renderFile, renderNotice, FILE_WORDS } from './cockpit-page.mjs';
+import { words, formatSize, renderFile, renderNotice, FILE_WORDS } from './board-document.mjs';
 import { boardPage } from './board-page.mjs';
 import { readProject } from './progress.mjs';
 
@@ -53,7 +53,7 @@ function send(res, status, html) {
 
 // A refusal is a security event, so it is said out loud where the owner started the server.
 // What was asked for is never echoed: it is untrusted input, and a terminal is a sink too.
-const denied = (what) => console.error(`cockpit: refused ${what}`);
+const denied = (what) => console.error(`board: refused ${what}`);
 
 export function createBoardServer(root, deps = {}) {
   return createServer((req, res) => {
@@ -83,7 +83,7 @@ export function createBoardServer(root, deps = {}) {
       // reason goes to the terminal the owner is already looking at; the page stays free of
       // internals, which is the floor for every error a reader can see. In English, because
       // the project's own language is read from a file this very failure may be about.
-      console.error(`cockpit: ${e.stack || e.message}`);
+      console.error(`board: ${e.stack || e.message}`);
       return send(res, 500, page({ title: FILE_WORDS.en.broke, body: `<h1>${escapeHtml(FILE_WORDS.en.broke)}</h1>` }));
     }
   });
@@ -95,12 +95,12 @@ export function serve(root, { port = DEFAULT_PORT } = {}) {
     const why = e.code === 'EADDRINUSE' ? `port ${port} is already in use`
       : e.code === 'EACCES' ? `port ${port} may not be opened by this user`
         : `the server could not start (${e.message})`;
-    console.error(`cockpit: ${why}. Pass another with: node checks/progress.mjs --serve --port <number>`);
+    console.error(`board: ${why}. Pass another with: node checks/progress.mjs --serve --port <number>`);
     server.close();
     process.exitCode = 1;
   });
   server.listen(port, '127.0.0.1', () => {
-    console.log(`Cockpit: http://127.0.0.1:${port} - stop with ctrl-c`);
+    console.log(`Board: http://127.0.0.1:${port} - stop with ctrl-c`);
   });
   return server;
 }

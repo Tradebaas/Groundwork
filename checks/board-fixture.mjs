@@ -1,8 +1,8 @@
 // A throwaway project on disk, and the scaffolding every test of the board shares: the file
 // bodies a work tree is made of, the reader's view of a rendered page, and the two helpers that
 // speak to a running server. It lives here so the four test files beside it
-// (checks/board.test.mjs, checks/board-strip.test.mjs, checks/cockpit.test.mjs and
-// checks/cockpit-path.test.mjs) build the same kind of project and assert on it the same way,
+// (checks/board.test.mjs, checks/board-strip.test.mjs, checks/board-server.test.mjs and
+// checks/board-path.test.mjs) build the same kind of project and assert on it the same way,
 // and none of them has to import another's tests to get one.
 
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 
 export function fixture(files = {}) {
-  const root = mkdtempSync(join(tmpdir(), 'groundwork-cockpit-'));
+  const root = mkdtempSync(join(tmpdir(), 'groundwork-board-'));
   const put = (p, body) => {
     mkdirSync(dirname(join(root, p)), { recursive: true });
     writeFileSync(join(root, p), body);

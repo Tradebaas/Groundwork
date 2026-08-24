@@ -17,7 +17,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   fixture, project, BRIEF, STORY, visible,
-} from './cockpit-fixture.mjs';
+} from './board-fixture.mjs';
 import { boardPage } from './board-page.mjs';
 
 // A moment no wall clock in this test's lifetime can produce, so a stamp that matches it can only

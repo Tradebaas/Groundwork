@@ -113,7 +113,7 @@ export function parseSpec(text) {
 }
 
 // Where the shared documents live, in one place: the parser home owns these paths, and the gate
-// (check.mjs) and the board (cockpit.mjs) read them from here rather than each spelling a path
+// (check.mjs) and the board (board-page.mjs) read them from here rather than each spelling a path
 // again. The handoff is a list because the session protocol prefers a maintainer-local file
 // whenever one exists.
 export const BRIEF_PATH = 'docs/product/BRIEF.md';
@@ -425,7 +425,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         console.error('progress: --port needs a number, for example: --serve --port 8322');
         process.exitCode = 1;
       } else {
-        import('./cockpit.mjs')
+        import('./board-server.mjs')
           .then(({ serve }) => serve(root, port === undefined ? {} : { port }))
           .catch((e) => {
             console.error(`progress: the board could not start (${e.message})`);

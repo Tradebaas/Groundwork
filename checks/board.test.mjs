@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Self-test for the board: the header, the lanes, the cards, the four shelves and the front door
-// (checks/board-page.mjs and checks/shelves.mjs, plus the routes in checks/cockpit.mjs that reach
+// (checks/board-page.mjs and checks/shelves.mjs, plus the routes in checks/board-server.mjs that reach
 // them). What is proven here is that the page is a pure function of what is on disk - move one
 // status line and the card moves, add one document and it appears on a shelf, with no other edit -
 // and that a card says everything a person needs and nothing they do not.
 // The two lines under the shelves are proven in checks/board-strip.test.mjs, the file page and
-// the server's own answers in checks/cockpit.test.mjs, and what may be opened at all in
-// checks/cockpit-path.test.mjs.
+// the server's own answers in checks/board-server.test.mjs, and what may be opened at all in
+// checks/board-path.test.mjs.
 // Run: node --test checks/board.test.mjs
 
 import { execFileSync } from 'node:child_process';
@@ -17,11 +17,11 @@ import assert from 'node:assert/strict';
 import {
   fixture, project, BRIEF, EPIC, FEATURE, STORY,
   visible, idChip, laneOf, shelfOf, get, listen,
-} from './cockpit-fixture.mjs';
+} from './board-fixture.mjs';
 import { boardPage, WIP } from './board-page.mjs';
 import { card } from './board-shell.mjs';
 import { shelfFor, SHELVES, OTHER } from './shelves.mjs';
-import { createBoardServer } from './cockpit.mjs';
+import { createBoardServer } from './board-server.mjs';
 
 // ---------------------------------------------------------------- the lanes
 
@@ -318,7 +318,7 @@ test('the shelf rule answers on its own: a path in, a shelf out', () => {
   // The narrower row wins over the folder it sits inside, in both directions.
   assert.equal(shelfFor('docs/product/ARCHITECTURE.md'), 'built');
   assert.equal(shelfFor('docs/specs/archive/000-baseline/spec.md'), 'learned');
-  assert.equal(shelfFor('docs/specs/010-cockpit.md'), 'now');
+  assert.equal(shelfFor('docs/specs/012-a-shipped-change.md'), 'now');
   assert.equal(shelfFor('docs/tools/handy.md'), OTHER);
   // A file that is no project document at all stands on no shelf, and says so.
   assert.equal(shelfFor('checks/links.mjs'), null);

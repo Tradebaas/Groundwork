@@ -2,7 +2,7 @@
 // text gets into it. The cards, the lanes, the shelves, the two lines under them, a file page and
 // a notice all render through here, so the project has one design and one escaping rule rather
 // than six of each.
-// Split out of checks/cockpit-page.mjs when the lanes arrived (E-01/F-04/S-03): a second page
+// Split out of checks/board-document.mjs when the lanes arrived (E-01/F-04/S-03): a second page
 // would otherwise have carried a second copy of the tokens and of the escaping, which is the
 // drift this whole framework is against. Nothing here reads a file or touches the network.
 //
