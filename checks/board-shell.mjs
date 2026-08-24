@@ -120,24 +120,43 @@ ${LANES}`;
 
 // ---------------------------------------------------------------- the shell's own words
 
-// The three sentences that belong to the shell rather than to any one card: what a page is read
-// from, how it names the file a fact came from, and how a reader gets back. Every page says them
-// the same way because there is one place they are written.
+// The sentences that belong to the shell rather than to any one card: what a page is read from,
+// how it names the file a fact came from, and how a reader gets back. Every page says them the
+// same way because there is one place they are written.
+//
+// Two of them come in pairs, because the same board is read in two places. Served, it is read the
+// moment the page opens and every name it shows can be opened beside it. Printed as one file
+// (E-01/F-04/S-05), it is the picture of the repository at the moment it was made (decision 0021):
+// it states that moment, and it says that the names in it are names, because the reader of a file
+// has neither the server nor the repository.
 const SHELL = {
   en: {
     live: 'Read from the project files the moment you opened this page. Nothing here is stored.',
+    made: (when) => `Made from the project files on ${when}. This is the picture at that moment, `
+      + 'not the project as it is now.',
+    names: "Every file name here is a file in the project's repository; this picture does not "
+      + 'carry the files themselves.',
     source: 'From',
     back: 'Back to the board',
     partFailed: (why) => `This part of the board could not be built: ${why}. The rest still holds.`,
   },
   nl: {
     live: 'Gelezen uit de projectbestanden op het moment dat je deze pagina opende. Er wordt hier niets bewaard.',
+    made: (when) => `Gemaakt uit de projectbestanden op ${when}. Dit is het beeld van dat moment, `
+      + 'niet het project zoals het nu is.',
+    names: 'Elke bestandsnaam hier is een bestand in de repository van het project; dit beeld '
+      + 'bevat die bestanden zelf niet.',
     source: 'Uit',
     back: 'Terug naar het bord',
     partFailed: (why) => `Dit deel van het bord kon niet worden opgebouwd: ${why}. De rest klopt nog.`,
   },
 };
 export const shellWords = (lang) => SHELL[lang] || SHELL.en;
+
+// The moment a printed board was made, in one spelling everywhere it is read. UTC, because the
+// reader of the file is not on the machine that made it and a bare local time would be a riddle;
+// to the minute, because the second a render finished says nothing a reader can use.
+export const stamp = (date) => `${date.toISOString().slice(0, 16).replace('T', ' ')} UTC`;
 
 // ---------------------------------------------------------------- text into markup
 

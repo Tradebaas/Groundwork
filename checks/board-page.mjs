@@ -8,6 +8,10 @@
 // The shelves are checks/shelves.mjs, the two lines checks/board-strip.mjs, the shell they render
 // in checks/board-shell.mjs; serving is checks/cockpit.mjs and the file page
 // checks/cockpit-page.mjs.
+// One derivation, two outputs (decision 0021): served on this machine, or printed as one
+// self-contained file (`--page`, E-01/F-04/S-05). The file is the picture of the repository at
+// the moment it was made, so it carries that moment and opens nothing; everything else on it is
+// the same page, built by the same code.
 // Story: docs/work/E-01-agile-first/F-04-board/S-04-four-shelves-and-the-file-pages (local).
 
 import { readProject, readBrief, readHandoff, derive, BRIEF_PATH } from './progress.mjs';
@@ -17,7 +21,7 @@ import { decidePath, ignoreLookup } from './cockpit-path.mjs';
 import { shelfDocuments, renderShelves, SHELF_WORDS } from './shelves.mjs';
 import { readStrip, stripPaths, renderStrip } from './board-strip.mjs';
 import {
-  shellWords, escapeHtml, sentence, pathName, lead, list, folded, card, attempt, page,
+  shellWords, escapeHtml, sentence, pathName, lead, list, folded, card, attempt, page, stamp,
 } from './board-shell.mjs';
 
 // Rule 6 of decision 0021: one story being built, two in review. The board shows the number and
@@ -222,13 +226,18 @@ function otherEpics(epics, w) {
 
 // ---------------------------------------------------------------- the page
 
-function renderBoard(project, body, w) {
+// The one line under the title that is about the page rather than about the project: where it was
+// read from. A served board was read as it opened; a file says the moment it was made instead, and
+// adds that the names in it are names, because its reader has no repository beside them.
+const readFrom = (w, made) => (made ? `${w.made(stamp(made))} ${w.names}` : w.live);
+
+function renderBoard(project, body, w, made) {
   return page({
     lang: project.lang,
     title: `${project.name}: ${w.board.toLowerCase()}`,
     body: [
       `<h1>${escapeHtml(project.name)}</h1>`,
-      `<p class="sub">${escapeHtml(w.sub)} ${escapeHtml(w.live)}</p>`,
+      `<p class="sub">${escapeHtml(w.sub)} ${escapeHtml(readFrom(w, made))}</p>`,
       body,
     ].join('\n'),
   });
@@ -246,7 +255,24 @@ const shelvesSection = (read, w, opens) => (read.error
   ? `<section class="card"><p class="note">${escapeHtml(w.partFailed(read.error.message))}</p></section>`
   : renderShelves(read.value, w, opens));
 
-export function boardPage(root, deps = {}) {
+// Which of the names the page is about to show the file route will actually serve. Asked once
+// for the whole page: git is a process, and a board that names every document would otherwise
+// spawn one per name. A file the project keeps out of git is named rather than linked, which is
+// Groundwork's own work tree and its own handoff.
+function opensOn(root, names, deps) {
+  const isIgnored = ignoreLookup(root, names.filter(Boolean));
+  return (path) => Boolean(path) && decidePath(root, path, { isIgnored, ...deps }).ok;
+}
+
+// A printed board has no route to point at, so every name on it stays a name and the git question
+// above is never asked: it exists to decide which names open, and none of them do.
+const NEVER = () => false;
+
+// The board, for the machine it is served on and for the file it is printed as. `made` is a Date
+// on a printed one and absent on a served one. It is the only input that is not read off disk,
+// and the only thing that changes the page: everything else is derived the same way for both, so
+// a lane, a card, a shelf or a count cannot reach one output and miss the other.
+export function boardPage(root, { made = null, ...deps } = {}) {
   const project = readProject(root);
   const progress = derive(project);
   const w = boardWords(project.lang);
@@ -254,20 +280,16 @@ export function boardPage(root, deps = {}) {
   const epic = inFlightEpic(work.epics);
   const handoff = readHandoff(root);
   // Everything the page will show is read before any of it renders, so the one ignore question
-  // below can cover every name it will name. Which of those files git ignores is asked once for
-  // the whole page: a board that names every document would otherwise spawn a process per name.
-  // A file the project keeps out of git is named rather than linked, which is Groundwork's own
-  // work tree and its own handoff.
+  // below can cover every name it will name.
   const docs = attempt(() => shelfDocuments(root));
   const facts = readStrip(root);
-  const isIgnored = ignoreLookup(root, [
+  const opens = made ? NEVER : opensOn(root, [
     BRIEF_PATH,
     epic?.path,
     ...work.stories.map((s) => s.path),
     ...(docs.value || []).map((d) => d.path),
     ...stripPaths(facts),
-  ].filter(Boolean));
-  const opens = (path) => Boolean(path) && decidePath(root, path, { isIgnored, ...deps }).ok;
+  ], deps);
   return renderBoard(project, [
     purposeCard(readBrief(root), project.lang, w, opens),
     roundCard(progress, epic, handoff.now, project.lang, w, opens),
@@ -276,6 +298,6 @@ export function boardPage(root, deps = {}) {
     epic ? lanes(work, epic.key, w, opens) : '',
     epic ? otherEpics(work.epics.filter((e) => e.key !== epic.key), w) : '',
     shelvesSection(docs, w, opens),
-    renderStrip(facts, project.lang, opens),
-  ].filter(Boolean).join('\n'), w);
+    renderStrip(facts, project.lang, opens, made),
+  ].filter(Boolean).join('\n'), w, made);
 }

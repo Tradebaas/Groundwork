@@ -32,6 +32,7 @@ jobs:
           node checks/cockpit.test.mjs
           node checks/board.test.mjs
           node checks/board-strip.test.mjs
+          node checks/board-file.test.mjs
 
       - name: Groundwork checks
         run: node checks/check.mjs

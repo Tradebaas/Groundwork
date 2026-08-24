@@ -112,7 +112,9 @@ records the reasoning.
   answer opens as a page on this machine only: the goal, the stand, the next step, which file
   owns which fact, how the documents point at each other, and whether the gates are armed on
   this clone. Every card is read from the file that owns it at the moment you open the page, and
-  nothing is stored.
+  nothing is stored. `--page` prints that same board as one self-contained HTML file, for someone
+  who has to look but has no repository, no server and no checkout: it says when it was made, it
+  names every file without linking to any, and it carries none of them.
 
 ## Requirements
 
