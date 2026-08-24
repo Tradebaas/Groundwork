@@ -18,9 +18,14 @@ const ENFORCEMENT_PATH = 'checks/enforcement.mjs';
 const LINKS_PATH = 'checks/links.mjs';
 
 // The gates line's own framing. What is armed and what is not comes from the report.
+// The answer comes in two, because a gate is armed somewhere. Served, that somewhere is the
+// machine the reader is on. Printed as one file (E-01/F-04/S-05) it is not: the reader is
+// somewhere else, later, so the line says where the reading was done instead of pointing at a
+// machine the report never saw.
 const GATE_WORDS = {
   en: {
     armedOf: (n, t) => `${n} of the ${t} gates on this machine are armed`,
+    armedThere: (n, t) => `${n} of the ${t} gates were armed on the machine where this file was made`,
     headArmed: 'Armed',
     headNotArmed: 'Not armed',
     signals: {
@@ -32,6 +37,7 @@ const GATE_WORDS = {
   },
   nl: {
     armedOf: (n, t) => `${n} van de ${t} poorten op deze machine staan scherp`,
+    armedThere: (n, t) => `${n} van de ${t} poorten stonden scherp op de machine waar dit bestand is gemaakt`,
     headArmed: 'Scherp',
     headNotArmed: 'Niet scherp',
     signals: {
@@ -134,12 +140,14 @@ const linksAnswer = (graph, w) => (graph.documents.length
 
 // The two lines, in the project's own language. The word sets are gathered here rather than
 // handed in, so a caller cannot hand this file a set that words a gate differently than the
-// terminal does.
-export function renderStrip(facts, lang, opens = () => false) {
+// terminal does. `made` is the moment a printed board was made, and null on a served one: the
+// only thing that changes here is which of the two gate sentences is true.
+export function renderStrip(facts, lang, opens = () => false, made = null) {
   const w = { ...shellWords(lang), ...(GATE_WORDS[lang] || GATE_WORDS.en) };
   const lw = LINK_WORDS[lang] || LINK_WORDS.en;
+  const armed = made ? w.armedThere : w.armedOf;
   return '<div class="strip">'
-    + line(w, facts.gates, (s) => `${w.armedOf(s.filter((x) => x.armed).length, s.length)}.`,
+    + line(w, facts.gates, (s) => `${armed(s.filter((x) => x.armed).length, s.length)}.`,
       (s) => gatesDetail(s, w), ENFORCEMENT_PATH, opens)
     + line(w, facts.graph, (g) => linksAnswer(g, lw), (g) => linksDetail(g, lw, opens), LINKS_PATH, opens)
     + '</div>';

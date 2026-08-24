@@ -4,6 +4,8 @@
 //      node checks/progress.mjs --line     one line, if the stand changed or a heads-up is open
 //      node checks/progress.mjs --all      one line per registered project
 //      node checks/progress.mjs --serve    the same stand as a page, on this machine only
+//      node checks/progress.mjs --page     the same board as one self-contained HTML file,
+//                                          printed, so the caller decides where it lands
 //      node checks/progress.mjs --links    which document points at which, plus orphans, hubs,
 //                                          and how many paths point at nothing
 //      node checks/progress.mjs --json     the derived facts, for tooling
@@ -430,6 +432,17 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
             process.exitCode = 1;
           });
       }
+    } else if (arg === '--page') {
+      // The same board as one file someone else can open: printed, never written, so nothing
+      // lands in the repository by accident and the caller chooses where it goes. Loaded here
+      // for the same reason --serve is, and the clock is handed in so the one fact on the page
+      // that is not read off disk stays testable.
+      import('./board-page.mjs')
+        .then(({ boardPage }) => process.stdout.write(boardPage(root, { made: new Date() })))
+        .catch((e) => {
+          console.error(`progress: the board could not be printed (${e.message})`);
+          process.exitCode = 1;
+        });
     } else if (arg === '--links') {
       // The same derivation the board's link card renders, without starting a server.
       console.log(renderLinks(readProject(root), projectGraph(root)));
