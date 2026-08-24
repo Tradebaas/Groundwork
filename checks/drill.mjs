@@ -33,7 +33,7 @@ function resolveSource() {
 // .github/workflows/ci.yml, which is the list this one mirrors.
 const SUITES = [
   'check.test.mjs', 'check-code.test.mjs', 'check-trace.test.mjs', 'check-stack.test.mjs',
-  'progress.test.mjs', 'links.test.mjs', 'work.test.mjs',
+  'progress.test.mjs', 'progress-work.test.mjs', 'links.test.mjs', 'work.test.mjs',
   'cockpit-path.test.mjs', 'cockpit.test.mjs',
 ];
 

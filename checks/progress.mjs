@@ -21,6 +21,12 @@ import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 // The link graph is derived next door, from the one definition of a link the gate also uses.
 import { projectGraph, renderLinks } from './links.mjs';
+// A project that plans its work in docs/work/ is counted from there, through the one reader of
+// that tree (decision 0021). Everything this file knows about epics, features and stories it
+// knows from work.mjs; it never parses one itself.
+import { readWork } from './work.mjs';
+// What the stand is called lives next door, so this file can stay the judgment and the commands.
+import { renderFull, renderLine } from './progress-report.mjs';
 
 const read = (p) => readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
 const SPEC_DONE = 'done';
@@ -30,48 +36,6 @@ const SPEC_INACTIVE = new Set(['dropped']);
 // same ids would otherwise see the example credited as its own finished work, or warned about
 // as a spec pointing at nothing. It is not this project's work, so it never counts as any.
 const SPEC_EXAMPLE = 'example';
-
-// The framing words. Content always comes from the project's own documents, so only these
-// connectors need translating. VOICE.md decides which set is used. Exported because the board
-// (checks/cockpit.mjs) renders the same facts and must say them in the same words.
-export const WORDS = {
-  en: {
-    doneOfTotal: (d, t) => `${d} of the ${t} things are done`,
-    shortDone: (d, t) => `${d} of ${t} done`,
-    headDone: 'Done',
-    headDoing: 'Working on now',
-    headTodo: 'Not started yet',
-    now: 'now',
-    next: 'next',
-    noScope: 'Scope is not defined yet. Run the `scope` skill to write down what this project '
-      + 'will do, then this overview can report on it.',
-    heads: 'Heads up',
-    headsShort: (n) => `${n} heads-up${n === 1 ? '' : 's'}`,
-    nothingYet: 'Nothing is done yet',
-    unknownItem: (spec) => `the plan "${spec}" says it delivers something that is not in the brief. `
-      + 'Either it belongs in the brief, or it should not be built.',
-    doubleClaim: (title, specs) => `"${title}" is being worked on from ${specs.length} plans at once `
-      + `(${specs.join(', ')}). One of them owns it; the others should say so.`,
-  },
-  nl: {
-    doneOfTotal: (d, t) => `${d} van de ${t} dingen zijn klaar`,
-    shortDone: (d, t) => `${d} van de ${t} klaar`,
-    headDone: 'Klaar',
-    headDoing: 'Nu mee bezig',
-    headTodo: 'Nog niet begonnen',
-    now: 'nu',
-    next: 'daarna',
-    noScope: 'De scope is nog niet bepaald. Draai de `scope`-skill om vast te leggen wat dit '
-      + 'project gaat doen, dan kan dit overzicht erover rapporteren.',
-    heads: 'Let op',
-    headsShort: (n) => `${n}× let op`,
-    nothingYet: 'Er is nog niets klaar',
-    unknownItem: (spec) => `het plan "${spec}" levert iets op wat niet in de brief staat. `
-      + 'Of het hoort in de brief, of het moet niet gebouwd worden.',
-    doubleClaim: (title, specs) => `aan "${title}" wordt vanuit ${specs.length} plannen tegelijk gewerkt `
-      + `(${specs.join(', ')}). Eén ervan is eigenaar; de andere moeten dat zeggen.`,
-  },
-};
 
 // ---------------------------------------------------------------- reading
 
@@ -252,15 +216,54 @@ export function readProject(root) {
     lang: language(root),
     scopeItems: brief.items,
     specs,
+    work: readWork(root),
     now: readHandoff(root).now,
   };
 }
 
 // ---------------------------------------------------------------- deriving
 
-// The whole judgment of this tool lives here: scope items in, a state per item out.
-// Kept free of file reading so it can be tested directly against fixtures.
-export function derive({ scopeItems, specs: allSpecs }) {
+// A feature is what the owner reads as one thing done or not done, so the features are the items
+// and the stories are the count underneath them. Started means a story of it is being built or
+// reviewed, or some but not all of them are finished.
+function featureState(f, stories) {
+  if (f.done) return 'done';
+  const mine = stories.filter((s) => s.feature === f.key);
+  const started = mine.some((s) => s.lane === 'in progress' || s.lane === 'preview') || mine.some((s) => s.done);
+  return started ? 'doing' : 'todo';
+}
+
+// The work tree as the same shape the brief route produces, so every renderer, the one-line
+// nudge and the board keep working on one derivation instead of two.
+function deriveWork(work) {
+  const many = work.epics.length > 1;
+  const epicTitle = (key) => (work.epics.find((e) => e.key === key) || {}).title || key;
+  const items = work.features.map((f) => ({
+    id: f.key,
+    title: many ? `${epicTitle(f.epic)}: ${f.title}` : f.title,
+    state: featureState(f, work.stories),
+  }));
+  const count = (st) => items.filter((i) => i.state === st).length;
+  return {
+    source: 'work',
+    defined: items.length > 0,
+    total: items.length,
+    done: count('done'),
+    doing: count('doing'),
+    todo: count('todo'),
+    items,
+    stories: work.counts.stories,
+    epics: work.counts.epics,
+    warnings: work.problems.map((p) => ({ kind: 'work', problem: p })),
+  };
+}
+
+// The whole judgment of this tool lives here: scope items in, a state per item out - unless the
+// project plans its work in docs/work/, in which case that tree is the answer and the brief's
+// scope list is not consulted at all. One question decides it, asked in this one place: does this
+// project have an epic on disk. Nothing is ever counted from both, so no precedence rule exists.
+export function derive({ scopeItems, specs: allSpecs, work }) {
+  if (work && work.epics.length) return deriveWork(work);
   const specs = allSpecs.filter((s) => s.status !== SPEC_EXAMPLE);
   // Warnings are kept as facts, not sentences: the wording is chosen at render time so it can
   // follow the project's language and stay free of the internal ids the report never shows.
@@ -286,6 +289,7 @@ export function derive({ scopeItems, specs: allSpecs }) {
   });
   const count = (st) => items.filter((i) => i.state === st).length;
   return {
+    source: 'brief',
     defined: items.length > 0,
     total: items.length,
     done: count('done'),
@@ -297,58 +301,6 @@ export function derive({ scopeItems, specs: allSpecs }) {
 }
 
 // ---------------------------------------------------------------- rendering
-
-// A warning fact turned into the owner's own sentence. The spec folder name stays: it is how
-// they find the file, and unlike an SC-id it says something on its own.
-export function warningText(w, warn) {
-  if (warn.kind === 'unknownItem') return w.unknownItem(warn.spec);
-  return w.doubleClaim(warn.title, warn.specs);
-}
-
-export function renderFull(project, progress) {
-  const w = WORDS[project.lang] || WORDS.en;
-  const out = [project.name];
-  if (!progress.defined) {
-    out.push('', w.noScope);
-    return out.join('\n');
-  }
-  out.push('', `${w.doneOfTotal(progress.done, progress.total)}.`, '');
-  const group = (head, state) => {
-    const list = progress.items.filter((i) => i.state === state);
-    if (!list.length) return;
-    out.push(head);
-    for (const i of list) out.push(`  - ${i.title}`);
-    out.push('');
-  };
-  group(w.headDone, 'done');
-  group(w.headDoing, 'doing');
-  group(w.headTodo, 'todo');
-  if (project.now) out.push(`${w.now}: ${project.now}`);
-  if (progress.warnings.length) {
-    out.push('', `${w.heads}:`);
-    for (const warn of progress.warnings) out.push(`  - ${warningText(w, warn)}`);
-  }
-  return out.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd();
-}
-
-const LINE_MAX = 120;
-
-export function renderLine(project, progress) {
-  const w = WORDS[project.lang] || WORDS.en;
-  if (!progress.defined) return `${project.name}: ${w.noScope.split('.')[0]}`.slice(0, LINE_MAX);
-  const doing = progress.items.find((i) => i.state === 'doing');
-  const next = progress.items.find((i) => i.state === 'todo');
-  const parts = [`${project.name}: ${w.shortDone(progress.done, progress.total)}`];
-  if (doing) parts.push(`${w.now}: ${doing.title}`);
-  else if (project.now) parts.push(`${w.now}: ${project.now}`);
-  if (next) parts.push(`${w.next}: ${next.title}`);
-  // Work that traces nowhere is the one thing this line must never drop, so the marker is
-  // reserved its space first and the titles are what gives way when the line runs long.
-  const flag = progress.warnings.length ? ` · ⚠ ${w.headsShort(progress.warnings.length)}` : '';
-  const room = LINE_MAX - flag.length;
-  const line = parts.join(' · ');
-  return (line.length <= room ? line : `${line.slice(0, room - 3).trimEnd()}...`) + flag;
-}
 
 // ---------------------------------------------------------------- per-user project list
 
@@ -448,8 +400,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       // The same derivation the board's link card renders, without starting a server.
       console.log(renderLinks(readProject(root), projectGraph(root)));
     } else if (arg === '--json') {
+      // The stand, not the tree it was counted from: `node checks/work.mjs --json` already
+      // returns every epic, feature and story, and printing them here as well would hand a tool
+      // two copies of one fact to keep in step.
       const { project, progress } = reportFor(root);
-      console.log(JSON.stringify({ ...project, progress }, null, 2));
+      const { work, ...rest } = project;
+      console.log(JSON.stringify({ ...rest, progress }, null, 2));
     } else if (arg === '--line') {
       const line = cmdLine(root);
       // Stop-hook contract: a JSON systemMessage surfaces the line, silence when nothing moved.
