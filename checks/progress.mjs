@@ -229,7 +229,7 @@ export function readProject(root) {
 function featureState(f, stories) {
   if (f.done) return 'done';
   const mine = stories.filter((s) => s.feature === f.key);
-  const started = mine.some((s) => s.lane === 'in progress' || s.lane === 'preview') || mine.some((s) => s.done);
+  const started = mine.some((s) => s.lane === 'in progress' || s.lane === 'review') || mine.some((s) => s.done);
   return started ? 'doing' : 'todo';
 }
 

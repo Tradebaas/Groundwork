@@ -107,7 +107,7 @@ test('an empty work folder is not a work tree, so the brief still answers', () =
 
 test('a feature is done, being worked on, or not started, from the stories under it', () => {
   for (const [status, state] of [['backlog', 'todo'], ['refinement', 'todo'], ['to do', 'todo'],
-    ['in progress', 'doing'], ['preview', 'doing'], ['done', 'done']]) {
+    ['in progress', 'doing'], ['review', 'doing'], ['done', 'done']]) {
     const fx = workProject(status);
     const d = derive(readProject(fx.root));
     assert.equal(d.items[0].state, state, `a story in ${status} makes its feature ${state}`);
