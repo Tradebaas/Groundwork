@@ -30,6 +30,7 @@ jobs:
           node checks/work.test.mjs
           node checks/cockpit-path.test.mjs
           node checks/cockpit.test.mjs
+          node checks/board.test.mjs
 
       - name: Groundwork checks
         run: node checks/check.mjs

@@ -19,6 +19,9 @@ import { WORK_DIR } from './work.mjs';
 import { enforcementReport } from './enforcement.mjs';
 import { decidePath, ignoreLookup } from './cockpit-path.mjs';
 import { projectGraph, LINK_WORDS, HUB_MIN } from './links.mjs';
+import {
+  shellWords, escapeHtml, sentence, fileHref, pathName, list, lead, folded, page,
+} from './board-shell.mjs';
 
 // The gates card and the link card report on the project as a whole rather than on one document,
 // so the file each names is the one that does the looking.
@@ -30,14 +33,11 @@ const LINKS_PATH = 'checks/links.mjs';
 export const BOARD = {
   en: {
     stand: 'Where the project stands',
-    live: 'Read from the project files the moment you opened this page. Nothing here is stored.',
     progress: 'Progress',
     goal: 'Goal and scope',
     noGoal: 'The brief does not say yet what this project is for. Run the `scope` skill to write it down.',
     outOfScope: 'Deliberately not part of this',
     noOutOfScope: 'The brief names nothing as out of scope yet, so the boundary is still open.',
-    nextStep: 'Next step',
-    noNextStep: 'The handoff names no next step. Run the `checkpoint` skill to write down where the work stands.',
     fileMap: 'Where everything lives',
     noFileMap: 'The documents manifest is missing, so there is no map of which file owns which fact. '
       + 'The `begin` skill puts the project documents in place.',
@@ -52,10 +52,8 @@ export const BOARD = {
       'adapter hooks': 'the reminders the agent gets during a session',
       'design method': 'the method the interface is designed with',
     },
-    source: 'From',
     cardFailed: (why) => `This card could not be built: ${why}. The other cards still hold.`,
     broke: 'The board could not be built. The reason is printed where you started it.',
-    back: 'Back to the board',
     readOnly: 'This file as it is on disk right now, read-only.',
     refused: 'Not available.',
     notShown: (name, size) => `${name} is ${size} and is not shown here. Open it on disk.`,
@@ -63,14 +61,11 @@ export const BOARD = {
   },
   nl: {
     stand: 'Waar het project staat',
-    live: 'Gelezen uit de projectbestanden op het moment dat je deze pagina opende. Er wordt hier niets bewaard.',
     progress: 'Voortgang',
     goal: 'Doel en scope',
     noGoal: 'De brief zegt nog niet waar dit project voor is. Draai de `scope`-skill om dat vast te leggen.',
     outOfScope: 'Bewust geen onderdeel hiervan',
     noOutOfScope: 'De brief noemt nog niets buiten scope, dus de grens ligt nog open.',
-    nextStep: 'Volgende stap',
-    noNextStep: 'De handoff noemt geen volgende stap. Draai de `checkpoint`-skill om vast te leggen waar het werk staat.',
     fileMap: 'Waar alles staat',
     noFileMap: 'Het documentenoverzicht ontbreekt, dus er is geen kaart van welk bestand welk feit bezit. '
       + 'De `begin`-skill zet de projectdocumenten klaar.',
@@ -85,10 +80,8 @@ export const BOARD = {
       'adapter hooks': 'de herinneringen die de agent tijdens een sessie krijgt',
       'design method': 'de methode waarmee de interface wordt ontworpen',
     },
-    source: 'Uit',
     cardFailed: (why) => `Deze kaart kon niet worden opgebouwd: ${why}. De andere kaarten kloppen nog.`,
     broke: 'Het overzicht kon niet worden opgebouwd. De reden staat waar je het gestart hebt.',
-    back: 'Terug naar het overzicht',
     readOnly: 'Dit bestand zoals het nu op schijf staat, alleen-lezen.',
     refused: 'Niet beschikbaar.',
     notShown: (name, size) => `${name} is ${size} en wordt hier niet getoond. Open het op schijf.`,
@@ -96,92 +89,13 @@ export const BOARD = {
   },
 };
 
-export const words = (lang) => BOARD[lang] || BOARD.en;
-export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (c) => ({
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-}[c]));
-
-// The report's sentences carry `backticked` skill names. They are escaped like everything else,
-// then the backticks become the markup they always meant.
-const sentence = (text) => escapeHtml(text).replace(/`([^`]+)`/g, '<code>$1</code>');
-
-const fileHref = (relPath) => `/file?path=${encodeURIComponent(relPath)}`;
-
-// A path is a name first, and a link only where the file route will actually serve that file, so
-// the board never hands a reader a door that does not open. Every card that names a file names it
-// through here; the label may be shorter than the path (the file map writes its rows from inside
-// docs/), and it is the path that decides and the label that shows.
-const pathName = (path, opens, label = path) => {
-  const name = `<code>${escapeHtml(label)}</code>`;
-  return opens(path) ? `<a href="${fileHref(path)}">${name}</a>` : name;
-};
-
+export const words = (lang) => ({
+  ...shellWords(lang), ...(WORDS[lang] || WORDS.en), ...(BOARD[lang] || BOARD.en),
+});
 export function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} bytes`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-// defer: the few token values below are copied from the explainer (index.html) instead of read
-// from a token file. ceiling: a third surface, or the owner moving the accent, makes the copies
-// drift. upgrade-when: this project's own token section in docs/DESIGN.md is filled.
-const STYLE = `:root{color-scheme:dark light;
-  --bg:#0a0b0b;--surface:rgba(255,255,255,.025);--line:rgba(255,255,255,.08);
-  --ink:#f2f3f1;--ink2:#c3c6c0;--muted:#8f938a;--accent:#3fae9f;--tint:#3fae9f17;
-  --r:14px;--rs:8px;--maxw:900px}
-@media(prefers-color-scheme:light){:root{
-  --bg:#f6f7f6;--surface:#fdfdfc;--line:rgba(0,0,0,.10);
-  --ink:#15181a;--ink2:#454b47;--muted:#5d625c;--accent:#2f6664;--tint:#2f66640f}}
-*{box-sizing:border-box}
-body{margin:0;padding:48px 20px 80px;background:var(--bg);color:var(--ink);
-  font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  -webkit-font-smoothing:antialiased}
-main{max-width:var(--maxw);margin:0 auto}
-h1{font-size:27px;line-height:1.2;letter-spacing:-.02em;margin:0 0 8px;font-weight:700}
-.sub{color:var(--muted);margin:0 0 36px;font-size:14px;max-width:62ch}
-.hint{color:var(--muted);margin:8px 0 0;font-size:14px;max-width:62ch}
-.card{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
-  padding:26px 28px;margin:0 0 20px}
-.card h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-  margin:0 0 16px;font-weight:600}
-.lead{font-size:20px;line-height:1.35;margin:0}
-h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
-  margin:24px 0 8px;font-weight:600}
-details{margin:24px 0 0}
-summary{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
-  font-weight:600;cursor:pointer}
-summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
-details[open] summary{margin-bottom:12px}
-.count{color:var(--ink2);font-weight:400;letter-spacing:0}
-ul{margin:0;padding-left:22px}
-li{margin:0 0 6px;color:var(--ink2)}
-p{margin:0 0 12px}
-.src{margin:22px 0 0;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
-.note{border-left:2px solid var(--accent);background:var(--tint);padding:12px 16px;
-  margin:20px 0 0;border-radius:0 var(--rs) var(--rs) 0;color:var(--ink2)}
-a{color:var(--accent)}
-a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
-pre{margin:0;padding:22px;background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--r);overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-size:13px;line-height:1.6;color:var(--ink2);white-space:pre-wrap;word-break:break-word}`;
-
-export function page({ lang = 'en', title, body }) {
-  return `<!doctype html>
-<html lang="${escapeHtml(lang)}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escapeHtml(title)}</title>
-<style>${STYLE}</style>
-</head>
-<body>
-<main>
-${body}
-</main>
-</body>
-</html>
-`;
 }
 
 // A card builds or it names its failure. One card that cannot be built never takes the board
@@ -206,20 +120,6 @@ export function card(title, owner, build) {
   }
   return `<section class="card">\n<h2>${escapeHtml(title)}</h2>\n${body}\n${src}\n</section>`;
 }
-
-const list = (titles) => `<ul>${titles.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`;
-
-// A card opens with its answer in one sentence. Past about two lines in this column that stops
-// being a headline and starts being a paragraph, and it is set as one: the project writes its
-// own sentences, so the board has to survive a long one without shouting it.
-const LEAD_MAX = 200;
-const lead = (text, markup = escapeHtml) => `<p${text.length > LEAD_MAX ? '' : ' class="lead"'}>${markup(text)}</p>`;
-
-// A list stops being scannable long before it stops being true. The details element keeps every
-// sentence intact, one click away, behind its own count: no script (criterion 12), and the
-// keyboard behaviour and focus ring come with the element (criterion 22).
-const folded = (head, count, body) => `<details><summary>${escapeHtml(head)} `
-  + `<span class="count">${count}</span></summary>\n${body}</details>`;
 
 // The progress card, straight off the existing derivation: the same states, the same counting
 // rules, the same items the text report produces. No second judgment lives here.
@@ -359,14 +259,15 @@ export function linksCard(graph, lang, opens = () => false) {
   return out.join('\n');
 }
 
-export function renderBoard(project, cards) {
+export function renderOverview(project, cards) {
   const w = words(project.lang);
   return page({
     lang: project.lang,
     title: `${project.name}: ${w.stand.toLowerCase()}`,
     body: [
       `<h1>${escapeHtml(project.name)}</h1>`,
-      `<p class="sub">${escapeHtml(w.stand)}. ${escapeHtml(w.live)}</p>`,
+      `<p class="sub">${escapeHtml(w.stand)}. ${escapeHtml(w.live)} `
+        + `<a href="/">${escapeHtml(w.back)}</a></p>`,
       ...cards,
     ].join('\n'),
   });
@@ -409,7 +310,7 @@ function readManifest(root) {
 const attempt = (fn) => { try { return { value: fn() }; } catch (error) { return { error }; } };
 const unwrap = ({ value, error }) => { if (error) throw error; return value; };
 
-export function boardPage(root, deps = {}) {
+export function overviewPage(root, deps = {}) {
   const project = readProject(root);
   const progress = derive(project);
   const handoff = readHandoff(root);
@@ -433,7 +334,7 @@ export function boardPage(root, deps = {}) {
   // Read in the order the question is asked: what is this, where does it stand, what is next,
   // where does everything live, how does it hang together, and is any of this actually being
   // enforced here.
-  return renderBoard(project, [
+  return renderOverview(project, [
     card(w.goal, from(BRIEF_PATH), () => goalCard(readBrief(root), project.lang)),
     // Which file owns the stand moved with the source: a project that plans its work in
     // docs/work/ is counted from there, and the card must name what it actually read.

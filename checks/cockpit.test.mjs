@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// Self-test for the board's cards and the server that carries them (checks/cockpit-page.mjs and
-// checks/cockpit.mjs). The board is proven to keep its promise: the owner's own sentences, a
-// named card instead of an empty one, and no card taking the page down.
-// What may be opened is proven next door, in checks/cockpit-path.test.mjs.
+// Self-test for the overview cards beside the board and the server that carries every page
+// (checks/cockpit-page.mjs and checks/cockpit.mjs). They are proven to keep their promise: the
+// owner's own sentences, a named card instead of an empty one, and no card taking the page down.
+// What may be opened is proven next door, in checks/cockpit-path.test.mjs; the lanes themselves
+// are proven in checks/board.test.mjs.
 // Run: node --test checks/cockpit.test.mjs
 
 import { execFileSync } from 'node:child_process';
@@ -10,9 +11,10 @@ import { request as httpRequest } from 'node:http';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fixture } from './cockpit-fixture.mjs';
+import { escapeHtml } from './board-shell.mjs';
 import {
-  escapeHtml, formatSize, card, progressCard, goalCard, nextStepCard, fileMapCard, gatesCard,
-  linksCard, renderBoard, boardPage,
+  formatSize, card, progressCard, goalCard, nextStepCard, fileMapCard, gatesCard,
+  linksCard, renderOverview, overviewPage,
 } from './cockpit-page.mjs';
 import { createBoardServer } from './cockpit.mjs';
 import { derive, parseManifest } from './progress.mjs';
@@ -52,7 +54,7 @@ test('a rendered card carries the owner sentences and no internal identifiers', 
     specs: [{ file: 'a', status: 'done', traces: ['SC-1'] }, { file: 'b', status: 'building', traces: ['SC-2'] }],
   });
   const owner = { lang: 'en', path: 'docs/product/BRIEF.md', openable: true };
-  const html = renderBoard(project(), [card('Progress', owner, () => progressCard(project(), progress))]);
+  const html = renderOverview(project(), [card('Progress', owner, () => progressCard(project(), progress))]);
   const text = visible(html);
   assert.match(text, /1 of the 3 things are done/);
   assert.match(text, /import receipts with the camera/);
@@ -73,7 +75,7 @@ test('an undefined scope names the skill that fills it instead of showing a zero
 
 test('a card that cannot be built names its failure and the others still render', () => {
   const owner = { lang: 'en', path: 'docs/product/BRIEF.md', openable: true };
-  const html = renderBoard(project(), [
+  const html = renderOverview(project(), [
     card('Progress', owner, () => { throw new Error('the brief could not be read'); }),
     card('Next step', { lang: 'en', path: 'docs/state/STATE.md', openable: true }, () => '<p>ship it</p>'),
   ]);
@@ -100,7 +102,7 @@ test('nothing in a project file can execute as markup', () => {
 
 test('framing words follow the project language', () => {
   const progress = derive({ scopeItems: items, specs: [] });
-  const nl = visible(renderBoard(project({ lang: 'nl' }), [
+  const nl = visible(renderOverview(project({ lang: 'nl' }), [
     card('Voortgang', { lang: 'nl', path: 'docs/product/BRIEF.md' }, () => progressCard(project({ lang: 'nl' }), progress)),
   ]));
   assert.match(nl, /0 van de 3 dingen zijn klaar/);
@@ -298,11 +300,13 @@ test('the server answers the board, a permitted file, a refused path and a wrong
   const server = createBoardServer(f.root, { isIgnored: () => false });
   const port = await listen(server);
   try {
-    const board = await get(port, '/');
-    assert.equal(board.status, 200);
-    assert.match(visible(board.body), /Kassaboek.*1 of the 2 things are done/);
+    // The six cards moved one route along when the lanes took the front door (E-01/F-04/S-03);
+    // what they answer, and the headers every page is served under, did not move with them.
+    const overview = await get(port, '/overview');
+    assert.equal(overview.status, 200);
+    assert.match(visible(overview.body), /Kassaboek.*1 of the 2 things are done/);
     // Criterion 6: a stale page can never present itself as the live stand.
-    assert.match(board.headers['cache-control'], /no-store/);
+    assert.match(overview.headers['cache-control'], /no-store/);
 
     const file = await get(port, '/file?path=docs%2Fproduct%2FBRIEF.md');
     assert.equal(file.status, 200);
@@ -353,7 +357,7 @@ test('the board names a handoff the project keeps out of git, and does not link 
     'docs/state/STATE.local.md': '# STATE\n\n- **Now ▶** finish the export screen\n',
   });
   execFileSync('git', ['init', '-q'], { cwd: f.root, stdio: 'ignore' });
-  const html = boardPage(f.root);
+  const html = overviewPage(f.root);
   assert.equal(html.split('<section class="card">').length - 1, 6, 'the board carries six cards');
   // The sixth card reads the documents of this project and names the file that does the looking.
   assert.match(visible(html), /How the documents point at each other/);
@@ -368,7 +372,7 @@ test('the board names a handoff the project keeps out of git, and does not link 
 
 test('a project without a brief still gets a board that says so', () => {
   const f = fixture({ 'docs/state/STATE.md': '# STATE\n' });
-  const text = visible(boardPage(f.root, { isIgnored: () => false }));
+  const text = visible(overviewPage(f.root, { isIgnored: () => false }));
   assert.match(text, /Scope is not defined yet/);
   // A zero that would read as progress on undecided scope. The gates card may honestly report
   // zero of three armed in a bare directory, and does; that is a measured fact, not a blank.
