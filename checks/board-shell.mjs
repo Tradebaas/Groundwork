@@ -1,6 +1,7 @@
 // The page shell every page this board serves is built in: the look, and the safe ways project
-// text gets into it. The lanes, the overview cards, a file page and a notice all render through
-// here, so the project has one design and one escaping rule rather than four of each.
+// text gets into it. The cards, the lanes, the shelves, the two lines under them, a file page and
+// a notice all render through here, so the project has one design and one escaping rule rather
+// than six of each.
 // Split out of checks/cockpit-page.mjs when the lanes arrived (E-01/F-04/S-03): a second page
 // would otherwise have carried a second copy of the tokens and of the escaping, which is the
 // drift this whole framework is against. Nothing here reads a file or touches the network.
@@ -60,24 +61,36 @@ pre{margin:0;padding:22px;background:var(--surface);border:1px solid var(--line)
   border-radius:var(--r);overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
   font-size:13px;line-height:1.6;color:var(--ink2);white-space:pre-wrap;word-break:break-word}`;
 
-// The lanes. A lane is a fold with its count in the summary, so a collapsed one still says how
-// much it holds; the cards inside it sit on a grid that gives way to one column on a phone.
-const LANES = `.lane{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
-  padding:18px 20px;margin:0 0 12px}
-.lane>details{margin:0}
-.lane summary{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;
-  list-style:none}
-.lane summary::-webkit-details-marker{display:none}
-/* Laying the summary out as a row takes the browser's own disclosure triangle away, and a lane
+// The three things on this board that fold: a lane, a shelf, and one of the two lines under the
+// shelves. One box, one summary, one disclosure triangle, so the page reads as a single column of
+// things that open rather than as three inventions. The cards inside a lane sit on a grid that
+// gives way to one column on a phone.
+const LANES = `.lane,.shelf,.line{border:1px solid var(--line);border-radius:var(--r);
+  background:var(--surface);padding:18px 20px;margin:0 0 12px}
+.lane>details,.shelf>details,.line>details{margin:0}
+.lane summary,.shelf summary,.line summary{display:flex;align-items:center;gap:10px;font-size:13px;
+  letter-spacing:.08em;list-style:none}
+.lane summary::-webkit-details-marker,.shelf summary::-webkit-details-marker,
+.line summary::-webkit-details-marker{display:none}
+/* Laying the summary out as a row takes the browser's own disclosure triangle away, and a row
    that folds has to look like one. This draws it back, pointing at what opening it will do. */
-.lane summary::before{content:"";width:7px;height:7px;flex:none;margin:0 2px 2px 0;
-  border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);
-  transform:rotate(-45deg)}
-.lane details[open] summary::before{transform:rotate(45deg);margin:0 2px 4px 0}
-.lane summary .ttl{color:var(--ink);text-transform:none;letter-spacing:-.01em;font-size:16px;
-  font-weight:600}
-.lane summary .tail{margin-left:auto;display:flex;align-items:center;gap:10px;
+.lane summary::before,.shelf summary::before,.line summary::before{content:"";width:7px;height:7px;
+  flex:none;margin:0 2px 2px 0;border-right:1.5px solid var(--muted);
+  border-bottom:1.5px solid var(--muted);transform:rotate(-45deg)}
+.lane details[open] summary::before,.shelf details[open] summary::before,
+.line details[open] summary::before{transform:rotate(45deg);margin:0 2px 4px 0}
+.lane summary .ttl,.shelf summary .ttl{color:var(--ink);text-transform:none;letter-spacing:-.01em;
+  font-size:16px;font-weight:600}
+.lane summary .tail,.shelf summary .tail{margin-left:auto;display:flex;align-items:center;gap:10px;
   letter-spacing:0;text-transform:none;font-weight:400}
+/* The two lines lead with a whole sentence rather than a title, so they are set as one. */
+.line summary .ttl{color:var(--ink2);text-transform:none;letter-spacing:0;font-size:15px;
+  font-weight:400;line-height:1.5}
+.shelves,.strip{margin:28px 0 0}
+/* A shelf a file page sent the reader back to says so, so arriving lands on something visible. */
+.shelf:target{border-color:var(--accent);background:var(--tint)}
+.docs{margin:14px 0 0}
+.docs li{font-size:14px;margin:0 0 8px}
 .wip{color:var(--muted);font-size:13px}
 .wip.over{color:var(--ink2);border-bottom:1px dashed var(--accent)}
 /* Cards keep a card's width and wrap onto a second column where there is room, so a lane holding
@@ -115,11 +128,13 @@ const SHELL = {
     live: 'Read from the project files the moment you opened this page. Nothing here is stored.',
     source: 'From',
     back: 'Back to the board',
+    partFailed: (why) => `This part of the board could not be built: ${why}. The rest still holds.`,
   },
   nl: {
     live: 'Gelezen uit de projectbestanden op het moment dat je deze pagina opende. Er wordt hier niets bewaard.',
     source: 'Uit',
     back: 'Terug naar het bord',
+    partFailed: (why) => `Dit deel van het bord kon niet worden opgebouwd: ${why}. De rest klopt nog.`,
   },
 };
 export const shellWords = (lang) => SHELL[lang] || SHELL.en;
@@ -159,6 +174,30 @@ export const lead = (text, markup = escapeHtml) => `<p${text.length > LEAD_MAX ?
 // sentence intact, one click away, behind its own count.
 export const folded = (head, count, body, open = false) => `<details${open ? ' open' : ''}>`
   + `<summary>${escapeHtml(head)} <span class="count">${count}</span></summary>\n${body}</details>`;
+
+// A read that fails is carried to the part of the board that owns it, where a failure is named,
+// instead of taking the page down on its way there. The other half of the same promise as card()
+// below: nothing this page reads can cost a reader the rest of it.
+export const attempt = (fn) => { try { return { value: fn() }; } catch (error) { return { error }; } };
+
+// A card builds or it names its failure. One card that cannot be built never takes the board
+// down with it, because a half-empty board still answers most of the question.
+// owner: { lang, path, opens } - the file that owns this card's content, and the question of
+// whether the file route will serve it. It is named either way, through the same pathName rule
+// every other name on the board goes through.
+export function card(title, owner, build) {
+  const w = shellWords(owner?.lang);
+  let body;
+  try {
+    body = build();
+  } catch (e) {
+    body = `<p class="note">${escapeHtml(w.partFailed(e.message))}</p>`;
+  }
+  const src = owner?.path
+    ? `<p class="src">${escapeHtml(w.source)} ${pathName(owner.path, owner.opens || (() => false))}</p>`
+    : '';
+  return `<section class="card">\n<h2>${escapeHtml(title)}</h2>\n${body}\n${src}\n</section>`;
+}
 
 // ---------------------------------------------------------------- the page itself
 

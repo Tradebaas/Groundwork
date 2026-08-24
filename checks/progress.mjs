@@ -133,6 +133,40 @@ export function parseManifest(text) {
   return rows;
 }
 
+// Which manifest row covers a file, answered in one place for the gate that fails when no row
+// does (check.mjs, docs-manifest) and for the board that reads the covering row's own sentence.
+// Paths are written from inside docs/, the way the manifest writes them.
+function globToRegex(glob) {
+  // Supports **, *, and [...] classes; everything else is literal.
+  let re = '';
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '*') {
+      if (glob[i + 1] === '*') { re += '.*'; i++; } else re += '[^/]*';
+    } else if (c === '[') {
+      const end = glob.indexOf(']', i);
+      if (end === -1) { re += '\\['; continue; }
+      re += glob.slice(i, end + 1);
+      i = end;
+    } else {
+      re += c.replace(/[.+?^${}()|\\]/g, '\\$&');
+    }
+  }
+  return new RegExp(`^${re}$`);
+}
+
+// Rows in, a lookup out. A literal row wins over a pattern row, so a file named in full carries
+// its own sentence even where a pattern would also have caught it.
+export function manifestMatcher(rows) {
+  const literals = new Map();
+  const patterns = [];
+  for (const row of rows) {
+    if (/[*[]/.test(row.path)) patterns.push({ re: globToRegex(row.path), row });
+    else literals.set(row.path, row);
+  }
+  return (inDocs) => literals.get(inDocs) || patterns.find((p) => p.re.test(inDocs))?.row || null;
+}
+
 // One definition of what counts as a spec: <folder>/spec.md, or a single .md sitting directly in
 // docs/specs/; the TEMPLATE files are skeletons, not specs. Both shapes count inside archive/ too,
 // because `spec` §6 sends every finished spec there: archiving says where a spec lives, never that
