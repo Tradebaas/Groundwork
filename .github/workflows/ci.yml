@@ -26,6 +26,7 @@ jobs:
           node checks/check-stack.test.mjs
           node checks/progress.test.mjs
           node checks/links.test.mjs
+          node checks/work.test.mjs
           node checks/cockpit-path.test.mjs
           node checks/cockpit.test.mjs
 

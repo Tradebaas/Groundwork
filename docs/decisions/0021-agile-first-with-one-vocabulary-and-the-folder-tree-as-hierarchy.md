@@ -1,6 +1,10 @@
 # 0021: Agile-first, with one vocabulary and the folder tree as the work hierarchy
 
 - **Date:** 2026-08-24 · **Status:** accepted · **Decider:** owner (requests of 2026-08-24), worked out by the agent
+- **Amended 2026-08-24** by the owner: a project runs several epics, one after the other (a Power BI
+  project starts at phase 0 and moves on to phase 1), and a feature hangs on exactly one of them.
+  So the epic became a folder like the feature already was, and the levels below it are read
+  through it. The rest of this record stands as written.
 
 ## Context
 
@@ -56,9 +60,9 @@ role or ritual that does not pay for itself.
 
 | Level | What it is | Where it lives |
 |---|---|---|
-| Epic | The goal of this round, and what "finished" means for it. One at a time | `docs/work/EPIC.md` |
-| Feature | A larger piece of work that delivers value on its own and can run live on its own. Carries its value, its purpose, which choice in the vision it serves, and its acceptance | `docs/work/F-nn-<slug>/feature.md` |
-| Story | The card that moves across the board: one buildable slice of its feature, with criteria, size, dependencies, status and the review verdicts | `docs/work/F-nn-<slug>/S-nn-<slug>.md` |
+| Epic | The goal of one round, and what "finished" means for it. A project runs several, one after the other, and only one is in flight | `docs/work/E-nn-<slug>/epic.md` |
+| Feature | A larger piece of work that delivers value on its own and can run live on its own. Carries its value, its purpose, which choice in the vision it serves, and its acceptance | `docs/work/E-nn-<slug>/F-nn-<slug>/feature.md` |
+| Story | The card that moves across the board: one buildable slice of its feature, with criteria, size, dependencies, status and the review verdicts | `.../F-nn-<slug>/S-nn-<slug>.md` |
 | Task | One step an agent carries out to finish its story, as a checklist ticked while the work happens | a section inside the story file |
 
 Retired wording, which goes on the denylist in `checks/config.json` so it cannot silently return:
@@ -67,7 +71,9 @@ becomes feature, cockpit becomes board.
 
 ### One source of truth, by construction rather than by discipline
 
-- **Containment is physical.** A story is in one feature folder. A feature is in one project.
+- **Containment is physical.** A story is in one feature folder, a feature is in one epic folder,
+  an epic is in one project. Nothing carries a parent field, and an id is the path through that
+  tree (`E-01/F-04/S-01`), so numbering restarts inside each parent and no id is ambiguous.
 - **A status lives on one line, in the story that owns it.** Every lane, count, blocker and
   progress number is derived from those lines. No status is written down twice, so no precedence
   rule is needed to say which copy wins.
@@ -83,7 +89,7 @@ becomes feature, cockpit becomes board.
 ### The document map
 
 Two documents are added, and no others: `docs/product/VISION.md` (mission, vision, strategy, and
-the choice set every feature has to serve) and `docs/work/EPIC.md`. Everything the owner asked to
+the choice set every feature has to serve) and the epic page at `docs/work/E-nn-<slug>/epic.md`. Everything the owner asked to
 be able to see already has an owning file: choices in `docs/decisions/`, the tech stack in
 `docs/standards/` plus its decision record, technical documentation in `docs/product/ARCHITECTURE.md`,
 the design system in `docs/DESIGN.md`, the voice in `docs/design/VOICE.md`, runbooks in
@@ -99,7 +105,7 @@ its own.
 
 ### Seven rules, and no more
 
-1. One epic at a time.
+1. One epic in flight at a time. A project may hold several; they run one after the other.
 2. A feature delivers value on its own and names in one line which choice in the vision it serves.
 3. A story lives in exactly one feature folder.
 4. Ready: a value sentence, testable criteria, its tasks, a size, its dependencies, and the owner's
