@@ -27,6 +27,10 @@ went wrong or needs the owner's action; a list of deleted template files is nois
 - Delete any non-archived spec folder: `docs/specs/[0-9]*` directories are in-flight Groundwork
   maintainer work, never the new owner's. Keep the worked example in
   `docs/specs/archive/007-pickup-slots/` and the `TEMPLATE*.md` files.
+- `docs/product/VISION.md` does not exist in a fresh copy, because Groundwork keeps its own
+  purpose out of the copy entirely. Put this project's in place
+  (`cp docs/product/TEMPLATE-VISION.md docs/product/VISION.md`); the interview at step 4 fills it,
+  and it is the first document that step writes, because scope serves purpose.
 - `docs/product/BRIEF.md` and `docs/specs/archive/000-baseline/` hold Groundwork's own scope and
   the record of what the framework itself had already shipped. Counted against this project they
   would report someone else's work as done here. Put the blank brief back

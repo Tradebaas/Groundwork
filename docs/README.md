@@ -16,6 +16,8 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `state/INTAKE.md` | LIVE | Untriaged feedback and ideas; nothing built from here |
 | `state/log/*.md` ◆ | ARCHIVE | Rotated STATE.md log entries, per month |
 | `product/BRIEF.md` | LIVE | Scope: what this project is and is not |
+| `product/VISION.md` | LIVE | Purpose: mission, vision, who it serves, what it is deliberately not, and the numbered strategy a feature cites. Written by `begin` from the template; absent until then |
+| `product/TEMPLATE-VISION.md` | REF | Blank vision skeleton; `begin` puts it in place as this project's own |
 | `product/TEMPLATE-BRIEF.md` | REF | Blank brief skeleton; `begin` puts it in place of Groundwork's own |
 | `product/CONTEXT.md` | LIVE | Domain glossary: shared vocabulary, banned synonyms, how a term is measured |
 | `product/ARCHITECTURE.md` | REF | System map: modules, data, what the system decides, contracts, environments (made by `architect`; absent until then) |
