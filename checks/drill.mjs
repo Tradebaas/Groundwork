@@ -170,6 +170,7 @@ export const STEPS = [
       for (const spec of numberedSpecs(ctx.copy)) rmSync(at('docs', 'specs', spec), { recursive: true });
       rmSync(at('docs', 'specs', 'archive', '000-baseline'), { recursive: true, force: true });
       const pairs = [
+        [at('docs', 'product', 'TEMPLATE-VISION.md'), at('docs', 'product', 'VISION.md')],
         [at('docs', 'product', 'TEMPLATE-BRIEF.md'), at('docs', 'product', 'BRIEF.md')],
         [at('docs', 'operations', 'TEMPLATE-DEPLOY.md'), at('docs', 'operations', 'deploy.md')],
         [at('docs', 'state', 'TEMPLATE-DEBT.md'), at('docs', 'state', 'DEBT.md')],
