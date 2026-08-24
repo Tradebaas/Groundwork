@@ -11,9 +11,11 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-  readProject, readBrief, readHandoff, parseManifest, derive, WORDS, warningText,
+  readProject, readBrief, readHandoff, parseManifest, derive,
   BRIEF_PATH, MANIFEST_PATH,
 } from './progress.mjs';
+import { WORDS, warningText, headline, nothingPlanned } from './progress-report.mjs';
+import { WORK_DIR } from './work.mjs';
 import { enforcementReport } from './enforcement.mjs';
 import { decidePath, ignoreLookup } from './cockpit-path.mjs';
 import { projectGraph, LINK_WORDS, HUB_MIN } from './links.mjs';
@@ -223,8 +225,8 @@ const folded = (head, count, body) => `<details><summary>${escapeHtml(head)} `
 // rules, the same items the text report produces. No second judgment lives here.
 export function progressCard(project, progress) {
   const w = WORDS[project.lang] || WORDS.en;
-  if (!progress.defined) return lead(w.noScope, sentence);
-  const out = [lead(`${w.doneOfTotal(progress.done, progress.total)}.`)];
+  if (!progress.defined) return lead(nothingPlanned(w, progress), sentence);
+  const out = [lead(`${headline(w, progress)}.`)];
   const group = (head, state, fold) => {
     const titles = progress.items.filter((i) => i.state === state).map((i) => i.title);
     if (!titles.length) return;
@@ -433,7 +435,9 @@ export function boardPage(root, deps = {}) {
   // enforced here.
   return renderBoard(project, [
     card(w.goal, from(BRIEF_PATH), () => goalCard(readBrief(root), project.lang)),
-    card(w.progress, from(BRIEF_PATH), () => progressCard(project, progress)),
+    // Which file owns the stand moved with the source: a project that plans its work in
+    // docs/work/ is counted from there, and the card must name what it actually read.
+    card(w.progress, from(progress.source === 'work' ? WORK_DIR : BRIEF_PATH), () => progressCard(project, progress)),
     card(w.nextStep, from(handoff.path), () => nextStepCard(handoff.now, progress.warnings, project.lang)),
     card(w.fileMap, from(MANIFEST_PATH), () => fileMapCard(unwrap(manifest), project.lang, opens)),
     card(linkWords.heading, from(LINKS_PATH), () => linksCard(unwrap(graph), project.lang, opens)),

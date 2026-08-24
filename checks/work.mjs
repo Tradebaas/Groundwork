@@ -170,7 +170,7 @@ function readStory(dir, root, name, featureKey, problems) {
   const path = relative(root, file);
   const statusText = field(text, 'Status');
   const readLane = lane(statusText);
-  if (!readLane) problems.push({ kind: 'status', path, text: `${key} has no readable status ("${statusText || 'no Status line'}"), so it is in no lane` });
+  if (!readLane) problems.push({ kind: 'status', ref: key, path, text: `${key} has no readable status ("${statusText || 'no Status line'}"), so it is in no lane` });
   const dependsText = field(text, 'Depends on');
   const size = field(text, 'Size');
   return {
@@ -199,7 +199,7 @@ function readFeature(epicDir, root, folder, epicId, problems) {
   const storyKeys = stories.map((s) => s.key);
   const found = pick(dir, 'feature');
   if (!found) {
-    problems.push({ kind: 'feature', path: relative(root, dir), text: `${key} has no feature.md, so it states no value` });
+    problems.push({ kind: 'feature', ref: key, path: relative(root, dir), text: `${key} has no feature.md, so it states no value` });
     return { feature: { id, key, epic: epicId, slug: folder, title: id, path: null, status: null, size: null, value: null, worth: null, vision: null, scope: null, acceptance: [], storyKeys }, stories };
   }
   const { text, file } = found;
@@ -228,7 +228,7 @@ function readEpic(base, root, folder, problems) {
   const featureKeys = features.map((f) => f.key);
   const found = pick(dir, 'epic');
   if (!found) {
-    problems.push({ kind: 'epic', path: relative(root, dir), text: `${id} has no epic.md, so this round has no stated goal` });
+    problems.push({ kind: 'epic', ref: id, path: relative(root, dir), text: `${id} has no epic.md, so this round has no stated goal` });
     return { epic: { id, key: id, slug: folder, title: id, path: null, status: null, goal: null, finished: [], featureKeys }, features, stories };
   }
   const { text, file } = found;
@@ -299,7 +299,7 @@ export function readWork(root, dir = WORK_DIR) {
   if (!existsSync(base) || !statSync(base).isDirectory()) return derive(empty);
   // An epic is a folder, so a loose EPIC.md is someone writing the old flat shape: say so,
   // rather than reporting an empty tree at a project that has clearly been planned.
-  if (pick(base, 'EPIC')) problems.push({ kind: 'shape', path: dir, text: `an epic is a folder: move ${dir}/EPIC.md into ${dir}/E-01-<slug>/epic.md` });
+  if (pick(base, 'EPIC')) problems.push({ kind: 'shape', ref: dir, path: dir, text: `an epic is a folder: move ${dir}/EPIC.md into ${dir}/E-01-<slug>/epic.md` });
   const read = folders(base, /^E-\d{2}-/).map((f) => readEpic(base, root, f, problems));
   return derive({
     root, path: dir, present: true, problems,
