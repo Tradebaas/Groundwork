@@ -1,111 +1,27 @@
 #!/usr/bin/env node
-// Self-test for the board: the lanes, the cards and the front door (checks/board-page.mjs, and
-// the routes in checks/cockpit.mjs that reach it). What is proven here is that the page is a
-// pure function of the work tree - move one status line and the card moves, with no other edit -
+// Self-test for the board: the header, the lanes, the cards, the four shelves and the front door
+// (checks/board-page.mjs and checks/shelves.mjs, plus the routes in checks/cockpit.mjs that reach
+// them). What is proven here is that the page is a pure function of what is on disk - move one
+// status line and the card moves, add one document and it appears on a shelf, with no other edit -
 // and that a card says everything a person needs and nothing they do not.
-// The six cards beside it are proven in checks/cockpit.test.mjs; what may be opened, in
+// The two lines under the shelves are proven in checks/board-strip.test.mjs, the file page and
+// the server's own answers in checks/cockpit.test.mjs, and what may be opened at all in
 // checks/cockpit-path.test.mjs.
 // Run: node --test checks/board.test.mjs
 
-import { request as httpRequest } from 'node:http';
+import { execFileSync } from 'node:child_process';
 import { writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture } from './cockpit-fixture.mjs';
+import {
+  fixture, project, BRIEF, EPIC, FEATURE, STORY,
+  visible, idChip, laneOf, shelfOf, get, listen,
+} from './cockpit-fixture.mjs';
 import { boardPage, WIP } from './board-page.mjs';
+import { card } from './board-shell.mjs';
+import { shelfFor, SHELVES, OTHER } from './shelves.mjs';
 import { createBoardServer } from './cockpit.mjs';
-
-// ---------------------------------------------------------------- a project on disk
-
-const BRIEF = '# BRIEF\n\n## Product\n\n- **Name:** Kassaboek\n';
-
-const EPIC = (title) => `# EPIC: ${title}
-
-- **Status:** open
-
-## The goal
-
-${title} in one round.
-
-## What finished means
-
-1. It runs where people can use it.
-`;
-
-const FEATURE = (title) => `# F: ${title}
-
-- **Status:** refinement · **Size:** M
-
-- **What you can do after it.** ${title}, working.
-- **What that is worth.** Time back.
-
-## Acceptance for the feature as a whole
-
-1. It works.
-`;
-
-// One story file, written the way the reader's parse contract says one is written. Everything a
-// test wants to vary is a field, so a test says what it is about and nothing else.
-const STORY = (id, title, over = {}) => {
-  const o = {
-    status: 'to do', size: 'M', value: 'Worth doing, in one sentence.', depends: 'none',
-    signOff: '2026-08-24', tasks: ['- [x] one', '- [ ] two'], review: ['pending', 'pending', 'pending'],
-    ...over,
-  };
-  return `# ${id}: ${title}
-
-- **Feature:** F-01 · **Status:** ${o.status} · **Size:** ${o.size}
-- **Depends on:** ${o.depends} · **Owner sign-off:** ${o.signOff}
-
-## Value
-
-${o.value}
-
-## Acceptance
-
-1. It does the thing.
-
-## Tasks
-
-${o.tasks.join('\n')}
-
-## Review
-
-- Technical: ${o.review[0]}
-- Functional: ${o.review[1]}
-- Architecture: ${o.review[2]}
-`;
-};
-
-// A project whose whole work tree is one epic with one feature: stories in, board out.
-function project(stories, extra = {}) {
-  const files = { 'docs/product/BRIEF.md': BRIEF, ...extra };
-  files['docs/work/E-01-shop/epic.md'] = EPIC('A shop that sells');
-  files['docs/work/E-01-shop/F-01-till/feature.md'] = FEATURE('The till');
-  for (const [name, body] of Object.entries(stories)) {
-    files[`docs/work/E-01-shop/F-01-till/${name}.md`] = body;
-  }
-  return fixture(files);
-}
-
-// What a reader actually sees, with the markup and the style sheet taken away.
-const visible = (html) => html.replace(/<style[\s\S]*?<\/style>/, '')
-  .replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-
-// A card's own id chip. The label a screen reader hears sits inside it, so the id is what follows
-// that label, and nothing else on the page has that shape - a blocker sentence naming the same
-// story is prose, not a chip.
-const idChip = (id) => new RegExp(`</span>${id}</span>`);
-
-// The page cut into its lanes, so a test can ask what stands in one lane without matching across
-// the whole page. The lane keeps its own markup: the fold state is part of what is asserted.
-function laneOf(html, name) {
-  const sections = html.split('<section class="lane">').slice(1);
-  const found = sections.find((s) => s.includes(`<span class="ttl">${name}</span>`));
-  assert.ok(found, `no lane called ${name} on the page`);
-  return found.split('</section>')[0];
-}
 
 // ---------------------------------------------------------------- the lanes
 
@@ -274,13 +190,36 @@ test('a project with one round says nothing about other rounds', () => {
   f.clean();
 });
 
+test('a card that cannot be built names its failure, and the rest of the board still holds', () => {
+  const html = card('Progress', { lang: 'en', path: 'docs/product/BRIEF.md' }, () => {
+    throw new Error('the brief could not be read');
+  });
+  assert.match(visible(html), /could not be built: the brief could not be read/);
+  assert.match(visible(html), /The rest still holds/);
+  // A card names its owning file either way, and here nothing said the file may be opened.
+  assert.match(visible(html), /From docs\/product\/BRIEF\.md/);
+  assert.doesNotMatch(html, /<a /);
+});
+
 // ---------------------------------------------------------------- the empty copy
 
 test('a copy that has planned nothing reads as not started, never as an error', () => {
   const f = fixture({ 'docs/product/BRIEF.md': BRIEF });
   const html = boardPage(f.root);
-  assert.match(visible(html), /No work is planned yet/);
+  // The sentence is the one the terminal report gives the same project: a brief with nothing in
+  // scope is missing its scope, and being told to cut an epic first would be the wrong step.
+  assert.match(visible(html), /Scope is not defined yet/);
   assert.doesNotMatch(html, /<section class="lane">/);
+  f.clean();
+});
+
+test('scope written down but no work tree yet names the step that is missing', () => {
+  const f = fixture({
+    'docs/product/BRIEF.md': `${BRIEF}\n## In scope\n\n- SC-1 import receipts with the camera\n`,
+  });
+  const text = visible(boardPage(f.root));
+  assert.match(text, /0 of the 1 things are done/, 'the stand is still counted');
+  assert.match(text, /No work is planned yet.*Cut the epic into features and stories/);
   f.clean();
 });
 
@@ -308,6 +247,9 @@ test('the header answers how far the project is, and what happens next', () => {
   assert.match(text, /A shop that sells in one round/, 'the goal, from the epic file');
   assert.match(text, /0 of the 1 features are done, 1 of 2 stories/);
   assert.match(text, /Next step finish the till/);
+  // Nothing internal reaches a reader: no SC-id, no status word, no script anywhere.
+  assert.doesNotMatch(text, /SC-\d|refinement/);
+  assert.doesNotMatch(boardPage(f.root), /<script|onload=|javascript:/i);
   f.clean();
 });
 
@@ -339,24 +281,177 @@ test('moving one status line moves the card, with no other edit', () => {
   f.clean();
 });
 
+// ---------------------------------------------------------------- the four shelves
+
+// A manifest with one literal row and one pattern row, which is the pair criterion 3 is about.
+const MANIFEST = `# docs
+
+| File | Tier | What it owns |
+|---|---|---|
+| \`product/VISION.md\` | LIVE | Purpose: mission, vision, who it serves |
+| \`decisions/[0-9]*.md\` ◆ | REF | Decision records, numbered |
+`;
+
+test('a document stands on the shelf its path puts it on, and one the rule does not know is named anyway', () => {
+  const f = project({ 'S-01-a': STORY('S-01', 'A card', { status: 'to do' }) });
+  // Nothing but the two files changes between the two renders.
+  assert.doesNotMatch(visible(boardPage(f.root)), /VISION\.md|handy\.md/);
+  f.put('docs/product/VISION.md', '# VISION\n');
+  f.put('docs/tools/handy.md', '# A folder the rule never heard of\n');
+  const html = boardPage(f.root);
+
+  assert.match(shelfOf(html, 'why'), /product\/VISION\.md/, 'a path the rule knows lands on its shelf');
+  assert.match(shelfOf(html, OTHER), /tools\/handy\.md/, 'a path it does not know lands on the named one');
+  // The other direction: neither document is anywhere else on the page.
+  assert.doesNotMatch(shelfOf(html, OTHER), /VISION\.md/);
+  for (const key of SHELVES) assert.doesNotMatch(shelfOf(html, key), /handy\.md/);
+  // The catch-all says why it exists, rather than reading as a filing mistake.
+  assert.match(visible(shelfOf(html, OTHER)), /folder the shelf rule does not know/);
+  f.clean();
+});
+
+test('the shelf rule answers on its own: a path in, a shelf out', () => {
+  assert.equal(shelfFor('docs/product/BRIEF.md'), 'why');
+  assert.equal(shelfFor('docs/work/E-01-shop/F-01-till/S-01-a.md'), 'now');
+  assert.equal(shelfFor('docs/standards/GLOBAL.md'), 'built');
+  assert.equal(shelfFor('docs/decisions/0021-agile-first.md'), 'learned');
+  // The narrower row wins over the folder it sits inside, in both directions.
+  assert.equal(shelfFor('docs/product/ARCHITECTURE.md'), 'built');
+  assert.equal(shelfFor('docs/specs/archive/000-baseline/spec.md'), 'learned');
+  assert.equal(shelfFor('docs/specs/010-cockpit.md'), 'now');
+  assert.equal(shelfFor('docs/tools/handy.md'), OTHER);
+  // A file that is no project document at all stands on no shelf, and says so.
+  assert.equal(shelfFor('checks/links.mjs'), null);
+  assert.equal(shelfFor(null), null);
+});
+
+test('a row says what its document owns in the manifest own words, pattern rows included', () => {
+  const f = project({ 'S-01-a': STORY('S-01', 'A card', { status: 'to do' }) }, {
+    'docs/README.md': MANIFEST,
+    'docs/product/VISION.md': '# VISION\n',
+    'docs/decisions/0001-first.md': '# 0001\n',
+    'docs/decisions/0002-second.md': '# 0002\n',
+  });
+  const html = boardPage(f.root);
+  assert.match(visible(shelfOf(html, 'why')), /product\/VISION\.md - Purpose: mission, vision, who it serves/);
+  // One pattern row stands for many files, and every one of them carries that row's sentence.
+  const learned = visible(shelfOf(html, 'learned'));
+  assert.match(learned, /decisions\/0001-first\.md - Decision records, numbered/);
+  assert.match(learned, /decisions\/0002-second\.md - Decision records, numbered/);
+  // The rows are the files, never the manifest row itself: a pattern opens nothing.
+  assert.doesNotMatch(learned, /\[0-9\]/);
+  // A document no row covers is named and says nothing further.
+  assert.match(visible(shelfOf(html, 'now')), /work\/E-01-shop\/epic\.md/);
+  f.clean();
+});
+
+test('a document the project keeps out of git is named on its shelf, and not linked', () => {
+  const f = project({ 'S-01-a': STORY('S-01', 'A card', { status: 'to do' }) }, {
+    '.gitignore': '*.local.md\n',
+    'docs/state/STATE.local.md': '# STATE\n\n- **Now ▶** finish the till\n',
+    'docs/state/DEBT.md': '# DEBT\n',
+  });
+  execFileSync('git', ['init', '-q'], { cwd: f.root, stdio: 'ignore' });
+  const html = boardPage(f.root);
+  const now = shelfOf(html, 'now');
+  assert.match(visible(now), /state\/STATE\.local\.md/, 'it is named');
+  assert.doesNotMatch(now, /href="[^"]*STATE\.local/, 'and it is not a door that does not open');
+  // Its neighbour is tracked, so that one does open: the rule is git's answer, not the folder.
+  assert.match(now, /<a href="\/file\?path=docs%2Fstate%2FDEBT\.md">/);
+  // The handoff it holds is still read, and still the next step on the board.
+  assert.match(visible(html), /Next step finish the till/);
+  f.clean();
+});
+
+// ---------------------------------------------------------------- the header
+
+test('the header says what the project is for, and what it is deliberately not', () => {
+  const f = project({ 'S-01-a': STORY('S-01', 'A card', { status: 'to do' }) }, {
+    'docs/product/BRIEF.md': `${BRIEF}
+- **One sentence:** Kassaboek turns a shoebox of receipts into a monthly overview.
+
+## Out of scope
+
+- payroll
+- a second currency
+`,
+  });
+  const html = boardPage(f.root);
+  const text = visible(html);
+  assert.match(text, /What this project is for Kassaboek turns a shoebox of receipts/);
+  assert.match(html, /<summary>Deliberately not part of this <span class="count">2<\/span>/);
+  assert.match(text, /payroll/);
+  // Beside the epic's own goal, not instead of it.
+  assert.match(text, /A shop that sells in one round/);
+  assert.match(html, /<a href="\/file\?path=docs%2Fproduct%2FBRIEF\.md">/, 'and the brief it came from opens');
+  f.clean();
+});
+
+test('a brief with no goal, or no boundary, says which is missing instead of showing nothing', () => {
+  const bare = project({ 'S-01-a': STORY('S-01', 'A card', { status: 'to do' }) });
+  assert.match(visible(boardPage(bare.root)), /does not say yet what this project is for.*scope skill/);
+  bare.clean();
+
+  const noBoundary = project({ 'S-01-a': STORY('S-01', 'A card', { status: 'to do' }) }, {
+    'docs/product/BRIEF.md': `${BRIEF}\n- **One sentence:** One sentence, no boundary.\n`,
+  });
+  const text = visible(boardPage(noBoundary.root));
+  assert.match(text, /One sentence, no boundary/);
+  assert.match(text, /names nothing as out of scope yet/);
+  noBoundary.clean();
+});
+
+test('the framing words follow the project language', () => {
+  const f = project({ 'S-01-a': STORY('S-01', 'Een kaart', { status: 'to do' }) }, {
+    'docs/design/VOICE.md': '# VOICE\n\n- **Product language:** Nederlands\n',
+  });
+  const text = visible(boardPage(f.root));
+  assert.match(text, /Waar dit project voor is/);
+  assert.match(text, /Wat we nu bouwen/, 'the shelves speak it too');
+  assert.match(text, /poorten op deze machine staan scherp/, 'and so do the two lines');
+  f.clean();
+});
+
+// ---------------------------------------------------------------- the empty copy
+
+test('a copy with no manifest, no brief and no work tree still shows four shelves', () => {
+  const f = fixture({});
+  const html = boardPage(f.root);
+  const text = visible(html);
+  // Not started, never an error: every shelf is named and says it holds nothing.
+  for (const key of SHELVES) {
+    assert.match(visible(shelfOf(html, key)), /No document here yet/, `the ${key} shelf stands`);
+    assert.match(shelfOf(html, key), /<span class="wip">0<\/span>/);
+  }
+  // The catch-all only appears when it holds something, so an empty copy has exactly four.
+  assert.equal(html.split('<section class="shelf"').length - 1, SHELVES.length);
+  assert.match(text, /Scope is not defined yet/);
+  // A zero would read as progress on undecided scope, so none is shown; the next step still
+  // names the skill that writes one.
+  assert.doesNotMatch(text, /0 of the \d+ things/);
+  assert.match(text, /names no next step.*checkpoint skill/);
+  assert.doesNotMatch(html, /<section class="lane">/);
+  f.clean();
+});
+
+test('a docs folder that cannot be read is named on the page, never shown as empty shelves', () => {
+  // A name that is no folder at all is the portable stand-in for a folder that cannot be read:
+  // both leave readdir throwing something other than "it is not there".
+  const f = fixture({ docs: 'this is a file where a folder should be\n' });
+  const html = boardPage(f.root);
+  assert.match(visible(html), /could not be built:/);
+  assert.match(visible(html), /The rest still holds/);
+  // A silent empty shelf would read as a project with no documents, which is the lie this
+  // catches. The rest of the board is still there.
+  assert.doesNotMatch(html, /<section class="shelf"/);
+  assert.match(visible(html), /What this project is for/);
+  assert.match(visible(html), /gates on this machine are armed/);
+  f.clean();
+});
+
 // ---------------------------------------------------------------- the routes
 
-function get(port, path) {
-  return new Promise((ok, fail) => {
-    const req = httpRequest({ host: '127.0.0.1', port, path, method: 'GET' }, (res) => {
-      let body = '';
-      res.setEncoding('utf8');
-      res.on('data', (c) => { body += c; });
-      res.on('end', () => ok({ status: res.statusCode, body }));
-    });
-    req.on('error', fail);
-    req.end();
-  });
-}
-
-const listen = (server) => new Promise((ok) => server.listen(0, '127.0.0.1', () => ok(server.address().port)));
-
-test('the served page opens on the board, with the six cards one route along', async () => {
+test('the board is the whole front door, and the page it replaced is gone', async () => {
   const planned = project({ 'S-01-a': STORY('S-01', 'A card in a lane', { status: 'to do' }) });
   const server = createBoardServer(planned.root, { isIgnored: () => false });
   const port = await listen(server);
@@ -364,23 +459,18 @@ test('the served page opens on the board, with the six cards one route along', a
     const front = await get(port, '/');
     assert.equal(front.status, 200);
     assert.match(visible(front.body), /A card in a lane/, 'the front door is the board');
-    assert.match(front.body, /<a href="\/overview">/, 'and it names where the rest went');
-    const overview = await get(port, '/overview');
-    assert.equal(overview.status, 200);
-    assert.match(visible(overview.body), /Where the project stands/, 'the six cards keep answering');
-    assert.match(overview.body, /<a href="\/">/, 'and point back at the board');
-  } finally { server.close(); planned.clean(); }
+    // Everything the six cards answered is on it: goal and boundary, the stand, the next step,
+    // the documents, the gates and the links.
+    assert.match(visible(front.body), /What this project is for/);
+    assert.match(visible(front.body), /What we are building now/);
+    assert.match(visible(front.body), /gates on this machine are armed/);
+    assert.match(visible(front.body), /documents, with \d+ links between them/);
+    // And no page links at the retired route any more.
+    assert.doesNotMatch(front.body, /href="\/overview"/);
 
-  // A project that has planned nothing yet opens on the same door, and says so rather than
-  // failing: what the six cards answer is still one click away.
-  const briefOnly = fixture({ 'docs/product/BRIEF.md': BRIEF });
-  const second = createBoardServer(briefOnly.root, { isIgnored: () => false });
-  const secondPort = await listen(second);
-  try {
-    const front = await get(secondPort, '/');
-    assert.equal(front.status, 200);
-    assert.match(visible(front.body), /No work is planned yet/);
-    assert.match(front.body, /<a href="\/overview">/);
-    assert.equal((await get(secondPort, '/overview')).status, 200);
-  } finally { second.close(); briefOnly.clean(); }
+    const retired = await get(port, '/overview');
+    assert.equal(retired.status, 404, 'the route answers like any other unknown path');
+    assert.equal(retired.status, (await get(port, '/nothing-here')).status);
+    assert.match(visible(retired.body), /Not available/);
+  } finally { server.close(); planned.clean(); }
 });

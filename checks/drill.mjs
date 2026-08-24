@@ -34,7 +34,7 @@ function resolveSource() {
 const SUITES = [
   'check.test.mjs', 'check-code.test.mjs', 'check-trace.test.mjs', 'check-stack.test.mjs',
   'progress.test.mjs', 'progress-work.test.mjs', 'links.test.mjs', 'work.test.mjs',
-  'cockpit-path.test.mjs', 'cockpit.test.mjs', 'board.test.mjs',
+  'cockpit-path.test.mjs', 'cockpit.test.mjs', 'board.test.mjs', 'board-strip.test.mjs',
 ];
 
 // begin's exact first commit, subject and trailer, from .agents/skills/begin/SKILL.md.

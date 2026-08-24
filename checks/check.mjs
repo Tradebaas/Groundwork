@@ -13,7 +13,7 @@ import { execSync } from 'node:child_process';
 import { join, dirname, resolve, relative, extname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // The brief is parsed in exactly one place; the progress overview already owns that reading.
-import { parseBrief, parseManifest, isSpecPath, BRIEF_PATH, MANIFEST_PATH } from './progress.mjs';
+import { parseBrief, parseManifest, manifestMatcher, isSpecPath, BRIEF_PATH, MANIFEST_PATH } from './progress.mjs';
 // What counts as a link, and which files are this project's documents, are defined once and
 // read here and by the board.
 import { parseLinks, linkTargets, readDocuments, forTerminal, SKIP_DIRS } from './links.mjs';
@@ -61,25 +61,6 @@ function walk(root, dir = root, out = { files: [], dirs: [] }) {
 const read = (p) => readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
 const lines = (p) => read(p).split('\n');
 const rel = (root, p) => relative(root, p).split('\\').join('/');
-
-function globToRegex(glob) {
-  // Supports **, *, and [...] classes; everything else is literal.
-  let re = '';
-  for (let i = 0; i < glob.length; i++) {
-    const c = glob[i];
-    if (c === '*') {
-      if (glob[i + 1] === '*') { re += '.*'; i++; } else re += '[^/]*';
-    } else if (c === '[') {
-      const end = glob.indexOf(']', i);
-      if (end === -1) { re += '\\['; continue; }
-      re += glob.slice(i, end + 1);
-      i = end;
-    } else {
-      re += c.replace(/[.+?^${}()|\\]/g, '\\$&');
-    }
-  }
-  return new RegExp(`^${re}$`);
-}
 
 // The SC-ids the brief actually defines, or null when scope is not written down yet. A project
 // that has not run `scope` has nothing to validate against and must not be blocked for it.
@@ -162,16 +143,14 @@ export function runChecks(root) {
     },
 
     'docs-manifest'() {
-      // The manifest is read in exactly one place, the same rows the board renders: two readers
-      // of one table drift, and a row the gate cannot see is a document nobody has to list.
-      const listed = parseManifest(read(join(root, MANIFEST_PATH))).map((r) => r.path);
-      const literals = new Set(listed.filter((p) => !/[*[]/.test(p)));
-      const patterns = listed.filter((p) => /[*[]/.test(p)).map(globToRegex);
+      // The manifest is read in exactly one place, and matched by the one rule the board reads
+      // its rows through: two readers of one table drift, and a row the gate cannot see is a
+      // document nobody has to list.
+      const covers = manifestMatcher(parseManifest(read(join(root, MANIFEST_PATH))));
       for (const f of tree.files) {
         const r = rel(root, f);
         if (!r.startsWith('docs/') || r === MANIFEST_PATH || r.endsWith('.gitkeep')) continue;
-        const inDocs = r.slice('docs/'.length);
-        if (!literals.has(inDocs) && !patterns.some((re) => re.test(inDocs))) {
+        if (!covers(r.slice('docs/'.length))) {
           fail(`${r} is not listed in docs/README.md: every docs file needs a manifest row.`);
         }
       }

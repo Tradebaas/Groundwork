@@ -9,7 +9,7 @@ import { join, dirname } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  parseBrief, parseSpec, derive, readProject,
+  parseBrief, parseSpec, parseManifest, manifestMatcher, derive, readProject,
   readRegistry, writeRegistry, registerProject, cmdLine, isSpecPath,
 } from './progress.mjs';
 import { renderFull, renderLine, warningText, WORDS } from './progress-report.mjs';
@@ -90,6 +90,37 @@ const items = [
   { id: 'SC-2', title: 'overzicht' },
   { id: 'SC-3', title: 'export' },
 ];
+
+// The manifest is the one table saying which file owns which fact. The docs-manifest gate fails
+// when no row covers a file; the board reads the covering row's sentence onto a shelf. Both ask
+// the matcher below, so a row one of them can see is a row the other can see too.
+test('manifest: a row is a backticked path, a tier and a sentence, header and divider aside', () => {
+  const rows = parseManifest(`# docs
+| File | Tier | What it owns |
+|---|---|---|
+| \`state/STATE.md\` | LIVE | Live state and the single "what's next" |
+| \`design/*.md\` ◆ | REF | Design and voice |
+Rules: one fact, one owning file.
+`);
+  assert.deepEqual(rows.map((r) => r.path), ['state/STATE.md', 'design/*.md']);
+  assert.equal(rows[0].tier, 'LIVE');
+  assert.equal(rows[1].owns, 'Design and voice');
+});
+
+test('manifest: which row covers a file, by name and by pattern, and what covers nothing', () => {
+  const covers = manifestMatcher([
+    { path: 'decisions/TEMPLATE.md', tier: 'REF', owns: 'The skeleton' },
+    { path: 'decisions/[0-9]*.md', tier: 'REF', owns: 'Decision records, numbered' },
+    { path: 'specs/archive/**', tier: 'ARCHIVE', owns: 'Shipped specs' },
+  ]);
+  assert.equal(covers('decisions/0021-agile-first.md').owns, 'Decision records, numbered');
+  assert.equal(covers('specs/archive/000-baseline/spec.md').owns, 'Shipped specs');
+  // A file named in full carries its own sentence, even where a pattern would also catch it.
+  assert.equal(covers('decisions/TEMPLATE.md').owns, 'The skeleton');
+  // A single star stops at the folder boundary; a file no row covers is answered as such.
+  assert.equal(covers('decisions/deeper/0001-x.md'), null);
+  assert.equal(covers('tools/handy.md'), null);
+});
 
 test('a scope item is done, in progress, or not started', () => {
   const p = derive({

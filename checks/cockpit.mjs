@@ -3,15 +3,16 @@
 //
 // This file is the HTTP layer and nothing else: which requests are answered at all, which route
 // they reach, and what headers every answer carries. What may be opened is decided in
-// checks/cockpit-path.mjs; the lanes are built in checks/board-page.mjs, the six cards beside
-// them in checks/cockpit-page.mjs, and the shell both render in is checks/board-shell.mjs.
-// Spec: docs/specs/010-cockpit (maintainer-local); the lanes: E-01/F-04/S-03.
+// checks/cockpit-path.mjs; the board is built in checks/board-page.mjs, the file page beside it
+// in checks/cockpit-page.mjs, and the shell both render in is checks/board-shell.mjs.
+// Spec: docs/specs/010-cockpit (maintainer-local); the lanes: E-01/F-04/S-03; the shelves and
+// the retirement of /overview: E-01/F-04/S-04.
 
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { decidePath, hostAllowed } from './cockpit-path.mjs';
 import { page, escapeHtml } from './board-shell.mjs';
-import { words, formatSize, overviewPage, renderFile, renderNotice, BOARD } from './cockpit-page.mjs';
+import { words, formatSize, renderFile, renderNotice, FILE_WORDS } from './cockpit-page.mjs';
 import { boardPage } from './board-page.mjs';
 import { readProject } from './progress.mjs';
 
@@ -67,11 +68,9 @@ export function createBoardServer(root, deps = {}) {
       // refused before a path is even parsed.
       if (req.method !== 'GET') return send(res, 405, 'Not available.\n');
       const url = new URL(req.url, 'http://127.0.0.1');
-      // The board is the front door. The six cards that used to stand here keep every answer they
-      // gave, one route along, until S-04 regroups them onto the four shelves and S-06 retires the
-      // old name; each page links to the other, so neither is a dead end.
+      // The board is the whole front door: the round in flight, the four shelves and the two
+      // lines under them. There is no second page to keep in step with it.
       if (url.pathname === '/') return send(res, 200, boardPage(root, deps));
-      if (url.pathname === '/overview') return send(res, 200, overviewPage(root, deps));
       if (url.pathname === '/file') {
         const { status, html } = filePage(root, url.searchParams.get('path'), deps);
         if (status === 404) denied('a file request outside what the board may show');
@@ -85,7 +84,7 @@ export function createBoardServer(root, deps = {}) {
       // internals, which is the floor for every error a reader can see. In English, because
       // the project's own language is read from a file this very failure may be about.
       console.error(`cockpit: ${e.stack || e.message}`);
-      return send(res, 500, page({ title: BOARD.en.broke, body: `<h1>${escapeHtml(BOARD.en.broke)}</h1>` }));
+      return send(res, 500, page({ title: FILE_WORDS.en.broke, body: `<h1>${escapeHtml(FILE_WORDS.en.broke)}</h1>` }));
     }
   });
 }

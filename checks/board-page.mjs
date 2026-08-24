@@ -1,18 +1,23 @@
-// The board: six lanes with the cards in them, above a header that says how far the whole
-// project is. Facts in, one page out - nothing is stored, nothing is generated ahead of time.
-// Every lane, count, blocker and next step below comes from checks/work.mjs through the
-// derivation checks/progress.mjs already exposes, so moving one story's status line moves its
-// card and no second administration exists to keep in step (decision 0021).
-// The shell it renders in is checks/board-shell.mjs; serving is checks/cockpit.mjs; the six
-// cards beside it are checks/cockpit-page.mjs.
-// Story: docs/work/E-01-agile-first/F-04-board/S-03-the-lanes-and-the-cards (maintainer-local).
+// The board: the whole project on one page. What it is for and what it is not, the round in
+// flight, six lanes with the cards in them, the four shelves that hold every document, and the
+// two lines that say whether the gates are armed and how the documents point at each other.
+// Facts in, one page out - nothing is stored, nothing is generated ahead of time. Every lane,
+// count, blocker and next step comes from checks/work.mjs through the derivation
+// checks/progress.mjs already exposes, so moving one story's status line moves its card and no
+// second administration exists to keep in step (decision 0021).
+// The shelves are checks/shelves.mjs, the two lines checks/board-strip.mjs, the shell they render
+// in checks/board-shell.mjs; serving is checks/cockpit.mjs and the file page
+// checks/cockpit-page.mjs.
+// Story: docs/work/E-01-agile-first/F-04-board/S-04-four-shelves-and-the-file-pages (local).
 
-import { readProject, readHandoff, derive } from './progress.mjs';
-import { WORDS, warningText, headline } from './progress-report.mjs';
+import { readProject, readBrief, readHandoff, derive, BRIEF_PATH } from './progress.mjs';
+import { WORDS, warningText, headline, nothingPlanned } from './progress-report.mjs';
 import { LANES } from './work.mjs';
 import { decidePath, ignoreLookup } from './cockpit-path.mjs';
+import { shelfDocuments, renderShelves, SHELF_WORDS } from './shelves.mjs';
+import { readStrip, stripPaths, renderStrip } from './board-strip.mjs';
 import {
-  shellWords, escapeHtml, sentence, pathName, lead, folded, page,
+  shellWords, escapeHtml, sentence, pathName, lead, list, folded, card, attempt, page,
 } from './board-shell.mjs';
 
 // Rule 6 of decision 0021: one story being built, two in review. The board shows the number and
@@ -32,8 +37,12 @@ const OPEN_LANES = new Set(['to do', 'in progress', 'review']);
 const BOARD_WORDS = {
   en: {
     board: 'The board',
-    sub: 'Every story in the lane its own status line puts it in.',
-    more: 'Goal, files, links and gates',
+    sub: 'Every story in the lane its own status line puts it in, and every document on the shelf its path puts it on.',
+    purpose: 'What this project is for',
+    noGoal: 'The brief does not say yet what this project is for. Run the `scope` skill to write it down.',
+    outOfScope: 'Deliberately not part of this',
+    noOutOfScope: 'The brief names nothing as out of scope yet, so the boundary is still open.',
+    stand: 'Where the project stands',
     inFlight: 'Epic in flight',
     featuresDone: (d, t) => `${d} of ${t} features done`,
     storiesDone: (d, t) => `${d} of ${t} stories done`,
@@ -48,8 +57,12 @@ const BOARD_WORDS = {
   },
   nl: {
     board: 'Het bord',
-    sub: 'Elke story staat in de baan die zijn eigen statusregel hem geeft.',
-    more: 'Doel, bestanden, verwijzingen en poorten',
+    sub: 'Elke story staat in de baan die zijn eigen statusregel hem geeft, en elk document op de plank waar zijn pad het neerzet.',
+    purpose: 'Waar dit project voor is',
+    noGoal: 'De brief zegt nog niet waar dit project voor is. Draai de `scope`-skill om dat vast te leggen.',
+    outOfScope: 'Bewust geen onderdeel hiervan',
+    noOutOfScope: 'De brief noemt nog niets buiten scope, dus de grens ligt nog open.',
+    stand: 'Waar het project staat',
     inFlight: 'Epic in uitvoering',
     featuresDone: (d, t) => `${d} van ${t} features klaar`,
     storiesDone: (d, t) => `${d} van ${t} stories klaar`,
@@ -65,9 +78,13 @@ const BOARD_WORDS = {
 };
 
 // One object per language, so a caller asks once and gets the shell's sentences, the stand's
-// sentences and the board's own.
+// sentences, the shelves' and the board's own. Each set owns its own keys, and the merge is the
+// only place they meet. The two lines under the shelves gather their own, next door.
 const boardWords = (lang) => ({
-  ...shellWords(lang), ...(WORDS[lang] || WORDS.en), ...(BOARD_WORDS[lang] || BOARD_WORDS.en),
+  ...shellWords(lang),
+  ...(WORDS[lang] || WORDS.en),
+  ...(SHELF_WORDS[lang] || SHELF_WORDS.en),
+  ...(BOARD_WORDS[lang] || BOARD_WORDS.en),
 });
 
 // A lane is named by the status word itself, with the first letter raised. That is mechanical,
@@ -144,23 +161,52 @@ function lanes(work, epicKey, w, opens) {
 
 // ---------------------------------------------------------------- the header
 
-// The project, the round it is in, what that round is for, how far the whole project is, and what
-// happens next. Everything a person opens this page to find out before they look at a lane.
-function header(progress, epic, now, w, opens) {
-  const out = [`<h2>${escapeHtml(w.inFlight)}</h2>`];
-  out.push(lead(epic.title));
-  if (epic.goal) out.push(`<p>${sentence(epic.goal)}</p>`);
-  // How far the whole project is, in the words the terminal report already uses for it.
-  out.push(`<p class="hint">${escapeHtml(headline(w, progress))}.</p>`);
-  out.push(`<h3>${escapeHtml(w.nextStep)}</h3>`);
-  out.push(now ? `<p>${sentence(now)}</p>` : `<p>${sentence(w.noNextStep)}</p>`);
-  // What the reader could not place is said here rather than left to a lane that will never show
-  // it: a story with an unreadable status is in no lane at all.
-  for (const warn of progress.warnings) {
-    out.push(`<p class="note">${escapeHtml(w.heads)}: ${sentence(warningText(w, warn))}</p>`);
-  }
-  if (epic.path) out.push(`<p class="src">${escapeHtml(w.source)} ${pathName(epic.path, opens)}</p>`);
-  return `<section class="card">${out.join('\n')}</section>`;
+// What this project is for, and what it is deliberately not. The promise in one sentence and the
+// boundary that keeps it a promise, both from the brief. The scope items themselves are the
+// stand next door, so they are not claimed twice.
+function purposeCard(brief, lang, w, opens) {
+  return card(w.purpose, { lang, path: BRIEF_PATH, opens }, () => {
+    if (!brief?.goal) return lead(w.noGoal, sentence);
+    const outside = brief.outOfScope || [];
+    return [
+      lead(brief.goal),
+      outside.length
+        ? folded(w.outOfScope, outside.length, list(outside.map((i) => i.title)))
+        : `<p class="note">${escapeHtml(w.noOutOfScope)}</p>`,
+    ].join('\n');
+  });
+}
+
+// The round the project is in, what that round is for, how far the whole project is, and what
+// happens next. A copy that has planned no round still gets this card: the stand and the next
+// step are what a person opens the page for, and neither depends on a work tree existing.
+function roundCard(progress, epic, now, lang, w, opens) {
+  const owner = { lang, path: epic?.path, opens };
+  return card(epic ? w.inFlight : w.stand, owner, () => {
+    const out = [];
+    if (epic) {
+      out.push(lead(epic.title));
+      if (epic.goal) out.push(`<p>${sentence(epic.goal)}</p>`);
+    }
+    // How far the whole project is, in the words the terminal report already uses for it, so the
+    // page and the terminal can never word one stand differently. A project that has planned
+    // nothing names the step that is missing instead of showing a zero: scope first, and the
+    // work tree after it.
+    if (progress.defined) {
+      out.push(`<p class="${epic ? 'hint' : 'lead'}">${escapeHtml(headline(w, progress))}.</p>`);
+      if (!epic) out.push(`<p class="hint">${escapeHtml(w.noWork)}</p>`);
+    } else {
+      out.push(lead(nothingPlanned(w, progress), sentence));
+    }
+    out.push(`<h3>${escapeHtml(w.nextStep)}</h3>`);
+    out.push(now ? `<p>${sentence(now)}</p>` : `<p>${sentence(w.noNextStep)}</p>`);
+    // What the reader could not place is said here rather than left to a lane that will never
+    // show it: a story with an unreadable status is in no lane at all.
+    for (const warn of progress.warnings) {
+      out.push(`<p class="note">${escapeHtml(w.heads)}: ${sentence(warningText(w, warn))}</p>`);
+    }
+    return out.join('\n');
+  });
 }
 
 // An epic that is not the one in flight is listed with its own progress and stays folded, so a
@@ -182,8 +228,7 @@ function renderBoard(project, body, w) {
     title: `${project.name}: ${w.board.toLowerCase()}`,
     body: [
       `<h1>${escapeHtml(project.name)}</h1>`,
-      `<p class="sub">${escapeHtml(w.sub)} ${escapeHtml(w.live)} `
-        + `<a href="/overview">${escapeHtml(w.more)}</a></p>`,
+      `<p class="sub">${escapeHtml(w.sub)} ${escapeHtml(w.live)}</p>`,
       body,
     ].join('\n'),
   });
@@ -195,23 +240,42 @@ function renderBoard(project, body, w) {
 // that says nothing.
 const inFlightEpic = (epics) => epics.find((e) => !e.done) || epics[epics.length - 1] || null;
 
+// The four shelves, or the one sentence that says why they could not be read. A docs/ folder that
+// cannot be walked is a failure to name, never a page that quietly holds no documents.
+const shelvesSection = (read, w, opens) => (read.error
+  ? `<section class="card"><p class="note">${escapeHtml(w.partFailed(read.error.message))}</p></section>`
+  : renderShelves(read.value, w, opens));
+
 export function boardPage(root, deps = {}) {
   const project = readProject(root);
   const progress = derive(project);
   const w = boardWords(project.lang);
   const { work } = project;
   const epic = inFlightEpic(work.epics);
-  // A copy that has planned nothing yet reads as not started, never as an error.
-  if (!epic) return renderBoard(project, `<section class="card"><p>${sentence(w.noWork)}</p></section>`, w);
-  const now = readHandoff(root).now;
-  // Which of the files this page names git ignores is asked once for the whole page: a board that
-  // named every story would otherwise spawn a process per name. A file the project keeps out of
-  // git is named rather than linked, which is Groundwork's own work tree.
-  const isIgnored = ignoreLookup(root, [epic.path, ...work.stories.map((s) => s.path)]);
+  const handoff = readHandoff(root);
+  // Everything the page will show is read before any of it renders, so the one ignore question
+  // below can cover every name it will name. Which of those files git ignores is asked once for
+  // the whole page: a board that names every document would otherwise spawn a process per name.
+  // A file the project keeps out of git is named rather than linked, which is Groundwork's own
+  // work tree and its own handoff.
+  const docs = attempt(() => shelfDocuments(root));
+  const facts = readStrip(root);
+  const isIgnored = ignoreLookup(root, [
+    BRIEF_PATH,
+    epic?.path,
+    ...work.stories.map((s) => s.path),
+    ...(docs.value || []).map((d) => d.path),
+    ...stripPaths(facts),
+  ].filter(Boolean));
   const opens = (path) => Boolean(path) && decidePath(root, path, { isIgnored, ...deps }).ok;
   return renderBoard(project, [
-    header(progress, epic, now, w, opens),
-    lanes(work, epic.key, w, opens),
-    otherEpics(work.epics.filter((e) => e.key !== epic.key), w),
-  ].join('\n'), w);
+    purposeCard(readBrief(root), project.lang, w, opens),
+    roundCard(progress, epic, handoff.now, project.lang, w, opens),
+    // A copy that has planned no round yet still gets the shelves and the two lines below: the
+    // lanes are the only part of the board that needs a work tree to exist.
+    epic ? lanes(work, epic.key, w, opens) : '',
+    epic ? otherEpics(work.epics.filter((e) => e.key !== epic.key), w) : '',
+    shelvesSection(docs, w, opens),
+    renderStrip(facts, project.lang, opens),
+  ].filter(Boolean).join('\n'), w);
 }
