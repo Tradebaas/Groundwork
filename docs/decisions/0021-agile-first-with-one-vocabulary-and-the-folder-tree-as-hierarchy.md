@@ -116,6 +116,12 @@ its own.
 ### Seven rules, and no more
 
 1. One epic in flight at a time. A project may hold several; they run one after the other.
+   Clarified 2026-08-25 by the owner, after this sentence stalled an agent that read it as a queue
+   fixed at cutting time: it is a work-in-progress limit, not a fixed order. Which epic runs next
+   may change whenever there is a reason, because reordering on new information is the method, not
+   a breach of it. What the limit forbids is two epics open at once, so a reorder is an explicit
+   park of the one in flight, written on its card with the reason, never a second epic quietly
+   started beside the first.
 2. A feature delivers value on its own and names in one line which choice in the vision it serves.
 3. A story lives in exactly one feature folder.
 4. Ready: a value sentence, testable criteria, its tasks, a size, its dependencies, and the owner's
