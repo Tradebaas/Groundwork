@@ -86,7 +86,7 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
 | EU/NL compliance: this project's register | `docs/compliance/REGISTER.md` (regimes: `docs/compliance/COMPLIANCE.md`) |
 | Operational runbooks | `docs/operations/` |
 | Automated checks (run: `node checks/check.mjs`) | `checks/` |
-| What is done, what is left (run: `node checks/progress.mjs`; `--all` for every project, `--serve` for the same stand as a page on this machine, `--page` for that same board printed as one self-contained file, `--links` for which document points at which, and how many paths point at nothing) | derived from BRIEF + specs + STATE, never stored |
+| What is done, what is left (run: `node checks/progress.mjs`; `--all` for every project, `--serve` for the same stand as a board on this machine - the way in, the lanes, the round, the features and every document, each a page behind one sidebar - `--page` for that whole board printed as one self-contained file, `--links` for which document points at which, and how many paths point at nothing) | derived from BRIEF + specs + STATE, never stored |
 | Full docs manifest | `docs/README.md` |
 
 ## Skills: expert methods, loaded on demand
