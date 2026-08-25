@@ -84,7 +84,7 @@ export function featurePage(root, key, opts = {}) {
   if (!f) return null;
   const stories = project.work.stories.filter((s) => s.feature === f.key);
   const body = [
-    card(w.storiesHead === 'Stories' ? 'What you can do after it' : 'Wat je erna kunt',
+    card(w.afterHead,
       { lang: project.lang, path: f.path, opens: c.opens }, () => [
         f.value ? lead(f.value, sentence) : '',
         bar(f.progress.done, f.progress.total),

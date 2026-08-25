@@ -45,6 +45,13 @@ test('a document stands on the shelf its path puts it on, and one the rule does 
   f.clean();
 });
 
+// Retired by S-07, recorded here because a test that is simply gone leaves no trace of what
+// stopped being true: "a row says what its document owns in the manifest own words, pattern rows
+// included". A shelf row used to carry the manifest's sentence about the fact a document owns.
+// The sidebar names a document by its own heading instead, so no manifest sentence reaches any
+// page, and shelfDocuments no longer gathers one. The manifest itself is still gated, by the
+// docs-manifest check in checks/check.mjs, which is where that rule belongs.
+
 test('the shelf rule answers on its own: a path in, a shelf out', () => {
   assert.equal(shelfFor('docs/product/BRIEF.md'), 'why');
   assert.equal(shelfFor('docs/work/E-01-shop/F-01-till/S-01-a.md'), 'now');
