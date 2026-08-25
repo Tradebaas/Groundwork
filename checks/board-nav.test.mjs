@@ -184,3 +184,31 @@ test('every page the sidebar offers answers, and carries the sidebar itself', as
     assert.equal(nowhere.status, 404);
   } finally { server.close(); f.clean(); }
 });
+
+test('a document behind a folded row is still placed: the chapter opens and the place is marked', async () => {
+  // More documents in one folder than the sidebar will list, so the row it gets stands for the
+  // folder rather than for any one of them. Without this, a reader who followed a link into that
+  // folder met a sidebar with nothing open and nothing marked - which is the dead end the sidebar
+  // was built to end, arriving by another door.
+  const f = project({ 'S-01-a': STORY('S-01', 'A card', { status: 'to do' }) }, Object.fromEntries(
+    Array.from({ length: 6 }, (_, i) => [`docs/decisions/000${i + 1}-one.md`, `# 000${i + 1}: one\n`]),
+  ));
+  const server = createBoardServer(f.root, { isIgnored: () => false });
+  const port = await listen(server);
+  try {
+    const page = await get(port, '/file?path=docs%2Fdecisions%2F0003-one.md');
+    assert.equal(page.status, 200);
+    const chapter = chapterOf(page.body, 'What we learned');
+    assert.match(chapter, /aria-current="location"/, 'the place the document sits in is marked');
+    assert.match(chapter, /href="\/folder\?path=docs%2Fdecisions"/, 'and it is the folder row');
+    // "location", never "page": the folder is where this document is, not what is being shown.
+    assert.doesNotMatch(chapter, /aria-current="page"/);
+    // The chapter holding it is open, because no script runs here to open it afterwards.
+    assert.match(page.body, /<div class="topic"><details open>[\s\S]*?What we learned/,
+      'and the chapter it belongs to arrives open');
+
+    // The other direction: a document with a row of its own is the page, not a location.
+    const own = await get(port, '/file?path=docs%2Fproduct%2FBRIEF.md');
+    assert.match(chapterOf(own.body, 'Why we build it'), /aria-current="page"/);
+  } finally { server.close(); f.clean(); }
+});
