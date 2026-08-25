@@ -43,34 +43,43 @@ export function formatSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// Where a reader came from, and the one click back. The shelf is not remembered and not passed
-// along: it is read off the path by the same rule that put the file on that shelf, so a link
-// somebody kept says the same thing tomorrow. A file that stands on no shelf (the readers the two
-// lines under the shelves name, which live outside docs/) goes back to the board itself.
+// Where this document stands. The shelf is not remembered and not passed along: it is read off
+// the path by the same rule that put the file there, so a link somebody kept says the same thing
+// tomorrow. It is a statement, not a link, because since S-07 the shelf is a chapter of the
+// sidebar this page already carries, opened on the row the reader is on. A file that stands on no
+// shelf (the readers outside docs/) keeps the one click back to the board.
 function backFrom(relPath, w) {
   const shelf = shelfFor(relPath);
   return shelf
-    ? `${escapeHtml(w.onShelf)} <a href="/#shelf-${shelf}">${escapeHtml(w.shelfNames[shelf])}</a>.`
+    ? `${escapeHtml(w.onShelf)} ${escapeHtml(w.shelfNames[shelf])}.`
     : `<a href="/">${escapeHtml(w.back)}</a>`;
 }
 
-export function renderFile(project, relPath, text) {
+// The sidebar comes in from the caller rather than being built here: this module renders one
+// document and knows nothing about the tree it hangs in, and a document page without navigation
+// is a dead end a reader has to use the back button to leave.
+export function renderFile(project, relPath, text, nav = '', title = null) {
   const w = words(project.lang);
   return page({
     lang: project.lang,
+    nav,
+    frame: true,
     title: relPath,
     body: [
-      `<h1>${escapeHtml(relPath)}</h1>`,
-      `<p class="sub">${escapeHtml(w.readOnly)} ${backFrom(relPath, w)}</p>`,
+      `<h1>${escapeHtml(title || relPath)}</h1>`,
+      `<p class="sub"><code>${escapeHtml(relPath)}</code> - ${escapeHtml(w.readOnly)} `
+        + `${backFrom(relPath, w)}</p>`,
       `<pre>${escapeHtml(text)}</pre>`,
     ].join('\n'),
   });
 }
 
-export function renderNotice(project, notice) {
+export function renderNotice(project, notice, nav = '') {
   const w = words(project.lang);
   return page({
     lang: project.lang,
+    nav,
+    frame: true,
     title: notice,
     body: [
       `<h1>${escapeHtml(notice)}</h1>`,

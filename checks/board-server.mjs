@@ -13,7 +13,9 @@ import { readFileSync } from 'node:fs';
 import { decidePath, hostAllowed } from './board-path.mjs';
 import { page, escapeHtml } from './board-shell.mjs';
 import { words, formatSize, renderFile, renderNotice, FILE_WORDS } from './board-document.mjs';
-import { boardPage } from './board-page.mjs';
+import { startPage, boardOnlyPage, context, shellFor } from './board-page.mjs';
+import { titleOf } from './board-nav.mjs';
+import { epicPage, featuresPage, featurePage, folderPage } from './board-views.mjs';
 import { readProject } from './progress.mjs';
 
 const DEFAULT_PORT = 8321;
@@ -21,19 +23,28 @@ const DEFAULT_PORT = 8321;
 const FILE_MAX_BYTES = 512 * 1024;
 
 function filePage(root, requested, deps = {}) {
-  const project = readProject(root);
+  const c = context(root, deps);
+  c.rootPath = root;
+  const { project } = c;
   const w = words(project.lang);
   const decision = decidePath(root, requested, deps);
-  if (!decision.ok) return { status: 404, html: renderNotice(project, w.refused) };
+  // The sidebar is the same one every page carries, with this document's own row marked, so a
+  // reader who followed a link can go anywhere else from here instead of only back.
+  const nav = (rel) => shellFor(c, rel ? `/file?path=${encodeURIComponent(rel)}` : '/');
+  if (!decision.ok) return { status: 404, html: renderNotice(project, w.refused, nav(null)) };
   const size = formatSize(decision.size);
   if (decision.size > FILE_MAX_BYTES) {
-    return { status: 200, html: renderNotice(project, w.notShown(decision.rel, size)) };
+    return { status: 200, html: renderNotice(project, w.notShown(decision.rel, size), nav(decision.rel)) };
   }
   const buffer = readFileSync(decision.path);
   if (buffer.includes(0)) {
-    return { status: 200, html: renderNotice(project, w.binary(decision.rel, size)) };
+    return { status: 200, html: renderNotice(project, w.binary(decision.rel, size), nav(decision.rel)) };
   }
-  return { status: 200, html: renderFile(project, decision.rel, buffer.toString('utf8')) };
+  return {
+    status: 200,
+    html: renderFile(project, decision.rel, buffer.toString('utf8'), nav(decision.rel),
+      titleOf(root, decision.rel)),
+  };
 }
 
 // ---------------------------------------------------------------- serving
@@ -70,7 +81,24 @@ export function createBoardServer(root, deps = {}) {
       const url = new URL(req.url, 'http://127.0.0.1');
       // The board is the whole front door: the round in flight, the four shelves and the two
       // lines under them. There is no second page to keep in step with it.
-      if (url.pathname === '/') return send(res, 200, boardPage(root, deps));
+      // One page per subject, the way the sidebar lists them: the way in, the board itself, the
+      // round, the features and one feature. Each is derived at view time; none is stored.
+      if (url.pathname === '/') return send(res, 200, startPage(root, deps));
+      if (url.pathname === '/board') return send(res, 200, boardOnlyPage(root, deps));
+      if (url.pathname === '/epic') return send(res, 200, epicPage(root, deps));
+      if (url.pathname === '/features') return send(res, 200, featuresPage(root, deps));
+      if (url.pathname === '/folder') {
+        const html = folderPage(root, url.searchParams.get('path'), deps);
+        if (html) return send(res, 200, html);
+        const p = readProject(root);
+        return send(res, 404, renderNotice(p, words(p.lang).refused, ''));
+      }
+      if (url.pathname === '/feature') {
+        const html = featurePage(root, url.searchParams.get('key'), deps);
+        if (html) return send(res, 200, html);
+        const p = readProject(root);
+        return send(res, 404, renderNotice(p, words(p.lang).refused));
+      }
       if (url.pathname === '/file') {
         const { status, html } = filePage(root, url.searchParams.get('path'), deps);
         if (status === 404) denied('a file request outside what the board may show');

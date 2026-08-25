@@ -18,10 +18,13 @@ import { readProject, readBrief, readHandoff, derive, BRIEF_PATH } from './progr
 import { WORDS, warningText, headline, nothingPlanned } from './progress-report.mjs';
 import { LANES } from './work.mjs';
 import { decidePath, ignoreLookup } from './board-path.mjs';
-import { shelfDocuments, renderShelves, SHELF_WORDS } from './shelves.mjs';
+import { shelfDocuments, SHELF_WORDS } from './shelves.mjs';
+import { navModel, sidebar } from './board-nav.mjs';
+import { icon } from './board-icons.mjs';
 import { readStrip, stripPaths, renderStrip } from './board-strip.mjs';
 import {
   shellWords, escapeHtml, sentence, pathName, lead, list, folded, card, attempt, page, stamp,
+  fileHref,
 } from './board-shell.mjs';
 
 // Rule 6 of decision 0021: one story being built, two in review. The board shows the number and
@@ -54,6 +57,22 @@ const BOARD_WORDS = {
     noStories: 'This epic is not cut into stories yet.',
     laneEmpty: 'Nothing here.',
     heldOf: (n, limit) => `${n} of ${limit} allowed`,
+    allowed: (limit) => `${limit} allowed`,
+    start: 'Start', epic: 'Epic', features: 'Features', boardShort: 'Board',
+    navLabel: 'This project',
+    // A subject's name in the sidebar is short enough to sit on one line; the question it is
+    // short for is the heading of the page it opens, where the length earns its place.
+    navNames: {
+      why: 'Why we build it', now: 'Building now', built: 'How it is built',
+      learned: 'What we learned', other: 'Elsewhere',
+    },
+    inFolder: (n) => `${n} documents`,
+    notInGit: 'kept out of git, so this board does not open it',
+    tasksHead: 'Tasks', storiesHead: 'Stories', acceptanceHead: 'Acceptance',
+    finishedHead: 'What finished means', goalHead: 'The goal',
+    worthHead: 'What that is worth', visionHead: 'Which choice it serves',
+    ofDone: (d, t) => `${d} of ${t} done`,
+    noEpic: 'No round has been planned yet.',
     tasks: (d, t) => `tasks ${d} of ${t}`,
     misses: (what) => `Still missing: ${what}`,
     storyLabel: 'Story',
@@ -74,6 +93,20 @@ const BOARD_WORDS = {
     noStories: 'Deze epic is nog niet in stories geknipt.',
     laneEmpty: 'Hier staat niets.',
     heldOf: (n, limit) => `${n} van ${limit} toegestaan`,
+    allowed: (limit) => `${limit} toegestaan`,
+    start: 'Start', epic: 'Epic', features: 'Features', boardShort: 'Bord',
+    navLabel: 'Dit project',
+    navNames: {
+      why: 'Waarom we het bouwen', now: 'Nu in aanbouw', built: 'Hoe het gebouwd is',
+      learned: 'Wat we geleerd hebben', other: 'Elders',
+    },
+    inFolder: (n) => `${n} documenten`,
+    notInGit: 'buiten git gehouden, dus dit bord opent het niet',
+    tasksHead: 'Taken', storiesHead: 'Stories', acceptanceHead: 'Acceptatie',
+    finishedHead: 'Wat klaar betekent', goalHead: 'Het doel',
+    worthHead: 'Wat dat waard is', visionHead: 'Welke keuze het dient',
+    ofDone: (d, t) => `${d} van ${t} klaar`,
+    noEpic: 'Er is nog geen ronde gepland.',
     tasks: (d, t) => `taken ${d} van ${t}`,
     misses: (what) => `Mist nog: ${what}`,
     storyLabel: 'Story',
@@ -122,6 +155,12 @@ function storyCard(story, feature, w, opens = () => false) {
     const pct = Math.round((story.tasks.done / story.tasks.total) * 100);
     out.push(`<span class="bar" aria-hidden="true"><i style="width:${pct}%"></i></span>`);
     out.push(`<p class="hint">${escapeHtml(w.tasks(story.tasks.done, story.tasks.total))}</p>`);
+    // The steps themselves, on the card. A board that shows only a fraction says how far the
+    // work is; one that shows the steps says what is actually left, which is what a person
+    // reading a lane wants to know.
+    out.push(`<ul class="steps">${story.tasks.items.map((t) => `<li class="t-${t.state}">`
+      + `${t.state === 'done' ? icon('circle-check') : icon('chevron-right')}`
+      + `<span>${sentence(t.text)}</span></li>`).join('')}</ul>`);
   }
   if (!story.done && !story.ready.ok) {
     out.push(`<p class="hint">${escapeHtml(w.misses(story.ready.missing.map((m) => m.text).join(', ')))}</p>`);
@@ -140,15 +179,19 @@ function storyCard(story, feature, w, opens = () => false) {
 // the work-in-progress number beside it where decision 0021 sets one.
 function lane(name, stories, w) {
   const limit = WIP[name];
-  const tail = limit === undefined ? String(stories.length) : w.heldOf(stories.length, limit);
   const body = stories.length
-    ? `<div class="cards">${stories.join('')}</div>`
+    ? `<div class="cards" tabindex="0" role="group" aria-label="${escapeHtml(laneName(name))}">`
+      + `${stories.join('')}</div>`
     : `<p class="empty">${escapeHtml(w.laneEmpty)}</p>`;
-  // Over the limit is stated, never refused: the lane still shows every card it holds.
+  // Over the limit is stated, never refused: the lane still shows every card it holds, and the
+  // whole lane says so rather than one number inside it.
   const over = limit !== undefined && stories.length > limit ? ' over' : '';
-  return `<section class="lane"><details${OPEN_LANES.has(name) ? ' open' : ''}>`
+  const tail = (limit === undefined ? '' : `<span class="wip">${escapeHtml(w.allowed(limit))}</span>`)
+    + `<span class="count">${stories.length}</span>`;
+  return `<section class="lane lane-${name.replace(/\s+/g, '-')}${over}">`
+    + `<details${OPEN_LANES.has(name) ? ' open' : ''}>`
     + `<summary><span class="ttl">${escapeHtml(laneName(name))}</span>`
-    + `<span class="tail"><span class="wip${over}">${escapeHtml(tail)}</span></span></summary>`
+    + `<span class="tail">${tail}</span></summary>`
     + `\n${body}</details></section>`;
 }
 
@@ -231,13 +274,17 @@ function otherEpics(epics, w) {
 // adds that the names in it are names, because its reader has no repository beside them.
 const readFrom = (w, made) => (made ? `${w.made(stamp(made))} ${w.names}` : w.live);
 
-function renderBoard(project, body, w, made) {
+function renderBoard(project, body, w, made, nav = '', heading = null, sub = null) {
   return page({
     lang: project.lang,
-    title: `${project.name}: ${w.board.toLowerCase()}`,
+    nav,
+    // A served board is a frame that holds still; a file made with --page is a document.
+    // The stamp is what tells them apart everywhere else on this page, so it tells them apart here.
+    frame: !made,
+    title: `${project.name}: ${(heading || w.board).toLowerCase()}`,
     body: [
-      `<h1>${escapeHtml(project.name)}</h1>`,
-      `<p class="sub">${escapeHtml(w.sub)} ${escapeHtml(readFrom(w, made))}</p>`,
+      `<h1>${escapeHtml(heading || project.name)}</h1>`,
+      `<p class="sub">${escapeHtml(sub || `${w.sub} ${readFrom(w, made)}`)}</p>`,
       body,
     ].join('\n'),
   });
@@ -248,12 +295,6 @@ function renderBoard(project, body, w, made) {
 // finished the last one is still what the lanes are about, which keeps the page free of a state
 // that says nothing.
 const inFlightEpic = (epics) => epics.find((e) => !e.done) || epics[epics.length - 1] || null;
-
-// The four shelves, or the one sentence that says why they could not be read. A docs/ folder that
-// cannot be walked is a failure to name, never a page that quietly holds no documents.
-const shelvesSection = (read, w, opens) => (read.error
-  ? `<section class="card"><p class="note">${escapeHtml(w.partFailed(read.error.message))}</p></section>`
-  : renderShelves(read.value, w, opens));
 
 // Which of the names the page is about to show the file route will actually serve. Asked once
 // for the whole page: git is a process, and a board that names every document would otherwise
@@ -272,32 +313,72 @@ const NEVER = () => false;
 // on a printed one and absent on a served one. It is the only input that is not read off disk,
 // and the only thing that changes the page: everything else is derived the same way for both, so
 // a lane, a card, a shelf or a count cannot reach one output and miss the other.
-export function boardPage(root, { made = null, ...deps } = {}) {
+// What every page this board serves needs before it can render: the project, its words, the
+// documents, and the one git question asked once for every name the page will carry.
+export function context(root, { made = null, ...deps } = {}) {
   const project = readProject(root);
   const progress = derive(project);
   const w = boardWords(project.lang);
-  const { work } = project;
-  const epic = inFlightEpic(work.epics);
-  const handoff = readHandoff(root);
-  // Everything the page will show is read before any of it renders, so the one ignore question
-  // below can cover every name it will name.
+  const epic = inFlightEpic(project.work.epics);
   const docs = attempt(() => shelfDocuments(root));
   const facts = readStrip(root);
   const opens = made ? NEVER : opensOn(root, [
     BRIEF_PATH,
     epic?.path,
-    ...work.stories.map((s) => s.path),
+    ...project.work.stories.map((s) => s.path),
+    ...project.work.features.map((f) => f.path),
     ...(docs.value || []).map((d) => d.path),
     ...stripPaths(facts),
   ], deps);
-  return renderBoard(project, [
-    purposeCard(readBrief(root), project.lang, w, opens),
-    roundCard(progress, epic, handoff.now, project.lang, w, opens),
-    // A copy that has planned no round yet still gets the shelves and the two lines below: the
-    // lanes are the only part of the board that needs a work tree to exist.
-    epic ? lanes(work, epic.key, w, opens) : '',
-    epic ? otherEpics(work.epics.filter((e) => e.key !== epic.key), w) : '',
-    shelvesSection(docs, w, opens),
-    renderStrip(facts, project.lang, opens, made),
-  ].filter(Boolean).join('\n'), w, made);
+  return { project, progress, w, epic, docs: docs.value || [], docsError: docs.error || null,
+    facts, opens, made };
 }
+
+export const shellFor = (c, here) => sidebar(c.project.name,
+  navModel(c.rootPath, c.docs, c.w, c.opens), c.w, { here, failure: c.docsError });
+
+// The way in: what this project is for, where the round stands, and the two derived lines. The
+// lanes are not here - they are the board, which is its own page.
+export function startPage(root, opts = {}) {
+  const c = context(root, opts);
+  c.rootPath = root;
+  const body = [
+    `<div class="top">${purposeCard(readBrief(root), c.project.lang, c.w, c.opens)}`
+      + `${roundCard(c.progress, c.epic, readHandoff(root).now, c.project.lang, c.w, c.opens)}</div>`,
+    renderStrip(c.facts, c.project.lang, c.opens, c.made),
+  ].filter(Boolean).join('\n');
+  return renderBoard(c.project, body, c.w, c.made, shellFor(c, '/'));
+}
+
+// The board, and only the board: the lanes, the stories in them, and the steps on each story.
+export function boardOnlyPage(root, opts = {}) {
+  const c = context(root, opts);
+  c.rootPath = root;
+  const { work } = c.project;
+  const body = c.epic
+    ? `${lanes(work, c.epic.key, c.w, c.opens)}`
+      + `${otherEpics(work.epics.filter((e) => e.key !== c.epic.key), c.w)}`
+    : `<p class="empty">${escapeHtml(c.w.noEpic)}</p>`;
+  return renderBoard(c.project, body, c.w, c.made, shellFor(c, '/board'), c.w.board,
+    c.epic ? c.epic.title : c.w.noEpic);
+}
+
+// Kept so a printed file is still one page that answers the whole question: the start, then the
+// lanes under it. It carries no sidebar: a file with one page in it has nowhere to navigate to,
+// and an address that answers nothing off the network is worse than no address at all. Every name
+// it holds is still there, set as a name.
+export function boardPage(root, { made = null, ...deps } = {}) {
+  const c = context(root, { made, ...deps });
+  c.rootPath = root;
+  const { work } = c.project;
+  const body = [
+    `<div class="top">${purposeCard(readBrief(root), c.project.lang, c.w, c.opens)}`
+      + `${roundCard(c.progress, c.epic, readHandoff(root).now, c.project.lang, c.w, c.opens)}</div>`,
+    c.epic ? lanes(work, c.epic.key, c.w, c.opens) : '',
+    c.epic ? otherEpics(work.epics.filter((e) => e.key !== c.epic.key), c.w) : '',
+    renderStrip(c.facts, c.project.lang, c.opens, c.made),
+  ].filter(Boolean).join('\n');
+  return renderBoard(c.project, body, c.w, c.made);
+}
+
+export { renderBoard, storyCard, lanes, inFlightEpic };
