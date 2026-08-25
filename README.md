@@ -109,12 +109,15 @@ records the reasoning.
   (runbook: [docs/operations/evidence-drill.md](docs/operations/evidence-drill.md)). The same directory holds `node checks/progress.mjs`: a read-only, plain-language
   answer to "what is done and what is left", derived from the brief, the specs and the handoff,
   with `--all` covering every project you have started this way. Add `--serve` and the same
-  answer opens as a page on this machine only: the goal, the stand, the next step, which file
-  owns which fact, how the documents point at each other, and whether the gates are armed on
-  this clone. Every card is read from the file that owns it at the moment you open the page, and
-  nothing is stored. `--page` prints that same board as one self-contained HTML file, for someone
-  who has to look but has no repository, no server and no checkout: it says when it was made, it
-  names every file without linking to any, and it carries none of them.
+  answer opens as a small board on this machine only: the way in (the goal, the stand, the next
+  step), the six lanes with the cards in them, the round and its features, and every document the
+  project holds, each on its own page behind one sidebar. It also says how the documents point at
+  each other and whether the gates are armed on this clone. Every card is read from the file that
+  owns it at the moment you open the page, and nothing is stored. `--page` prints the whole of it
+  as one self-contained HTML file, for someone who has to look but has no repository, no server
+  and no checkout: it says when it was made, it names every file without linking to any, it
+  carries none of them, and it has no navigation at all, because there is nowhere inside one file
+  to navigate to.
 
 ## Requirements
 
