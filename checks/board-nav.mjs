@@ -151,7 +151,7 @@ export function navModel(root, docs, w, opens = () => true) {
         const inPlace = docs.filter((d) => d.path.startsWith(`${dir}/`)).length;
         rows.push({
           href: folderHref(dir), label: folderLabel(dir), icon: iconFor(`${dir}/`),
-          count: inPlace, full: dir,
+          count: inPlace, full: dir, dir,
         });
       } else if (held.length === 1 && held[0].path.split('/').length > 2) {
         // A folder holding one document is a concept with an instance in it, so the row carries
@@ -186,10 +186,30 @@ export function navModel(root, docs, w, opens = () => true) {
 
 // ---------------------------------------------------------------- the sidebar itself
 
+// Which document a route is showing, so a row standing for a folder can tell whether the reader
+// is inside it. Anything that is not a file route is nobody's document.
+const shownBy = (here) => {
+  const m = /^\/file\?path=(.*)$/.exec(here || '');
+  if (!m) return null;
+  try { return decodeURIComponent(m[1]); } catch { return null; }
+};
+
+// A row is marked when it is the page, and also when it is the place the page sits in: a folder
+// holding more documents than fit gets one row, and without this a reader who followed a link
+// into it would meet a sidebar with nothing open and nothing marked, which is the dead end this
+// navigation exists to end. The two are told apart the way ARIA tells them apart - "page" is this
+// page, "location" is where in the tree this page is - so neither claims to be the other.
+const marks = (p, here) => {
+  if (p.href === here) return 'page';
+  const doc = shownBy(here);
+  return p.dir && doc && doc.startsWith(`${p.dir}/`) ? 'location' : null;
+};
+
 const row = (p, here) => {
-  const on = p.href === here;
+  const mark = marks(p, here);
+  const on = mark !== null;
   return `<li><a class="plink${on ? ' on' : ''}" href="${escapeHtml(p.href)}"`
-    + `${on ? ' aria-current="page"' : ''}`
+    + `${on ? ` aria-current="${mark}"` : ''}`
     + `${p.full ? ` title="${escapeHtml(p.full)}"` : ''}>`
     + `${icon(p.icon)}<span>${escapeHtml(p.label)}</span>`
     + `${p.count ? `<b class="n">${p.count}</b>` : ''}</a></li>`;
@@ -204,7 +224,7 @@ const row = (p, here) => {
 // none, and that is the one thing this navigation may never say by accident.
 export function sidebar(name, model, w, { here = '/', failure = null } = {}) {
   const groups = model.map((g) => {
-    const holdsHere = g.rows.some((p) => p.href === here);
+    const holdsHere = g.rows.some((p) => marks(p, here) !== null);
     return `<div class="topic"><details${holdsHere ? ' open' : ''}>`
       + `<summary><span class="ttl">${escapeHtml(g.label)}</span>${icon('chevron-right')}</summary>`
       + `<ul>${g.rows.map((p) => row(p, here)).join('')}</ul></details></div>`;
