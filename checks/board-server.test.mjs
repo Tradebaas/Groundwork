@@ -33,15 +33,17 @@ const project = (over = {}) => ({ name: 'Kassaboek', lang: 'en', now: null, ...o
 
 // ---------------------------------------------------------------- the file page
 
-test('a file page says which shelf it was reached from, and gets back to it in one click', () => {
+test('a file page says which shelf it stands on, and carries the way out beside it', () => {
   const html = renderFile(project(), 'docs/product/BRIEF.md', '# BRIEF\n\nThe shoebox.\n');
   const text = visible(html);
   // The file is what the page is for: the whole of it, as it lies on disk.
   assert.match(text, /This file as it is on disk right now, read-only/);
   assert.match(html, /<pre># BRIEF\n\nThe shoebox\.\n<\/pre>/);
-  // Where it was reached from, and the one click back to exactly that shelf.
+  // Where it stands, as a statement rather than a link: since S-07 the shelf is a chapter of the
+  // sidebar every document page carries, so the anchor a shelf section used to offer is gone and
+  // must not come back as a link to nowhere.
   assert.match(text, /On the shelf Why we build it/);
-  assert.match(html, /<a href="\/#shelf-why">Why we build it<\/a>/);
+  assert.doesNotMatch(html, /href="[^"]*#shelf-/, 'no link into a shelf section that no page renders');
 });
 
 test('the shelf a file page names is the one its own path puts it on', () => {

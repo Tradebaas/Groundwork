@@ -80,7 +80,11 @@ test('the printed file is the same picture as the served board, down to the last
     .replace(LIVE, `${WHEN} ${NAMES}`)
     .replace(HERE, (m, n, t) => THERE(n, t))
     // A name is a name: the anchor goes, the name it wrapped stays exactly as it was.
-    .replace(/<a href="\/file\?path=[^"]*">(<code>[^<]*<\/code>)<\/a>/g, '$1');
+    .replace(/<a href="\/file\?path=[^"]*">(<code>[^<]*<\/code>)<\/a>/g, '$1')
+    // The fourth rule, added by S-07. A served page is a frame: it fills the window and the
+    // containers in it scroll, so the lanes stay where the reader put them. A file is one long
+    // document that scrolls the ordinary way, and the class is the whole of that difference.
+    .replace(' class="frame"', '');
   assert.equal(asPrinted, printed);
   // And the served board really did carry all three, so the diff above proved something.
   assert.match(served, new RegExp(LIVE));
@@ -165,9 +169,10 @@ test('a copy that has planned nothing prints too, and reads as not started', () 
   assert.match(printed, /<\/html>\n$/);
   assert.match(text, /Scope is not defined yet/);
   assert.match(text, new RegExp(`Made from the project files on ${STAMP}`));
-  // Every shelf is named and says it holds nothing, the same as on the served board.
-  assert.equal(printed.split('<section class="shelf"').length - 1, 4);
-  assert.doesNotMatch(printed, /<section class="lane">/);
+  // Redrawn for S-07: the shelves became the sidebar's chapters, and a printed file has no
+  // sidebar at all, because there is nowhere in it to navigate to. What has to hold is that an
+  // empty copy still prints as not started rather than as a failure, which the rest of this asks.
+  assert.doesNotMatch(printed, /<section class="lane[ "]/);
   assert.doesNotMatch(printed, /<a[\s>]/);
   // Not an error and not a blank page: the file still says what to do next.
   assert.match(text, /names no next step/);

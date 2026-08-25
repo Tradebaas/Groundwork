@@ -1,5 +1,5 @@
 // The page shell every page this board serves is built in: the look, and the safe ways project
-// text gets into it. The cards, the lanes, the shelves, the two lines under them, a file page and
+// text gets into it. The cards, the lanes, the sidebar, the two lines under them, a file page and
 // a notice all render through here, so the project has one design and one escaping rule rather
 // than six of each.
 // Split out of checks/board-document.mjs when the lanes arrived (E-01/F-04/S-03): a second page
@@ -10,113 +10,260 @@
 // everything that folds folds with <details>, and its keyboard behaviour and focus ring come with
 // the element instead of being rebuilt.
 
-// defer: the token values below are copied from the explainer (index.html) instead of read from
-// a token file. ceiling: a third surface, or the owner moving the accent, makes the copies drift.
-// upgrade-when: this project's own token section in docs/DESIGN.md is filled. Ledger: DEBT-001.
+// The look, taken from the board the owner handed over as the reference (Duetti, commit 141c653)
+// and from the three notes he parked with it: the dark theme stands as it is, the light theme is
+// firmer than that reference's, and the type is tighter. Dark is charcoal with one peach accent.
+// Light is this project's own: warm paper, near-black ink, a burnt amber that is the daylight
+// sibling of the peach - measured, not guessed (see the story for the ratios).
 const TOKENS = `:root{color-scheme:dark light;
-  --bg:#0a0b0b;--surface:rgba(255,255,255,.025);--line:rgba(255,255,255,.08);
-  --ink:#f2f3f1;--ink2:#c3c6c0;--muted:#8f938a;--accent:#3fae9f;--tint:#3fae9f17;
-  --r:14px;--rs:8px;--maxw:900px}
+  --bg:#2B2D33;--panel:#1F2126;--card:#34363D;--card2:#3C3E46;
+  --line:rgba(255,255,255,.08);--code:rgba(255,255,255,.07);
+  --ink:#F2EFE9;--ink2:#A7A9B0;--muted:#74777F;
+  --accent:#F6C59B;--accent2:#E9B384;--onaccent:#23252A;--red:#E3867A;
+  --tint:rgba(246,197,155,.10);--shadow:none;
+  --rs:12px;--r:20px;--rl:28px;--side:264px}
 @media(prefers-color-scheme:light){:root{
-  --bg:#f6f7f6;--surface:#fdfdfc;--line:rgba(0,0,0,.10);
-  --ink:#15181a;--ink2:#454b47;--muted:#5d625c;--accent:#2f6664;--tint:#2f66640f}}`;
+  --bg:#F7F5F2;--panel:#EFEBE5;--card:#FFFFFF;--card2:#F5F1EB;
+  --line:rgba(28,26,24,.13);--code:rgba(28,26,24,.06);
+  --ink:#1C1A18;--ink2:#4A4640;--muted:#6F6A62;
+  --accent:#B4551F;--accent2:#8F4116;--onaccent:#FFFFFF;--red:#A82E22;
+  --tint:rgba(180,85,31,.07);--shadow:0 8px 24px rgba(28,26,24,.07)}}`;
 
+// The interface face stays the machine's own - system-ui resolves to San Francisco, Segoe UI or
+// Roboto wherever the reader is - because the board's Content-Security-Policy allows no font to
+// load, not even an embedded one. What the owner's "tighter" note asks for is therefore done with
+// what a system face has: tight tracking, heavier headings, shorter line height.
 const BASE = `*{box-sizing:border-box}
-/* The machine's own interface face, named as what it is rather than as a list of the vendors it
-   could be. system-ui resolves to San Francisco, Segoe UI or Roboto wherever the reader is, so
-   the page picks no typeface at all - which is the honest state until the owner picks one. */
-body{margin:0;padding:48px 20px 80px;background:var(--bg);color:var(--ink);
-  font:16px/1.65 system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-main{max-width:var(--maxw);margin:0 auto}
-h1{font-size:27px;line-height:1.2;letter-spacing:-.02em;margin:0 0 8px;font-weight:700}
-.sub{color:var(--muted);margin:0 0 36px;font-size:14px;max-width:62ch}
-.hint{color:var(--muted);margin:8px 0 0;font-size:14px;max-width:62ch}
-.card{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
-  padding:26px 28px;margin:0 0 20px}
-.card h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-  margin:0 0 16px;font-weight:600}
-.lead{font-size:20px;line-height:1.35;margin:0}
-h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
-  margin:24px 0 8px;font-weight:600}
-details{margin:24px 0 0}
-summary{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
-  font-weight:600;cursor:pointer}
-summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
-details[open] summary{margin-bottom:12px}
-.count{color:var(--ink2);font-weight:400;letter-spacing:0}
-ul{margin:0;padding-left:22px}
-li{margin:0 0 6px;color:var(--ink2)}
-p{margin:0 0 12px}
-.src{margin:22px 0 0;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
-.note{border-left:2px solid var(--accent);background:var(--tint);padding:12px 16px;
-  margin:20px 0 0;border-radius:0 var(--rs) var(--rs) 0;color:var(--ink2)}
-/* A label a screen reader hears and the page does not show, for a value whose meaning is in its
-   position rather than in its characters. */
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.55 -apple-system,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;text-wrap:balance;letter-spacing:-.021em;font-weight:700}
+p{margin:0 0 10px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+main:focus{outline:none}
+main:focus-visible{outline-offset:-3px}
+code{font:.88em ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);
+  padding:.1em .4em;border-radius:6px;color:var(--ink)}
+pre{margin:0;padding:20px;background:var(--panel);border-radius:var(--r);overflow:auto;
+  font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink2);
+  white-space:pre-wrap;word-break:break-word}
+ul{margin:0;padding-left:20px}
+li{margin:0 0 5px;color:var(--ink2)}
 .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
   clip-path:inset(50%);white-space:nowrap;border:0}
-a{color:var(--accent)}
-a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
-pre{margin:0;padding:22px;background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--r);overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-size:13px;line-height:1.6;color:var(--ink2);white-space:pre-wrap;word-break:break-word}`;
+.skip{position:absolute;left:-9999px;top:0;z-index:9}
+.skip:focus{left:10px;top:10px;background:var(--card);color:var(--ink);padding:10px 14px;
+  border-radius:var(--rs)}
 
-// The three things on this board that fold: a lane, a shelf, and one of the two lines under the
-// shelves. One box, one summary, one disclosure triangle, so the page reads as a single column of
-// things that open rather than as three inventions. The cards inside a lane sit on a grid that
-// gives way to one column on a phone.
-const LANES = `.lane,.shelf,.line{border:1px solid var(--line);border-radius:var(--r);
-  background:var(--surface);padding:18px 20px;margin:0 0 12px}
-.lane>details,.shelf>details,.line>details{margin:0}
-.lane summary,.shelf summary,.line summary{display:flex;align-items:center;gap:10px;font-size:13px;
-  letter-spacing:.08em;list-style:none}
-.lane summary::-webkit-details-marker,.shelf summary::-webkit-details-marker,
-.line summary::-webkit-details-marker{display:none}
-/* Laying the summary out as a row takes the browser's own disclosure triangle away, and a row
-   that folds has to look like one. This draws it back, pointing at what opening it will do. */
-.lane summary::before,.shelf summary::before,.line summary::before{content:"";width:7px;height:7px;
-  flex:none;margin:0 2px 2px 0;border-right:1.5px solid var(--muted);
-  border-bottom:1.5px solid var(--muted);transform:rotate(-45deg)}
-.lane details[open] summary::before,.shelf details[open] summary::before,
-.line details[open] summary::before{transform:rotate(45deg);margin:0 2px 4px 0}
-.lane summary .ttl,.shelf summary .ttl{color:var(--ink);text-transform:none;letter-spacing:-.01em;
-  font-size:16px;font-weight:600}
-.lane summary .tail,.shelf summary .tail{margin-left:auto;display:flex;align-items:center;gap:10px;
-  letter-spacing:0;text-transform:none;font-weight:400}
-/* The two lines lead with a whole sentence rather than a title, so they are set as one. */
-.line summary .ttl{color:var(--ink2);text-transform:none;letter-spacing:0;font-size:15px;
-  font-weight:400;line-height:1.5}
-.shelves,.strip{margin:28px 0 0}
-/* A shelf a file page sent the reader back to says so, so arriving lands on something visible. */
-.shelf:target{border-color:var(--accent);background:var(--tint)}
-.docs{margin:14px 0 0}
-.docs li{font-size:14px;margin:0 0 8px}
-.wip{color:var(--muted);font-size:13px}
-.wip.over{color:var(--ink2);border-bottom:1px dashed var(--accent)}
-/* Cards keep a card's width and wrap onto a second column where there is room, so a lane holding
-   one story does not stretch it across the page and a lane holding ten stays scannable. */
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;
-  margin:14px 0 0}
-.wcard{border:1px solid var(--line);border-radius:var(--rs);padding:14px 16px;
-  background:var(--bg)}
-.wcard h4{margin:8px 0 2px;font-size:15px;line-height:1.3;letter-spacing:-.01em;font-weight:600}
-.wcard p{margin:0 0 8px;font-size:14px;color:var(--ink2)}
-.wcard .feat{color:var(--muted);font-size:12px;margin:0 0 6px}
-.wcard footer{margin:10px 0 0;font-size:12px;color:var(--muted);word-break:break-word}
-.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 9px;
-  font-size:12px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.chip.size{font-family:inherit}
-.bar{display:block;height:3px;border-radius:2px;background:var(--line);margin:0 0 6px;
+/* The shell: the sidebar down the left, the page beside it. The project's documents are reached
+   through that sidebar, grouped on the four shelves, one page per document. On a phone the sidebar
+   folds to a strip above. */
+.shell{display:grid;grid-template-columns:var(--side) minmax(0,1fr);align-items:start}
+.shell:not(:has(>.side)){grid-template-columns:minmax(0,1fr)}
+.side{position:sticky;top:0;height:100vh;overflow:auto;padding:20px 12px;
+  background:var(--panel);border-right:1px solid var(--line)}
+/* The sidebar. Four destinations, then the subjects, one word per row. Every rule here answers
+   a measured finding: the headings were rendering at 15px/400 uppercase because a font
+   shorthand ending in the keyword inherit is invalid and was dropped whole, the muted tone here
+   measures 3.60:1, and a row that only cleared 44px by wrapping was never really 44px. */
+.mark{display:block;padding:6px 12px 14px;font-size:19px;font-weight:700;
+  letter-spacing:-.026em;color:var(--ink)}
+.mark:hover{text-decoration:none;color:var(--accent)}
+.side ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.side li{margin:0}
+.plink{display:flex;align-items:center;gap:10px;min-height:36px;padding:7px 12px;
+  border-radius:9px;font-size:13px;font-weight:500;color:var(--ink2);letter-spacing:-.004em}
+.plink span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plink .ico{color:var(--muted)}
+.plink:hover{background:var(--card2);color:var(--ink);text-decoration:none}
+.plink:hover .ico{color:var(--ink2)}
+/* The active row is a tint and an accent, not a filled block: on a page whose loudest object
+   should be the work, the navigation says "here" without shouting it. */
+.plink.on{background:var(--tint);color:var(--accent2);font-weight:600}
+.plink.on .ico{color:var(--accent2)}
+.plink.on:hover{background:var(--tint);color:var(--accent2);text-decoration:none}
+.plink .n{margin-left:auto;font-weight:600;font-size:11px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.dest{margin:0 0 6px}
+.topic{margin-top:14px}
+.topic>details{margin:0}
+.topic summary{display:flex;align-items:center;gap:8px;min-height:34px;padding:7px 12px;
+  border-radius:9px;cursor:pointer;list-style:none;color:var(--ink2)}
+.topic summary::-webkit-details-marker{display:none}
+.topic summary .ttl{flex:1;min-width:0;font-size:11.5px;font-weight:600;line-height:1.3;
+  letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topic summary:hover{background:var(--card2);color:var(--ink)}
+.topic summary .ico{width:14px;height:14px;color:var(--muted);transition:transform .16s ease-out}
+.topic details[open] summary .ico{transform:rotate(90deg)}
+.topic ul{margin:1px 0 4px}
+.topic .plink{padding-left:18px}
+main{padding:34px 26px 72px;max-width:1680px;margin:0 auto}
+h1{font-size:31px;line-height:1.14;margin:0 0 6px}
+.sub{color:var(--ink2);margin:0 0 26px;font-size:14px;max-width:70ch}
+.hint{color:var(--ink2);margin:8px 0 0;font-size:13px;max-width:66ch}
+.empty{color:var(--ink2);font-size:13px;margin:12px 0 0}
+
+/* A card is a panel: the two at the top of the board, a shelf, a document page. */
+.card{background:var(--panel);border-radius:var(--rl);padding:24px 26px;margin:0 0 16px}
+.card h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  margin:0 0 14px;font-weight:600}
+.lead{font-size:19px;line-height:1.4;margin:0;letter-spacing:-.012em}
+h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  margin:20px 0 8px;font-weight:600}
+.src{margin:20px 0 0;padding-top:14px;border-top:1px solid var(--line);font-size:12px;
+  color:var(--ink2)}
+.note{border-left:2px solid var(--accent);background:var(--tint);padding:12px 16px;margin:16px 0 0;
+  border-radius:0 var(--rs) var(--rs) 0;color:var(--ink2)}
+.top{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 20px}
+.top .card{margin:0}
+/* The frame holds still and the containers in it move: the page itself never scrolls, so the
+   lanes stay where the reader put them. The sidebar scrolls in itself, the lane row sideways, each
+   lane in itself, and every other page in its own column. Two pages are deliberately not frames.
+   A file made with --page is one long document rather than a screen, and a frame narrow enough to
+   have stacked its sidebar would put everything under that sidebar out of reach, so both keep the
+   ordinary page scroll. Printing does too, on the same grounds. */
+html:has(.frame),.frame{height:100%;overflow:hidden}
+.frame .shell{height:100dvh;align-items:stretch}
+.frame .side,.frame main{min-height:0}
+.frame .side{position:static;height:100%}
+.frame main{overflow:auto}
+.frame main:has(>.lanes){display:flex;flex-direction:column;overflow:hidden;padding-bottom:26px}
+.frame main:has(>.lanes)>h1,.frame main:has(>.lanes)>.sub{flex:none}
+.frame main:has(>.lanes)>.lanes{flex:1 1 auto;min-height:0;margin-bottom:0}
+.frame .lanes>.lane{display:flex;flex-direction:column;min-height:0}
+.frame .lane>details[open]{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+/* An open <details> keeps its content in a box of its own, so the height has to be handed down
+   through that box or the cards below it are laid out at their full length and clipped away. An
+   engine without the pseudo-element skips this one rule and hands the height straight to .cards,
+   which is the same result. */
+.frame .lane>details[open]::details-content{display:flex;flex-direction:column;flex:1 1 auto;
+  min-height:0}
+.frame .lane summary{flex:none}
+.frame .lane .cards{flex:1 1 auto;min-height:0;overflow:auto}
+@media(max-width:900px){.top{grid-template-columns:1fr}}`;
+
+// The lanes, in a row the way the owner settled them: Backlog, Refinement and Done start folded
+// and a folded lane is a narrow upright strip, so To do, In progress and Review are what a reader
+// lands on and all six still fit. The fold is a <details>, so the strip is CSS on its open state
+// and no script decides what a reader can see.
+const LANES = `.lanes{display:flex;gap:14px;align-items:stretch;overflow-x:auto;
+  padding-bottom:10px;margin:0 0 22px}
+.lane{flex:1 1 0;min-width:262px;background:var(--panel);border-radius:var(--rl);padding:20px}
+.lane>details{margin:0}
+.lane summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none}
+.lane summary::-webkit-details-marker{display:none}
+.lane summary .ttl{font-size:16px;font-weight:700;letter-spacing:-.018em;color:var(--ink);
+  white-space:nowrap}
+.lane summary .tail{margin-left:auto;display:flex;align-items:center;gap:7px}
+.lane .count{font-size:13px;font-weight:600;line-height:1;color:var(--onaccent);background:var(--accent);
+  border-radius:999px;padding:5px 9px;font-variant-numeric:tabular-nums}
+.lane .wip{font-size:11px;font-weight:600;line-height:1;letter-spacing:.03em;color:var(--ink2);white-space:nowrap;
+  border:1px solid var(--line);border-radius:999px;padding:4px 7px}
+.lane.over .ttl,.lane.over .wip{color:var(--red)}
+.lane.over .wip{border-color:var(--red)}
+.lane.over .count{background:var(--red);color:#fff}
+/* Folded: the whole lane becomes the strip, with its name set upright beside its count. */
+.lane:has(>details:not([open])){flex:0 0 58px;min-width:0;padding:18px 0 16px;cursor:pointer}
+.lane:has(>details:not([open])) summary{flex-direction:column;gap:12px}
+.lane:has(>details:not([open])) summary .ttl{writing-mode:vertical-rl;transform:rotate(180deg)}
+.lane:has(>details:not([open])) summary .tail{margin:0;flex-direction:column;gap:8px}
+.lane:has(>details:not([open])) .wip{writing-mode:vertical-rl;transform:rotate(180deg)}
+.cards{display:flex;flex-direction:column;gap:12px;margin:14px 0 0}
+.wcard{background:var(--card);border-radius:var(--r);padding:17px 19px;box-shadow:var(--shadow)}
+.wcard header{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 9px}
+.wcard h4{font-size:15px;line-height:1.32;margin:0 0 2px}
+.wcard .feat{color:var(--muted);font-size:12px;margin:0 0 7px}
+.wcard p{margin:0 0 8px;font-size:13.5px;color:var(--ink2)}
+.wcard footer{margin:11px 0 0;font-size:12px;color:var(--ink2);word-break:break-word}
+/* The two lanes work actually sits in carry a ring, so they read as the live ones. */
+.lane-in-progress .wcard,.lane-review .wcard{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.chip{display:inline-flex;align-items:center;font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,
+  monospace;background:var(--card2);color:var(--ink);border-radius:999px;padding:5px 10px}
+.chip.size{font-family:inherit;background:var(--code);color:var(--ink2)}
+.bar{display:block;height:4px;border-radius:2px;background:var(--code);margin:2px 0 6px;
   overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent)}
-.marks{margin:8px 0 0;padding-left:18px}
-.marks li{font-size:13px;margin:0 0 4px}
-.marks.block li{color:var(--ink)}
-.empty{color:var(--muted);font-size:14px;margin:14px 0 0}`;
+.marks{margin:9px 0 0;padding-left:17px}
+.marks li{font-size:12.5px;margin:0 0 4px}
+.marks.block li{color:var(--red)}
+/* The two derived lines under the lanes keep folding, and a shelf a file page came back to says
+   so by lighting its own border. */
+.line{background:var(--panel);border-radius:var(--rl);padding:18px 22px;margin:0 0 12px}
+.line>details{margin:0}
+.line summary{cursor:pointer;font-size:14px;color:var(--ink2);line-height:1.5;list-style:none}
+.line summary::-webkit-details-marker{display:none}
+.line .count{color:var(--muted);font-size:13px}
+@media(max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  main{padding:24px 18px 56px}
+  .lanes{display:block}
+  .lane,.lane:has(>details:not([open])){flex:none;min-width:0;padding:18px 20px;margin:0 0 12px}
+  .lane:has(>details:not([open])) summary{flex-direction:row}
+  .lane:has(>details:not([open])) summary .ttl,
+  .lane:has(>details:not([open])) .wip{writing-mode:horizontal-tb;transform:none}
+  .lane:has(>details:not([open])) summary .tail{margin-left:auto;flex-direction:row}
+}
+@media(max-width:900px),print{
+  html:has(.frame),.frame{height:auto;overflow:visible}
+  .frame .shell{height:auto}
+  .frame .side{height:auto}
+  .frame main,.frame main:has(>.lanes){display:block;overflow:visible}
+  .frame .lanes>.lane,.frame .lane>details[open],
+  .frame .lane>details[open]::details-content{display:block;min-height:auto}
+  .frame .lane .cards{overflow:visible}
+}
+@media(pointer:coarse){.plink{min-height:44px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}`;
+
+import { ICON_STYLE } from './board-icons.mjs';
+
+
+// The parts the pages beside the board bring with them: a section heading with its icon, the tile
+// grid an index page is made of, and the steps on a story card.
+const EXTRA = `.sech{display:flex;align-items:center;gap:9px;font-size:17px;margin:26px 0 12px;
+  letter-spacing:-.018em}
+.sech .ico{width:18px;height:18px;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.tile{display:block;background:var(--panel);border-radius:var(--rl);padding:20px 22px;
+  color:var(--ink)}
+.tile:hover{background:var(--card2);text-decoration:none}
+.tile header{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.tile h4{font-size:16px;line-height:1.3;margin:0 0 6px}
+.tile p{margin:0 0 10px;font-size:13.5px;color:var(--ink2)}
+.tile .hint{margin:0}
+.cards.wide{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.crit{margin:0;padding-left:20px}
+.crit li{font-size:13.5px;margin:0 0 7px;color:var(--ink2)}
+.crit li.met{color:var(--muted)}
+.crit li.met::marker{color:var(--accent)}
+/* A folder's own page: one row per document, its heading first and its file name under it. */
+.index{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:2px}
+.index li{margin:0}
+.index a,.index .dead{display:block;padding:13px 16px;border-radius:var(--rs)}
+.index a:hover{background:var(--panel);text-decoration:none}
+.index b{display:block;font-size:14px;font-weight:600;color:var(--ink);line-height:1.35}
+.index span{display:block;margin-top:3px;font-size:12px;color:var(--ink2);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.index .dead b{color:var(--ink2)}
+.steps{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.steps li{display:grid;grid-template-columns:15px 1fr;gap:8px;align-items:start;font-size:12.5px;
+  color:var(--ink2);line-height:1.45;margin:0}
+.steps .ico{width:14px;height:14px;margin-top:1px;color:var(--muted)}
+.steps .t-done{color:var(--muted)}
+.steps .t-done .ico{color:var(--accent)}
+.steps .t-done span{text-decoration:line-through;text-decoration-thickness:1px}
+.steps .t-started .ico{color:var(--accent)}`;
 
 export const STYLE = `${TOKENS}
 ${BASE}
-${LANES}`;
+${LANES}
+${EXTRA}
+${ICON_STYLE}`;
 
 // ---------------------------------------------------------------- the shell's own words
 
@@ -138,6 +285,7 @@ const SHELL = {
       + 'carry the files themselves.',
     source: 'From',
     back: 'Back to the board',
+    skip: 'Skip the navigation',
     partFailed: (why) => `This part of the board could not be built: ${why}. The rest still holds.`,
   },
   nl: {
@@ -148,6 +296,7 @@ const SHELL = {
       + 'bevat die bestanden zelf niet.',
     source: 'Uit',
     back: 'Terug naar het bord',
+    skip: 'Sla de navigatie over',
     partFailed: (why) => `Dit deel van het bord kon niet worden opgebouwd: ${why}. De rest klopt nog.`,
   },
 };
@@ -220,7 +369,7 @@ export function card(title, owner, build) {
 
 // ---------------------------------------------------------------- the page itself
 
-export function page({ lang = 'en', title, body }) {
+export function page({ lang = 'en', title, body, nav = '', frame = false }) {
   return `<!doctype html>
 <html lang="${escapeHtml(lang)}">
 <head>
@@ -229,10 +378,14 @@ export function page({ lang = 'en', title, body }) {
 <title>${escapeHtml(title)}</title>
 <style>${STYLE}</style>
 </head>
-<body>
-<main>
+<body${frame ? ` class="frame"` : ``}>
+${nav ? `<a class="skip" href="#main">${escapeHtml(shellWords(lang).skip)}</a>` : ``}
+<div class="shell">
+${nav}
+<main id="main" tabindex="-1">
 ${body}
 </main>
+</div>
 </body>
 </html>
 `;

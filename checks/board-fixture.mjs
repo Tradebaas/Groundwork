@@ -109,17 +109,25 @@ export const idChip = (id) => new RegExp(`</span>${id}</span>`);
 // matching across the whole page. Each keeps its own markup: the fold state is part of what is
 // asserted.
 export function laneOf(html, name) {
-  const found = html.split('<section class="lane">').slice(1)
+  const found = html.split(/<section class="lane[^"]*">/).slice(1)
     .find((s) => s.includes(`<span class="ttl">${name}</span>`));
   assert.ok(found, `no lane called ${name} on the page`);
   return found.split('</section>')[0];
 }
 
-export function shelfOf(html, key) {
-  const found = html.split(`<section class="shelf" id="shelf-${key}">`)[1];
-  assert.ok(found, `no shelf called ${key} on the page`);
-  return found.split('</section>')[0];
+// The sidebar cut into one chapter. Since S-07 a shelf is a chapter of the navigation rather
+// than a section of the board, so this is where a test asks what stands on one. The chapter is
+// found by the name a reader sees, because that name is the whole of what identifies it.
+export function chapterOf(html, name) {
+  const found = html.split('<div class="topic">').slice(1)
+    .find((s) => s.includes(`<span class="ttl">${name}</span>`));
+  assert.ok(found, `no chapter called ${name} in the sidebar`);
+  return found.split('</details>')[0];
 }
+
+// How many chapters the sidebar holds. An empty copy has none, and a docs/ folder that could not
+// be read has none either - and those two must not be told apart by counting alone.
+export const chapterCount = (html) => html.split('<div class="topic">').length - 1;
 
 // ---------------------------------------------------------------- talking to a served page
 
