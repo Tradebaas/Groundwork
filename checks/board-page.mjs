@@ -69,6 +69,7 @@ const BOARD_WORDS = {
     inFolder: (n) => `${n} documents`,
     notInGit: 'kept out of git, so this board does not open it',
     tasksHead: 'Tasks', storiesHead: 'Stories', acceptanceHead: 'Acceptance',
+    afterHead: 'What you can do after it',
     finishedHead: 'What finished means', goalHead: 'The goal',
     worthHead: 'What that is worth', visionHead: 'Which choice it serves',
     ofDone: (d, t) => `${d} of ${t} done`,
@@ -103,6 +104,7 @@ const BOARD_WORDS = {
     inFolder: (n) => `${n} documenten`,
     notInGit: 'buiten git gehouden, dus dit bord opent het niet',
     tasksHead: 'Taken', storiesHead: 'Stories', acceptanceHead: 'Acceptatie',
+    afterHead: 'Wat je erna kunt',
     finishedHead: 'Wat klaar betekent', goalHead: 'Het doel',
     worthHead: 'Wat dat waard is', visionHead: 'Welke keuze het dient',
     ofDone: (d, t) => `${d} van ${t} klaar`,
@@ -339,12 +341,17 @@ export const shellFor = (c, here) => sidebar(c.project.name,
 
 // The way in: what this project is for, where the round stands, and the two derived lines. The
 // lanes are not here - they are the board, which is its own page.
+// What this project is for and where the round stands, side by side. Both pages that open with
+// them ask for them here, so the pair cannot drift into two arrangements of the same two cards.
+const topCards = (root, c) => `<div class="top">`
+  + `${purposeCard(readBrief(root), c.project.lang, c.w, c.opens)}`
+  + `${roundCard(c.progress, c.epic, readHandoff(root).now, c.project.lang, c.w, c.opens)}</div>`;
+
 export function startPage(root, opts = {}) {
   const c = context(root, opts);
   c.rootPath = root;
   const body = [
-    `<div class="top">${purposeCard(readBrief(root), c.project.lang, c.w, c.opens)}`
-      + `${roundCard(c.progress, c.epic, readHandoff(root).now, c.project.lang, c.w, c.opens)}</div>`,
+    topCards(root, c),
     renderStrip(c.facts, c.project.lang, c.opens, c.made),
   ].filter(Boolean).join('\n');
   return renderBoard(c.project, body, c.w, c.made, shellFor(c, '/'));
@@ -372,8 +379,7 @@ export function boardPage(root, { made = null, ...deps } = {}) {
   c.rootPath = root;
   const { work } = c.project;
   const body = [
-    `<div class="top">${purposeCard(readBrief(root), c.project.lang, c.w, c.opens)}`
-      + `${roundCard(c.progress, c.epic, readHandoff(root).now, c.project.lang, c.w, c.opens)}</div>`,
+    topCards(root, c),
     c.epic ? lanes(work, c.epic.key, c.w, c.opens) : '',
     c.epic ? otherEpics(work.epics.filter((e) => e.key !== c.epic.key), c.w) : '',
     renderStrip(c.facts, c.project.lang, c.opens, c.made),
