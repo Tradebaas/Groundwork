@@ -26,6 +26,11 @@ authoritative sources (official docs, release pages). Model memory is a rumor wi
 
 ## 2. Generate `docs/standards/<stack>.md`
 
+Start from `docs/standards/TEMPLATE-STACK.md`, which owns the shape. Its floor table is the part
+`checks/check.mjs` reads: six classes of risk, each answered with a command, a reasoned
+`not applicable`, or a named `manual` check with a `defer:` marker. Fill that table as you
+research, because it is what step 3 has to satisfy.
+
 Research what a top engineer in *this* ecosystem does **today**, from primary sources, and write
 it down with versions, dates, and source links.
 
@@ -56,15 +61,15 @@ cover at least:
 ## 3. Scaffold and wire the gates
 
 - Scaffold the conventional project structure (official generator where one exists).
-- Wire the gate chain so it runs the same everywhere:
-  - **pre-commit** (`checks/hooks/pre-commit`, versioned): append fast checks (format, lint
+- Wire the gate chain so it runs the same everywhere. **What has to be covered is the floor table
+  you filled in step 2**, not a list repeated here: every class answered, and every `command`
+  answer running as a live stage. An SBOM of at least top-level dependencies is the CRA legal
+  floor, so `dependencies` is answered with one where the stack has any.
+  - **pre-commit** (`checks/hooks/pre-commit`, versioned): append the fast half (format, lint
     staged) after the Groundwork line. Cheap first.
-  - **CI** (`.github/workflows/ci.yml`, or this host's equivalent): the full authority:
-    checks, typecheck, lint, tests, build, secret scan. Replace the placeholder stage;
-    CI must fail on any gate.
-  - **Supply-chain floor**, as soon as the stack has dependencies: an SBOM (software bill of
-    materials) of at least top-level dependencies - the CRA legal floor - plus dependency
-    audit and license scan, all wired into CI with this ecosystem's current tools.
+  - **CI** (`.github/workflows/ci.yml`, or this host's equivalent): the full authority. Replace
+    the placeholder stage; CI must fail on any gate. Deleting a placeholder without wiring what it
+    stood for leaves the class unanswered, and the floor table is where that shows.
   - **Design detector**, when the product has a user interface: a CI stage that runs the design
     method's own detector over the surfaces this project ships, beside the typecheck and the
     tests. It is deterministic, model-free and needs no key, so it belongs with the mechanical
