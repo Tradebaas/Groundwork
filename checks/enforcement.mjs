@@ -15,9 +15,6 @@ import { join } from 'node:path';
 // Whether the design method is installed, and at which version, is read where its install route
 // lives, so the report and the installer can never disagree about where the payload sits.
 import { designMethodSignal } from './design-method.mjs';
-// The floor's shape is derived where the gate already parses the contract, so the line below and
-// the board's own line are two renderings of one count rather than two readings of one table.
-import { floorReport } from './check-stack.mjs';
 
 // stderr is swallowed: "not a repo" or "key unset" are expected degraded states, not errors.
 const git = (root, args) => execSync(`git ${args}`, {
@@ -125,7 +122,3 @@ export function formatFloor(floor) {
   }
   return lines;
 }
-
-// The floor for this root, or nothing when no stack is declared. One call for the CLI, so a
-// caller cannot report the floor without the derivation that owns it.
-export const floorFor = (root) => formatFloor(floorReport(root));
