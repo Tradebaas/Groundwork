@@ -39,6 +39,10 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   design method would read as this project's product truth. Delete it: the method's own init writes
   this project's, in the same place, from what the interview below already captured.
   `docs/DESIGN.md` stays: sections 1 and 2 ship with Groundwork and are input to that method.
+- `docs/standards/node.md` is Groundwork's own stack and its own floor table, which `stack-gates`
+  would hold this project to. Delete it: a copy has not chosen a stack yet, and the `stack` skill
+  writes this project's own from `docs/standards/TEMPLATE-STACK.md`. `GLOBAL.md` and the template
+  stay - they are the cross-stack floor and the shape, not Groundwork's answers.
 - `docs/operations/deploy.md` holds Groundwork's own release route, which would read as this
   project's if it stayed. Put the blank runbook back
   (`cp docs/operations/TEMPLATE-DEPLOY.md docs/operations/deploy.md`). `deliver` fills it at first

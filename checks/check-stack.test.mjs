@@ -9,9 +9,35 @@ import { expectClean, expectFail, report } from './check-fixture.mjs';
 
 // The manifest row keeps docs-manifest quiet, so only the gate under test speaks.
 const manifest = '# manifest\n\n| `state/STATE.md` | LIVE | state |\n| `standards/**` | LIVE | standards |\n';
+// A filled floor table, shaped the way docs/standards/TEMPLATE-STACK.md shapes it. The argument
+// overrides one or more classes, so a test can say exactly which shape it is about.
+const floor = (rows = {}) => {
+  const base = {
+    builds: ['command', '`npm run build`'],
+    behaves: ['command', '`npm test`'],
+    analyzed: ['command', '`npm run lint`'],
+    dependencies: ['command', '`npm audit`'],
+    secrets: ['not applicable', 'no product code here yet'],
+    renders: ['not applicable', 'this project ships no interface'],
+    ...rows,
+  };
+  const body = Object.entries(base)
+    .map(([cls, [form, answer]]) => `| \`${cls}\` | the risk | ${form} | ${answer} |`).join('\n');
+  return ['# TypeScript', '', '- Platform: no', '', '## The floor', '',
+    '| Class | The risk it covers | Form | Answer |', '|---|---|---|---|', body, '', '## Notes', ''].join('\n');
+};
+
+// A stack is chosen, and its floor is answered in a way ARMED_CI below satisfies: one live
+// command, the rest waived with a reason. Before S-02 this fixture carried no floor table at all,
+// which the gate now reads as a contract that is absent rather than merely unfilled.
 const stack = ({ put }) => {
   put('docs/README.md', manifest);
-  put('docs/standards/typescript.md', '# TypeScript\n\n- Platform: no\n');
+  put('docs/standards/typescript.md', floor({
+    builds: ['not applicable', 'nothing to assemble in this fixture'],
+    behaves: ['not applicable', 'no product code in this fixture'],
+    analyzed: ['command', '`npm run typecheck`'],
+    dependencies: ['not applicable', 'no dependencies in this fixture'],
+  }));
 };
 
 const PLACEHOLDER_CI = `name: ci
@@ -102,5 +128,66 @@ expectClean('stack-gates-detector-alone-needs-no-stack-file', (fx) => {
   design(fx);
   fx.put('.github/workflows/ci.yml', PLACEHOLDER_CI + detectStep);
 });
+
+// --- The floor contract: six classes answered, and every command actually running ------------
+
+const FLOOR_CI = `name: ci
+jobs:
+  gate:
+    steps:
+      - name: Groundwork checks
+        run: node checks/check.mjs
+      - name: Build
+        run: npm run build
+      - name: Tests
+        run: npm test
+      - name: Lint
+        run: npm run lint
+      - name: Audit
+        run: npm audit
+`;
+
+const BARE_CI = `name: ci
+jobs:
+  gate:
+    steps:
+      - name: Groundwork checks
+        run: node checks/check.mjs
+`;
+
+const withFloor = (contract, ci = FLOOR_CI) => ({ put }) => {
+  put('docs/README.md', manifest);
+  put('docs/standards/typescript.md', contract);
+  put('.github/workflows/ci.yml', ci);
+};
+
+// THE HOLE THIS STORY EXISTS FOR. Deleting the commented placeholders was one of the two fixes the
+// old gate's own message proposed, and it satisfied that gate while wiring nothing. Here the stack
+// declares four commands and the workflow runs none of them.
+expectFail('stack-gates', withFloor(floor(), BARE_CI));
+
+// A class left blank is a class nobody decided about, which is the silence the contract refuses.
+expectFail('stack-gates', withFloor(floor({ behaves: ['', ''] })));
+
+// A declared stack with no floor table at all: the contract is absent, not merely unfilled.
+expectFail('stack-gates', withFloor('# TypeScript\n\n- Platform: no\n'));
+
+// A command that exists only as a comment is a stage nobody runs. Same rule the design half
+// already holds: a stage that is talked about is not a stage.
+expectFail('stack-gates', withFloor(floor(),
+  `${BARE_CI}      # - name: Build\n      #   run: npm run build\n      - name: Tests\n        run: npm test\n`
+  + '      - name: Lint\n        run: npm run lint\n      - name: Audit\n        run: npm audit\n'));
+
+// `manual` is an allowed answer and a tracked one: without a defer: marker naming the class it is
+// the silent drop the platform route already refuses.
+expectFail('stack-gates', withFloor(floor({ behaves: ['manual', 'a scripted regression pass before release'] })));
+
+// The three forms, all used honestly, and the gate goes quiet. The manual class carries its
+// marker; the waived ones carry their reason.
+expectClean('stack-gates-floor-answered', withFloor(
+  floor({ behaves: ['manual', 'a scripted regression pass before release'] })
+  + '\n<!-- defer: behaves is proven by hand until a runner exists for this platform.\n'
+  + '     ceiling: the first release nobody had time to walk through.\n'
+  + '     upgrade-when: the vendor ships a supported test runner. -->\n'));
 
 report('stack-gate');
