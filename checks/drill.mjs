@@ -170,6 +170,7 @@ export const STEPS = [
       }
       for (const spec of numberedSpecs(ctx.copy)) rmSync(at('docs', 'specs', spec), { recursive: true });
       rmSync(at('docs', 'specs', 'archive', '000-baseline'), { recursive: true, force: true });
+      rmSync(at('docs', 'standards', 'node.md'), { force: true });
       const pairs = [
         [at('docs', 'product', 'TEMPLATE-VISION.md'), at('docs', 'product', 'VISION.md')],
         [at('docs', 'product', 'TEMPLATE-BRIEF.md'), at('docs', 'product', 'BRIEF.md')],
@@ -201,6 +202,10 @@ export const STEPS = [
       must(numberedSpecs(ctx.copy).length === 0, 'an in-flight spec folder survived the clearing');
       must(!existsSync(at('docs', 'specs', 'archive', '000-baseline')),
         "Groundwork's own baseline survived the clearing");
+      must(!existsSync(at('docs', 'standards', 'node.md')),
+        "Groundwork's own stack file survived the clearing, so the copy inherits a floor it did not choose");
+      must(existsSync(at('docs', 'standards', 'TEMPLATE-STACK.md')),
+        'the stack template went with it, leaving the copy no shape to write its own floor from');
       const checks = node(ctx.copy, ['checks/check.mjs']);
       must(checks.status === 0, `check.mjs failed after the clearing:\n${checks.stdout}`);
       return `${pairs.length} files blanked, denylist emptied, gates still green`;

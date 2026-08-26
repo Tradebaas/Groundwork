@@ -1,8 +1,9 @@
 # TEMPLATE: `<stack>` standards
 
 <!-- The `stack` skill writes this as docs/standards/<stack>.md, from live research (skill section
-     2). The floor table stays; everything else is yours. Replace what is in <angle brackets>, and
-     delete the worked answers at the bottom once your own are filled in. -->
+     2). The floor table stays: `checks/check.mjs` reads it and refuses a class nobody answered.
+     Replace what is in <angle brackets>, and delete the worked answers once your own are filled
+     in. -->
 
 ## The floor
 
@@ -21,7 +22,10 @@ list. **Each row is answered or the gates do not read green.**
 Three answer forms, and no fourth:
 
 - **command** - what CI runs: a shell line, or this host's own task. It has to exist as a live
-  stage in a workflow, never as a comment.
+  stage in a workflow, never as a comment. The Answer cell holds the command in backticks and
+  nothing else in backticks, because every backticked span in it is read as a command that must be
+  running. Two commands answering one class both have to run. Anything you want to say about the
+  answer goes under the table, where the reader has room and the parser does not look.
 - **`not applicable`** - plus the reason. Use it when the class genuinely cannot apply here, never
   when it is merely inconvenient.
 - **`manual`** - plus the named check and who runs it, and a `defer:` marker at the site. This is

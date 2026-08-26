@@ -9,6 +9,20 @@
 // moment any workflow file exists. So between choosing a stack and wiring its gates there is a
 // window where every signal reads green and not one line of the project's code is checked.
 // This gate closes that window.
+//
+// It used to close it by looking for the commented-out placeholder stages and failing while any
+// remained. That was satisfiable by deleting them, which is one of the two fixes its own message
+// proposed, so a project could reach green with a stack declared and nothing wired at all -
+// measured on a fresh copy, 2026-08-25. Since E-02/F-01/S-02 it reads the floor table in the
+// stack file instead: six classes of risk, each answered with a command, a reasoned
+// `not applicable`, or a named `manual` check with a defer: marker. Absence of a comment proved
+// nothing; presence of a running stage proves something. docs/standards/TEMPLATE-STACK.md owns
+// what the six classes are and what each one covers.
+//
+// What it still refuses to do is judge the answer. It never looks at which tool a command runs,
+// what that tool asserts, or whether a threshold is sane. A gate that pretended to would be the
+// false confidence this whole epic exists to remove, and the honest limit is written into the
+// epic rather than discovered later.
 
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -25,6 +39,44 @@ const stackFiles = (standards) => readdirSync(standards, { withFileTypes: true }
 // how a workflow claims a check it never performs.
 const runsDetector = (line) => !/^\s*#/.test(line) && /impeccable/i.test(line) && /\bdetect\b/.test(line);
 
+// The six classes of risk every product carries, in the order the floor table lists them.
+// docs/standards/TEMPLATE-STACK.md owns what each one covers; this file only checks it is
+// answered. Adding a class here without adding it there would fail every project at once.
+const CLASSES = ['builds', 'behaves', 'analyzed', 'dependencies', 'secrets', 'renders'];
+const FORMS = ['command', 'not applicable', 'manual'];
+const FORMS_SAID = 'a command, `not applicable` with a reason, or `manual` with a named check and a defer: marker';
+
+// The floor table, and only that table. A stack file may carry a second one (the worked answers
+// the template ships with, or the project's own), so the section heading is the anchor: what is
+// read is what stands under "## The floor" up to the next heading of that level.
+function floorRows(text) {
+  const lines = text.split('\n');
+  const start = lines.findIndex((l) => /^##\s+the floor\s*$/i.test(l));
+  if (start < 0) return null;
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((l) => /^##\s/.test(l));
+  const body = (end < 0 ? rest : rest.slice(0, end));
+  const rows = new Map();
+  for (const line of body) {
+    const cells = line.split('|').map((c) => c.trim());
+    if (cells.length < 5) continue;
+    const key = (cells[1] || '').replace(/`/g, '').toLowerCase();
+    if (!CLASSES.includes(key)) continue;
+    rows.set(key, { form: (cells[3] || '').replace(/[*`]/g, '').trim().toLowerCase(), answer: cells[4] || '' });
+  }
+  return rows;
+}
+
+// Every backticked span in an answer is a thing that has to run. One cell may hold more than one:
+// an audit and an SBOM are two commands answering one class, and both have to be live or the
+// class is half answered.
+const commandsIn = (answer) => [...answer.matchAll(/`([^`]+)`/g)].map((m) => m[1].trim()).filter(Boolean);
+
+// A workflow line that runs something, as opposed to one that talks about running it. The same
+// rule the design half has always held: a commented stage is how a workflow claims a check it
+// never performs.
+const liveLines = (lines) => lines.filter((l) => !/^\s*#/.test(l));
+
 export const stackChecks = ({ root, fail, lines }) => ({
   'stack-gates'() {
     // Another CI host is explicitly allowed (`stack` section 3: "or this host's equivalent"),
@@ -32,26 +84,57 @@ export const stackChecks = ({ root, fail, lines }) => ({
     const wfDir = join(root, '.github', 'workflows');
     if (!existsSync(wfDir)) return;
     const workflows = readdirSync(wfDir).filter((n) => /\.ya?ml$/.test(n));
+    const live = workflows.flatMap((name) => liveLines(lines(join(wfDir, name))));
 
     const standards = join(root, 'docs', 'standards');
     const stacks = existsSync(standards) ? stackFiles(standards) : [];
-    if (stacks.length) {
-      for (const name of workflows) {
-        lines(join(wfDir, name)).forEach((line, i) => {
-          if (!/^\s*#\s*(-\s*name:|---\s*Stack gates)/.test(line)) return;
-          fail(`.github/workflows/${name}:${i + 1} still carries a commented-out stack gate while docs/standards/ names a stack (${stacks.join(', ')}). Until that stage is filled in, CI proves Groundwork's own rules and nothing about this project's code. Replace the placeholders with this stack's real gates per the skill \`stack\` section 3, and delete the ones this stack has no equivalent for instead of leaving them commented.`);
-        });
+    for (const name of stacks) {
+      const rel = `docs/standards/${name}`;
+      const text = lines(join(standards, name)).join('\n');
+      const rows = floorRows(text);
+      if (!rows) {
+        fail(`${rel} declares a stack and carries no floor table, so nothing says how this project's own code is checked. Copy the table from docs/standards/TEMPLATE-STACK.md and answer all six classes: ${CLASSES.join(', ')}.`);
+        continue;
+      }
+      for (const cls of CLASSES) {
+        const row = rows.get(cls);
+        if (!row || !row.form || !row.answer) {
+          fail(`${rel} leaves the \`${cls}\` class unanswered. Every class is answered one of three ways: ${FORMS_SAID}. An unanswered class is not a floor with a hole in it, it is a hole nobody decided about.`);
+          continue;
+        }
+        if (!FORMS.includes(row.form)) {
+          fail(`${rel} answers \`${cls}\` with "${row.form}", which is not one of the three forms: ${FORMS_SAID}.`);
+          continue;
+        }
+        if (row.form === 'command') {
+          const wanted = commandsIn(row.answer);
+          if (!wanted.length) {
+            fail(`${rel} answers \`${cls}\` with a command and names none. Put the command in backticks, exactly as a workflow runs it.`);
+            continue;
+          }
+          for (const cmd of wanted) {
+            if (!live.some((l) => l.includes(cmd))) {
+              fail(`${rel} answers \`${cls}\` with \`${cmd}\`, and no workflow under .github/workflows/ runs it. A command nobody runs proves nothing: wire the stage, or change the answer to the form that is true.`);
+            }
+          }
+        }
+        if (row.form === 'manual') {
+          const marked = /defer:/i.test(text) && /upgrade-when:/i.test(text)
+            && new RegExp(`defer:[^]{0,400}?\\b${cls}\\b`, 'i').test(text);
+          if (!marked) {
+            fail(`${rel} answers \`${cls}\` with \`manual\` and carries no defer: marker naming it. A named manual check is allowed; an unmarked one is the silent drop the \`stack\` skill's platform route already refuses. Add a marker naming \`${cls}\`, with its ceiling and its upgrade-when.`);
+          }
+        }
       }
     }
 
-    // The design method's half of the same window. The detector is the first mechanical check
+    // The design method's half of the same question. The detector is the first mechanical check
     // this framework has on what an interface renders (spec 011), and it is the one gate whose
     // payload is deliberately absent from a clone: it is gitignored like a dependency. So the
     // question "does this project have an interface it judges with the method" is answered by
     // the tracked artifact the method writes, never by looking for the payload on disk.
     if (!existsSync(join(root, '.impeccable', 'config.json'))) return;
-    const wired = workflows.some((name) => lines(join(wfDir, name)).some(runsDetector));
-    if (!wired) {
+    if (!live.some(runsDetector)) {
       fail(`.impeccable/config.json declares the design method for this project, but no workflow in .github/workflows/ runs its detector, so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y impeccable@latest detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing.`);
     }
   },
