@@ -14,7 +14,8 @@ import { join } from 'node:path';
 import assert from 'node:assert/strict';
 import { runChecks, installHooks } from './check.mjs';
 import { needsHandoffNudge } from './handoff-nudge.mjs';
-import { enforcementReport, formatReport } from './enforcement.mjs';
+import { enforcementReport, formatReport, formatFloor } from './enforcement.mjs';
+import { floorReport } from './check-stack.mjs';
 import {
   fixture, expectClean, expectFail, withConfig, BASE_BUDGETS, tally, report,
 } from './check-fixture.mjs';
@@ -358,6 +359,113 @@ try {
     tally.passed++;
   } catch (e) { tally.failed.push(`install-hooks: ${e.message}`); }
   rmSync(fx.root, { recursive: true, force: true });
+}
+
+
+// --- the floor: the shape of the stack file's promise, counted once (E-02/F-01/S-03) ---
+// The derivation lives where the gate already parses the contract, so the terminal line and the
+// board read one function and cannot word the same floor two ways. What is proven here is the
+// counting, the not-started case, and the wording's honesty about what "proven" buys.
+
+const FULL_ROWS = {
+  builds: ['command', '`npm run build`'],
+  behaves: ['command', '`npm test`'],
+  analyzed: ['command', '`npm run lint`'],
+  dependencies: ['not applicable', 'No third-party code ships here, so there is nothing to audit'],
+  secrets: ['command', '`npm run scan`'],
+  renders: ['manual', 'A named walkthrough by the owner before each release'],
+};
+const RUNS_ALL = 'name: ci\njobs:\n  gate:\n    steps:\n      - run: npm run build\n      - run: npm test\n'
+  + '      - run: npm run lint\n      - run: npm run scan\n';
+
+const floorFile = (rows) => '# node\n\n## The floor\n\n'
+  + '| Class | The risk it covers | Form | Answer |\n|---|---|---|---|\n'
+  + Object.entries(rows).map(([cls, [form, answer]]) => `| \`${cls}\` | the risk | ${form} | ${answer} |`).join('\n')
+  + '\n\ndefer: renders is walked by hand. ceiling: a second surface. upgrade-when: a build step exists.\n';
+
+const withFloor = (rows = FULL_ROWS, workflow = RUNS_ALL) => ({ put }) => {
+  put('docs/standards/node.md', floorFile(rows));
+  put('.github/workflows/ci.yml', workflow);
+};
+
+function floorCase(label, mutate, check) {
+  const fx = fixture();
+  mutate(fx);
+  let out;
+  try {
+    out = floorReport(fx.root);
+  } catch (e) {
+    tally.failed.push(`${label}: derivation threw: ${e.message}`);
+    rmSync(fx.root, { recursive: true, force: true });
+    return;
+  }
+  rmSync(fx.root, { recursive: true, force: true });
+  try { check(out); tally.passed++; } catch (e) { tally.failed.push(`${label}: ${e.message}`); }
+}
+
+// Not started is not the same as failing, which is the rule the empty copy follows everywhere.
+floorCase('floor-no-stack-file', () => {}, (out) =>
+  assert.equal(out, null, 'a project with no stack file reports nothing, never a floor of zero'));
+floorCase('floor-templates-are-not-a-stack', ({ put }) => {
+  put('docs/standards/GLOBAL.md', '# cross-stack\n');
+  put('docs/standards/TEMPLATE-STACK.md', floorFile(FULL_ROWS));
+}, (out) => assert.equal(out, null, 'the template and the cross-stack floor are not a declared stack'));
+
+floorCase('floor-counts-proven-and-waived', withFloor(), (out) => {
+  assert.equal(out.total, 6, 'six classes, always');
+  assert.equal(out.proven, 4, 'four classes answered with a command that a workflow runs');
+  assert.equal(out.waived.length, 2, 'not applicable and manual are both waivers');
+  assert.deepEqual(out.waived.map((w) => w.cls).sort(), ['dependencies', 'renders']);
+  assert.equal(out.open.length, 0, 'nothing unanswered');
+  const dep = out.waived.find((w) => w.cls === 'dependencies');
+  assert.equal(dep.form, 'not applicable');
+  assert.match(dep.reason, /nothing to audit/, "the waiver carries the author's own reason");
+});
+
+// A command nobody runs proves nothing: the gate already refuses it, and the count must agree
+// with the gate rather than trusting the table.
+floorCase('floor-unrun-command-is-not-proven', withFloor(FULL_ROWS,
+  'name: ci\njobs:\n  gate:\n    steps:\n      - run: npm run build\n      # - run: npm test\n'
+  + '      - run: npm run lint\n      - run: npm run scan\n'), (out) => {
+  assert.equal(out.proven, 3, 'a commented stage does not prove its class');
+  assert.ok(out.open.includes('behaves'), 'a class whose command is dead is open, never waived');
+  assert.equal(out.waived.length, 2, 'and it is not quietly counted as a waiver either');
+});
+
+floorCase('floor-unanswered-class-is-open', withFloor({ ...FULL_ROWS, secrets: ['', ''] }), (out) => {
+  assert.ok(out.open.includes('secrets'), 'an unanswered class is open');
+  assert.equal(out.proven + out.waived.length + out.open.length, out.total, 'every class is accounted for');
+});
+
+// The line itself. One line when the floor is whole; the reasons named when it is not.
+{
+  const whole = formatFloor({
+    total: 6, proven: 6, waived: [], open: [], files: ['docs/standards/node.md'],
+  });
+  const holed = formatFloor({
+    total: 6,
+    proven: 4,
+    waived: [{ cls: 'dependencies', form: 'not applicable', reason: 'No third-party code ships here', path: 'docs/standards/node.md' },
+      { cls: 'renders', form: 'manual', reason: 'A named walkthrough by the owner', path: 'docs/standards/node.md' }],
+    open: [],
+    files: ['docs/standards/node.md'],
+  });
+  try {
+    assert.equal(whole.length, 1, 'a whole floor is one line');
+    assert.match(whole[0], /^floor: /, 'the line names itself, beside the enforcement line');
+    assert.match(whole[0], /6 of the 6/, 'the line leads with the count');
+    // The limit, stated rather than implied: a builder must not read this as an audit.
+    assert.match(whole[0], /runs, not that what it runs is any good/,
+      'the wording states what proven does not buy');
+    assert.equal(holed.length, 3, 'a waived class costs the line one line each');
+    assert.match(holed[0], /4 of the 6/);
+    assert.match(holed[1], /dependencies/);
+    assert.match(holed[1], /not applicable/);
+    assert.match(holed[1], /No third-party code ships here/);
+    assert.match(holed[2], /renders/);
+    assert.equal(formatFloor(null).length, 0, 'no stack file, no line');
+    tally.passed++;
+  } catch (e) { tally.failed.push(`floor-line: ${e.message}`); }
 }
 
 report('runner and document gate');

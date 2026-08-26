@@ -1,12 +1,13 @@
 // The board: the whole project on one page. What it is for and what it is not, the round in
 // flight, six lanes with the cards in them, the four shelves that hold every document, and the
-// two lines that say whether the gates are armed and how the documents point at each other.
+// lines that say whether the gates are armed, how much of this project's own code they look at,
+// and how the documents point at each other.
 // Facts in, one page out - nothing is stored, nothing is generated ahead of time. Every lane,
 // count, blocker and next step comes from checks/work.mjs through the derivation
 // checks/progress.mjs already exposes, so moving one story's status line moves its card and no
 // second administration exists to keep in step (decision 0021).
-// The shelves are checks/shelves.mjs, the two lines checks/board-strip.mjs, the shell they render
-// in checks/board-shell.mjs; serving is checks/board-server.mjs and the file page
+// The shelves are checks/shelves.mjs, the lines under them checks/board-strip.mjs, the shell
+// they render in checks/board-shell.mjs; serving is checks/board-server.mjs and the file page
 // checks/board-document.mjs.
 // One derivation, two outputs (decision 0021): served on this machine, or printed as one
 // self-contained file (`--page`, E-01/F-04/S-05). The file is the picture of the repository at
@@ -118,7 +119,7 @@ const BOARD_WORDS = {
 
 // One object per language, so a caller asks once and gets the shell's sentences, the stand's
 // sentences, the shelves' and the board's own. Each set owns its own keys, and the merge is the
-// only place they meet. The two lines under the shelves gather their own, next door.
+// only place they meet. The lines under the shelves gather their own, next door.
 const boardWords = (lang) => ({
   ...shellWords(lang),
   ...(WORDS[lang] || WORDS.en),

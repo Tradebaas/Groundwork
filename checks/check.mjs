@@ -17,7 +17,7 @@ import { parseBrief, parseManifest, manifestMatcher, isSpecPath, BRIEF_PATH, MAN
 // What counts as a link, and which files are this project's documents, are defined once and
 // read here and by the board.
 import { parseLinks, linkTargets, readDocuments, forTerminal, SKIP_DIRS } from './links.mjs';
-import { enforcementReport, formatReport } from './enforcement.mjs';
+import { enforcementReport, formatReport, floorFor } from './enforcement.mjs';
 // Gate families live in their own files, composed into the registry below: what a source file
 // may contain and how long it may be, the trace chain from brief to commit, whether a stack's
 // own gates are wired, and the config's self-gate, which also owns the third-party declaration.
@@ -418,6 +418,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (!process.env.CI) {
     try {
       for (const line of formatReport(enforcementReport(root))) console.log(line);
+      // The floor beside the signals: armed gates say nothing about how much of this project's
+      // own code any of them looks at. Silent until a stack is declared (E-02/F-01/S-03).
+      for (const line of floorFor(root)) console.log(line);
     } catch (e) {
       console.log(`enforcement: self-report crashed (${e.message}); the checks below still decide.`);
     }

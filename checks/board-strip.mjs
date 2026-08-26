@@ -1,20 +1,25 @@
-// The two lines under the shelves: how many gates are armed on this machine, and how the
-// project's documents point at each other. Each says its answer in one sentence and folds the
-// detail the reader behind it produces, so the board ends with two facts rather than two pages.
-// Both sentences are the readers' own (checks/enforcement.mjs, checks/links.mjs), quoted rather
-// than reworded: the terminal and the board must never word one fact differently.
+// The lines under the shelves: how many gates are armed on this machine, how much of this
+// project's own code any of them actually looks at, and how the project's documents point at
+// each other. Each says its answer in one sentence and folds the detail the reader behind it
+// produces, so the board ends with a handful of facts rather than a handful of pages.
+// Every sentence is a reader's own (checks/enforcement.mjs, checks/check-stack.mjs,
+// checks/links.mjs), quoted rather than reworded: the terminal and the board must never word one
+// fact differently. The floor line reads the same derivation the enforcement line prints, so a
+// waiver cannot show up in one place and not the other (E-02/F-01/S-03).
 // Moved here when the four shelves took the board and /overview was retired
 // (E-01/F-04/S-04); until then these were two of the six cards in checks/board-document.mjs.
 
 import { enforcementReport } from './enforcement.mjs';
+import { floorReport } from './check-stack.mjs';
 import { projectGraph, LINK_WORDS, HUB_MIN } from './links.mjs';
 import {
   shellWords, escapeHtml, sentence, pathName, list, folded, attempt,
 } from './board-shell.mjs';
 
-// Both lines report on the project as a whole rather than on one document, so the file each
+// Each line reports on the project as a whole rather than on one document, so the file each
 // names is the one that does the looking.
 const ENFORCEMENT_PATH = 'checks/enforcement.mjs';
+const FLOOR_PATH = 'checks/check-stack.mjs';
 const LINKS_PATH = 'checks/links.mjs';
 
 // The gates line's own framing. What is armed and what is not comes from the report.
@@ -49,16 +54,47 @@ const GATE_WORDS = {
   },
 };
 
-// The two reads this strip needs. Done before anything renders, so the page can ask git once
+// The floor line's own framing. The count comes from the derivation; the second sentence is the
+// limit, and it sits in the summary rather than behind the fold on purpose: a folded board still
+// has to say what "proven" does not buy, or the number alone reads as an audit nobody performed.
+// This line needs no served-or-printed split the way the gates line does: a floor is read off the
+// stack file and the workflows, both tracked, so it says the same thing wherever it is read.
+const FLOOR_WORDS = {
+  en: {
+    floorAnswer: (n, t) => `${n} of the ${t} risk classes are proven by a command that runs. `
+      + 'Proven means it runs, not that what it runs is any good.',
+    headWaived: 'Waived, on purpose and with a reason',
+    headOpen: 'Answered by nothing that runs',
+    waivedAs: (cls, form) => `${cls}, waived as ${form}`,
+    openWhy: 'A class here is either unanswered or answers with a command no workflow runs. The '
+      + 'gate refuses both; neither is a waiver.',
+    answeredIn: 'Answered in',
+  },
+  nl: {
+    floorAnswer: (n, t) => `${n} van de ${t} risicoklassen worden bewezen door een commando dat `
+      + 'draait. Bewezen betekent dat het draait, niet dat wat het draait deugt.',
+    headWaived: 'Vrijgesteld, bewust en met reden',
+    headOpen: 'Beantwoord door niets dat draait',
+    waivedAs: (cls, form) => `${cls}, vrijgesteld als ${form}`,
+    openWhy: 'Een klasse hier is niet beantwoord, of antwoordt met een commando dat geen enkele '
+      + 'workflow draait. De poort weigert allebei; geen van beide is een vrijstelling.',
+    answeredIn: 'Beantwoord in',
+  },
+};
+
+// The three reads this strip needs. Done before anything renders, so the page can ask git once
 // which of the names below it is allowed to open.
 export const readStrip = (root) => ({
   gates: attempt(() => enforcementReport(root)),
+  floor: attempt(() => floorReport(root)),
   graph: attempt(() => projectGraph(root)),
 });
 
-// Every file name these two lines will show, for that one ignore lookup.
+// Every file name these lines will show, for that one ignore lookup.
 export const stripPaths = (facts) => [
-  ENFORCEMENT_PATH, LINKS_PATH, ...(facts.graph.value?.documents || []).map((d) => d.path),
+  ENFORCEMENT_PATH, FLOOR_PATH, LINKS_PATH,
+  ...(facts.floor?.value?.files || []),
+  ...(facts.graph.value?.documents || []).map((d) => d.path),
 ];
 
 // ---------------------------------------------------------------- one line
@@ -93,6 +129,36 @@ function gatesDetail(signals, w) {
     for (const s of degraded) out.push(`<p class="note">${sentence(`${named(s)} - ${s.detail}`)}</p>`);
   }
   return out.join('\n');
+}
+
+// What the six classes are answered with, for the reader who wants to know which hole they are
+// standing in. A whole floor produces nothing here, and the line stays a single sentence.
+function floorDetail(floor, w, opens) {
+  const out = [];
+  if (floor.waived.length) {
+    out.push(`<h3>${escapeHtml(w.headWaived)}</h3>`);
+    // The reason is the stack file author's own, never reworded here: it is the whole content of
+    // the waiver, and the board is quoting it rather than summarising it.
+    for (const x of floor.waived) out.push(`<p class="note">${sentence(`${w.waivedAs(x.cls, x.form)} - ${x.reason}`)}</p>`);
+  }
+  if (floor.open.length) {
+    out.push(`<h3>${escapeHtml(w.headOpen)}</h3>`);
+    out.push(list(floor.open));
+    out.push(`<p class="hint">${escapeHtml(w.openWhy)}</p>`);
+  }
+  if (!out.length) return '';
+  // Where the answers live, so the reader can go read the table rather than trust this summary.
+  out.push(`<p class="hint">${escapeHtml(w.answeredIn)} ${floor.files.map((f) => pathName(f, opens)).join(', ')}</p>`);
+  return out.join('\n');
+}
+
+// The floor line exists only once a stack does. A project that has not chosen one has not failed
+// to answer the six classes, it has not been asked yet, and a line reading "0 of the 6" would be
+// the board's own version of the false confidence this gate exists to remove.
+function floorLine(read, w, opens) {
+  if (!read || (!read.error && !read.value)) return '';
+  return line(w, read, (f) => w.floorAnswer(f.proven, f.total), (f) => floorDetail(f, w, opens),
+    FLOOR_PATH, opens);
 }
 
 // Which document points at which, so the question behind moving or deleting a file has an answer
@@ -138,17 +204,21 @@ const linksAnswer = (graph, w) => (graph.documents.length
     + (graph.unresolved.length ? `${w.unresolved}: ${graph.unresolved.length}.` : w.noUnresolved)
   : w.noDocuments);
 
-// The two lines, in the project's own language. The word sets are gathered here rather than
+// The lines, in the project's own language. The word sets are gathered here rather than
 // handed in, so a caller cannot hand this file a set that words a gate differently than the
 // terminal does. `made` is the moment a printed board was made, and null on a served one: the
 // only thing that changes here is which of the two gate sentences is true.
 export function renderStrip(facts, lang, opens = () => false, made = null) {
   const w = { ...shellWords(lang), ...(GATE_WORDS[lang] || GATE_WORDS.en) };
+  const fw = { ...shellWords(lang), ...(FLOOR_WORDS[lang] || FLOOR_WORDS.en) };
   const lw = LINK_WORDS[lang] || LINK_WORDS.en;
   const armed = made ? w.armedThere : w.armedOf;
   return '<div class="strip">'
     + line(w, facts.gates, (s) => `${armed(s.filter((x) => x.armed).length, s.length)}.`,
       (s) => gatesDetail(s, w), ENFORCEMENT_PATH, opens)
+    // Directly under the gates, because it is the question the gates line invites: they are
+    // armed, and this is how much of this project's own code any of them looks at.
+    + floorLine(facts.floor, fw, opens)
     + line(w, facts.graph, (g) => linksAnswer(g, lw), (g) => linksDetail(g, lw, opens), LINKS_PATH, opens)
     + '</div>';
 }
