@@ -1,5 +1,5 @@
 // The page shell every page this board serves is built in: the look, and the safe ways project
-// text gets into it. The cards, the lanes, the sidebar, the two lines under them, a file page and
+// text gets into it. The cards, the lanes, the sidebar, the lines under them, a file page and
 // a notice all render through here, so the project has one design and one escaping rule rather
 // than six of each.
 // Split out of checks/board-document.mjs when the lanes arrived (E-01/F-04/S-03): a second page

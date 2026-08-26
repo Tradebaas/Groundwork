@@ -24,7 +24,7 @@
 // false confidence this whole epic exists to remove, and the honest limit is written into the
 // epic rather than discovered later.
 
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 // A stack file is any standards document that is not the cross-stack floor and not a template:
@@ -77,21 +77,74 @@ const commandsIn = (answer) => [...answer.matchAll(/`([^`]+)`/g)].map((m) => m[1
 // never performs.
 const liveLines = (lines) => lines.filter((l) => !/^\s*#/.test(l));
 
+// One definition of "this command actually runs", so the gate that refuses a dead command and
+// the report that counts a proven class can never drift apart on what proven means.
+const isLive = (cmd, live) => live.some((l) => l.includes(cmd));
+const runsAll = (answer, live) => {
+  const wanted = commandsIn(answer);
+  return wanted.length > 0 && wanted.every((cmd) => isLive(cmd, live));
+};
+
+// The one read of the contract: which stack files this project declares, what each one's floor
+// table says, and which workflow lines are live to answer it. The gate below and floorReport()
+// both take their facts from here, which is what keeps the refusal and the count in step.
+// The two halves stay separate on purpose: a project with no stack file still has live workflow
+// lines, and the design detector's half of the gate is entitled to them.
+export function readFloors(root, lines) {
+  const standards = join(root, 'docs', 'standards');
+  const stacks = existsSync(standards) ? stackFiles(standards) : [];
+  const wfDir = join(root, '.github', 'workflows');
+  const live = existsSync(wfDir)
+    ? readdirSync(wfDir).filter((n) => /\.ya?ml$/.test(n))
+      .flatMap((name) => liveLines(lines(join(wfDir, name))))
+    : [];
+  const files = stacks.map((name) => {
+    const text = lines(join(standards, name)).join('\n');
+    return { rel: `docs/standards/${name}`, text, rows: floorRows(text) };
+  });
+  return { live, files };
+}
+
+// The shape of the floor, counted once for everyone who reports it: how many classes are proven
+// by a command that runs, which ones are waived and why, and which are neither. E-02/F-01/S-03.
+// It counts and never judges, exactly like the gate: whether the command that runs is any good
+// is a question no file in checks/ is entitled to answer.
+export function floorReport(root) {
+  const read = (p) => readFileSync(p, 'utf8').replace(/\r\n/g, '\n').split('\n');
+  const floors = readFloors(root, read);
+  // No stack declared is not started, not a floor of zero: this project has not been asked the
+  // six questions yet, so it has nothing to answer for.
+  if (!floors.files.length) return null;
+  const waived = [];
+  const open = [];
+  let proven = 0;
+  let total = 0;
+  for (const file of floors.files) {
+    for (const cls of CLASSES) {
+      total += 1;
+      const row = file.rows?.get(cls);
+      // An unanswered class, or one answered in a form the contract does not have, is open: the
+      // gate is already refusing it, and counting it as waived would launder a hole into a choice.
+      if (!row || !row.form || !row.answer || !FORMS.includes(row.form)) { open.push(cls); continue; }
+      if (row.form === 'command') {
+        if (runsAll(row.answer, floors.live)) proven += 1;
+        else open.push(cls);
+        continue;
+      }
+      waived.push({ cls, form: row.form, reason: row.answer.trim(), path: file.rel });
+    }
+  }
+  return { total, proven, waived, open, files: floors.files.map((f) => f.rel) };
+}
+
 export const stackChecks = ({ root, fail, lines }) => ({
   'stack-gates'() {
     // Another CI host is explicitly allowed (`stack` section 3: "or this host's equivalent"),
     // and whether CI exists at all is enforcement.mjs's report to make. One fact, one place.
     const wfDir = join(root, '.github', 'workflows');
     if (!existsSync(wfDir)) return;
-    const workflows = readdirSync(wfDir).filter((n) => /\.ya?ml$/.test(n));
-    const live = workflows.flatMap((name) => liveLines(lines(join(wfDir, name))));
-
-    const standards = join(root, 'docs', 'standards');
-    const stacks = existsSync(standards) ? stackFiles(standards) : [];
-    for (const name of stacks) {
-      const rel = `docs/standards/${name}`;
-      const text = lines(join(standards, name)).join('\n');
-      const rows = floorRows(text);
+    const { live, files } = readFloors(root, lines);
+    for (const { rel, text, rows } of files) {
       if (!rows) {
         fail(`${rel} declares a stack and carries no floor table, so nothing says how this project's own code is checked. Copy the table from docs/standards/TEMPLATE-STACK.md and answer all six classes: ${CLASSES.join(', ')}.`);
         continue;
@@ -113,7 +166,7 @@ export const stackChecks = ({ root, fail, lines }) => ({
             continue;
           }
           for (const cmd of wanted) {
-            if (!live.some((l) => l.includes(cmd))) {
+            if (!isLive(cmd, live)) {
               fail(`${rel} answers \`${cls}\` with \`${cmd}\`, and no workflow under .github/workflows/ runs it. A command nobody runs proves nothing: wire the stage, or change the answer to the form that is true.`);
             }
           }

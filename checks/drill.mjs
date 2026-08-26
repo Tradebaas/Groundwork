@@ -65,6 +65,14 @@ async function hooksArmed(copy) {
   return mod.enforcementReport(copy).find((s) => s.signal === 'hooks').armed;
 }
 
+// The floor the copy reports about itself, derived by its own check-stack.mjs rather than this
+// tree's, on the same rule as hooksArmed above: a drift between the two has to fail here rather
+// than be papered over. Null is the honest answer for a copy that has not chosen a stack.
+async function floorOf(copy) {
+  const mod = await import(pathToFileURL(join(copy, 'checks', 'check-stack.mjs')).href);
+  return mod.floorReport(copy);
+}
+
 function walkFiles(dir, base = dir, out = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name);
@@ -165,6 +173,12 @@ export const STEPS = [
     // list of bullets changes without this step changing with it, twice.
     async run(ctx) {
       const at = (...p) => join(ctx.copy, ...p);
+      // The copy arrives carrying Groundwork's own stack file, so a floor is readable here.
+      // That is the half that keeps the assertion after the clearing honest: a report that was
+      // silent all along would pass it without meaning anything (E-02/F-01/S-03).
+      const before = await floorOf(ctx.copy);
+      must(before && before.total === 6 && before.proven > 0,
+        `the unpacked copy reports no floor from its own stack file: ${JSON.stringify(before)}`);
       for (const name of ['MASTER_PROMPT.md', 'MASTER_PROMPT.local.md']) {
         rmSync(at(name), { force: true });
       }
@@ -206,6 +220,11 @@ export const STEPS = [
         "Groundwork's own stack file survived the clearing, so the copy inherits a floor it did not choose");
       must(existsSync(at('docs', 'standards', 'TEMPLATE-STACK.md')),
         'the stack template went with it, leaving the copy no shape to write its own floor from');
+      // Not started is not the same as failing: a copy that has not chosen a stack reports no
+      // floor at all, never a floor of zero it was never asked to fill.
+      const after = await floorOf(ctx.copy);
+      must(after === null,
+        `a copy with no stack file reports a floor instead of nothing: ${JSON.stringify(after)}`);
       const checks = node(ctx.copy, ['checks/check.mjs']);
       must(checks.status === 0, `check.mjs failed after the clearing:\n${checks.stdout}`);
       return `${pairs.length} files blanked, denylist emptied, gates still green`;

@@ -4,7 +4,7 @@
 // routes in checks/board-server.mjs that reach them). What is proven here is that the page is a pure function of what is on disk - move one
 // status line and the card moves, add one document and it appears on a shelf, with no other edit -
 // and that a card says everything a person needs and nothing they do not.
-// The two lines under the shelves are proven in checks/board-strip.test.mjs, the file page and
+// The lines under the shelves are proven in checks/board-strip.test.mjs, the file page and
 // the server's own answers in checks/board-server.test.mjs, and what may be opened at all in
 // checks/board-path.test.mjs.
 // Run: node --test checks/board.test.mjs
@@ -337,7 +337,7 @@ test('the framing words follow the project language', () => {
   assert.match(html, /aria-label="Dit project"/, 'the sidebar names itself in it');
   assert.match(text, /Waarom we het bouwen/, 'and so do the subjects under it');
   assert.match(text, /Bord/, 'and the destinations beside them');
-  assert.match(text, /poorten op deze machine staan scherp/, 'and so do the two lines');
+  assert.match(text, /poorten op deze machine staan scherp/, 'and so do the lines under them');
   f.clean();
 });
 
