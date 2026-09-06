@@ -67,7 +67,7 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   the page alone). They tie those numbers to a gate that counts this repo, and in a copy the
   numbers describe the framework, not the project: the first decision this project records would
   otherwise turn the gate red.
-- Verify prerequisites: `git --version` and `node --version` (Node ≥ 20). Missing → tell the
+- Verify prerequisites: `git --version` and `node --version` (Node ≥ 22). Missing → tell the
   owner exactly what to install, then stop.
 
 ## 2. Interview the owner

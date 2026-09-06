@@ -122,7 +122,8 @@ records the reasoning.
 ## Requirements
 
 - Any AI coding agent. No vendor lock-in: one rulebook, open standards, plain Markdown.
-- Node.js ≥ 20 for `checks/` (the only tooling dependency until you choose a stack).
+- Node.js ≥ 22 for `checks/` (the only tooling dependency until you choose a stack; the design
+  method installed by `begin` needs the same floor).
 - On Windows: enable Developer Mode so the `.claude/skills` symlink survives
   `git clone -c core.symlinks=true` or ZIP extraction. No symlink support? Set
   `"skipSymlinkCheck": "<why>"` in `checks/config.json`, with your reason as the value, and point

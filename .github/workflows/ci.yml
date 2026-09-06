@@ -8,14 +8,21 @@ on:
     tags: ['v*']
   pull_request:
 
+# The token these jobs receive can read the checkout and nothing else: no job here writes to the
+# repository, and a workflow that could would be the first thing a poisoned dependency reaches for.
+permissions:
+  contents: read
+
+# Every action is pinned to a commit, with its tag beside it for the reader: a tag can be moved to
+# other code after review, a sha cannot. Bump both together when updating.
 jobs:
   gate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Checks must prove themselves first
         run: |
@@ -57,11 +64,11 @@ jobs:
   design:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          # The design method's own floor (its `engines.node`: 22.12 or newer at v4.0.4). The
-          # jobs beside it stay on 20; this one does not settle that question for them.
+          # Node 22 is the floor everywhere in this file since 2026-09-06: Node 20 reached end of
+          # life on 2026-04-30, and the design method's own `engines.node` asks 22.18 or newer.
           node-version: 22
 
       # index.html is what this repository publishes. docs/design/reference/ stays out of the
@@ -83,10 +90,10 @@ jobs:
     if: github.repository == 'Tradebaas/Groundwork'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20
+          node-version: 22
 
       - name: The drill must prove it can fail
         run: node checks/drill.test.mjs
@@ -102,12 +109,12 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Every commit message passes the gate
         env:
