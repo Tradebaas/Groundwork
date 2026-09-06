@@ -143,7 +143,8 @@ test('the front door answers the question, and the lanes are one click behind it
     // board, they became the page the sidebar's second row opens, which is asserted below.
     assert.match(visible(front.body), /What this project is for/);
     assert.match(visible(front.body), /gates on this machine are armed/);
-    assert.match(visible(front.body), /documents, with \d+ links between them/);
+    // The link map left the board in E-01/F-04/S-08; the terminal's --links is where it lives now.
+    assert.doesNotMatch(visible(front.body), /documents, with \d+ links between them/);
     assert.doesNotMatch(visible(front.body), /A card in a lane/, 'the way in is not the lanes');
     assert.match(front.body, /href="\/board"/, 'and it offers the way to them');
 

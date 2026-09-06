@@ -195,7 +195,6 @@ const LANES = `.lanes{display:flex;gap:14px;align-items:stretch;overflow-x:auto;
 .line>details{margin:0}
 .line summary{cursor:pointer;font-size:14px;color:var(--ink2);line-height:1.5;list-style:none}
 .line summary::-webkit-details-marker{display:none}
-.line .count{color:var(--muted);font-size:13px}
 @media(max-width:900px){
   .shell{grid-template-columns:minmax(0,1fr)}
   .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}

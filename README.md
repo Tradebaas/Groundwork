@@ -119,8 +119,8 @@ records the reasoning.
   with `--all` covering every project you have started this way. Add `--serve` and the same
   answer opens as a small board on this machine only: the way in (the goal, the stand, the next
   step), the six lanes with the cards in them, the round and its features, and every document the
-  project holds, each on its own page behind one sidebar. It also says how the documents point at
-  each other and whether the gates are armed on this clone. Every card is read from the file that
+  project holds, each on its own page behind one sidebar. It also says whether the gates are
+  armed on this clone and how many of the six risk classes a command in CI actually proves. Every card is read from the file that
   owns it at the moment you open the page, and nothing is stored. `--page` prints the whole of it
   as one self-contained HTML file, for someone who has to look but has no repository, no server
   and no checkout: it says when it was made, it names every file without linking to any, it

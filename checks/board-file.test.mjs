@@ -37,8 +37,7 @@ const HERE = /(\d+) of the (\d+) gates on this machine are armed\./;
 const THERE = (n, t) => `${n} of the ${t} gates were armed on the machine where this file was made.`;
 
 // A project with something on every part of the board: a goal and a boundary, cards in three
-// lanes, documents on three shelves, and enough pointers between them for the link line to have
-// an answer. The printed file has to carry all of it, unchanged.
+// lanes, documents on three shelves. The printed file has to carry all of it, unchanged.
 const SOMETHING = () => project({
   'S-01-a': STORY('S-01', 'Waiting to be picked up', { status: 'to do' }),
   'S-02-b': STORY('S-02', 'Under the hands', { status: 'in progress' }),
@@ -106,7 +105,9 @@ test('the printed file points nowhere: no anchor in it, and no address to fetch'
   // The names are still all there; they are set as names.
   const text = visible(printed);
   assert.match(text, /docs\/product\/BRIEF\.md/);
-  assert.match(text, /decisions\/0001-first\.md/);
+  // The reader behind the gates line is named like any other file. (Every document of the
+  // project was named here too, by the link map, until that left the board in E-01/F-04/S-08.)
+  assert.match(text, /checks\/enforcement\.mjs/);
   assert.match(text, /S-01-a\.md/);
   // And the sentence that tells a reader what those names are, and where the files are not.
   assert.match(printed, new RegExp(NAMES));
