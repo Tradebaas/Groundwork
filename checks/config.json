@@ -23,7 +23,7 @@
     { "pattern": "skill `taste`|\\.agents/skills/taste", "why": "retired skill; taste was removed on 2026-08-07 and nothing may point at it again. What each of its rules became is the table in decision 0020", "exclude": ["011-design-on-impeccable/"] },
     { "pattern": "\\bcockpit\\b", "why": "retired name for the local board: the page is the board (decision 0021), and since 2026-08-24 the modules that build, serve and guard it are checks/board-*.mjs. A document, a workflow or a page that still says it points at a module that is gone (E-01/F-04/S-06)" },
     { "pattern": "WCAG 2\\.1 AA (is the legal (baseline|floor)|as the working floor)", "why": "retired wording; the WCAG level is written in one place, the EAA row of docs/compliance/COMPLIANCE.md (2.2 AA for new interfaces since 2026-07-22), and every other file points there instead of repeating a number that drifts (2026-09-06)" },
-    { "pattern": "Node(\\.js)? ?(≥|>=) ?20\\b|node-version: 20\\b", "why": "retired floor; Node 20 reached end of life on 2026-04-30 and the design method needs 22.18 or newer, so since 2026-09-06 the floor is Node 22 everywhere (README, begin, BRIEF, ci.yml)" }
+    { "pattern": "Node(\\.js)? ?((≥|>=) ?20\\b|20 or (newer|later|higher))|node-version: 20\\b", "why": "retired floor; Node 20 reached end of life on 2026-04-30 and the design method needs 22.18 or newer, so since 2026-09-06 the floor is Node 22 everywhere (README, begin, BRIEF, ci.yml)" }
   ],
   "styleBans": [
     { "pattern": "\\bdelve(s|d|ing)?\\b", "why": "AI-tell verb; say 'look at', 'go into' or just state the point" },
