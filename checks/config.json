@@ -87,6 +87,7 @@
     "stateMdLines": 150,
     "skillMdLines": 500,
     "skillDescriptionChars": 1024,
+    "skillDescriptionTotalChars": 7000,
     "codeFileMaxLines": 500
   },
   "allowedEmptyDirs": [

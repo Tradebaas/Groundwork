@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Review the diff of substantial work before it is committed, after `verify` has passed. A gate-weakening scan first, then two always-on review axes with fresh eyes (standards conformance, and spec plus commit-message fidelity), plus a security axis that fires only on auth, payments, PII, external input, crypto or uploads, each reported by severity and never merged into one list. Use before committing any change bigger than a trivial fix.
+description: Review the diff of substantial work after `verify` and before the commit: a gate-weakening scan, then fresh-eyes axes for standards and for spec plus commit-message fidelity, plus a security axis on auth, payments, PII, external input, crypto or uploads, each reported by severity. Use before committing anything bigger than a trivial fix.
 ---
 
 # code-review: fresh eyes on the diff, one axis at a time

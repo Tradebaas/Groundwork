@@ -1,6 +1,6 @@
 ---
 name: begin
-description: Start a project on Groundwork. Use when docs/state/STATE.md says NOT STARTED, when the user says "begin", "start", "nieuw project", or asks how to get going in an empty copy - also when they lay Groundwork over a project that already exists (adopt, retrofit, brownfield), and when they open with an existing PRD, project description, or idea text: that material is this skill's input. Interviews the owner (or extracts the answers from their material and their code), fills the templates, sets up git and hooks, and proposes the first real step.
+description: Start a project on Groundwork: the interview (or the owner's PRD, description, idea text or existing code as its input), the filled templates, git and hooks, the first governed commit, one next step. Use when STATE.md says NOT STARTED, when the user says "begin", "start" or "nieuw project", or lays Groundwork over a project that already exists (adopt, retrofit, brownfield).
 ---
 
 # begin: from fresh copy to working project

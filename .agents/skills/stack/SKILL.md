@@ -1,6 +1,6 @@
 ---
 name: stack
-description: Choose the tech stack or target platform and make the project idiomatic for it. Covers classic code stacks and hosted/low-code platforms alike (own servers, Microsoft Power Platform/Dataverse, ServiceNow, Salesforce, Google, or whatever exists by then). Use when the target platform/stack must be decided, when generating docs/standards/<stack>.md, or when wiring stack-specific quality gates into CI and hooks. Requires live research. Never stack facts from model memory.
+description: Choose the tech stack or target platform (own servers, Power Platform, ServiceNow, Salesforce, Google, whatever exists by then) and make the project idiomatic for it: docs/standards/<stack>.md and the stack's own gates in CI and hooks. Use when the platform must be decided or those gates wired. Live research only, never stack facts from memory.
 ---
 
 # stack: choose deliberately, then be born current

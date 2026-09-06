@@ -242,6 +242,11 @@ export function runChecks(root) {
       const skillsDir = join(root, '.agents', 'skills');
       const agents = read(join(root, 'AGENTS.md'));
       const dirs = new Set();
+      // Every description is loaded into every session before anything is asked, so together
+      // they are a standing cost like the rulebook itself; the total is budgeted for the same
+      // reason the rulebook is, and a new skill is paid for by trimming or by raising it on purpose.
+      let descTotal = 0;
+      let longest = { name: null, chars: 0 };
       for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
         if (!entry.isDirectory()) continue;
         dirs.add(entry.name);
@@ -261,9 +266,15 @@ export function runChecks(root) {
         if (name && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(name)) fail(`skill "${entry.name}": name must be lowercase-hyphenated`);
         if (!desc) fail(`skill "${entry.name}": description is required (it is the load trigger)`);
         else if (desc.length > cfg.budgets.skillDescriptionChars) fail(`skill "${entry.name}": description exceeds ${cfg.budgets.skillDescriptionChars} chars`);
+        descTotal += (desc || '').length;
+        if ((desc || '').length > longest.chars) longest = { name: entry.name, chars: desc.length };
         const bodyLines = body.split('\n').length;
         if (bodyLines > cfg.budgets.skillMdLines) fail(`skill "${entry.name}": ${bodyLines} lines (budget ${cfg.budgets.skillMdLines}): move reference material to files next to SKILL.md`);
         if (!agents.includes(`\`${entry.name}\``)) fail(`skill "${entry.name}" is not registered in the AGENTS.md skills table`);
+      }
+      const totalBudget = cfg.budgets.skillDescriptionTotalChars;
+      if (totalBudget && descTotal > totalBudget) {
+        fail(`the skill descriptions total ${descTotal} chars against a budget of ${totalBudget}, and every session loads all of them before it starts; the longest is "${longest.name}" at ${longest.chars}. Trim descriptions to what triggers the skill, or raise budgets.skillDescriptionTotalChars in checks/config.json with the reason in the same change.`);
       }
       // reverse direction; only skills-table rows open with a backticked name in the first cell
       for (const m of agents.matchAll(/^\|\s*`([a-z0-9-]+)`\s*\|/gm)) {
