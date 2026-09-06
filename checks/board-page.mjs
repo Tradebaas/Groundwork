@@ -340,6 +340,11 @@ export function context(root, { made = null, ...deps } = {}) {
     facts, opens, made };
 }
 
+// A copy that has not started has one thing to say, and no lanes, shelves or gates to say it
+// under: the same sentence the terminal prints, as the page. No sidebar either, because every
+// document it would list is the framework's until `begin` has run.
+const notStartedPage = (c) => renderBoard(c.project, '', c.w, c.made, '', null, c.w.notStarted);
+
 export const shellFor = (c, here) => sidebar(c.project.name,
   navModel(c.rootPath, c.docs, c.w, c.opens), c.w, { here, failure: c.docsError });
 
@@ -353,6 +358,7 @@ const topCards = (root, c) => `<div class="top">`
 
 export function startPage(root, opts = {}) {
   const c = context(root, opts);
+  if (c.project.notStarted) return notStartedPage(c);
   c.rootPath = root;
   const body = [
     topCards(root, c),
@@ -364,6 +370,7 @@ export function startPage(root, opts = {}) {
 // The board, and only the board: the lanes, the stories in them, and the steps on each story.
 export function boardOnlyPage(root, opts = {}) {
   const c = context(root, opts);
+  if (c.project.notStarted) return notStartedPage(c);
   c.rootPath = root;
   const { work } = c.project;
   const body = c.epic
@@ -380,6 +387,7 @@ export function boardOnlyPage(root, opts = {}) {
 // it holds is still there, set as a name.
 export function boardPage(root, { made = null, ...deps } = {}) {
   const c = context(root, { made, ...deps });
+  if (c.project.notStarted) return notStartedPage(c);
   c.rootPath = root;
   const { work } = c.project;
   const body = [

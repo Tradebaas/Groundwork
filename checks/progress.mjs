@@ -210,23 +210,30 @@ function specFiles(root) {
 }
 
 // The next step, and the file it came from. The board names that file on its card, so the
-// lookup order lives here rather than being guessed a second time.
+// lookup order lives here rather than being guessed a second time. The same read says whether the
+// project has started at all: a fresh copy's handoff still reads NOT STARTED, and until `begin`
+// replaces the brief that came with the copy, every count would be about the framework, not about
+// this project. The owning file decides; a maintainer-local file outranks the tracked one here too.
 export function readHandoff(root) {
   let owning = null;
+  let notStarted = false;
   for (const rel of HANDOFF_PATHS) {
     const p = join(root, rel);
     if (!existsSync(p)) continue;
-    if (!owning) owning = rel;
     const lines = read(p).split('\n');
+    if (!owning) {
+      owning = rel;
+      notStarted = lines.some((l) => /^- \*\*Status:\*\*\s*NOT STARTED\b/.test(l));
+    }
     for (let i = 0; i < lines.length; i += 1) {
       const m = lines[i].match(/^- \*\*Now ▶\*\*\s*(.+)$/) || lines[i].match(/Now ▶\*{0,2}\s*(.+)$/);
       if (!m) continue;
       const now = joinWrapped(lines, i, m[1])
         .replace(/<!--.*?-->/g, '').replace(/\*\*/g, '').replace(/\s+/g, ' ').trim();
-      if (now) return { path: rel, now };
+      if (now) return { path: rel, now, notStarted };
     }
   }
-  return { path: owning, now: null };
+  return { path: owning, now: null, notStarted };
 }
 
 function language(root) {
@@ -246,14 +253,17 @@ export function readBrief(root) {
 export function readProject(root) {
   const brief = readBrief(root) || { name: null, items: [], goal: null, outOfScope: [], placeholders: 0 };
   const specs = specFiles(root).map((f) => ({ file: specLabel(f), ...parseSpec(read(f)) }));
+  const handoff = readHandoff(root);
   return {
     root,
-    name: brief.name || basename(root),
+    // A copy that has not started is named after its folder: the brief in it is the framework's.
+    name: (handoff.notStarted ? null : brief.name) || basename(root),
     lang: language(root),
     scopeItems: brief.items,
     specs,
     work: readWork(root),
-    now: readHandoff(root).now,
+    now: handoff.now,
+    notStarted: handoff.notStarted,
   };
 }
 
