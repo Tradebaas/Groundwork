@@ -7,6 +7,7 @@
 // that only looks like one, inside a string, is not.
 
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { commentOn } from './check-code.mjs';
 import { expectClean, expectFail, withConfig, tally, report } from './check-fixture.mjs';
 
@@ -73,6 +74,28 @@ expectFail('defer-markers', (fx) => { // markup comment, trailing
 // ... and the ways it must stay quiet, because a noisy gate gets switched off. The first two
 // are the honesty half of the same helper: text that merely looks like a comment opener is
 // still a string, and reading it as a comment would fail a file that defers nothing.
+// The shipped list, not a stand-in: the suppression and bare-marker bans carry regex the
+// stand-in above does not exercise, and the exemption they promise (a defer: marker on the line)
+// is the contract config.json documents. Proven here against the engine, on both halves.
+const SHIPPED = JSON.parse(readFileSync(new URL('./config.json', import.meta.url), 'utf8')).commentBans;
+const withShipped = withConfig({ commentBans: SHIPPED });
+expectFail('defer-markers', (fx) => { // a lint suppression with no reason and no end
+  withShipped(fx);
+  fx.put('src/app.js', '// eslint-disable-next-line no-console\nconsole.log(x);\n');
+});
+expectFail('defer-markers', (fx) => { // the Python spelling
+  withShipped(fx);
+  fx.put('src/app.py', 'import os  # noqa\n');
+});
+expectFail('defer-markers', (fx) => { // a bare marker
+  withShipped(fx);
+  fx.put('src/app.js', 'export const x = 1; // TODO handle the empty case\n');
+});
+expectClean('suppression-with-a-defer-marker-is-the-documented-case', (fx) => {
+  withShipped(fx);
+  fx.put('src/app.js', '// eslint-disable-next-line no-console -- defer: console until the logger lands. ceiling: dev only. upgrade-when: the logger module exists.\nconsole.log(x);\n');
+});
+
 expectClean('comment-ban-ignores-non-comment', (fx) => {
   withApology()(fx);
   fx.put('src/app.js', 'export const label = "closed for now";\n');
