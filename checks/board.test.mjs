@@ -186,6 +186,26 @@ test('an epic that is not in flight is listed with its progress and stays folded
   f.clean();
 });
 
+test('a parked epic is not the round in flight, whatever its place in the tree', () => {
+  // Rule 1 of decision 0021 lets the owner park a round. A parked epic sorts before the live one
+  // here, which is exactly how the board once showed the wrong lanes: it picked the first epic
+  // that was not finished, and parked is not finished.
+  const f = project({ 'S-01-now': STORY('S-01', 'The round we are in', { status: 'to do' }) }, {
+    'docs/work/E-00-parked/epic.md': EPIC('The parked one').replace('**Status:** open', '**Status:** parked 2026-08-25'),
+    'docs/work/E-00-parked/F-01-idle/feature.md': FEATURE('Idle feature'),
+    'docs/work/E-00-parked/F-01-idle/S-01-waiting.md': STORY('S-01', 'Waiting in the parked round', { status: 'refinement' }),
+  });
+  const html = boardPage(f.root);
+  const text = visible(html);
+  assert.match(text, /Epic in flight A shop that sells/);
+  assert.match(visible(laneOf(html, 'To do')), /The round we are in/);
+  assert.doesNotMatch(text, /Waiting in the parked round/);
+  // The parked round is still named, with its status, so the owner knows it exists.
+  assert.match(text, /Other epics/);
+  assert.match(text, /The parked one \(parked\)/);
+  f.clean();
+});
+
 test('a project with one round says nothing about other rounds', () => {
   const f = project({ 'S-01-a': STORY('S-01', 'The only round', { status: 'to do' }) });
   assert.doesNotMatch(visible(boardPage(f.root)), /Other epics/);

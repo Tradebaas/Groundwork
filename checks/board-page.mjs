@@ -55,6 +55,7 @@ const BOARD_WORDS = {
     featuresDone: (d, t) => `${d} of ${t} features done`,
     storiesDone: (d, t) => `${d} of ${t} stories done`,
     otherEpics: 'Other epics',
+    parked: 'parked',
     noStories: 'This epic is not cut into stories yet.',
     laneEmpty: 'Nothing here.',
     heldOf: (n, limit) => `${n} of ${limit} allowed`,
@@ -264,7 +265,7 @@ function roundCard(progress, epic, now, lang, w, opens) {
 // taking the page.
 function otherEpics(epics, w) {
   if (!epics.length) return '';
-  const rows = epics.map((e) => `<li>${escapeHtml(e.title)} - `
+  const rows = epics.map((e) => `<li>${escapeHtml(e.title)}${isParked(e) ? ` (${escapeHtml(w.parked)})` : ''} - `
     + `${escapeHtml(w.featuresDone(e.progress.done, e.progress.total))}</li>`).join('');
   return `<section class="card"><h2>${escapeHtml(w.otherEpics)}</h2>`
     + `${folded(w.otherEpics, epics.length, `<ul>${rows}</ul>`)}</section>`;
@@ -293,11 +294,13 @@ function renderBoard(project, body, w, made, nav = '', heading = null, sub = nul
   });
 }
 
-// The epic in flight is the first one that is not finished: rule 1 of decision 0021 runs them one
-// after the other, so the first unfinished one is the round the project is in. When every round is
-// finished the last one is still what the lanes are about, which keeps the page free of a state
-// that says nothing.
-const inFlightEpic = (epics) => epics.find((e) => !e.done) || epics[epics.length - 1] || null;
+// The epic in flight is the first one that is neither finished nor parked: rule 1 of decision 0021
+// runs them one after the other and lets the owner park one, so the first open round is the round
+// the project is in. Parked is not finished, and it once put a shelved round's cards in the lanes.
+// When every round is finished or parked the last one is still what the lanes are about, which
+// keeps the page free of a state that says nothing.
+const isParked = (e) => /^parked\b/.test(e.status || '');
+const inFlightEpic = (epics) => epics.find((e) => !e.done && !isParked(e)) || epics[epics.length - 1] || null;
 
 // Which of the names the page is about to show the file route will actually serve. Asked once
 // for the whole page: git is a process, and a board that names every document would otherwise
