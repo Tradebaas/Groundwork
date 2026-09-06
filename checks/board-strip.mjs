@@ -1,26 +1,25 @@
-// The lines under the shelves: how many gates are armed on this machine, how much of this
-// project's own code any of them actually looks at, and how the project's documents point at
-// each other. Each says its answer in one sentence and folds the detail the reader behind it
-// produces, so the board ends with a handful of facts rather than a handful of pages.
-// Every sentence is a reader's own (checks/enforcement.mjs, checks/check-stack.mjs,
-// checks/links.mjs), quoted rather than reworded: the terminal and the board must never word one
-// fact differently. The floor line reads the same derivation the enforcement line prints, so a
-// waiver cannot show up in one place and not the other (E-02/F-01/S-03).
-// Moved here when the four shelves took the board and /overview was retired
-// (E-01/F-04/S-04); until then these were two of the six cards in checks/board-document.mjs.
+// The two lines at the foot of the board: how many gates are armed on this machine, and how much of this
+// project's own code any of them actually looks at. Each says its answer in one sentence and folds
+// the detail the reader behind it produces, so the board ends with two facts rather than two pages.
+// Every sentence is a reader's own (checks/enforcement.mjs, checks/check-stack.mjs), quoted rather
+// than reworded: the terminal and the board must never word one fact differently. The floor line
+// reads the same derivation the enforcement line prints, so a waiver cannot show up in one place
+// and not the other (E-02/F-01/S-03).
+// Moved here when the four shelves took the board and /overview was retired (E-01/F-04/S-04);
+// until then these were two of the six cards in checks/board-document.mjs. A third line, the
+// document graph, stood here until E-01/F-04/S-08: it was half of the page's words and a
+// maintainer's view, and `progress.mjs --links` prints it in the terminal where it belongs.
 
 import { enforcementReport } from './enforcement.mjs';
 import { floorReport } from './check-stack.mjs';
-import { projectGraph, LINK_WORDS, HUB_MIN } from './links.mjs';
 import {
-  shellWords, escapeHtml, sentence, pathName, list, folded, attempt,
+  shellWords, escapeHtml, sentence, pathName, list, attempt,
 } from './board-shell.mjs';
 
 // Each line reports on the project as a whole rather than on one document, so the file each
 // names is the one that does the looking.
 const ENFORCEMENT_PATH = 'checks/enforcement.mjs';
 const FLOOR_PATH = 'checks/check-stack.mjs';
-const LINKS_PATH = 'checks/links.mjs';
 
 // The gates line's own framing. What is armed and what is not comes from the report.
 // The answer comes in two, because a gate is armed somewhere. Served, that somewhere is the
@@ -82,19 +81,17 @@ const FLOOR_WORDS = {
   },
 };
 
-// The three reads this strip needs. Done before anything renders, so the page can ask git once
+// The two reads this strip needs. Done before anything renders, so the page can ask git once
 // which of the names below it is allowed to open.
 export const readStrip = (root) => ({
   gates: attempt(() => enforcementReport(root)),
   floor: attempt(() => floorReport(root)),
-  graph: attempt(() => projectGraph(root)),
 });
 
 // Every file name these lines will show, for that one ignore lookup.
 export const stripPaths = (facts) => [
-  ENFORCEMENT_PATH, FLOOR_PATH, LINKS_PATH,
+  ENFORCEMENT_PATH, FLOOR_PATH,
   ...(facts.floor?.value?.files || []),
-  ...(facts.graph.value?.documents || []).map((d) => d.path),
 ];
 
 // ---------------------------------------------------------------- one line
@@ -106,8 +103,8 @@ function line(w, read, answer, detail, owner, opens) {
     return `<section class="line"><p class="note">${escapeHtml(w.partFailed(read.error.message))}</p></section>`;
   }
   const said = `<span class="ttl">${escapeHtml(answer(read.value))}</span>`;
-  // A reader with nothing to report has no working to show, and a fold that opens on sentences
-  // about documents a project does not have would be worse than no fold.
+  // A reader with nothing to report has no working to show (a whole floor is one sentence), and
+  // a fold that opens on nothing would be worse than no fold.
   const body = detail(read.value);
   if (!body) return `<section class="line">${said}</section>`;
   const src = `<p class="src">${escapeHtml(w.source)} ${pathName(owner, opens)}</p>`;
@@ -161,49 +158,6 @@ function floorLine(read, w, opens) {
     FLOOR_PATH, opens);
 }
 
-// Which document points at which, so the question behind moving or deleting a file has an answer
-// before the move: what nothing points at can go, and what many documents lean on is a decision.
-function linksDetail(graph, w, opens) {
-  if (!graph.documents.length) return '';
-  const named = (path) => pathName(path, opens);
-  const names = (paths) => paths.map(named).join(', ');
-  // What a link is, said on the line: a reader deciding whether a file is safe to delete has to
-  // know what was counted. It is a footnote to the number above it, not a second headline.
-  const out = [`<p class="hint">${escapeHtml(w.whatCounts)}</p>`];
-  out.push(graph.hubs.length
-    ? `<h3>${escapeHtml(w.hubs(HUB_MIN))}</h3>\n<ul>${graph.hubs
-      .map((h) => `<li>${named(h.path)} - ${escapeHtml(w.hubCount(h.count))}</li>`).join('')}</ul>`
-    : `<p class="note">${escapeHtml(w.noHubs(HUB_MIN))}</p>`);
-  out.push(graph.orphans.length
-    ? folded(w.orphans, graph.orphans.length, `<ul>${graph.orphans.map((p) => `<li>${named(p)}</li>`).join('')}</ul>`
-      // Most of an orphan list is by design, and a reader who does not know that reads it as a
-      // list of dead files. The clause is inside the fold, next to the names it explains.
-      + `\n<p class="hint">${escapeHtml(w.orphansWhy)}</p>`)
-    : `<p class="note">${escapeHtml(w.noOrphans)}</p>`);
-  if (graph.unresolved.length) {
-    // The target is set as the path it is, and never as a link: there is nothing to open, which
-    // is the whole finding.
-    out.push(folded(w.unresolved, graph.unresolved.length,
-      `<ul>${graph.unresolved.map((m) => `<li>${named(m.from)}: <code>${escapeHtml(m.raw)}</code></li>`).join('')}</ul>`
-      + `\n<p class="hint">${escapeHtml(w.unresolvedWhy)}</p>`));
-  }
-  // Both directions per document, which is the whole detail; it folds because it is as long as
-  // the project has documents.
-  const each = graph.documents.map((d) => `<li>${named(d.path)}<ul>`
-    + `<li>${d.outbound.length ? `${escapeHtml(w.pointsAt)}: ${names(d.outbound)}` : escapeHtml(w.pointsAtNothing)}</li>`
-    + `<li>${d.inbound.length ? `${escapeHtml(w.pointedAtBy)}: ${names(d.inbound)}` : escapeHtml(w.pointedAtByNothing)}</li>`
-    + '</ul></li>').join('');
-  out.push(folded(w.each, graph.documents.length, `<ul>${each}</ul>`));
-  return out.join('\n');
-}
-
-// The one sentence the link line leads with: how many documents point at how many others, and
-// what points at nothing. Both halves are the link reader's own wording.
-const linksAnswer = (graph, w) => (graph.documents.length
-  ? `${w.summary(graph.documents.length, graph.links)}. `
-    + (graph.unresolved.length ? `${w.unresolved}: ${graph.unresolved.length}.` : w.noUnresolved)
-  : w.noDocuments);
-
 // The lines, in the project's own language. The word sets are gathered here rather than
 // handed in, so a caller cannot hand this file a set that words a gate differently than the
 // terminal does. `made` is the moment a printed board was made, and null on a served one: the
@@ -211,7 +165,6 @@ const linksAnswer = (graph, w) => (graph.documents.length
 export function renderStrip(facts, lang, opens = () => false, made = null) {
   const w = { ...shellWords(lang), ...(GATE_WORDS[lang] || GATE_WORDS.en) };
   const fw = { ...shellWords(lang), ...(FLOOR_WORDS[lang] || FLOOR_WORDS.en) };
-  const lw = LINK_WORDS[lang] || LINK_WORDS.en;
   const armed = made ? w.armedThere : w.armedOf;
   return '<div class="strip">'
     + line(w, facts.gates, (s) => `${armed(s.filter((x) => x.armed).length, s.length)}.`,
@@ -219,6 +172,5 @@ export function renderStrip(facts, lang, opens = () => false, made = null) {
     // Directly under the gates, because it is the question the gates line invites: they are
     // armed, and this is how much of this project's own code any of them looks at.
     + floorLine(facts.floor, fw, opens)
-    + line(w, facts.graph, (g) => linksAnswer(g, lw), (g) => linksDetail(g, lw, opens), LINKS_PATH, opens)
     + '</div>';
 }

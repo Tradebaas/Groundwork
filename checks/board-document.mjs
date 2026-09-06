@@ -6,8 +6,9 @@
 //
 // Until E-01/F-04/S-04 this file also held six cards on a page of their own at /overview. That
 // page is retired: what it answered is on the board, where the four shelves (checks/shelves.mjs)
-// replaced its file map and the two lines under them (checks/board-strip.mjs) its gates and its
-// links. Spec: 010, archived and maintainer-local.
+// replaced its file map and the two lines under them (checks/board-strip.mjs) its gates and, until
+// E-01/F-04/S-08 took the link map off the board, its links. Spec: 010, archived and
+// maintainer-local.
 
 import { shelfFor, SHELF_WORDS } from './shelves.mjs';
 import { shellWords, escapeHtml, page } from './board-shell.mjs';

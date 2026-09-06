@@ -1,6 +1,7 @@
-// What counts as a link, in one place: the broken-link gate (checks/check.mjs) and the board's
-// link line (checks/board-strip.mjs) read it from here. Two copies would drift, and a board
-// that shows links nobody polices is worse than no card at all (spec 010, criterion 21).
+// What counts as a link, in one place: the broken-link gate (checks/check.mjs) and the terminal
+// view (`progress.mjs --links`) read it from here. Two copies would drift, and a view that shows
+// links nobody polices is worse than none at all (spec 010, criterion 21). The board carried this
+// as a third line until E-01/F-04/S-08.
 //
 // A document points at another one in two spellings, and this project uses both:
 //   - a markdown link, `[the brief](../product/BRIEF.md)`, resolved from the pointing document.
@@ -199,7 +200,7 @@ export function projectGraph(root) {
 }
 
 // The framing words for both surfaces, so the page and the one-shot command say the same thing.
-export const LINK_WORDS = {
+const LINK_WORDS = {
   en: {
     heading: 'How the documents point at each other',
     summary: (docs, links) => `${docs} documents, with ${links} links between them`,

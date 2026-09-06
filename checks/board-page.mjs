@@ -1,7 +1,7 @@
 // The board: the whole project on one page. What it is for and what it is not, the round in
 // flight, six lanes with the cards in them, the four shelves that hold every document, and the
-// lines that say whether the gates are armed, how much of this project's own code they look at,
-// and how the documents point at each other.
+// two lines that say whether the gates are armed and how much of this project's own code they
+// look at.
 // Facts in, one page out - nothing is stored, nothing is generated ahead of time. Every lane,
 // count, blocker and next step comes from checks/work.mjs through the derivation
 // checks/progress.mjs already exposes, so moving one story's status line moves its card and no
