@@ -37,8 +37,8 @@
    under the user's reduced-motion preference: loops, parallax, scroll-driven choreography and
    pointer physics all go still there, with the content still readable.
 8. **Accessible by construction.** Contrast of at least 4.5:1 for text, focus always visible,
-   touch targets at least 44px, semantics before ARIA. WCAG 2.1 AA is the legal floor, not the
-   ambition.
+   touch targets at least 44px, semantics before ARIA. The WCAG level named in
+   `docs/compliance/COMPLIANCE.md` is the floor, not the ambition.
 9. **One icon set, consistent.** Default to Lucide: uniform stroke icons, one weight, sized on
    the scale, colored by ink or the accent (never their own colors). Never emoji as UI icons,
    never a grab-bag of styles. A wordmark is text unless the owner supplies a real logo. A button

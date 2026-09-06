@@ -29,12 +29,16 @@ Stamp today in `Dates verified` on the rows you actually checked, and leave the 
 stamps alone: a partial pass that stamps the whole table turns a stale row into a fresh-looking
 one. Never assert a deadline or obligation from model memory. Deadline horizon: when any date
 there falls within the next 60 days, re-verify that regime now instead of waiting for the
-quarterly audit - rules move fastest just before they bite.
+quarterly audit - rules move fastest just before they bite. No network in this environment: the
+row keeps its old stamp and reads `open (unverified)` with the source it would check, never `n/a`.
 
 ## 3. Apply per obligation: build it in, don't bolt it on
 
 - **GDPR/AVG**: lawful basis named per processing purpose; data minimization in the schema
-  (collect nothing "for later"); records of processing (Art 30); DPIA if high-risk (Art 35);
+  (collect nothing "for later"); records of processing (Art 30); the DPIA screened against the
+  AP's list and the EDPB criteria and the outcome recorded as a register row, a negative one
+  included (Art 35); a privacy notice at the point of collection (Art 13 and 14); cookies and
+  similar storage only with consent where the Telecommunicatiewet asks it, verified at use time;
   data-subject rights executable (export, delete: actually implemented, not promised); the
   retention periods recorded here honored to the end, the product's own retirement included
   (`maintain` owns that step);
@@ -45,8 +49,10 @@ quarterly audit - rules move fastest just before they bite.
   early. Obligations land 2027-12-02, design for them now, not then. Art 4 AI literacy:
   `docs/compliance/AI-LITERACY.md` is the evidence note; keep the register's literacy line true
   for this team and re-check the note at the quarterly audit.
-- **Accessibility**: EN 301 549 / WCAG 2.1 AA as the working floor (design-guard checks it per
-  delivery; this skill checks the claim holds product-wide).
+- **Accessibility**: the level `docs/compliance/COMPLIANCE.md` names for new interfaces (EN 301
+  549) as the working floor. Evidence: the `renders` scan in the stack's floor table and
+  design-guard per delivery; this skill checks the claim holds product-wide, and where the EAA
+  applies an accessibility statement is published with the product.
 - **CRA**: scope before duties, because both the CRA and the PLD turn on the same test: supply in
   the course of a commercial activity. Free and open-source software its maintainer does not
   monetise is outside it, and paid services alongside a freely downloadable product or donations
