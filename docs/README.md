@@ -26,6 +26,7 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `specs/TEMPLATE-TICKET.md` | REF | Ticket skeleton: one vertical slice per file, session-sized |
 | `specs/[0-9]*/**` ◆ | LIVE | Specs for changes being built (spec.md, plan.md, notes, fixtures) |
 | `specs/archive/**` ◆ | ARCHIVE | Shipped or dropped specs; ships with one fictional worked example and Groundwork's own baseline record |
+| `work/**` ◆ | LIVE | The work as cards: one folder per epic, one per feature, one file per story, each in the lane its status names; the board and `checks/progress.mjs` read them (decision 0021). Absent until the first card |
 | `decisions/TEMPLATE.md` | REF | Decision record skeleton |
 | `decisions/[0-9]*.md` ◆ | REF | Decision records, numbered (Groundwork's own ship with the framework) |
 | `standards/GLOBAL.md` | REF | Universal code standards, stack-independent |
