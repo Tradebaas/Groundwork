@@ -55,20 +55,28 @@ That's it. The agent takes it from there. The rules in [AGENTS.md](AGENTS.md) te
 ## Already have a project?
 
 Groundwork lays over a repo that exists, without touching its history. Take a copy the same way as
-above, then move its contents into your project root, minus the four files that describe a product
-rather than the framework: keep your own `README.md`, `LICENSE`, `.gitignore` and `index.html`.
-Merge Groundwork's ignore entries into yours by hand, and read the explainer from the copy you
-took. Everything else is framework and lands as is, merging into `docs/` and `.github/` if you
-already have those. Where a name collides, copy it in under a temporary name and merge by hand:
-nothing here is worth losing your own file over. If your tool broke the `.claude/skills` symlink on
-the way, restore it with `ln -sfn ../.agents/skills .claude/skills`.
+above, next to your project rather than inside it, then run this once from your project root. It
+adds the framework and skips every file you already have, so nothing of yours is overwritten:
 
-Then say **`begin`** as above. It reads which of the two situations it is and adapts: your git
-history stays, the interview takes its answers from your code first, one baseline record states
-what already shipped so the overview does not report a running product as nothing done, and the
-first `node checks/check.mjs` is treated as a measurement instead of a verdict. Real code turns
-those gates red on contact, and the point is a starting position you can see, in
-[docs/state/DEBT.md](docs/state/DEBT.md), not a cleanup marathon before you may work.
+```sh
+rsync -a --ignore-existing --exclude .git --exclude README.md --exclude LICENSE --exclude .gitignore \
+  --exclude CHANGELOG.md --exclude index.html --exclude fonts --exclude .nojekyll ../Groundwork/ ./
+```
+
+The excluded files describe a product rather than the framework, so yours stay yours: merge
+Groundwork's `.gitignore` entries into your own by hand, and read the explainer from the copy you
+took. (No `rsync`, as on Windows: copy the folder in your file manager and answer "skip" for every
+file that already exists.) If your tool broke the `.claude/skills` symlink on the way, restore it
+with `ln -sfn ../.agents/skills .claude/skills`.
+
+Then say **`begin`** as above. It reads which of the two situations it is and adapts: it first
+checks that the framework landed whole and names any file it still misses because you already had
+one by that name (merge those by hand), your git history stays, the interview takes its answers
+from your code first, one baseline record states what already shipped so the overview does not
+report a running product as nothing done, and the first `node checks/check.mjs` is treated as a
+measurement instead of a verdict. Real code turns those gates red on contact, and the point is a
+starting position you can see, in [docs/state/DEBT.md](docs/state/DEBT.md), not a cleanup marathon
+before you may work.
 Why one route and not a separate installer:
 [decision 0018](docs/decisions/0018-an-existing-project-adopts-groundwork-through-begin.md).
 
