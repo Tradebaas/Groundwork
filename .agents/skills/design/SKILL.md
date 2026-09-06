@@ -1,6 +1,6 @@
 ---
 name: design
-description: Stand up this project's design system and voice, and run the making of an interface through impeccable, the installed design method. Covers brand intake, the UI foundation choice (component library or bespoke), voice and wording, and the owner's three decision points: the visual direction, the rendered compositions, and the finish verdict. Use after stack choice and before the first UI work, or when the owner wants the look or the voice defined or changed. Asks the owner only what is genuinely theirs; hands the rest to the method.
+description: Stand up the design system and voice, and run interface work through impeccable, the installed method: brand intake, the UI foundation, wording, and the owner's three decision points (direction, compositions, finish verdict). Use after the stack choice and before the first UI work, or when the owner wants the look or the voice defined or changed.
 ---
 
 # design: nothing ships looking or sounding like a default

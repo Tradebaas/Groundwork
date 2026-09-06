@@ -81,6 +81,11 @@ expectFail('skills', ({ put }) =>
 expectFail('skills', ({ put }) => // reverse direction: a table row whose skill directory is gone
   put('AGENTS.md', '# rules\n\nskills: `demo`\n\n| `phantom` | listed in the table, no directory |\n'));
 
+expectFail('skills', (fx) => { // the descriptions together outgrow what a session should pay
+  withConfig({ budgets: { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024, skillDescriptionTotalChars: 40 } })(fx);
+  fx.put('.agents/skills/demo/SKILL.md', `---\nname: demo\ndescription: ${'a trigger word '.repeat(6).trim()}.\n---\n`);
+});
+
 expectClean('skills-table-row-backed-by-directory', ({ put }) =>
   put('AGENTS.md', '# rules\n\n| `demo` | the routing row for the demo skill |\n'));
 

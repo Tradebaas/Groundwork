@@ -1,6 +1,6 @@
 ---
 name: critical-thinking
-description: Think hard about an idea, plan, or decision before committing to build it - the counterweight to AI's built-in pull toward agreeing, praising, and building whatever is asked. Load when the user proposes a solution, feature, approach, or "wouldn't it be great if", when begin's challenge step hands over a fresh product idea, when weighing options in scope/spec/architect/design, and any time you notice yourself about to agree enthusiastically or open with praise. Forces a named alternative, surfaces the load-bearing assumption, separates preference from requirement, and asks what would prove the idea wrong - then commits to the user's call. The judgment layer at the entrance to building; mirror of scope-guard at the exit.
+description: Think before agreeing: the counterweight to the pull toward praising and building whatever is asked. Load when the user proposes a feature, approach or "wouldn't it be great if", when begin hands over a fresh idea, when weighing options in scope, spec, architect or design, or when you notice yourself about to agree enthusiastically. Names an alternative and the load-bearing assumption, then commits to the user's call.
 ---
 
 # critical-thinking: earn the "yes" before you build

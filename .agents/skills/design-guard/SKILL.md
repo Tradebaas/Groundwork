@@ -1,6 +1,6 @@
 ---
 name: design-guard
-description: Judgment check before delivering user-facing output the installed design method does not carry: generated documents, e-mails, exports, error and CLI output, and interfaces on platforms it has no guidance for (game engines, console, embedded, print). For a frontend it re-checks the render against its direction contract and the finish verdict instead of opening a second hunt. Run on what actually renders, not on the code.
+description: Judgment check on user-facing output the installed design method does not carry: generated documents, e-mails, exports, error and CLI output, and interfaces on platforms it has no guidance for (game engines, console, embedded, print). For a frontend it re-checks the render against its direction contract and finish verdict. Run on what renders, not on the code.
 ---
 
 # design-guard: look at it before you ship it

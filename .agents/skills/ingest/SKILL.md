@@ -1,6 +1,6 @@
 ---
 name: ingest
-description: Convert non-Markdown source files (PDF, Word, PowerPoint, Excel, images, audio, HTML, CSV/JSON/XML, ZIP, EPub) to Markdown with Microsoft markitdown before reading them, so tokens are spent on content and not on binary bulk. Use when a task needs the contents of such a file, when adding reference material to docs/design/reference or a spec, or when the product itself must parse uploaded documents at runtime.
+description: Convert a non-Markdown file (PDF, Office, images, audio, HTML, CSV/JSON/XML, ZIP, EPub) to Markdown with markitdown before reading it, so tokens go to content rather than binary bulk. Use when a task needs such a file's contents, when adding reference material to docs/design/reference or a spec, or when the product must parse uploaded documents.
 ---
 
 # ingest: turn documents into Markdown before they cost tokens
