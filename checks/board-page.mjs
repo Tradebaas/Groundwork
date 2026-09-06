@@ -342,8 +342,10 @@ export function context(root, { made = null, ...deps } = {}) {
 
 // A copy that has not started has one thing to say, and no lanes, shelves or gates to say it
 // under: the same sentence the terminal prints, as the page. No sidebar either, because every
-// document it would list is the framework's until `begin` has run.
-const notStartedPage = (c) => renderBoard(c.project, '', c.w, c.made, '', null, c.w.notStarted);
+// document it would list is the framework's until `begin` has run. The stamp stays: a printed file
+// still has to say when it was made, whatever it says.
+const notStartedPage = (c) => renderBoard(c.project, '', c.w, c.made, '', null,
+  `${c.w.notStarted} ${readFrom(c.w, c.made)}`);
 
 export const shellFor = (c, here) => sidebar(c.project.name,
   navModel(c.rootPath, c.docs, c.w, c.opens), c.w, { here, failure: c.docsError });
