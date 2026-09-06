@@ -206,6 +206,18 @@ test('a parked epic is not the round in flight, whatever its place in the tree',
   f.clean();
 });
 
+test('a copy that has not started shows one card that says to begin, and nothing else', () => {
+  const f = project({}, {
+    'docs/state/STATE.md': '# STATE\n\n- **Status:** NOT STARTED. Fresh copy of Groundwork. Load the `begin` skill.\n- **Now ▶** run `begin`\n',
+  });
+  const html = boardPage(f.root);
+  const text = visible(html);
+  assert.match(text, /not started yet/i);
+  assert.match(text, /begin/);
+  assert.doesNotMatch(text, /Backlog|Refinement|gates on this machine|documents, with/);
+  f.clean();
+});
+
 test('a project with one round says nothing about other rounds', () => {
   const f = project({ 'S-01-a': STORY('S-01', 'The only round', { status: 'to do' }) });
   assert.doesNotMatch(visible(boardPage(f.root)), /Other epics/);

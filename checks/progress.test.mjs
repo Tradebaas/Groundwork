@@ -13,6 +13,31 @@ import {
   readRegistry, writeRegistry, registerProject, cmdLine, isSpecPath,
 } from './progress.mjs';
 import { renderFull, renderLine, warningText, WORDS } from './progress-report.mjs';
+import { basename } from 'node:path';
+import { readHandoff as readHandoffOf, readProject as readProjectOf } from './progress.mjs';
+
+// A fresh copy still carries the framework's own brief until `begin` replaces it, and counting
+// that brief told a new owner "11 of the 12 things are done" about a project that has not started.
+// While the handoff says NOT STARTED, the only true sentence is the one that says to begin.
+test('a copy that has not started says only that, in the report, the line and the name', () => {
+  const f = fixture({
+    'docs/product/BRIEF.md': '# BRIEF\n\n## Product\n\n- **Name:** Groundwork\n\n## In scope\n\n- SC-1 Someone copies the repo and says begin\n',
+    'docs/state/STATE.md': '# STATE\n\n## Handoff\n\n- **Status:** NOT STARTED. Fresh copy of Groundwork. Load the `begin` skill.\n- **Now ▶** run `begin`\n',
+  });
+  assert.equal(readHandoffOf(f.root).notStarted, true);
+  const p = readProjectOf(f.root);
+  assert.equal(p.notStarted, true);
+  assert.equal(p.name, basename(f.root), 'the folder, not the brief that came with the copy');
+  const progress = derive(p);
+  const full = renderFull(p, progress);
+  assert.match(full, /not started yet/i);
+  assert.match(full, /begin/);
+  assert.doesNotMatch(full, /things are done|Someone copies/);
+  const line = renderLine(p, progress);
+  assert.match(line, /begin/);
+  assert.doesNotMatch(line, / of the /);
+  rmSync(f.root, { recursive: true, force: true });
+});
 
 const BRIEF = (items) => `# BRIEF
 

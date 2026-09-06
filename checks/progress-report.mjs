@@ -12,6 +12,8 @@ export const WORDS = {
   en: {
     doneOfTotal: (d, t) => `${d} of the ${t} things are done`,
     shortDone: (d, t) => `${d} of ${t} done`,
+    notStarted: 'Not started yet. Say "begin", and the agent takes it from there.',
+    notStartedShort: 'not started yet · say "begin"',
     doneOfTotalWork: (fd, ft, sd, st) => `${fd} of the ${ft} features are done, ${sd} of ${st} stories`,
     shortDoneWork: (fd, ft, sd, st) => `${fd} of ${ft} features, ${sd} of ${st} stories done`,
     noWork: 'No work is planned yet. Cut the epic into features and stories, then this overview '
@@ -39,6 +41,8 @@ export const WORDS = {
   nl: {
     doneOfTotal: (d, t) => `${d} van de ${t} dingen zijn klaar`,
     shortDone: (d, t) => `${d} van de ${t} klaar`,
+    notStarted: 'Nog niet begonnen. Zeg "begin", dan neemt de agent het vanaf daar over.',
+    notStartedShort: 'nog niet begonnen · zeg "begin"',
     doneOfTotalWork: (fd, ft, sd, st) => `${fd} van de ${ft} features zijn klaar, ${sd} van de ${st} stories`,
     shortDoneWork: (fd, ft, sd, st) => `${fd} van ${ft} features, ${sd} van ${st} stories klaar`,
     noWork: 'Er is nog geen werk gepland. Knip de epic in features en stories, dan kan dit '
@@ -94,6 +98,9 @@ export const nothingPlanned = (w, progress) => (progress.source === 'work' ? w.n
 export function renderFull(project, progress) {
   const w = WORDS[project.lang] || WORDS.en;
   const out = [project.name];
+  // Before `begin` the only true sentence is the one that says to begin: the brief in a fresh
+  // copy is the framework's own, and counting it would report someone else's work as done here.
+  if (project.notStarted) return `${project.name}\n\n${w.notStarted}`;
   if (!progress.defined) {
     out.push('', nothingPlanned(w, progress));
     return out.join('\n');
@@ -121,6 +128,7 @@ const LINE_MAX = 120;
 
 export function renderLine(project, progress) {
   const w = WORDS[project.lang] || WORDS.en;
+  if (project.notStarted) return `${project.name}: ${w.notStartedShort}`.slice(0, LINE_MAX);
   if (!progress.defined) return `${project.name}: ${nothingPlanned(w, progress).split('.')[0]}`.slice(0, LINE_MAX);
   const doing = progress.items.find((i) => i.state === 'doing');
   const next = progress.items.find((i) => i.state === 'todo');
