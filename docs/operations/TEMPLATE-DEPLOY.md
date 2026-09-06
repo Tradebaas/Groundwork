@@ -13,6 +13,8 @@
 - **Hosting / platform:** <where it runs>
 - **Credentials:** <where the deploy credentials live (secret manager, keychain, CI secrets) and
   who holds them. Never the values.>
+- **Promotion:** the artifact that passed CI is what goes to production, unchanged; when data
+  persists, it runs on staging first. <how this project promotes, and what it checks in between>
 
 ## Deploy
 

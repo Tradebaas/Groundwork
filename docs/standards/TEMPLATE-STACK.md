@@ -48,6 +48,15 @@ point of the form: a floor with holes in it is allowed, and is never quiet about
 | `secrets` | Groundwork's own gate, with this stack's file extensions added to `extraCodeExtensions` in `checks/config.json` | Groundwork's own gate over the unpacked solution, with environment variables and Key Vault references as the pattern that replaces embedded values |
 | `renders` | **command** `npx -y impeccable@latest detect <the surfaces this project ships>` | **manual** - the accessibility checker in the studio, run per app before release, with a `defer:` marker naming it |
 
+Three notes on the answers above. A `behaves` command counts only if the runner fails on an empty
+suite; check what yours does with zero tests and add its flag when it passes by default. The
+`secrets` row names Groundwork's gate, which is four patterns run before a commit: a product that
+ships adds a real scanner over the tree and its history, and the gate is that scanner's pre-commit
+half. The `dependencies` class covers licences as well as holes: the SBOM lists them, and a checker
+with an allow-list is what makes an unwanted licence fail the build. Under `renders`, an
+accessibility scan and a performance budget on the public surfaces belong beside the detector; two
+commands in one cell both have to run.
+
 Sources, read 2026-08-26, primary only: `npm sbom` and its `cyclonedx` format from the npm CLI
 docs (docs.npmjs.com/cli/v11/commands/npm-sbom); the Test Engine deprecation, effective April 2026,
 and the Playwright samples that replace it from Microsoft Learn's "Important changes (deprecations)

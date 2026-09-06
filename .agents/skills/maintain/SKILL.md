@@ -56,9 +56,11 @@ what, impact, cause, fix, what now detects it earlier. No blame, no essay.
 
 ## Periodic audit (quarterly, or before major phases)
 
-One focused pass: security posture, compliance register still current (`comply`), backup
-restore proven again (a restore you haven't run this quarter is a rumor), unused code/deps
-(stack dead-code tooling), skill library still curated, STATE.md log rotated.
+One focused pass: security posture, compliance register still current (`comply`), retention
+honored while running (the oldest record per purpose sits inside its period, and the deletion
+job actually ran), backup restore proven again (a restore you haven't run this quarter is a
+rumor), unused code/deps (stack dead-code tooling), skill library still curated, STATE.md log
+rotated.
 
 The stack standards file ages the same way the compliance register does. Its header carries the
 date those facts were last verified; when that date is more than a quarter old, or the stack has
