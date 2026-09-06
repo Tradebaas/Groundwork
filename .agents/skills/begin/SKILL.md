@@ -18,12 +18,20 @@ One skill, two doors: decision 0018 records why.
 Do this housekeeping silently: it is plumbing, not progress. Report on it only if something
 went wrong or needs the owner's action; a list of deleted template files is noise to them.
 
+- **Existing project: check the overlay first, and touch only what came with the copy.** These
+  must exist before anything else happens: `AGENTS.md`, `.agents/skills/` with the `.claude/skills`
+  symlink, `checks/`, `docs/README.md`, `docs/state/STATE.md`, `.github/workflows/ci.yml`. The
+  README's copy command skips any name the project already had, so a missing one means the owner's
+  file kept the name: list those, and merge each by hand under a temporary name before going on.
+  A `README.md`, `LICENSE`, `.gitignore`, `CHANGELOG.md` or `index.html` that was here before the
+  copy is the owner's, and no bullet below edits it. The version this copy came from is read from
+  the copy the owner took, not from a file in the project.
 - If a `MASTER_PROMPT.md` or `MASTER_PROMPT.local.md` exists at the root: it is Groundwork's own
   origin brief, not part of any project. Delete it. (Fresh copies no longer carry it: it is
   gitignored at source. This clears it from older copies made while it was still tracked.)
-- `CHANGELOG.md` at the root is Groundwork's release history, not this project's. Note which
-  version this copy came from (its newest entry) in STATE.md at step 4, then empty the file down to
-  its heading so this project's first release writes into it.
+- `CHANGELOG.md` at the root of a fresh copy is Groundwork's release history, not this project's.
+  Note which version this copy came from (its newest entry) in STATE.md at step 4, then empty the
+  file down to its heading so this project's first release writes into it.
 - Delete any non-archived spec folder: `docs/specs/[0-9]*` directories are in-flight Groundwork
   maintainer work, never the new owner's. Keep the worked example in
   `docs/specs/archive/007-pickup-slots/` and the `TEMPLATE*.md` files.
@@ -63,8 +71,9 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   inherited (why the rulebook, skills and checks work the way they do). This project's own
   decisions continue from the next free number. Naming a range here would go stale the next time
   the framework records one.
-- Strip the `data-derive` attributes from the stat strip in `index.html` (leave the numbers and
-  the page alone). They tie those numbers to a gate that counts this repo, and in a copy the
+- Strip the `data-derive` attributes from the stat strip in `index.html` when that file is the
+  explainer that came with the copy (leave the numbers and the page alone; an owner's own
+  `index.html` has none and is not touched). They tie those numbers to a gate that counts this repo, and in a copy the
   numbers describe the framework, not the project: the first decision this project records would
   otherwise turn the gate red.
 - Verify prerequisites: `git --version` and `node --version` (Node ≥ 22). Missing → tell the
@@ -209,8 +218,11 @@ STATE.md under "Blocked on:", and carry on. Setup does not fail on it, and nothi
 step depends on it.
 
 If the owner has a remote (GitHub gets CI from `.github/workflows/ci.yml`; another host needs
-its equivalent: port it before first delivery), wire it and push. If not, note in STATE.md
-that CI is a `deliver` precondition still to be wired. On GitHub, also enable private
+its equivalent: port it before first delivery), wire it and push. No remote yet and the owner
+wants one on GitHub: hand them the two literal lines, `gh auth login` once, then from the project
+root `gh repo create <name> --private --source=. --push`, which creates the repository and pushes
+this first commit. If they want none, note in STATE.md that CI is a `deliver` precondition still to
+be wired. On GitHub, also enable private
 vulnerability reporting on day one, so `SECURITY.md`'s reporting channel exists before anyone
 reads the policy: `gh api --method PUT 'repos/{owner}/{repo}/private-vulnerability-reporting'`
 (not on GitHub or no `gh` → skip; `deliver`'s first-release check covers it).
