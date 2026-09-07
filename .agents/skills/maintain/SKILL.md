@@ -29,17 +29,20 @@ First maintenance session: confirm the minimum exists, or create it and record i
    vendor's own release and deprecation notices. Those last ones move on the vendor's schedule
    rather than yours, which is what makes a platform go stale while every project file sits
    untouched. The installed design method is a dependency too, and the only one whose manifest is
-   Groundwork's own config: **this is the only place its pin moves.** Compare
-   `node checks/design-method.mjs --pinned` with `npm view impeccable version`; to take a newer
-   one, edit `version` in the `thirdParty` entry of `checks/config.json`, re-run
-   `node checks/design-method.mjs --install`, then run the checks and exercise one interface
-   change end to end before the bump is committed. The install refuses when the payload that
-   lands is not the pin, and the enforcement line at the top of `node checks/check.mjs` reports a
-   payload that drifted from it, so a version nobody chose cannot become the version this project
-   builds on. Note the move in STATE.md. Read the release notes for a rule that was dropped:
-   decision 0020 credits rules to that method, and one that disappears upstream comes back into a
-   Groundwork file rather than being forked there. A major bump is its own unit of work, verified
-   like any other, never folded into a routine batch.
+   Groundwork's own config: **this is the only place its two recorded versions move.** It has two
+   because its npm package is a launcher that downloads the method's content at install time, so
+   the package version fixes the launcher and its engine binary while the content arrives at
+   whatever the current release is. The consequence to work with: **re-installing can change the
+   method even when nothing in this repo changed.** So treat an install as a version bump every
+   time. Run `node checks/design-method.mjs --install`, read which content landed, exercise one
+   interface change end to end, then record that number as `contentVersion` in the `thirdParty`
+   entry of `checks/config.json`. Until it is recorded, the enforcement line at the top of
+   `node checks/check.mjs` keeps reporting that the payload is not the verified one, which is the
+   whole point: the change cannot be prevented here, so it is made impossible to miss. Note the
+   move in STATE.md. Read the release notes for a rule that was dropped: decision 0020 credits
+   rules to that method, and one that disappears upstream comes back into a Groundwork file
+   rather than being forked there. A content jump across a major is its own unit of work,
+   verified like any other, never folded into a routine batch.
 3. **Debt harvest**: `grep -rn "defer:" --exclude-dir=.git .` → reconcile with DEBT.md. Flag
    markers whose upgrade trigger has fired, and `no-trigger` markers (those rot silently).
    Paying debt is a proposed, owner-approved task like any other.

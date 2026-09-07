@@ -1,8 +1,14 @@
 #!/usr/bin/env node
-// The design method: impeccable, installed per project at the version pinned in checks/config.json
-// and never vendored into this repo (spec 011). The payload is gitignored like a dependency, so this
-// file is both the route that puts it there and the reader that says whether it is there.
-// Run: node checks/design-method.mjs --install (--pinned prints the pin, for a workflow that needs it)
+// The design method: impeccable, installed per project and never vendored into this repo (spec 011).
+// The payload is gitignored like a dependency, so this file is both the route that puts it there and
+// the reader that says whether it is there.
+// Run: node checks/design-method.mjs --install (--pinned prints the package version, for a workflow)
+//
+// Two version lines, measured 2026-09-07: the npm package is a launcher that downloads the skill
+// payload from GitHub releases at install time, so pinning the package fixes the launcher and its
+// engine binary but not the method content (4.0.3 and 4.0.4 both install content 4.2.2). What this
+// file can honestly do is record the content version that was verified and report when the payload
+// stops matching it. That is visibility, not prevention; preventing it would mean vendoring.
 //
 // The install lands in .claude/skills, which is a symlink into .agents/skills here (decision
 // 0002), and upstream deliberately drops such a link so each harness gets its own build. So the
@@ -29,17 +35,29 @@ const LANDING_PATH = '.claude/skills/impeccable';
 const SKILLS_LINK = '.claude/skills';
 const PACKAGE = 'impeccable';
 
-// The pin: one number, in tracked config, beside the declaration that the payload is third-party.
-// An unpinned install is what let a one-maintainer upstream change the method between two sessions
-// of the same project; refreshing it is `maintain`'s job, never an install's side effect.
-export function pinnedVersion(root) {
+// Both numbers live in tracked config, beside the declaration that the payload is third-party, and
+// both move only through `maintain`. `version` is what the install fetches; `contentVersion` is the
+// payload this project actually read and verified, which is the one a reader should compare against.
+function thirdPartyEntry(root) {
   const cfg = JSON.parse(readFileSync(join(root, 'checks', 'config.json'), 'utf8'));
-  const entry = (cfg.thirdParty || []).find((e) => e && e.path === `${PAYLOAD_PATH}/`);
+  return (cfg.thirdParty || []).find((e) => e && e.path === `${PAYLOAD_PATH}/`);
+}
+
+export function pinnedVersion(root) {
+  const entry = thirdPartyEntry(root);
   const pin = entry && typeof entry.version === 'string' ? entry.version.trim() : '';
   if (!pin) {
-    throw new Error(`checks/config.json declares no version for ${PAYLOAD_PATH}/: the design method installs at a pinned version, so the pin has to exist before anything is fetched.`);
+    throw new Error(`checks/config.json declares no version for ${PAYLOAD_PATH}/: the design method installs at a fixed package version, so it has to exist before anything is fetched.`);
   }
   return pin;
+}
+
+// The content version is a record of what was verified. Absent is a legitimate state (nobody has
+// verified a payload yet), so this reads null rather than refusing.
+export function verifiedContent(root) {
+  const entry = thirdPartyEntry(root);
+  const v = entry && typeof entry.contentVersion === 'string' ? entry.contentVersion.trim() : '';
+  return v || null;
 }
 
 // The installed version is the skill's own frontmatter, which is where impeccable states it too.
@@ -55,13 +73,14 @@ export function designMethod(root) {
 // payload (it is gitignored), so the state is reported rather than assumed.
 export function designMethodSignal(root) {
   const { installed, version } = designMethod(root);
-  let pin = null;
-  try { pin = pinnedVersion(root); } catch { pin = null; }
+  let want = null;
+  try { want = verifiedContent(root); } catch { want = null; }
   if (installed) {
-    // A payload that is not the pinned one is reported, not silently accepted: the pin is only
-    // worth having if the difference is visible where the owner already looks.
-    const drift = pin && version && version !== pin
-      ? `, pinned at ${pin}: re-install or move the pin through \`maintain\``
+    // The payload can change under a project without anyone asking for it, because the install
+    // downloads the current release. That cannot be prevented here, so it is made impossible to
+    // miss: the line says which content was verified and which is actually on disk.
+    const drift = want && version && version !== want
+      ? `, but ${want} is the version this project verified: re-verify and move contentVersion through \`maintain\``
       : '';
     return {
       signal: 'design method',
@@ -139,10 +158,11 @@ export function install(root) {
     { cwd: root, stdio: ['ignore', 'inherit', 'inherit'] });
   const what = adopt(root);
   const { version } = designMethod(root);
-  if (version && version !== pin) {
-    throw new Error(`asked npm for ${PACKAGE}@${pin} and the payload says ${version}: the install did not land on the pinned version, so what is on disk is not what this project verified.`);
-  }
-  return `impeccable ${version || '(version unstated)'} installed at the pin: ${what}.`;
+  const verified = verifiedContent(root);
+  const note = verified && version && version !== verified
+    ? ` WARNING: this project verified content ${verified} and the install brought ${version}. The package version does not control the content, so read what changed, re-verify, and move contentVersion in checks/config.json through \`maintain\` before relying on it.`
+    : '';
+  return `impeccable content ${version || '(version unstated)'} installed from ${PACKAGE}@${pin}: ${what}.${note}`;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

@@ -19,10 +19,12 @@ dist/
 build/
 coverage/
 
-# The design method (impeccable) is installed per project at the version pinned in
-# checks/config.json, never vendored: `node checks/design-method.mjs --install` puts it
-# here, and `maintain` is the only route that moves the pin.
+# The design method (impeccable) is installed per project, never vendored:
+# `node checks/design-method.mjs --install` puts it here, and `maintain` is the only route that
+# moves the versions recorded in checks/config.json. The reviewer agents are written by that same
+# install, from the same payload, so they are ignored with it rather than committed as ours.
 .agents/skills/impeccable/
+.claude/agents/impeccable-*.md
 
 # The block below is impeccable's own, copied from its README (v3.5.0, "Keeping .impeccable out
 # of git"). Its working files are ephemeral; the shared artifacts it names stay tracked, which is
