@@ -45,11 +45,12 @@ hosted platform (and which one), and the date these facts were last verified aga
 sources. That header carries weight elsewhere - the platform line is what switches on the
 platform route in `code-review`, `debug`, `maintain` and `deliver`, and the date is what
 `maintain`'s quarterly audit tests for staleness. A file with no platform line reads downstream
-as "not a platform", so a platform project that omits it loses all four routes silently. Add
-`**Pipeline:** <path>` to the same header when this project's CI lives somewhere `stack-gates`
-does not already look (it finds `.github/workflows/`, `.gitlab-ci.yml` and `azure-pipelines.yml`
-by itself): that field is the one place a host is named, and without it every `command` answer
-below reads as claimed and unproven. Then cover at least:
+as "not a platform", so a platform project that omits it loses all four routes silently. Add a
+`Pipeline` field to the same header when this project's CI lives somewhere `stack-gates` does not
+already look (it finds `.github/workflows/`, `.gitlab-ci.yml` and `azure-pipelines.yml` by
+itself): the bold field, then the path in backticks, inside this project and never this file
+itself. That field is the one place a host is named, and without it every `command` answer below
+reads as claimed and unproven. Then cover at least:
 
 - Project layout for this stack (senior-readable, conventional, not invented).
 - Language/framework idiom: the current blessed patterns, and the deprecated ones to refuse.
@@ -80,8 +81,8 @@ below reads as claimed and unproven. Then cover at least:
     the placeholder stage; CI must fail on any gate. Deleting a placeholder without wiring what it
     stood for leaves the class unanswered, and the floor table is where that shows. `stack-gates`
     reads whichever pipeline this project has, so another host is a first-class answer rather than
-    an exemption: it is found by itself on the three hosts named in step 2, and named in the
-    header field there on any other.
+    an exemption: found by itself on the three hosts named in step 2, and named in that step's
+    header field on any other.
   - **Design detector**, when the product has a user interface: a CI stage that runs the design
     method's own detector over the surfaces this project ships, beside the typecheck and the
     tests. It is deterministic, model-free and needs no key, so it belongs with the mechanical
@@ -132,7 +133,7 @@ name the doc and date in the standards file.
   automated test support, pipeline tooling). A gate with no platform equivalent becomes a named
   manual check in the standards file and a `defer:` entry, never a silent drop. The platform's own
   pipeline is what proves the `command` answers, and it counts as itself: `stack-gates` reads
-  `azure-pipelines.yml` where it lies, and any other host from the header's `**Pipeline:**` field.
+  `azure-pipelines.yml` where it lies, and any other host from the header's `Pipeline` field.
 - **Verify means the platform's runtime**: exercise the flow, app, or generated document in a
   real dev environment, not just a clean export.
 

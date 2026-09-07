@@ -6,7 +6,9 @@
 // Run: node checks/check-stack.test.mjs
 
 import assert from 'node:assert/strict';
-import { expectClean, expectFail, floorCase, report } from './check-fixture.mjs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { expectClean, expectFail, expectFailWith, floorCase, report, tally } from './check-fixture.mjs';
 
 // The manifest row keeps docs-manifest quiet, so only the gate under test speaks.
 const manifest = '# manifest\n\n| `state/STATE.md` | LIVE | state |\n| `standards/**` | LIVE | standards |\n';
@@ -275,21 +277,70 @@ expectClean('stack-gates-a-declared-pipeline-the-gate-does-not-know', (fx) => {
     + '    sh "PowerPlatformPackSolution@2"\n    sh "PowerPlatformChecker@2"\n  }\n}\n');
 });
 
-// The declared path is project text, and it is held to the project: a path that climbs out of the
-// tree names no pipeline, so the classes it claimed stay open rather than being proven by whatever
-// lies outside.
-expectFail('stack-gates', (fx) => {
+// A declared path with nothing at it is the builder's own typo, not a host this gate has not met,
+// and the message says which of the two it is. Asserted on the message, because both cases fire
+// the same check: without that, the whole distinction could be deleted and stay green.
+const declaring = (path, extra = () => {}) => (fx) => {
   fx.put('docs/README.md', manifest);
   fx.put('docs/standards/power-platform.md', PLATFORM_FLOOR.replace('**Verified:** 2026-08-26',
-    '**Verified:** 2026-08-26 · **Pipeline:** `../elsewhere/ci.yml`'));
+    `**Verified:** 2026-08-26 · **Pipeline:** \`${path}\``));
+  extra(fx);
+};
+
+const NOTHING_THERE = /declares `\*\*Pipeline:\*\* ci\/Jenkinsfile` and there is nothing this gate can read there/;
+
+expectFailWith('stack-gates', declaring('ci/Jenkinsfile'), NOTHING_THERE);
+
+// And it is still said when a known host's pipeline does exist, because a typo hidden behind a
+// GitHub workflow that happens to be present is a typo nobody is told about.
+expectFailWith('stack-gates', declaring('ci/Jenkinsfile', ({ put }) =>
+  put('.github/workflows/docs.yml', 'name: docs\njobs:\n  pages:\n    steps:\n      - run: echo publish\n')),
+NOTHING_THERE);
+
+// THE SELF-PROOF THIS GATE REFUSES: a stack file naming itself as its own pipeline. Its floor
+// table holds every command in backticks, so reading it as a pipeline proves each of them with the
+// very table that claims them. One line of project text would otherwise turn the whole floor green
+// with no CI at all, which is the escape hatch this story removes rather than moves.
+expectFail('stack-gates', declaring('docs/standards/power-platform.md'));
+
+floorCase('floor-a-stack-file-cannot-prove-itself', declaring('docs/standards/power-platform.md'), (out) => {
+  assert.equal(out.proven, 0, 'a contract cannot be the evidence for itself');
+  assert.deepEqual(out.open.sort(), ['analyzed', 'builds', 'secrets'], 'the command classes stay open');
 });
 
-// A declared path with nothing at it is the builder's own typo, not a host this gate has not met,
-// and it is named as such rather than sending them to declare what they already declared.
-expectFail('stack-gates', (fx) => {
+// The declared path is held to the project by resolving it, not by reading the string: a symlink
+// walks out of a tree whatever the string looked like. The escape here points at a real directory
+// holding a real pipeline, one level above the project, so this case fails for the reason it names
+// rather than because the path happens not to exist.
+const outsideTheProject = ({ root, put }) => {
+  const escape = join(root, '..', `outside-${process.pid}`);
+  mkdirSync(escape, { recursive: true });
+  writeFileSync(join(escape, 'ci.yml'), 'steps:\n  - task: PowerPlatformPackSolution@2\n'
+    + '  - task: PowerPlatformChecker@2\n  - script: node checks/check.mjs\n');
+  put('docs/README.md', manifest);
+  put('docs/standards/power-platform.md', PLATFORM_FLOOR.replace('**Verified:** 2026-08-26',
+    `**Verified:** 2026-08-26 · **Pipeline:** \`../outside-${process.pid}/ci.yml\``));
+};
+
+floorCase('floor-a-pipeline-outside-the-project-proves-nothing', outsideTheProject, (out) => {
+  assert.equal(out.proven, 0, 'a file outside the project is not this project\'s pipeline');
+  assert.deepEqual(out.open.sort(), ['analyzed', 'builds', 'secrets'], 'the classes it claimed stay open');
+});
+
+// Prose that names the field is an instruction, not a declaration. The template and the `stack`
+// skill both carry that sentence and a builder keeps it when filling the file in, so it can stand
+// anywhere in the file, above the real declaration included. A line that starts as a sentence is
+// not a field, which is why the declaration has to begin as one and hold its path in backticks.
+const QUOTED = 'On any other host, name yours once in this file\'s\n'
+  + 'header, as `**Pipeline:** <path>` beside the stack and the verified date.\n\n';
+
+expectClean('stack-gates-prose-about-the-field-is-not-a-declaration', (fx) => {
   fx.put('docs/README.md', manifest);
-  fx.put('docs/standards/power-platform.md', PLATFORM_FLOOR.replace('**Verified:** 2026-08-26',
-    '**Verified:** 2026-08-26 · **Pipeline:** `ci/Jenkinsfile`'));
+  fx.put('docs/standards/power-platform.md', PLATFORM_FLOOR
+    .replace('**Verified:** 2026-08-26', '**Verified:** 2026-08-26 · **Pipeline:** `ci/pipeline.yml`')
+    .replace('# Microsoft Power Platform standards\n\n', `# Microsoft Power Platform standards\n\n${QUOTED}`));
+  fx.put('ci/pipeline.yml', 'steps:\n  - task: PowerPlatformPackSolution@2\n'
+    + '  - task: PowerPlatformChecker@2\n  - script: node checks/check.mjs\n');
 });
 
 // Silence is not one of the outcomes: a declared stack, a command answer, and no pipeline anywhere
@@ -335,5 +386,20 @@ expectFail('stack-gates', (fx) => {
   design(fx);
   fx.put('azure-pipelines.yml', AZURE_PIPELINE);
 });
+
+// A copy that has chosen nothing and has no pipeline anywhere: the state this change newly makes
+// reachable, since the gate no longer returns early on a missing workflow directory.
+expectClean('stack-gates-quiet-with-no-stack-and-no-pipeline', () => {});
+
+// PLATFORM_FLOOR is a transcription of the template's worked column, and a transcription drifts.
+// This is what notices: the commands the fixture walks are the ones that column actually names.
+const worked = readFileSync(new URL('../docs/standards/TEMPLATE-STACK.md', import.meta.url), 'utf8');
+for (const cmd of ['PowerPlatformPackSolution@2', 'PowerPlatformChecker@2', 'node checks/check.mjs']) {
+  try {
+    assert.ok(worked.includes(cmd), `TEMPLATE-STACK.md no longer names \`${cmd}\`, which PLATFORM_FLOOR walks`);
+    assert.ok(PLATFORM_FLOOR.includes(cmd), `PLATFORM_FLOOR no longer walks \`${cmd}\``);
+    tally.passed++;
+  } catch (e) { tally.failed.push(`template-column-and-fixture-agree: ${e.message}`); }
+}
 
 report('stack-gate');
