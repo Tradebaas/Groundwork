@@ -45,7 +45,10 @@ For an in-scope item, name the cheapest tier that delivers it (decision 0015: an
 on-demand skill before a gate, a gate before an always-on rule); the tier is part of the
 recommendation.
 
-Present triage as a batch with your recommendation per item; the owner decides, you record.
+Present triage as one table with your recommendation per item, in the owner's words (what it does
+for whom, never a component name), and close with one question: agree with the table as it stands,
+or name the rows to talk about. The owner decides, you record; a contested row gets a reply of its
+own, so no reply carries more than one question.
 For a contested item or a whole-direction call, run the `critical-thinking` moves before
 recommending: a recommendation that never faced a named alternative is agreement, not triage.
 

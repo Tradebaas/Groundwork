@@ -149,8 +149,10 @@ concrete break, and the smallest fix. A security finding sits on the never-simpl
 
 ## After the review
 
-Blockers are fixed before the commit; the fix goes back through `verify`. Majors are fixed or
-explicitly accepted by the owner. Minors are fixed cheaply now or recorded (INTAKE.md for
+Blockers are fixed before the commit; the fix goes back through `verify`. Majors are fixed, or
+put to the owner one at a time as a consequence for a user (what breaks for whom, and what
+accepting it costs), with your recommended answer; a major the owner accepts is recorded where
+it lands, never left in the chat. Minors are fixed cheaply now or recorded (INTAKE.md for
 ideas, DEBT.md with a `defer:` marker for accepted debt). Refactoring findings are applied
 here, in the review stage, as their own change: never folded into the implementing diff
 (see `docs/standards/GLOBAL.md`). Report the outcome per axis in a few lines, then proceed

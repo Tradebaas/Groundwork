@@ -26,6 +26,12 @@ authoritative sources (official docs, release pages). Model memory is a rumor wi
 
 ## 2. Generate `docs/standards/<stack>.md`
 
+**Existing project: read what the code already does before writing a rule.** The linter and
+formatter it configures, the test runner and where the tests live, the module layout, the naming
+in use, the stages its CI runs: these are the standards the project has, and the file records them
+first. A convention the code follows stays unless it fails the floor; a new one arrives with its
+reason and its migration path, never by a rewrite of what works.
+
 Start from `docs/standards/TEMPLATE-STACK.md`, which owns the shape. Its floor table is the part
 `checks/check.mjs` reads: six classes of risk, each answered with a command, a reasoned
 `not applicable`, or a named `manual` check with a `defer:` marker. Fill that table as you

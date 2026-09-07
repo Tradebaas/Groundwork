@@ -27,6 +27,9 @@ Run the full chain and paste real results, not summaries of results:
 - Run the long things at arm's length. A test run, a build or a log enters the context as its
   counts and its failures (tail, grep, or a subagent that reads it and returns two lines), so the
   transcript carries the conclusion and not the log; the full output stays on disk for the report.
+- Exercise against the real dependency, or the test double the spec names. A path that passed
+  because a fallback returned canned data (a sample response, a stub, a default) is a failure, and
+  the fallback is a finding: it carries a `defer:` marker with its trigger, or it goes.
 - User-facing output → also run `design-guard` on what rendered. A built interface gets re-checked
   against its direction contract and the finish verdict; a document, e-mail, export or error
   string gets judged there in full, because the design method does not carry those.
