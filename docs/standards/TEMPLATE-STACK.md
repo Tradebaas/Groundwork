@@ -22,10 +22,13 @@ list. **Each row is answered or the gates do not read green.**
 Three answer forms, and no fourth:
 
 - **command** - what CI runs: a shell line, or this host's own task. It has to exist as a live
-  stage in a workflow, never as a comment. The Answer cell holds the command in backticks and
+  stage in a pipeline, never as a comment. The Answer cell holds the command in backticks and
   nothing else in backticks, because every backticked span in it is read as a command that must be
   running. Two commands answering one class both have to run. Anything you want to say about the
   answer goes under the table, where the reader has room and the parser does not look.
+  The gate finds the pipeline itself on the hosts this framework has met (`.github/workflows/`,
+  `.gitlab-ci.yml`, `azure-pipelines.yml`). On any other host, name yours once in this file's
+  header, as `**Pipeline:** <path>` beside the stack and the verified date, and it is read there.
 - **`not applicable`** - plus the reason. Use it when the class genuinely cannot apply here, never
   when it is merely inconvenient.
 - **`manual`** - plus the named check and who runs it, and a `defer:` marker at the site. This is
@@ -37,13 +40,18 @@ point of the form: a floor with holes in it is allowed, and is never quiet about
 
 Three notes that hold for your own answers as much as for the worked ones below. A `behaves`
 command counts only if the runner fails on an empty suite (the test floor in `GLOBAL.md`; check what
-yours does with zero tests and add its flag when it passes by default). The `secrets` row names
-Groundwork's gate, which is four patterns run before a commit: a product that ships adds a real
-scanner over the tree and its history, and the gate is that scanner's pre-commit half. The
-`dependencies` class covers licences as well as holes: the SBOM lists them, and a checker with an
-allow-list is what makes an unwanted licence fail the build. Under `renders`, an accessibility scan
-and a performance budget on the public surfaces belong beside the detector; two commands in one
-cell both have to run.
+yours does with zero tests and add its flag when it passes by default). The `dependencies` class
+covers licences as well as holes: the SBOM lists them, and a checker with an allow-list is what
+makes an unwanted licence fail the build. Under `renders`, an accessibility scan and a performance
+budget on the public surfaces belong beside the detector; two commands in one cell both have to run.
+
+`secrets` is answered with a command like every other class, which is why the worked column names
+Groundwork's own gate rather than describing it: that gate is four patterns, run before a commit
+and again in CI. On a coded stack it needs this stack's file extensions added to
+`extraCodeExtensions` in `checks/config.json`; on a configured platform it reads the unpacked
+solution, where environment variables and Key Vault references are the pattern that replaces an
+embedded value. A product that ships adds a real scanner over the tree and its history, and
+Groundwork's gate is that scanner's pre-commit half.
 
 ## Worked answers
 
@@ -51,12 +59,16 @@ cell both have to run.
 
 | Class | TypeScript on Node | Microsoft Power Platform |
 |---|---|---|
-| `builds` | **command** `npm run build` | **command** the `PowerPlatformPackSolution@2` task, then the import task |
+| `builds` | **command** `npm run build` | **command** the `PowerPlatformPackSolution@2` task |
 | `behaves` | **command** `npm test` | **manual** - Test Engine was deprecated effective April 2026 and Microsoft points at the Power Platform Playwright samples instead. A project that has not adopted them yet answers `manual` with the named regression script and a `defer:` marker, rather than claiming a runner it does not have |
 | `analyzed` | **command** `tsc --noEmit` and `eslint .` | **command** the `PowerPlatformChecker@2` task - static analysis against Microsoft's rule set, emitting SARIF |
 | `dependencies` | **command** `npm audit --audit-level=high` and `npm sbom --sbom-format=cyclonedx` | **not applicable** - a solution declares dependencies on other solutions and connectors, and no vulnerability feed exists for those. Connector governance through DLP policies is the control instead, and it is a policy, not a build step |
-| `secrets` | Groundwork's own gate, with this stack's file extensions added to `extraCodeExtensions` in `checks/config.json` | Groundwork's own gate over the unpacked solution, with environment variables and Key Vault references as the pattern that replaces embedded values |
+| `secrets` | **command** `node checks/check.mjs` | **command** `node checks/check.mjs` |
 | `renders` | **command** `npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>` | **manual** - the accessibility checker in the studio, run per app before release, with a `defer:` marker naming it |
+
+A project whose pipeline also imports the packed solution names that task in the same `builds`
+cell, in backticks beside the pack task: two commands in one cell both have to run, so a deploy
+that is claimed is a deploy the gate can see.
 
 Sources, read 2026-08-26, primary only: `npm sbom` and its `cyclonedx` format from the npm CLI
 docs (docs.npmjs.com/cli/v11/commands/npm-sbom); the Test Engine deprecation, effective April 2026,

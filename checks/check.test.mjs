@@ -15,9 +15,8 @@ import assert from 'node:assert/strict';
 import { runChecks, installHooks } from './check.mjs';
 import { needsHandoffNudge } from './handoff-nudge.mjs';
 import { enforcementReport, formatReport, formatFloor } from './enforcement.mjs';
-import { floorReport } from './check-stack.mjs';
 import {
-  fixture, expectClean, expectFail, withConfig, BASE_BUDGETS, tally, report,
+  fixture, expectClean, expectFail, withConfig, BASE_BUDGETS, tally, report, floorCase,
 } from './check-fixture.mjs';
 
 expectClean();
@@ -404,21 +403,6 @@ const withFloor = (rows = FULL_ROWS, workflow = RUNS_ALL) => ({ put }) => {
   put('docs/standards/node.md', floorFile(rows));
   put('.github/workflows/ci.yml', workflow);
 };
-
-function floorCase(label, mutate, check) {
-  const fx = fixture();
-  mutate(fx);
-  let out;
-  try {
-    out = floorReport(fx.root);
-  } catch (e) {
-    tally.failed.push(`${label}: derivation threw: ${e.message}`);
-    rmSync(fx.root, { recursive: true, force: true });
-    return;
-  }
-  rmSync(fx.root, { recursive: true, force: true });
-  try { check(out); tally.passed++; } catch (e) { tally.failed.push(`${label}: ${e.message}`); }
-}
 
 // Not started is not the same as failing, which is the rule the empty copy follows everywhere.
 floorCase('floor-no-stack-file', () => {}, (out) =>

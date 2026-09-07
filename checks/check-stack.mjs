@@ -24,7 +24,7 @@
 // false confidence this whole epic exists to remove, and the honest limit is written into the
 // epic rather than discovered later.
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 // A stack file is any standards document that is not the cross-stack floor and not a template:
@@ -85,24 +85,67 @@ const runsAll = (answer, live) => {
   return wanted.length > 0 && wanted.every((cmd) => isLive(cmd, live));
 };
 
+// Where a pipeline lives on the hosts this framework has actually met: its own (GitHub Actions),
+// the one the template's worked platform column is written for (Azure Pipelines), and the one the
+// gate's own tests have named since S-02 (GitLab CI). Deliberately not a survey of the CI market,
+// because the declared path below is what makes the length of this list stop mattering.
+const KNOWN_PIPELINES = ['.github/workflows', '.gitlab-ci.yml', 'azure-pipelines.yml', 'azure-pipelines.yaml'];
+
+// The one stated place a project names a host nobody here has met: the stack file's header field,
+// beside the stack, the platform and the verified date. `**Pipeline:** <path>` and nothing else.
+// The path is project text, so it is held to the project: an absolute path or one that climbs out
+// of the tree is not a pipeline this gate will read, and reads as no declaration at all.
+const declaredPipeline = (text) => {
+  const m = text.match(/\*\*Pipeline:\*\*\s*(.+)/);
+  if (!m) return null;
+  const rel = m[1].split('·')[0].replace(/[`*]/g, '').trim().replace(/\/+$/, '');
+  if (!rel || rel.startsWith('/') || rel.split('/').includes('..')) return null;
+  return rel;
+};
+
+// A pipeline location is a file or a directory of them, and both are named the same way, so one
+// resolver reads either. Anything unreadable resolves to nothing: the gate below then says the
+// class is unproven and where it looked, which is the honest answer to a path it cannot open.
+function pipelineFilesAt(root, rel) {
+  const abs = join(root, rel);
+  if (!existsSync(abs)) return [];
+  try {
+    if (!statSync(abs).isDirectory()) return [rel];
+    return readdirSync(abs).filter((n) => /\.ya?ml$/.test(n)).sort().map((n) => `${rel}/${n}`);
+  } catch { return []; }
+}
+
+// One derivation of where this project's pipeline lives, for the refusal and the count alike.
+// Before S-04 this was a single hard-coded `.github/workflows/`, and the gate returned early when
+// it was absent: a second place where entitlement was decided, and the escape hatch that let the
+// refusal and the count disagree about the same project. It reports where it looked as well as
+// what it found, because a refusal a builder cannot act on is the same as silence.
+function pipelinePaths(root, texts = []) {
+  const declared = [...new Set(texts.map(declaredPipeline).filter(Boolean))];
+  const looked = [...new Set([...KNOWN_PIPELINES, ...declared])];
+  // A declared path that resolves to nothing is a different mistake from having no pipeline at
+  // all, and it is the builder's own typo rather than a host this gate has not met. Named
+  // separately below, because "nowhere I know to look" would send them to fix the wrong thing.
+  const missing = declared.filter((rel) => !pipelineFilesAt(root, rel).length);
+  return { looked, declared, missing, files: looked.flatMap((rel) => pipelineFilesAt(root, rel)) };
+}
+
 // The one read of the contract: which stack files this project declares, what each one's floor
-// table says, and which workflow lines are live to answer it. The gate below and floorReport()
-// both take their facts from here, which is what keeps the refusal and the count in step.
-// The two halves stay separate on purpose: a project with no stack file still has live workflow
-// lines, and the design detector's half of the gate is entitled to them.
+// table says, where this project's pipeline lives, and which of its lines are live to answer the
+// floor. The gate below and floorReport() both take their facts from here, which is what keeps the
+// refusal and the count in step. The two halves stay separate on purpose: a project with no stack
+// file still has live pipeline lines, and the design detector's half of the gate is entitled to
+// them. The stack files are read first because one of them may be where the pipeline is declared.
 export function readFloors(root, lines) {
   const standards = join(root, 'docs', 'standards');
   const stacks = existsSync(standards) ? stackFiles(standards) : [];
-  const wfDir = join(root, '.github', 'workflows');
-  const live = existsSync(wfDir)
-    ? readdirSync(wfDir).filter((n) => /\.ya?ml$/.test(n))
-      .flatMap((name) => liveLines(lines(join(wfDir, name))))
-    : [];
   const files = stacks.map((name) => {
     const text = lines(join(standards, name)).join('\n');
     return { rel: `docs/standards/${name}`, text, rows: floorRows(text) };
   });
-  return { live, files };
+  const pipelines = pipelinePaths(root, files.map((f) => f.text));
+  const live = pipelines.files.flatMap((rel) => liveLines(lines(join(root, rel))));
+  return { live, files, pipelines };
 }
 
 // The shape of the floor, counted once for everyone who reports it: how many classes are proven
@@ -139,11 +182,18 @@ export function floorReport(root) {
 
 export const stackChecks = ({ root, fail, lines }) => ({
   'stack-gates'() {
-    // Another CI host is explicitly allowed (`stack` section 3: "or this host's equivalent"),
-    // and whether CI exists at all is enforcement.mjs's report to make. One fact, one place.
-    const wfDir = join(root, '.github', 'workflows');
-    if (!existsSync(wfDir)) return;
-    const { live, files } = readFloors(root, lines);
+    // Entitlement is decided here and nowhere else: a project owes this gate an answer the moment
+    // it declares a stack, whatever host runs its pipeline. Whether CI exists at all stays
+    // enforcement.mjs's report to make. One fact, one place.
+    const { live, files, pipelines } = readFloors(root, lines);
+    const looked = pipelines.looked.join(', ');
+    const nowhereToLook = pipelines.missing.length
+      ? `The stack file header declares \`**Pipeline:** ${pipelines.missing.join('`, `')}\` and there is `
+        + 'nothing this gate can read at that path, so nothing proves it: correct the path, or wire '
+        + 'the stage, or change the answer to the form that is true.'
+      : `This project has no pipeline anywhere this gate knows to look (${looked}), `
+        + 'so nothing proves it: wire the stage, or name your pipeline in the stack file header as '
+        + '`**Pipeline:** <path>`, or change the answer to the form that is true.';
     for (const { rel, text, rows } of files) {
       if (!rows) {
         fail(`${rel} declares a stack and carries no floor table, so nothing says how this project's own code is checked. Copy the table from docs/standards/TEMPLATE-STACK.md and answer all six classes: ${CLASSES.join(', ')}.`);
@@ -166,9 +216,10 @@ export const stackChecks = ({ root, fail, lines }) => ({
             continue;
           }
           for (const cmd of wanted) {
-            if (!isLive(cmd, live)) {
-              fail(`${rel} answers \`${cls}\` with \`${cmd}\`, and no workflow under .github/workflows/ runs it. A command nobody runs proves nothing: wire the stage, or change the answer to the form that is true.`);
-            }
+            if (isLive(cmd, live)) continue;
+            fail(pipelines.files.length
+              ? `${rel} answers \`${cls}\` with \`${cmd}\`, and no pipeline this project has runs it (read: ${pipelines.files.join(', ')}). A command nobody runs proves nothing: wire the stage, or change the answer to the form that is true.`
+              : `${rel} answers \`${cls}\` with \`${cmd}\`, and nothing runs it. ${nowhereToLook}`);
           }
         }
         if (row.form === 'manual') {
@@ -188,7 +239,12 @@ export const stackChecks = ({ root, fail, lines }) => ({
     // the tracked artifact the method writes, never by looking for the payload on disk.
     if (!existsSync(join(root, '.impeccable', 'config.json'))) return;
     if (!live.some(runsDetector)) {
-      fail(`.impeccable/config.json declares the design method for this project, but no workflow in .github/workflows/ runs its detector, so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing.`);
+      const where = pipelines.files.length
+        ? `no pipeline this project has runs its detector (read: ${pipelines.files.join(', ')})`
+        : `nothing runs its detector: ${pipelines.missing.length
+          ? `the stack file header declares \`**Pipeline:** ${pipelines.missing.join('`, `')}\` and there is nothing this gate can read there`
+          : `this project has no pipeline anywhere this gate knows to look (${looked})`}`;
+      fail(`.impeccable/config.json declares the design method for this project, but ${where}, so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing. A host this gate does not know is named in the stack file header as \`**Pipeline:** <path>\`.`);
     }
   },
 });

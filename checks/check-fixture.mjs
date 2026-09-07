@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import { runChecks } from './check.mjs';
+import { floorReport } from './check-stack.mjs';
 
 export function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'groundwork-test-'));
@@ -78,4 +79,22 @@ export function report(suite) {
     process.exit(1);
   }
   console.log(`OK: ${tally.passed} ${suite} self-tests passed: every gate fails when it should.`);
+}
+
+// A derivation, not a gate: build a fixture, read the floor out of it, and assert on the shape
+// that comes back. The count and the gate are two renderings of one read (E-02/F-01/S-03), so
+// both suites assert on it and both do it the same way.
+export function floorCase(label, mutate, check) {
+  const fx = fixture();
+  mutate(fx);
+  let out;
+  try {
+    out = floorReport(fx.root);
+  } catch (e) {
+    tally.failed.push(`${label}: derivation threw: ${e.message}`);
+    rmSync(fx.root, { recursive: true, force: true });
+    return;
+  }
+  rmSync(fx.root, { recursive: true, force: true });
+  try { check(out); tally.passed++; } catch (e) { tally.failed.push(`${label}: ${e.message}`); }
 }
