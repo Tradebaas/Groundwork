@@ -74,6 +74,9 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
   ~40% is the owner's call, and only when finishing the current unit of work first is clearly
   better. Past ~40%, always checkpoint.
 - Read only what the task needs. Before each file read, ask: does this answer the current question?
+  A test run, a build or a log enters the context as its counts and failures, never whole.
+- When the tool compacts the context, what survives is: the files changed this session, the
+  commands that run the checks and tests, and the Now line. Checkpoint before it decides for you.
 - Prefer pointers over copies. Link to the owning file; never restate its content elsewhere.
 - State lives on disk, not in chat: progress → `docs/state/STATE.md`, decisions →
   `docs/decisions/`, debt → `defer:` markers (below) + `docs/state/DEBT.md`.
