@@ -53,7 +53,13 @@ a hardcoded table would rot. What the session's tool offers today is looked up l
    tiers, take the higher one for irreversible or security-relevant work and the lower one for
    easily-verified, easily-retried work.
 
-6. **Deliver one recommendation, paste-ready.** One combination, one reason, and the exact way
+6. **Count the tool servers.** Every connected server puts its tool schemas into every turn,
+   whether the session uses them or not. Disconnect the ones this session does not need, prefer
+   the platform's own CLI for the same job (the repository host's, the cloud's) over a server, and
+   use the tool's deferred-schema mode where it has one. Read the tool's own context report at the
+   start, so the standing cost is a number and not a feeling.
+
+7. **Deliver one recommendation, paste-ready.** One combination, one reason, and the exact way
    to start it in the user's tool: the launch flag, picker command, or settings path that tool
    uses for model and effort (look it up in the tool's own docs if unsure; for example, Claude
    Code takes `claude --model <model>` plus `/effort <level>` as the first input). No menu of
@@ -65,7 +71,9 @@ If the running session's model turns out too small, do not advise switching mode
 the switch drops the per-model cache and the full history is re-read at full price. The correct
 move is the `checkpoint` skill (flush the handoff to STATE.md), then clear the context, then
 restart with the right model via this method. Wrong calibration costs one restart; a
-mid-session switch costs the whole context twice.
+mid-session switch costs the whole context twice. The same holds for everything else that
+invalidates the cache wholesale: connecting or disconnecting a tool server, toggling a plugin,
+changing the effort level. Each belongs at a session boundary, decided here.
 
 ## Relation to the rest of the system
 

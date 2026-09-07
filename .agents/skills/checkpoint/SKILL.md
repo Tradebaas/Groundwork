@@ -33,6 +33,24 @@ degrades and the handoff turns lossy. Suggest, do not force, and never clear the
 user's behalf. A tool that supports lifecycle hooks can surface this reminder automatically once
 context crosses the threshold; such a hook only ever suggests.
 
+## Cheaper than a checkpoint, and what costs more
+
+A checkpoint is the middle of a ladder, and the rungs below it are free:
+
+- Keep the log out of the context. A test run, a build or a log enters the conversation as its
+  counts and its failures (the shell's tail and grep, or a subagent that reads it and returns two
+  lines), never whole. File reads dominate a long session; read the range, not the file.
+- Rewind instead of summarizing when a path is abandoned: going back to the turn before it keeps
+  the cached prefix, while a summary throws the cache away and keeps the dead end in it.
+- When the tool offers manual compaction, do it at a natural break with an instruction, and say
+  what survives: the files changed this session, the commands that run the checks and tests, and
+  the Now line. The tool's automatic summary keeps what it finds important, not what you do.
+- After two failed corrections on the same problem, a fresh session that starts from what was
+  learned, written down, beats a third attempt in a context full of the first two.
+- Nothing mid-session that invalidates the cache wholesale: a model or effort switch, a tool
+  server connected or disconnected, a plugin toggled. Each re-reads the whole history at full
+  price, so each belongs at a session boundary (`calibrate`).
+
 ## The method (do it from context you already have; do not re-read the repo)
 
 The whole point is to spend few tokens. Write from what is already in this conversation. Only

@@ -24,6 +24,9 @@ Run the full chain and paste real results, not summaries of results:
   explained and traced to a rule before the criterion counts as met.
 - Probe the edges the criteria imply: empty input, wrong input, unauthorized user, the second
   run (idempotency), the slow path. The first bug is usually one step off the happy path.
+- Run the long things at arm's length. A test run, a build or a log enters the context as its
+  counts and its failures (tail, grep, or a subagent that reads it and returns two lines), so the
+  transcript carries the conclusion and not the log; the full output stays on disk for the report.
 - User-facing output → also run `design-guard` on what rendered. A built interface gets re-checked
   against its direction contract and the finish verdict; a document, e-mail, export or error
   string gets judged there in full, because the design method does not carry those.

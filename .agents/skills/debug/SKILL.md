@@ -21,7 +21,9 @@ beats diagnosis under fire), then run this loop calmly.
    bumps, config or environment changes. `git bisect` beats rereading the whole system.
 4. **Hypothesize, test one change at a time.** Rank hypotheses by likelihood and cost of
    testing; each experiment changes exactly one thing and names its predicted outcome before
-   running. Two simultaneous changes make the result unreadable. Expect horses, not zebras:
+   running. Two simultaneous changes make the result unreadable. Read the evidence at arm's
+   length: a failing suite or a log enters the context as its failures and counts (tail, grep, or
+   a subagent), never whole, or the third experiment runs in a context the first two filled. Expect horses, not zebras:
    the common cause outranks the exotic one until evidence says otherwise.
 5. **Fix the root cause, once.** The fix goes where the cause lives, not where the symptom
    showed (decision ladder: understand, then fix the cause once). A symptom patch that leaves
