@@ -56,8 +56,9 @@ what, impact, cause, fix, what now detects it earlier. No blame, no essay.
 
 ## Periodic audit (quarterly, or before major phases)
 
-One focused pass: security posture, compliance register still current (`comply`), retention
-honored while running (the oldest record per purpose sits inside its period, and the deletion
+One focused pass: security posture, compliance register still current (`comply`), the specs at
+`done` read against the running product (a criterion the product no longer meets reopens its spec;
+the record never outranks the code), retention honored while running (the oldest record per purpose sits inside its period, and the deletion
 job actually ran), backup restore proven again (a restore you haven't run this quarter is a
 rumor), unused code/deps (stack dead-code tooling), skill library still curated, STATE.md log
 rotated.
