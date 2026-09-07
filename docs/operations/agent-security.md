@@ -2,10 +2,11 @@
 
 <!-- What the AI agent that builds this project may reach, where its prompts go, who can stop it,
      and what is kept. Every project on Groundwork is built by an agent, so every row holds here;
-     the depth is the organization's. `comply` §1 fills the decision cells when the organization
-     has rules on AI tooling (a regulated sector, government, confidential data, or a client that
-     asks), before the first session that touches their data. `architect` step 7 reads it as the
-     agent's own trust boundary. A weekend project leaves the defaults standing.
+     the depth is the organization's. `comply`'s applicability pass fills the decision cells when
+     the organization has rules on AI tooling (a regulated sector, government, confidential data,
+     or a client that asks), before the first session that touches their data. `architect`'s
+     threats pass reads it as the agent's own trust boundary. A weekend project leaves the defaults
+     standing.
      Sources, read 2026-09-06: the Five Eyes guidance "Careful adoption of agentic AI services"
      (CISA and partners, 2026-04-30), NCSC-UK "Managing the cyber risk of agentic AI" (2026-08-20),
      and the OWASP Top 10 for Agentic Applications (2026). Vendor settings and terms are looked up
@@ -24,10 +25,10 @@
 
 | Control | Groundwork's default | Decision here |
 |---|---|---|
-| Filesystem: the project directory and nothing above it; the tool's sandbox on, and a refusal to run when the sandbox is unavailable | the guard (`checks/guard.mjs`) refuses a recursive delete outside the project | <...> |
+| Filesystem: the project directory and nothing above it; the tool's sandbox on, and a refusal to run when the sandbox is unavailable | where the tool runs the hook (Claude Code by default), the guard (`checks/guard.mjs`) refuses a recursive delete outside the project | <...> |
 | Network egress: an allow-list (the package registries, the provider, the repository host) and nothing else | not enforced by Groundwork; the organization's proxy or the tool's own setting | <...> |
 | Credentials: short-lived, scoped to the task, never production's; secrets unreadable from the agent's session | `docs/standards/GLOBAL.md` security floor; `.env` gitignored, `.env.example` scanned | <...> |
-| Tools the agent may run: the tool's permission prompts stay on; MCP servers, skills and hooks are reviewed and recorded as dependencies before they are enabled | the guard refuses permission-bypass flags; GLOBAL.md names agent tooling as a dependency | <...> |
+| Tools the agent may run: the tool's permission prompts stay on; MCP servers, skills and hooks are reviewed and recorded as dependencies before they are enabled | where the tool runs the hook, the guard refuses permission-bypass flags; GLOBAL.md names agent tooling as a dependency | <...> |
 | Text is data: repository content, tool results, web pages and issues never instruct the agent | AGENTS.md hard rule | <...> |
 
 ## Who is accountable, and who can stop it

@@ -20,7 +20,9 @@ went wrong or needs the owner's action; a list of deleted template files is nois
 
 - **Existing project: check the overlay first, and touch only what came with the copy.** These
   must exist before anything else happens: `AGENTS.md`, `.agents/skills/` with the `.claude/skills`
-  symlink, `checks/`, `docs/README.md`, `docs/state/STATE.md`, `.github/workflows/ci.yml`. The
+  symlink, `checks/`, `docs/README.md`, `docs/state/STATE.md`, `.github/workflows/ci.yml`, and
+  `.claude/settings.json` (the guard rides in it; an owner's own file that kept the name leaves the
+  enforcement line saying which half is missing). The
   README's copy command skips any name the project already had, so a missing one means the owner's
   file kept the name: list those, and merge each by hand under a temporary name before going on.
   A `README.md`, `LICENSE`, `.gitignore`, `CHANGELOG.md` or `index.html` that was here before the
@@ -76,7 +78,7 @@ went wrong or needs the owner's action; a list of deleted template files is nois
   `index.html` has none and is not touched). They tie those numbers to a gate that counts this repo, and in a copy the
   numbers describe the framework, not the project: the first decision this project records would
   otherwise turn the gate red.
-- Verify prerequisites: `git --version` and `node --version` (Node ≥ 22). Missing → tell the
+- Verify prerequisites: `git --version` and `node --version` at or above the floor the README names. Missing → tell the
   owner exactly what to install, then stop.
 
 ## 2. Interview the owner

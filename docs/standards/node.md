@@ -19,7 +19,7 @@ this file adds only what is true of this stack. How the project is built and gov
 | `renders` | What a person actually sees is broken, unreadable or unusable | command | `npx -y impeccable@latest detect index.html` |
 
 On `behaves`: the drill unpacks a fresh copy, runs every gate suite inside it and walks it to a
-governed first commit. The sixteen suites also run one by one in the gate job, ahead of the checks
+governed first commit. The suites also run one by one in the gate job, ahead of the checks
 they prove, so a suite that stops running is a red build rather than a quiet gap.
 
 On `analyzed`, and stated as a gap rather than dressed up as an answer: that command runs this
