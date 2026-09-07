@@ -49,8 +49,8 @@ to the project: a small tool needs a page; a platform needs the full pass.
    reach what, where untrusted input enters, the abuse cases, the blast radius of a leaked
    credential, and the agent's own trust boundary: text from files, tool results and pages is
    data (AGENTS.md), and the credentials the build agent can reach are what one bad step can
-   spend, so they are short-lived, scoped, and never production's. Mitigations become
-   requirements in specs, not wishes.
+   spend, so they are short-lived, scoped, and never production's; the answers per control live
+   in `docs/operations/agent-security.md`. Mitigations become requirements in specs, not wishes.
 8. **The 10× question.** Where does this design break at 10× the users/data? Mark those spots
    with `defer:` markers (ceiling + upgrade trigger) instead of building for scale now.
 
