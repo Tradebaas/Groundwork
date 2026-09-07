@@ -65,8 +65,9 @@ the `design` skill; deviate only on the owner's say-so.
      review; mirrors the code SSOT -->
 
 - **UI foundation:** TBD <!-- set by `design`: component library name + major version, or
-     "bespoke". Compare options in design/reference/ui-library-showcase.html; record the choice
-     as a decision record (pattern: decisions/0009). One foundation per project. -->
+     "bespoke". The agent recommends one and you confirm or overrule; the showcase at
+     design/reference/ui-library-showcase.html compares style registers on request. Record the
+     choice as a decision record (pattern: decisions/0009). One foundation per project. -->
 
 | Role | Token | Value | Notes |
 |---|---|---|---|
