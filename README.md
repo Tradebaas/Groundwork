@@ -108,7 +108,10 @@ records the reasoning.
   docs manifest, link integrity, retired-fact denylist, file and source-code budgets, spec-ticket
   integrity, skill format, secrets, and more: zero model tokens spent. CI runs it on every push.
   A `commit-msg` hook adds the last link in the chain: every commit names the scope item it
-  serves, so a sha resolves back to a requirement instead of to someone's memory.
+  serves, so a sha resolves back to a requirement instead of to someone's memory. A pre-command
+  guard (`checks/guard.mjs`, wired for Claude Code, one hook away in any other tool) refuses the
+  handful of commands the rulebook forbids: a bypassed gate, a force-push, a discarded working
+  tree, a delete outside the project, a dropped table, a download piped into a shell.
   The checks test themselves: every gate has to prove it fails on a violation before it is
   trusted, and `.github/workflows/ci.yml` runs those suites ahead of the checks, because a gate
   that isn't tested is false confidence. The copy route is tested the same way: on every push,
