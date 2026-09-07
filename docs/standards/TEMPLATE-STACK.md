@@ -28,7 +28,9 @@ Three answer forms, and no fourth:
   answer goes under the table, where the reader has room and the parser does not look.
   The gate finds the pipeline itself on the hosts this framework has met (`.github/workflows/`,
   `.gitlab-ci.yml`, `azure-pipelines.yml`). On any other host, name yours once in this file's
-  header, as `**Pipeline:** <path>` beside the stack and the verified date, and it is read there.
+  header: the bold field `Pipeline` followed by the path in backticks, beside the stack and the
+  verified date. It has to be a path inside this project, and it cannot be this file: a contract
+  that proves itself proves nothing.
 - **`not applicable`** - plus the reason. Use it when the class genuinely cannot apply here, never
   when it is merely inconvenient.
 - **`manual`** - plus the named check and who runs it, and a `defer:` marker at the site. This is
@@ -45,7 +47,7 @@ covers licences as well as holes: the SBOM lists them, and a checker with an all
 makes an unwanted licence fail the build. Under `renders`, an accessibility scan and a performance
 budget on the public surfaces belong beside the detector; two commands in one cell both have to run.
 
-`secrets` is answered with a command like every other class, which is why the worked column names
+`secrets` is answered with a command like every other class, which is why the worked answers name
 Groundwork's own gate rather than describing it: that gate is four patterns, run before a commit
 and again in CI. On a coded stack it needs this stack's file extensions added to
 `extraCodeExtensions` in `checks/config.json`; on a configured platform it reads the unpacked

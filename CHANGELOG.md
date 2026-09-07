@@ -31,9 +31,11 @@ A stage now counts wherever it actually runs. The floor table asks how each of t
 is checked, and until now only a GitHub Actions workflow could answer it: a project on Azure
 Pipelines or GitLab got either silence or a refusal naming stages that were already running. The
 gate reads whichever pipeline your project has (`.github/workflows/`, `.gitlab-ci.yml`,
-`azure-pipelines.yml`), and any other host is named once in your stack file's header, as
-`**Pipeline:** <path>`. When it finds no pipeline at all, it says so and says where it looked,
-because a class nobody checks is not something to be quiet about. The worked platform column in
+`azure-pipelines.yml`), and any other host is named once in your stack file's header, in a
+`Pipeline` field holding the path. When it finds no pipeline at all, or the path you named holds
+nothing it can read, it says which of the two happened and where it looked, because a class nobody
+checks is not something to be quiet about. The path has to be inside your project and cannot be
+the stack file itself: a contract that proves itself proves nothing. The worked platform column in
 `docs/standards/TEMPLATE-STACK.md` was walked end to end against the gate and two answers in it
 were not satisfiable as written; both are fixed.
 

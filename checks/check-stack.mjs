@@ -24,8 +24,8 @@
 // false confidence this whole epic exists to remove, and the honest limit is written into the
 // epic rather than discovered later.
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { join, sep } from 'node:path';
 
 // A stack file is any standards document that is not the cross-stack floor and not a template:
 // `stack` section 2 writes exactly one, named for the stack (docs/standards/<stack>.md).
@@ -91,44 +91,84 @@ const runsAll = (answer, live) => {
 // because the declared path below is what makes the length of this list stop mattering.
 const KNOWN_PIPELINES = ['.github/workflows', '.gitlab-ci.yml', 'azure-pipelines.yml', 'azure-pipelines.yaml'];
 
-// The one stated place a project names a host nobody here has met: the stack file's header field,
-// beside the stack, the platform and the verified date. `**Pipeline:** <path>` and nothing else.
-// The path is project text, so it is held to the project: an absolute path or one that climbs out
-// of the tree is not a pipeline this gate will read, and reads as no declaration at all.
-const declaredPipeline = (text) => {
-  const m = text.match(/\*\*Pipeline:\*\*\s*(.+)/);
-  if (!m) return null;
-  const rel = m[1].split('·')[0].replace(/[`*]/g, '').trim().replace(/\/+$/, '');
-  if (!rel || rel.startsWith('/') || rel.split('/').includes('..')) return null;
-  return rel;
-};
+// The one stated place a project names a host nobody here has met: a bold field on a metadata
+// line of the stack file, with the path in backticks. Both halves of that shape are load-bearing.
+// The line has to start as a field rather than a sentence, and the path has to be backticked, so
+// that prose naming the field - which the template and the `stack` skill both carry, and which a
+// builder keeps when filling the file in - reads as the instruction it is and not as a path.
+const PIPELINE_FIELD = /^[-*]?\s*(?=\*\*)[^\n]*?\*\*Pipeline:\*\*\s*`([^`\n]+)`/m;
+const declaredPipeline = (text) => (text.match(PIPELINE_FIELD) || [])[1] || null;
 
-// A pipeline location is a file or a directory of them, and both are named the same way, so one
-// resolver reads either. Anything unreadable resolves to nothing: the gate below then says the
-// class is unproven and where it looked, which is the honest answer to a path it cannot open.
-function pipelineFilesAt(root, rel) {
-  const abs = join(root, rel);
-  if (!existsSync(abs)) return [];
+// A path resolved inside the project, or nothing. It resolves before it trusts, because a textual
+// guard is not containment: `..` spelled with a backslash is not a `..` to a slash split, and a
+// symlink walks out of the tree whatever the string looked like. Comparing real path against real
+// path is what holds, and the project's own root is resolved too (on macOS the temporary
+// directory a test runs in sits behind /var -> /private/var, so an unresolved root never matches).
+function insideProject(home, rel) {
   try {
-    if (!statSync(abs).isDirectory()) return [rel];
-    return readdirSync(abs).filter((n) => /\.ya?ml$/.test(n)).sort().map((n) => `${rel}/${n}`);
+    const abs = realpathSync(join(home, rel));
+    return abs === home || abs.startsWith(home + sep) ? abs : null;
+  } catch { return null; }
+}
+
+// A pipeline location is a file or a directory of them, named the same way, so one resolver reads
+// either. Only a plain file counts: a device file passes "not a directory" and then blocks the
+// gate forever on the read. Anything unreadable resolves to nothing, and the gate below then says
+// the class is unproven and where it looked, which is the honest answer to a path it cannot open.
+function pipelineFilesAt(home, rel) {
+  const abs = insideProject(home, rel);
+  if (!abs) return [];
+  try {
+    const st = statSync(abs);
+    if (st.isFile()) return [rel];
+    if (!st.isDirectory()) return [];
+    return readdirSync(abs).filter((n) => /\.ya?ml$/.test(n)).sort()
+      .filter((n) => {
+        const entry = insideProject(home, `${rel}/${n}`);
+        return entry !== null && statSync(entry).isFile();
+      })
+      .map((n) => `${rel}/${n}`);
   } catch { return []; }
 }
 
 // One derivation of where this project's pipeline lives, for the refusal and the count alike.
-// Before S-04 this was a single hard-coded `.github/workflows/`, and the gate returned early when
-// it was absent: a second place where entitlement was decided, and the escape hatch that let the
-// refusal and the count disagree about the same project. It reports where it looked as well as
-// what it found, because a refusal a builder cannot act on is the same as silence.
-function pipelinePaths(root, texts = []) {
-  const declared = [...new Set(texts.map(declaredPipeline).filter(Boolean))];
-  const looked = [...new Set([...KNOWN_PIPELINES, ...declared])];
-  // A declared path that resolves to nothing is a different mistake from having no pipeline at
-  // all, and it is the builder's own typo rather than a host this gate has not met. Named
-  // separately below, because "nowhere I know to look" would send them to fix the wrong thing.
-  const missing = declared.filter((rel) => !pipelineFilesAt(root, rel).length);
-  return { looked, declared, missing, files: looked.flatMap((rel) => pipelineFilesAt(root, rel)) };
+// Entitlement used to be decided a second time, by a `.github/workflows/` check that returned
+// early: that is the escape hatch that let the refusal and the count disagree about one project.
+// It reports what it could not read as well as what it found, because a refusal a builder cannot
+// act on is the same as silence.
+function pipelinePaths(root, stacks) {
+  const looked = KNOWN_PIPELINES;
+  let home;
+  try { home = realpathSync(root); } catch { return { looked, unusable: [], files: [] }; }
+  // A stack file is not a pipeline. A project naming its own contract as the thing that proves it
+  // would have every command proven by the very table that claims them, which is self-proof in one
+  // line of project text. What this gate still cannot judge is whether a real pipeline file tells
+  // the truth; that limit is the module header's, and it is unchanged.
+  const contracts = new Set(stacks.map((f) => f.rel));
+  const declared = [...new Set(stacks.map((f) => declaredPipeline(f.text)).filter(Boolean))];
+  const resolved = new Map(declared.map((rel) => [rel, contracts.has(rel) ? [] : pipelineFilesAt(home, rel)]));
+  const files = [...new Set([
+    ...looked.flatMap((rel) => pipelineFilesAt(home, rel)),
+    ...declared.flatMap((rel) => resolved.get(rel)),
+  ])];
+  return { looked, unusable: declared.filter((rel) => !resolved.get(rel).length), files };
 }
+
+// Where this gate looked, said once for both halves of the refusal below. A declared path that
+// gave nothing is named on its own: that is the builder's own path, not a host nobody taught this
+// gate, and sending them to declare what they already declared is the same as silence.
+const whereItLooked = (p) => [
+  p.files.length
+    ? `read: ${p.files.join(', ')}`
+    : `this project has no pipeline anywhere this gate knows to look (${p.looked.join(', ')})`,
+  p.unusable.length
+    ? `the stack file declares \`**Pipeline:** ${p.unusable.join('`, `')}\` and there is nothing `
+      + 'this gate can read there'
+    : '',
+].filter(Boolean).join('; ');
+
+const WIRE_IT = 'Wire the stage, or name your pipeline in the stack file header as `**Pipeline:**` '
+  + 'with the path in backticks, or change the answer to the form that is true.';
 
 // The one read of the contract: which stack files this project declares, what each one's floor
 // table says, where this project's pipeline lives, and which of its lines are live to answer the
@@ -143,7 +183,7 @@ export function readFloors(root, lines) {
     const text = lines(join(standards, name)).join('\n');
     return { rel: `docs/standards/${name}`, text, rows: floorRows(text) };
   });
-  const pipelines = pipelinePaths(root, files.map((f) => f.text));
+  const pipelines = pipelinePaths(root, files);
   const live = pipelines.files.flatMap((rel) => liveLines(lines(join(root, rel))));
   return { live, files, pipelines };
 }
@@ -186,14 +226,7 @@ export const stackChecks = ({ root, fail, lines }) => ({
     // it declares a stack, whatever host runs its pipeline. Whether CI exists at all stays
     // enforcement.mjs's report to make. One fact, one place.
     const { live, files, pipelines } = readFloors(root, lines);
-    const looked = pipelines.looked.join(', ');
-    const nowhereToLook = pipelines.missing.length
-      ? `The stack file header declares \`**Pipeline:** ${pipelines.missing.join('`, `')}\` and there is `
-        + 'nothing this gate can read at that path, so nothing proves it: correct the path, or wire '
-        + 'the stage, or change the answer to the form that is true.'
-      : `This project has no pipeline anywhere this gate knows to look (${looked}), `
-        + 'so nothing proves it: wire the stage, or name your pipeline in the stack file header as '
-        + '`**Pipeline:** <path>`, or change the answer to the form that is true.';
+    const looked = whereItLooked(pipelines);
     for (const { rel, text, rows } of files) {
       if (!rows) {
         fail(`${rel} declares a stack and carries no floor table, so nothing says how this project's own code is checked. Copy the table from docs/standards/TEMPLATE-STACK.md and answer all six classes: ${CLASSES.join(', ')}.`);
@@ -217,9 +250,7 @@ export const stackChecks = ({ root, fail, lines }) => ({
           }
           for (const cmd of wanted) {
             if (isLive(cmd, live)) continue;
-            fail(pipelines.files.length
-              ? `${rel} answers \`${cls}\` with \`${cmd}\`, and no pipeline this project has runs it (read: ${pipelines.files.join(', ')}). A command nobody runs proves nothing: wire the stage, or change the answer to the form that is true.`
-              : `${rel} answers \`${cls}\` with \`${cmd}\`, and nothing runs it. ${nowhereToLook}`);
+            fail(`${rel} answers \`${cls}\` with \`${cmd}\`, and nothing runs it (${looked}). A command nobody runs proves nothing. ${WIRE_IT}`);
           }
         }
         if (row.form === 'manual') {
@@ -239,12 +270,7 @@ export const stackChecks = ({ root, fail, lines }) => ({
     // the tracked artifact the method writes, never by looking for the payload on disk.
     if (!existsSync(join(root, '.impeccable', 'config.json'))) return;
     if (!live.some(runsDetector)) {
-      const where = pipelines.files.length
-        ? `no pipeline this project has runs its detector (read: ${pipelines.files.join(', ')})`
-        : `nothing runs its detector: ${pipelines.missing.length
-          ? `the stack file header declares \`**Pipeline:** ${pipelines.missing.join('`, `')}\` and there is nothing this gate can read there`
-          : `this project has no pipeline anywhere this gate knows to look (${looked})`}`;
-      fail(`.impeccable/config.json declares the design method for this project, but ${where}, so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing. A host this gate does not know is named in the stack file header as \`**Pipeline:** <path>\`.`);
+      fail(`.impeccable/config.json declares the design method for this project, and nothing runs its detector (${looked}), so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing. ${WIRE_IT}`);
     }
   },
 });

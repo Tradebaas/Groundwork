@@ -60,6 +60,22 @@ export function expectFail(name, mutate) {
   rmSync(fx.root, { recursive: true, force: true });
 }
 
+// A gate that fired is not the same as a gate that said something a builder can act on. Where the
+// message is the point of the change, the test asserts the message: without this, a whole branch
+// of a refusal can be deleted with every expectFail still green.
+export function expectFailWith(name, mutate, pattern) {
+  const fx = fixture();
+  mutate(fx);
+  const found = runChecks(fx.root).filter((f) => f.check === name);
+  try {
+    assert.ok(found.length, `expected check "${name}" to fail, got none`);
+    assert.ok(found.some((f) => pattern.test(f.msg)),
+      `expected a "${name}" message matching ${pattern}, got: ${JSON.stringify(found.map((f) => f.msg))}`);
+    tally.passed++;
+  } catch (e) { tally.failed.push(`${name}: ${e.message}`); }
+  rmSync(fx.root, { recursive: true, force: true });
+}
+
 // Several tests need a config that differs from the fixture's in one key. One helper beats a
 // copy of the base object per test, and keeps each test's intent on one line.
 export const BASE_BUDGETS = { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024 };
