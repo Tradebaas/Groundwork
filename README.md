@@ -117,7 +117,10 @@ records the reasoning.
   that isn't tested is false confidence. The copy route is tested the same way: on every push,
   `node checks/drill.mjs` unpacks a fresh copy, walks it to a first governed commit and throws it
   away again, so the promise at the top of this file is checked by machine instead of asserted
-  (runbook: [docs/operations/evidence-drill.md](docs/operations/evidence-drill.md)). The same directory holds `node checks/progress.mjs`: a read-only, plain-language
+  (runbook: [docs/operations/evidence-drill.md](docs/operations/evidence-drill.md)). Under the checks' own output stand three lines the owner reads: which gates are armed on
+  this machine, how much of the project's own code they prove, and how many of the dated facts (the
+  compliance stamps, the stack file's source date, the last proven restore) are older than a
+  quarter. The same directory holds `node checks/progress.mjs`: a read-only, plain-language
   answer to "what is done and what is left", derived from the brief, the specs and the handoff,
   with `--all` covering every project you have started this way. Add `--serve` and the same
   answer opens as a small board on this machine only: the way in (the goal, the stand, the next

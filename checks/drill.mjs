@@ -35,7 +35,7 @@ const SUITES = [
   'check.test.mjs', 'check-code.test.mjs', 'check-trace.test.mjs', 'check-stack.test.mjs',
   'progress.test.mjs', 'progress-work.test.mjs', 'links.test.mjs', 'work.test.mjs',
   'board-path.test.mjs', 'board-server.test.mjs', 'board-nav.test.mjs', 'board.test.mjs',
-  'board-strip.test.mjs', 'board-file.test.mjs', 'guard.test.mjs',
+  'board-strip.test.mjs', 'board-file.test.mjs', 'guard.test.mjs', 'evidence.test.mjs',
 ];
 
 // begin's exact first commit, subject and trailer, from .agents/skills/begin/SKILL.md.
