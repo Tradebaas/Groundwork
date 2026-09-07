@@ -31,5 +31,12 @@ foundation and where its theme/token SSOT lives in code. One foundation per proj
 second library or building beside the chosen one requires a new decision record first. The
 showcase page is a hand-built impression for comparing style registers; current library facts
 (maintenance, license, stack fit) are always verified live via the `stack` skill before the
-decision. Easier now: owners choose with their eyes, and every project's UI traces to one
-recorded choice. Watch for: the showcase aging; refresh it when the ecosystem shifts.
+decision. Easier now: every project's UI traces to one recorded choice. Watch for: the showcase
+aging; refresh it when the ecosystem shifts.
+
+Amended 2026-09-07: what this record decided, exactly one recorded foundation per project, is
+unchanged; who does the comparing is. The agent now researches and recommends one foundation with
+its one real alternative, and the owner confirms or overrules; the showcase is opened on request
+rather than handed over as a ten-page comparison. Reason: the owner Groundwork is written for is
+not a designer, so "owners choose with their eyes" put the research on the person with the least
+basis to do it, and it was one of nine owner stops before any code existed.

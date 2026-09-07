@@ -24,7 +24,9 @@ accessibility needs) and points at the brief for scope, users and purpose: a fac
 both files is a fact that will disagree with itself later.
 
 No design method installed (a project that started without an interface, a failed install recorded
-in STATE.md)? Install it first. Everything below assumes it is there.
+in STATE.md)? Install it first. Everything below assumes it is there. When the install genuinely
+cannot happen, section 5 is the route that still builds, visibly degraded rather than silently
+worse.
 
 ## 1. Ask the owner: only what is theirs
 
@@ -43,26 +45,40 @@ for them twice would seed the answer before that round can do its work.
 
 ## 2. Choose the UI foundation: one source of truth for all UI
 
-Before anything is made, the owner picks exactly one foundation this project's UI is built on. It
-stays a Groundwork decision, made here, that the method then builds within.
+Before anything is made, exactly one foundation is fixed for this project's UI. It stays a
+Groundwork decision, made here, that the method then builds within.
 
-- **A component library, themed with the owner's brand.** Open
-  `docs/design/reference/ui-library-showcase.html` in a browser together: one page per library
-  (shadcn/ui, Material UI, Chakra UI, Magic UI, Aceternity UI, Nyxhora UI, React-Bootstrap,
-  React Bits, Mantine, HeroUI) plus the bespoke option, each with the same live, working
-  components so the owner compares style registers fairly.
-- **A bespoke system.** No library: the project's own tokens and components. Right when the look is
-  part of the product's value, the brand requirements are strong, or the owner wants zero UI
-  dependencies. The owner can also hand over their own ideas, references, or existing UI code.
+**You recommend one; the owner confirms or overrules.** Comparing ten libraries is a designer's
+job, and the owner Groundwork is written for is not one: handing over a ten-page showcase moves the
+research onto the person with the least basis to do it. So do the research and arrive with a
+recommendation:
+
+1. Read the stack, the brief and the brand reality from step 1. Verify the candidate's current
+   maintenance, licence and accessibility from its official docs (live, never model memory; that
+   is `stack` skill territory).
+2. Recommend **one** foundation in a short paragraph: what it is, why it fits this product, and
+   what it costs. Name the one real alternative beside it, per `critical-thinking`, and say what
+   would have to be true to prefer it. Bespoke is the named alternative to every library, and
+   vice versa.
+3. Say in one line that the showcase exists and that you will open it on request:
+   `docs/design/reference/ui-library-showcase.html` holds one page per library (shadcn/ui,
+   Material UI, Chakra UI, Magic UI, Aceternity UI, Nyxhora UI, React-Bootstrap, React Bits,
+   Mantine, HeroUI) plus the bespoke option, each with the same live components. An owner who
+   wants to compare style registers themselves gets it; nobody is required to.
+
+**The two shapes** the recommendation picks between: a **component library** themed with the
+owner's brand, or a **bespoke system** of the project's own tokens and components. Bespoke is
+right when the look is part of the product's value, the brand requirements are strong, or the
+owner wants zero UI dependencies; the owner can also hand over their own ideas, references or
+existing UI code, which is binding input rather than a candidate.
 
 Rules for this step:
 
 - The foundation is an expensive-to-reverse choice: run the `critical-thinking` moves before
-  recommending one. Bespoke is the named alternative to every library, and vice versa.
+  recommending one, not after the owner has agreed.
 - The stack constrains the menu. The showcase's ten are React-centric; for another stack,
-  research equivalents live (that is `stack` skill territory, never model memory). Verify the
-  candidate's current maintenance, license, and accessibility from its official docs before
-  deciding; the showcase shows style registers, not current facts.
+  research equivalents live. The showcase shows style registers, not current facts, which is the
+  other reason the research cannot be delegated to it.
 - The owner's brand always sits on top: the library provides structure and behavior, the brand
   tokens flow in through the library's theming layer (or the token file, if bespoke).
 - Record the choice as a decision record (see `docs/decisions/0009-ui-foundation-choice.md`). It
@@ -127,13 +143,14 @@ The owner decides at three points, in this order. This is the order of work:
    table with open findings is never handed back as a pass, and never summarized into one. Whether
    to fund another round or ship as it stands is the owner's call.
 
-   **Where the reviewer comes from on this harness.** The method ships native reviewer definitions
-   for Copilot and Cursor only; measured on a clean install, 2026-08-07, a Claude Code install
-   writes no agent definitions at all, so `impeccable-finish-reviewer` is not a name this harness
-   can spawn. Spawn a fresh subagent instead and hand it
-   `.agents/skills/impeccable/reference/degraded/finish-reviewer.md` as its brief, together with the
-   input packet that reference asks for. That keeps what the point is for, a reviewer with none of
-   the build thread in its context, and it is disclosed to the owner in one line at finish.
+   **Where the reviewer comes from.** What this point is for is a reviewer with none of the build
+   thread in its context; which agent the method can spawn is the method's own business and changes
+   between its releases, so this skill does not restate it. Use the reviewer the installed method
+   names if it can be spawned here. If it cannot, spawn a fresh subagent, hand it the method's own
+   finish-reviewer brief (look it up in the payload rather than from a path written here) plus the
+   input packet that brief asks for, and disclose in one line at finish which of the two ran.
+   Measured on the pinned release, 2026-08-07: a Claude Code install wrote no agent definitions, so
+   the second route is the live one here.
 
 An addition inside a surface that already exists inherits that surface: it is not a new identity
 exercise, and it does not run this round again.
@@ -148,4 +165,30 @@ mechanical checks validate against.
 Done means: VOICE.md filled and DESIGN.md section 3 written from the build (TEMPLATE markers
 removed), tokens in code, decision records for the UI foundation and for any direction that
 replaced the owner's standing taste, the finish verdict reported with its open items, and STATE.md
-updated. Owner answers captured verbatim where wording matters. ⚓
+updated. Owner answers captured verbatim where wording matters.
+
+## 5. When the method is unavailable: the degraded route
+
+The method is one package from one maintainer, so it can genuinely be missing: npm unreachable,
+the pinned version gone, a Node floor this machine cannot meet, an install that refuses. The
+brief's rule is that a capability which cannot degrade visibly does not get built, so this is
+that degradation, written down before it is needed. Say in one line that you are on this route
+and why, record it in STATE.md, and build on:
+
+- **The rulebook**: `docs/DESIGN.md` section 1 (the ten principles, as a floor) and section 2
+  (the owner's standing taste, as the seed), plus both floors in `design-guard` section 1,
+  accessibility and reduced motion. The method builds on top of these anyway. Without it you have
+  the floor without the craft: plainer, and still not allowed to be inaccessible or ugly by
+  default.
+- **The three owner stops stay**, in the same order, at lower fidelity. Direction: two or three
+  written directions, each with a palette and one flat SVG viewport, and the owner picks; there is
+  no external roll, so name the category default explicitly and make sure one candidate is not it.
+  Compositions: flat SVG, approved before code is written. Finish: a fresh subagent that never saw
+  the build thread scores the result against the rulebook above and the story's acceptance
+  criteria, and its table is reported as it stands, open items intact. Dropping a stop is what
+  turns a degraded build into an unrecoverable one, because the owner never saw the choice.
+- **Not attempted, and said so**: the derived visual worlds, the detector, the method's own review
+  passes. Record in DESIGN.md section 3 that this surface was built on the degraded route, so a
+  later session can offer a re-run through the full method instead of assuming one happened.
+
+A surface built this way is finished work, not a draft. It is re-run only if the owner asks. ⚓

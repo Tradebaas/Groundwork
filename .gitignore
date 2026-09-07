@@ -19,8 +19,9 @@ dist/
 build/
 coverage/
 
-# The design method (impeccable) is installed per project at its current release, never
-# vendored: `node checks/design-method.mjs --install` puts it here, `maintain` refreshes it.
+# The design method (impeccable) is installed per project at the version pinned in
+# checks/config.json, never vendored: `node checks/design-method.mjs --install` puts it
+# here, and `maintain` is the only route that moves the pin.
 .agents/skills/impeccable/
 
 # The block below is impeccable's own, copied from its README (v3.5.0, "Keeping .impeccable out
