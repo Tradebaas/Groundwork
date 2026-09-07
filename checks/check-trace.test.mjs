@@ -166,6 +166,8 @@ expectMsgFail('commit-style-typography', 'feat(checks): add a thing\n\nA body \u
 expectMsgFail('commit-style-phrase', 'feat(checks): add a thing\n\nLet us delve into why.\n\nTraces-to: SC-1\n', SCOPED, 'commit-style');
 expectMsgClean('commit-style-quoted-source', 'feat(checks): add a thing\n\nThe owner wrote "done \u2014 ship it" checks:allow-style\n\nTraces-to: SC-1\n');
 expectMsgClean('commit-style-plain', 'feat(checks): add a thing\n\nA plain body that says why, with no tells.\n\nTraces-to: SC-1\n');
+// Naming the tell is not using it: the commit that bans a phrase says which one, in quotes.
+expectMsgClean('commit-style-names-a-tell', 'feat(checks): ban a verb\n\nThe verb "delve" joins the style bans.\n\nTraces-to: SC-1\n');
 expectMsgFail('commit-trace-empty', 'feat(checks): add a thing\n\nTraces-to:\n');
 expectMsgFail('commit-trace-placeholder', 'feat(checks): add a thing\n\nTraces-to: <SC-id>\n');
 expectMsgFail('commit-trace-tbd', 'feat(checks): add a thing\n\nTraces-to: TBD\n');
