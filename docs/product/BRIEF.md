@@ -20,7 +20,7 @@
   default look, and claims "done" without evidence. The builder carries that risk personally:
   rework, quality no serious client would accept, and no trail anyone can audit a year later.
 - **Owner (decides scope):** Remon Panman
-- **Target & stack:** plain Markdown, a dependency-free Node check script (Node >= 22), git
+- **Target & stack:** plain Markdown, a dependency-free Node check script (the Node floor the README names), git
   hooks, GitHub Actions for CI and GitHub Pages for the explainer. Vendor-neutral on two open
   standards: AGENTS.md for the rulebook and Agent Skills for the method library.
 

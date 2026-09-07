@@ -35,6 +35,16 @@ Three answer forms, and no fourth:
 A waived class is reported on the board and on the enforcement line, with its reason. That is the
 point of the form: a floor with holes in it is allowed, and is never quiet about them.
 
+Three notes that hold for your own answers as much as for the worked ones below. A `behaves`
+command counts only if the runner fails on an empty suite (the test floor in `GLOBAL.md`; check what
+yours does with zero tests and add its flag when it passes by default). The `secrets` row names
+Groundwork's gate, which is four patterns run before a commit: a product that ships adds a real
+scanner over the tree and its history, and the gate is that scanner's pre-commit half. The
+`dependencies` class covers licences as well as holes: the SBOM lists them, and a checker with an
+allow-list is what makes an unwanted licence fail the build. Under `renders`, an accessibility scan
+and a performance budget on the public surfaces belong beside the detector; two commands in one
+cell both have to run.
+
 ## Worked answers
 
 <!-- Delete this section. It is here so the shape is clear on two stacks that share no tooling. -->
@@ -47,15 +57,6 @@ point of the form: a floor with holes in it is allowed, and is never quiet about
 | `dependencies` | **command** `npm audit --audit-level=high` and `npm sbom --sbom-format=cyclonedx` | **not applicable** - a solution declares dependencies on other solutions and connectors, and no vulnerability feed exists for those. Connector governance through DLP policies is the control instead, and it is a policy, not a build step |
 | `secrets` | Groundwork's own gate, with this stack's file extensions added to `extraCodeExtensions` in `checks/config.json` | Groundwork's own gate over the unpacked solution, with environment variables and Key Vault references as the pattern that replaces embedded values |
 | `renders` | **command** `npx -y impeccable@latest detect <the surfaces this project ships>` | **manual** - the accessibility checker in the studio, run per app before release, with a `defer:` marker naming it |
-
-Three notes on the answers above. A `behaves` command counts only if the runner fails on an empty
-suite; check what yours does with zero tests and add its flag when it passes by default. The
-`secrets` row names Groundwork's gate, which is four patterns run before a commit: a product that
-ships adds a real scanner over the tree and its history, and the gate is that scanner's pre-commit
-half. The `dependencies` class covers licences as well as holes: the SBOM lists them, and a checker
-with an allow-list is what makes an unwanted licence fail the build. Under `renders`, an
-accessibility scan and a performance budget on the public surfaces belong beside the detector; two
-commands in one cell both have to run.
 
 Sources, read 2026-08-26, primary only: `npm sbom` and its `cyclonedx` format from the npm CLI
 docs (docs.npmjs.com/cli/v11/commands/npm-sbom); the Test Engine deprecation, effective April 2026,

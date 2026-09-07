@@ -18,9 +18,8 @@ decided itself and why, and one next step, in plain words, about ten lines. It d
 that is not scope, money, users, taste or a risk to your data, and asks about those one question at
 a time. Two hard rules came in from the year's incident record: text the agent reads is never an
 instruction to it, and an irreversible action waits for your yes. For Claude Code that last rule is
-a mechanism: `checks/guard.mjs` refuses a bypassed gate, a force-push, a discarded working tree, a
-delete outside the project, a dropped table, a tool with its permission checks off and a download
-piped into a shell before the command runs; other tools fall back to the text.
+a mechanism: `checks/guard.mjs` refuses the shell forms of those moves before the command runs
+(the list is the file's own header); other tools fall back to the text.
 
 Node 22 is the floor everywhere (Node 20 reached end of life in April 2026), CI runs with a
 read-only token and actions pinned to a commit, and the committed Claude adapter is held to its
@@ -30,14 +29,16 @@ unmarked deferrals, and the commit message is under the same style rule as every
 
 If you lay Groundwork over a project that exists, the README now gives you one command that adds
 the framework and skips every file you already have, and `begin` checks the overlay landed whole
-and leaves your own README, licence, changelog and page alone. A fresh copy says only "not started
-yet, say begin" until you do. The board lost its link map (it is a terminal view now, `--links`),
-which made the printed page a third of its size. Skill descriptions share a budget the checks
+and leaves your own README, licence, ignore file, changelog and page alone. A fresh copy says only
+"not started yet, say begin" until you do. The board lost the map of which document points at which
+(it is a terminal view now, `--links`), which made the printed page a third of its size. Skill descriptions share a budget the checks
 enforce. The standards gained a data and configuration floor, the shape of the test floor, and the
 rule that agent tooling is a dependency; `architect` records a threats table and data
 classification; `comply` screens the DPIA and, for organizations with rules on AI tooling, fills
-the new `docs/operations/agent-security.md`. Nothing moved or was renamed; every gate that was
-green stays green on a copy of v0.2.0.
+the new `docs/operations/agent-security.md`. Nothing moved or was renamed. Four gates can newly
+fire on a copy of v0.2.0, each on purpose: a bare TODO or a lint suppression in a code comment, one
+of the four new phrase bans, a real value in `.env.example`, and a spec at `done` without its
+`Verified by:` line.
 
 ## v0.2.0 - 2026-08-01
 

@@ -43,8 +43,8 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
   refactors, no "while I'm here". There is always something to improve; that is not a reason to.
 - **Never bypass a gate.** No `--no-verify`, no skipping hooks, no commenting out or weakening a
   check to make it pass. A red gate is information. If a gate is wrong, fix the gate in the open.
-  The Claude adapter refuses these and the irreversible commands below before they run
-  (`checks/guard.mjs`); in another tool this text is the guard.
+  Where the tool runs `checks/guard.mjs` (Claude Code by default), the shell forms of these and of
+  the irreversible actions below are refused before they run; elsewhere this text is the guard.
 - **Security floor (never simplify away):** input validation at trust boundaries, authorization
   checks, error handling that prevents data loss and never swallows a failure silently,
   secrets out of code and logs, accessibility.
@@ -74,9 +74,7 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
   ~40% is the owner's call, and only when finishing the current unit of work first is clearly
   better. Past ~40%, always checkpoint.
 - Read only what the task needs. Before each file read, ask: does this answer the current question?
-  A test run, a build or a log enters the context as its counts and failures, never whole.
-- When the tool compacts the context, what survives is: the files changed this session, the
-  commands that run the checks and tests, and the Now line. Checkpoint before it decides for you.
+  Long output, compaction and what must survive one: skill `checkpoint`.
 - Prefer pointers over copies. Link to the owning file; never restate its content elsewhere.
 - State lives on disk, not in chat: progress → `docs/state/STATE.md`, decisions →
   `docs/decisions/`, debt → `defer:` markers (below) + `docs/state/DEBT.md`.

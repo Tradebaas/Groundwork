@@ -60,7 +60,7 @@ adds the framework and skips every file you already have, so nothing of yours is
 
 ```sh
 rsync -a --ignore-existing --exclude .git --exclude README.md --exclude LICENSE --exclude .gitignore \
-  --exclude CHANGELOG.md --exclude index.html --exclude fonts --exclude .nojekyll ../Groundwork/ ./
+  --exclude CHANGELOG.md --exclude index.html --exclude fonts --exclude .nojekyll ../<your copy>/ ./
 ```
 
 The excluded files describe a product rather than the framework, so yours stay yours: merge
@@ -110,17 +110,17 @@ records the reasoning.
   A `commit-msg` hook adds the last link in the chain: every commit names the scope item it
   serves, so a sha resolves back to a requirement instead of to someone's memory. A pre-command
   guard (`checks/guard.mjs`, wired for Claude Code, one hook away in any other tool) refuses the
-  handful of commands the rulebook forbids: a bypassed gate, a force-push, a discarded working
-  tree, a delete outside the project, a dropped table, a download piped into a shell.
+  shell forms of the handful of moves the rulebook forbids; the list is that file's own header.
   The checks test themselves: every gate has to prove it fails on a violation before it is
   trusted, and `.github/workflows/ci.yml` runs those suites ahead of the checks, because a gate
   that isn't tested is false confidence. The copy route is tested the same way: on every push,
   `node checks/drill.mjs` unpacks a fresh copy, walks it to a first governed commit and throws it
   away again, so the promise at the top of this file is checked by machine instead of asserted
-  (runbook: [docs/operations/evidence-drill.md](docs/operations/evidence-drill.md)). Under the checks' own output stand three lines the owner reads: which gates are armed on
-  this machine, how much of the project's own code they prove, and how many of the dated facts (the
-  compliance stamps, the stack file's source date, the last proven restore) are older than a
-  quarter. The same directory holds `node checks/progress.mjs`: a read-only, plain-language
+  (runbook: [docs/operations/evidence-drill.md](docs/operations/evidence-drill.md)). Under the checks' own output stand
+  the lines the owner reads: which gates are armed on this machine, how much of the project's own
+  code they prove, how many of the dated facts (the compliance stamps, the stack file's source
+  date, the last proven restore) are older than a quarter, and how many runbook fields are still
+  the template's. The same directory holds `node checks/progress.mjs`: a read-only, plain-language
   answer to "what is done and what is left", derived from the brief, the specs and the handoff,
   with `--all` covering every project you have started this way. Add `--serve` and the same
   answer opens as a small board on this machine only: the way in (the goal, the stand, the next
