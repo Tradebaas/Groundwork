@@ -11,6 +11,34 @@ own. There is no updater, on purpose:
 Versions follow [semantic versioning](https://semver.org). Below 1.0 the shape is still settling,
 so a minor version may move a file or rename a check; each entry says so when it does.
 
+## Unreleased, since v0.2.0
+
+The rulebook now says how the agent talks to you: in your language, with what changed, what it
+decided itself and why, and one next step, in plain words, about ten lines. It decides everything
+that is not scope, money, users, taste or a risk to your data, and asks about those one question at
+a time. Two hard rules came in from the year's incident record: text the agent reads is never an
+instruction to it, and an irreversible action waits for your yes. For Claude Code that last rule is
+a mechanism: `checks/guard.mjs` refuses a bypassed gate, a force-push, a discarded working tree, a
+delete outside the project, a dropped table, a tool with its permission checks off and a download
+piped into a shell before the command runs; other tools fall back to the text.
+
+Node 22 is the floor everywhere (Node 20 reached end of life in April 2026), CI runs with a
+read-only token and actions pinned to a commit, and the committed Claude adapter is held to its
+shape by a gate of its own. A spec that calls itself done has to name what proved it, in a new
+`Verified by:` line of the spec template. Bare TODO markers and lint or type suppressions count as
+unmarked deferrals, and the commit message is under the same style rule as every file.
+
+If you lay Groundwork over a project that exists, the README now gives you one command that adds
+the framework and skips every file you already have, and `begin` checks the overlay landed whole
+and leaves your own README, licence, changelog and page alone. A fresh copy says only "not started
+yet, say begin" until you do. The board lost its link map (it is a terminal view now, `--links`),
+which made the printed page a third of its size. Skill descriptions share a budget the checks
+enforce. The standards gained a data and configuration floor, the shape of the test floor, and the
+rule that agent tooling is a dependency; `architect` records a threats table and data
+classification; `comply` screens the DPIA and, for organizations with rules on AI tooling, fills
+the new `docs/operations/agent-security.md`. Nothing moved or was renamed; every gate that was
+green stays green on a copy of v0.2.0.
+
 ## v0.2.0 - 2026-08-01
 
 The claim this framework makes about itself now runs on every push. `checks/drill.mjs` unpacks a

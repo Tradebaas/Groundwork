@@ -1,6 +1,6 @@
 ---
 name: handover
-description: Make the project fully transferable to another human or agent with zero verbal context. Use at milestones, before breaks, when a new person/tool joins, or when the owner asks "can someone else take this over?". Also the end-of-session discipline when significant work happened.
+description: Make the project fully transferable to another human or agent with zero verbal context. Use at milestones, before breaks, when a new person/tool joins, or when the owner asks "can someone else take this over?". The end of an ordinary session is `checkpoint`, not this.
 ---
 
 # handover: the repo must speak for itself
