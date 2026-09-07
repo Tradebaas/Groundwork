@@ -27,6 +27,16 @@ shape by a gate of its own. A spec that calls itself done has to name what prove
 `Verified by:` line of the spec template. Bare TODO markers and lint or type suppressions count as
 unmarked deferrals, and the commit message is under the same style rule as every file.
 
+A stage now counts wherever it actually runs. The floor table asks how each of the six risk classes
+is checked, and until now only a GitHub Actions workflow could answer it: a project on Azure
+Pipelines or GitLab got either silence or a refusal naming stages that were already running. The
+gate reads whichever pipeline your project has (`.github/workflows/`, `.gitlab-ci.yml`,
+`azure-pipelines.yml`), and any other host is named once in your stack file's header, as
+`**Pipeline:** <path>`. When it finds no pipeline at all, it says so and says where it looked,
+because a class nobody checks is not something to be quiet about. The worked platform column in
+`docs/standards/TEMPLATE-STACK.md` was walked end to end against the gate and two answers in it
+were not satisfiable as written; both are fixed.
+
 If you lay Groundwork over a project that exists, the README now gives you one command that adds
 the framework and skips every file you already have, and `begin` checks the overlay landed whole
 and leaves your own README, licence, ignore file, changelog and page alone. A fresh copy says only
@@ -35,10 +45,11 @@ and leaves your own README, licence, ignore file, changelog and page alone. A fr
 enforce. The standards gained a data and configuration floor, the shape of the test floor, and the
 rule that agent tooling is a dependency; `architect` records a threats table and data
 classification; `comply` screens the DPIA and, for organizations with rules on AI tooling, fills
-the new `docs/operations/agent-security.md`. Nothing moved or was renamed. Four gates can newly
+the new `docs/operations/agent-security.md`. Nothing moved or was renamed. Five gates can newly
 fire on a copy of v0.2.0, each on purpose: a bare TODO or a lint suppression in a code comment, one
-of the four new phrase bans, a real value in `.env.example`, and a spec at `done` without its
-`Verified by:` line.
+of the four new phrase bans, a real value in `.env.example`, a spec at `done` without its
+`Verified by:` line, and a stack file whose `command` answers no pipeline runs, on a project whose
+CI was never on GitHub and was therefore never asked.
 
 ## v0.2.0 - 2026-08-01
 
