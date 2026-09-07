@@ -68,7 +68,9 @@ export function enforcementReport(root) {
     const hooks = settings.hooks || {};
     const commands = (event) => (hooks[event] || []).flatMap((m) => m.hooks || []).map((h) => h.command || '');
     stopWired = commands('Stop').length > 0;
-    guardWired = commands('PreToolUse').some((c) => /checks\/guard\.mjs/.test(c));
+    // The guard judges shell commands, so it is wired only where the matcher lets it see them.
+    guardWired = (hooks.PreToolUse || []).some((m) => (!m.matcher || /\bBash\b/.test(m.matcher))
+      && (m.hooks || []).some((h) => /checks\/guard\.mjs/.test(h.command || '')));
   } catch { stopWired = false; guardWired = false; }
   if (stopWired && guardWired) {
     signals.push({ signal: 'adapter hooks', armed: true, detail: '.claude/settings.json wires the Stop hooks and the guard' });

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Self-test for the two lines at the foot of the board (checks/board-strip.mjs): how many gates
-// are armed on this machine, and how much of the project's own code any of them looks at. What is
-// proven here is that each line leads with the answer in the reader's own words, keeps the whole
-// working one click behind it, and that a reader that fails costs the board one line rather than
-// the page.
+// Self-test for the lines at the foot of the board (checks/board-strip.mjs): how many gates are
+// armed on this machine, how much of the project's own code any of them looks at, how old its
+// dated facts are, and how many runbook fields are still the template's. What is proven here is
+// that each line leads with the answer in the reader's own words, keeps the whole working one
+// click behind it, and that a reader that fails costs the board one line rather than the page.
 // These were two of the six cards on the retired /overview page; the board they now sit on is
 // proven in checks/board.test.mjs. Run: node --test checks/board-strip.test.mjs
 

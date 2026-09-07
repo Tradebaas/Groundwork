@@ -287,6 +287,12 @@ expectSignal('enforcement-adapter-unparseable', ({ put }) =>
 expectSignal('enforcement-adapter-half-wired', ({ put }) =>
   put('.claude/settings.json', '{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"node x"}]}]}}'),
 'adapter hooks', false, 'guard');
+expectSignal('enforcement-adapter-guard-off-bash', ({ put }) => // the guard on a tool it cannot judge
+  put('.claude/settings.json', JSON.stringify({ hooks: {
+    Stop: [{ hooks: [{ type: 'command', command: 'node x' }] }],
+    PreToolUse: [{ matcher: 'Read', hooks: [{ type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/checks/guard.mjs"' }] }],
+  } })),
+'adapter hooks', false, 'guard');
 expectSignal('enforcement-adapter-wired', ({ put }) =>
   put('.claude/settings.json', JSON.stringify({ hooks: {
     Stop: [{ hooks: [{ type: 'command', command: 'node x' }] }],

@@ -23,9 +23,10 @@ import { datedEvidence, formatEvidence, formatRunbooks } from './evidence.mjs';
 // may contain and how long it may be, the trace chain from brief to commit, whether a stack's
 // own gates are wired, and the config's self-gate, which also owns the third-party declaration.
 import { codeChecks } from './check-code.mjs';
-import { checkCommitMessage, traceChecks } from './check-trace.mjs';
+import { checkCommitMessage, traceChecks, styleHits, compilePhrases } from './check-trace.mjs';
 import { stackChecks, floorReport } from './check-stack.mjs';
 import { configChecks, thirdPartyMatcher } from './check-config.mjs';
+import { realpathSync } from 'node:fs';
 
 // The commit-msg hook and the self-test have always imported this from here; it is authored in
 // check-trace.mjs with the rest of the chain, and stays reachable at its published address.
@@ -206,7 +207,7 @@ export function runChecks(root) {
       // Deterministic characters only; judgment tells (cliche phrasing) live in VOICE.md + design-guard.
       // checks:allow-style on a line is the escape hatch (e.g. a spec quoting source text verbatim).
       const chars = AI_TYPOGRAPHY;
-      const phrases = (cfg.styleBans || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
+      const phrases = compilePhrases(cfg.styleBans);
       // The phrase bans skip the files that legitimately name the tells (VOICE.md defines them,
       // decision records and archives may quote them), same idiom as the denylist. Typography is
       // banned everywhere but checks/, which must hold the literal characters to detect them.
@@ -218,16 +219,9 @@ export function runChecks(root) {
         if (r.startsWith('checks/') || isThirdParty(r)) continue;
         const scanPhrases = !phraseSkip(r);
         lines(f).forEach((line, i) => {
-          if (line.includes('checks:allow-style')) return;
-          for (const [ch, what, fix] of chars) {
-            if (line.includes(ch)) {
-              fail(`${r}:${i + 1} contains a ${what}: ${fix}. Deliberate (quoting source text)? Append "checks:allow-style" to that line.`);
-            }
-          }
-          if (scanPhrases) {
-            for (const e of phrases) {
-              if (e.re.test(line)) fail(`${r}:${i + 1} reads as AI boilerplate (/${e.pattern}/): ${e.why}`);
-            }
+          for (const h of styleHits(line, { chars, phrases: scanPhrases ? phrases : [] })) {
+            if (h.kind === 'char') fail(`${r}:${i + 1} contains a ${h.what}: ${h.fix}. Deliberate (quoting source text)? Append "checks:allow-style" to that line.`);
+            else fail(`${r}:${i + 1} reads as AI boilerplate (/${h.pattern}/): ${h.why}`);
           }
         });
       }
@@ -407,7 +401,12 @@ export function installHooks(root) {
   return 'core.hooksPath -> checks/hooks (re-run after every fresh clone)';
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+// Both sides as real paths: the path a hook or a person passes may reach this file through a
+// symlink, and a raw comparison would make every gate a silent no-op from such a path.
+const invokedAs = (() => {
+  try { return realpathSync(resolve(process.argv[1] || '')); } catch { return null; }
+})();
+if (invokedAs && invokedAs === fileURLToPath(import.meta.url)) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   if (process.argv.includes('--install-hooks')) {
     console.log(`hooks wired: ${installHooks(root)}`);
