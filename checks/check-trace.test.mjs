@@ -66,6 +66,24 @@ expectClean('spec-traces-valid', ({ put }) => {
 const scopedManifest = `${ticketManifest}| \`product/BRIEF.md\` | LIVE | brief |\n`;
 const BRIEF_SC1 = '# BRIEF\n\n## In scope\n\n- SC-1 the one real scope item\n';
 
+// Done is a claim the overview counts. Since decision 0013's third option was built, the claim
+// has to name its evidence; a spec still building is not asked for any.
+expectFail('spec-traces', ({ put }) => { // done with no Verified by line at all
+  put('docs/README.md', scopedManifest);
+  put('docs/product/BRIEF.md', BRIEF_SC1);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** done\n- **Traces to:** BRIEF SC-1\n');
+});
+expectFail('spec-traces', ({ put }) => { // done with the template's placeholder still there
+  put('docs/README.md', scopedManifest);
+  put('docs/product/BRIEF.md', BRIEF_SC1);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** done\n- **Traces to:** BRIEF SC-1\n- **Verified by:** TBD <!-- filled when done -->\n');
+});
+expectClean('spec-traces-done-with-evidence', ({ put }) => {
+  put('docs/README.md', scopedManifest);
+  put('docs/product/BRIEF.md', BRIEF_SC1);
+  put('docs/specs/001-demo/spec.md', '# 001: demo\n\n- **Status:** done\n- **Traces to:** BRIEF SC-1\n- **Verified by:** checks/demo.test.mjs, 12 of 12, and the walk of 2026-09-07 in the STATE.md log\n');
+});
+
 expectFail('spec-traces', ({ put }) => { // spec names an SC-item the brief does not define
   put('docs/README.md', scopedManifest);
   put('docs/product/BRIEF.md', BRIEF_SC1);

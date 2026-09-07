@@ -24,6 +24,9 @@ Right-sizing (details in the `spec` skill, never more ceremony than the change d
 - **Traces to:** BRIEF SC-<n> / explicit request: <link or quote>
 - **Owner sign-off:** TBD <!-- the interview's shared-understanding confirmation: date plus the
   owner's words. Required before building starts; a bare "approved" is not it. -->
+- **Verified by:** TBD <!-- filled when the status becomes done, never before: the artifact that
+  proves the criteria hold (the test suite and its count, the dated walk of the running app, the
+  STATE.md log entry). Gated: a spec at done with this line unfilled fails the checks. -->
 
 ## Why
 

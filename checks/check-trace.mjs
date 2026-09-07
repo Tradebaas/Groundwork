@@ -140,6 +140,16 @@ export const traceChecks = ({ root, tree, known, fail, read, rel }) => ({
       for (const id of unknownScopeIds(body, known)) {
         fail(`${r}: Traces-to names ${id}, which BRIEF.md does not define. Fix the id, or run \`scope\` to put the item in the brief first.`);
       }
+      // A spec that calls itself done is what the overview counts as done, and the word alone is
+      // the model's own claim. The claim names its evidence (decision 0013, option 3): the
+      // artifact verify produced, so a reader opens it instead of trusting it.
+      const status = ((body.match(/^- \*\*Status:\*\*\s*(\S+)/m) || [])[1] || '').toLowerCase();
+      if (status === 'done') {
+        const verified = (body.match(/^- \*\*Verified by:\*\*\s*(.+)$/m) || [])[1];
+        if (!traceFilled(verified)) {
+          fail(`${r}: status is done, but "- **Verified by:**" is missing or unfilled. Name the artifact that proves the criteria hold (the suite and its count, the dated walk of the running app, the STATE.md log entry), or set the status back to building. Skill: verify.`);
+        }
+      }
     }
   },
 });
