@@ -86,6 +86,8 @@ commits already hold what the product is, who runs it and what it is built on. R
 answers back for a one-line confirmation each, and spend the interview on what only the owner
 knows: why it exists, who it is for, what is deliberately out, and what "done" means from here.
 Asking an owner to describe software they have been running is the fastest way to lose their trust.
+The conventions the code follows (its linter, its test runner, its layout) are the `stack` skill's
+input on this door: recorded as the standards before anything new is proposed.
 
 **Material first.** Ask whether the owner already has anything written: a PRD, project
 description, pitch, notes, or a rough idea dump. Take it now (pasted text or a file; convert
