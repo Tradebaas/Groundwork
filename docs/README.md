@@ -37,7 +37,7 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | `compliance/TEMPLATE-REGISTER.md` | REF | Blank register; `begin` puts it in place of Groundwork's own |
 | `compliance/COMPLIANCE.md` | LIVE | The EU/NL regimes, when they bite, and the date each was verified |
 | `compliance/AI-LITERACY.md` | REF | AI Act Art 4 literacy evidence: the measures, and who they cover per the register |
-| `operations/*.md` ◆ | REF | Runbooks: deploy, incident, backup/restore, monitoring, plus the blank `operations/TEMPLATE-DEPLOY.md` that `begin` puts in place of the deploy one and `operations/evidence-drill.md`, which is Groundwork's own and inert in a project |
+| `operations/*.md` ◆ | REF | Runbooks: deploy, incident, backup/restore, monitoring, agent security (what the building agent may reach, where prompts go, who stops it, what is kept), plus the blank `operations/TEMPLATE-DEPLOY.md` that `begin` puts in place of the deploy one and `operations/evidence-drill.md`, which is Groundwork's own and inert in a project |
 
 Rules: one fact, one owning file; everything else links to it. New file → add a row here in the
 same change. Retire a fact → add its old wording to the denylist in `checks/config.json`.

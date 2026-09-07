@@ -18,7 +18,9 @@ Product with digital elements sold in the EU → CRA. Software placed on the EU 
 virtually every shipped product → Product Liability Directive. Essential/important sector or
 supplier to one → NIS2. The client is a financial entity → DORA. Connected product, or a
 cloud/SaaS service a customer can switch away from → Data Act. Every dependency → its
-license.
+license. The organization has rules on AI tooling (a regulated sector, government, confidential
+data, or a client that asks) → `docs/operations/agent-security.md` is filled before the first
+session on their data: where prompts go, what the agent can reach, who can stop it, what is kept.
 
 ## 2. Verify current state of the law
 
