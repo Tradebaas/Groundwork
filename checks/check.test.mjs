@@ -284,8 +284,14 @@ expectSignal('enforcement-adapter-empty-hooks', ({ put }) =>
   put('.claude/settings.json', '{"hooks":{}}'), 'adapter hooks', false);
 expectSignal('enforcement-adapter-unparseable', ({ put }) =>
   put('.claude/settings.json', 'not json'), 'adapter hooks', false);
-expectSignal('enforcement-adapter-wired', ({ put }) =>
+expectSignal('enforcement-adapter-half-wired', ({ put }) =>
   put('.claude/settings.json', '{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"node x"}]}]}}'),
+'adapter hooks', false, 'guard');
+expectSignal('enforcement-adapter-wired', ({ put }) =>
+  put('.claude/settings.json', JSON.stringify({ hooks: {
+    Stop: [{ hooks: [{ type: 'command', command: 'node x' }] }],
+    PreToolUse: [{ matcher: 'Bash', hooks: [{ type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/checks/guard.mjs"' }] }],
+  } })),
 'adapter hooks', true);
 
 // The design method's payload is gitignored, so a clone starts without it and the report says so

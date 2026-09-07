@@ -1,5 +1,5 @@
 {
-  "_doc": "Thin Claude adapter (decision 0001: AGENTS.md is the single rulebook). Two suggest-only Stop hooks: progress.mjs prints one plain-language progress line when the stand has changed since it was last shown; handoff-nudge.mjs prints one reminder when the turn advises a fresh session without a paste-ready prompt. Both only read, never block, and stay silent otherwise.",
+  "_doc": "Thin Claude adapter (decision 0001: AGENTS.md is the single rulebook). Two suggest-only Stop hooks: progress.mjs prints one plain-language progress line when the stand has changed since it was last shown; handoff-nudge.mjs prints one reminder when the turn advises a fresh session without a paste-ready prompt. Both only read, never block, and stay silent otherwise. One PreToolUse guard on the Bash tool: checks/guard.mjs refuses the handful of commands the rulebook forbids or holds for the owner's yes (a bypassed gate, a force-push, discarded work, a recursive delete outside the project, a dropped table, a tool with its permission checks off, a download piped into a shell) with the reason on stderr and exit 2; everything else passes. The judgment is vendor-neutral and lives in that file, so another harness wires the same script in its own pre-command hook.",
   "hooks": {
     "Stop": [
       {
@@ -11,6 +11,18 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/checks/handoff-nudge.mjs\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/checks/guard.mjs\"",
+            "timeout": 10
           }
         ]
       }

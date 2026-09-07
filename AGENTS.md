@@ -43,6 +43,8 @@ Read enough to know the root cause, then fix the cause once, not the symptom eve
   refactors, no "while I'm here". There is always something to improve; that is not a reason to.
 - **Never bypass a gate.** No `--no-verify`, no skipping hooks, no commenting out or weakening a
   check to make it pass. A red gate is information. If a gate is wrong, fix the gate in the open.
+  The Claude adapter refuses these and the irreversible commands below before they run
+  (`checks/guard.mjs`); in another tool this text is the guard.
 - **Security floor (never simplify away):** input validation at trust boundaries, authorization
   checks, error handling that prevents data loss and never swallows a failure silently,
   secrets out of code and logs, accessibility.

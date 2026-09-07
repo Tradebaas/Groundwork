@@ -1,7 +1,7 @@
 // Groundwork enforcement self-report: which enforcement tier does this environment run at?
 // A fresh copy silently loses four machine-local layers: git hooks (core.hooksPath is set per
 // clone), CI (a workflow only runs when a GitHub remote exists to push to), the Claude adapter's
-// suggest-hooks (.claude/settings.json), and the design method, whose payload is installed per
+// hooks (.claude/settings.json: the suggest hooks and the guard), and the design method, whose payload is installed per
 // project and gitignored like a dependency. Without this report, a hookless clone with no remote
 // runs with zero hard gates and no warning (GAP C-2, INTAKE 2026-07-22).
 // Report, never block: a weak environment is information, not a violation. The exit code
@@ -57,18 +57,25 @@ export function enforcementReport(root) {
     signals.push({ signal: 'CI', armed: true, detail: 'workflow + GitHub remote' });
   }
 
-  // 3. Adapter suggest-hooks. The Stop hooks (progress line, handoff nudge) live in
-  //    .claude/settings.json; without them the suggest layer is silent. The rulebook bridges
-  //    (CLAUDE.md, .gemini) are blocking gates in check.mjs already and need no report here.
-  let adapterHooks = false;
+  // 3. Adapter hooks, both halves: the Stop hooks (progress line, handoff nudge) that suggest,
+  //    and the PreToolUse guard (checks/guard.mjs) that refuses what the rulebook forbids. Both
+  //    live in .claude/settings.json; a clone that lost the file has neither. The rulebook
+  //    bridges (CLAUDE.md, .gemini) are blocking gates in check.mjs already and need no report.
+  let stopWired = false;
+  let guardWired = false;
   try {
     const settings = JSON.parse(readFileSync(join(root, '.claude', 'settings.json'), 'utf8'));
-    adapterHooks = Object.keys(settings.hooks || {}).length > 0;
-  } catch { adapterHooks = false; }
-  if (adapterHooks) {
-    signals.push({ signal: 'adapter hooks', armed: true, detail: '.claude/settings.json wires the Stop hooks' });
+    const hooks = settings.hooks || {};
+    const commands = (event) => (hooks[event] || []).flatMap((m) => m.hooks || []).map((h) => h.command || '');
+    stopWired = commands('Stop').length > 0;
+    guardWired = commands('PreToolUse').some((c) => /checks\/guard\.mjs/.test(c));
+  } catch { stopWired = false; guardWired = false; }
+  if (stopWired && guardWired) {
+    signals.push({ signal: 'adapter hooks', armed: true, detail: '.claude/settings.json wires the Stop hooks and the guard' });
+  } else if (!stopWired && !guardWired) {
+    signals.push({ signal: 'adapter hooks', armed: false, detail: 'Claude adapter hooks not wired (.claude/settings.json): the progress line and handoff nudge never fire, and the guard (checks/guard.mjs) never runs.' });
   } else {
-    signals.push({ signal: 'adapter hooks', armed: false, detail: 'Claude adapter hooks not wired (.claude/settings.json): the progress line and handoff nudge never fire.' });
+    signals.push({ signal: 'adapter hooks', armed: false, detail: `Claude adapter half wired (.claude/settings.json): ${stopWired ? 'the guard (checks/guard.mjs) is not a PreToolUse hook, so nothing refuses a bypassed gate or a force-push' : 'no Stop hooks, so the progress line and handoff nudge never fire'}.` });
   }
 
   // 4. The design method. Its payload is installed per project and gitignored, so a clone starts
