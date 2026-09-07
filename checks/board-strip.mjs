@@ -15,7 +15,8 @@
 import { enforcementReport } from './enforcement.mjs';
 import { floorReport } from './check-stack.mjs';
 import {
-  datedEvidence, runbookPlaceholders, phaseOf, runbooksSaid, runbookFiles, runbookTotal, EVIDENCE_WORDS,
+  datedEvidence, runbookPlaceholders, phaseOf, runbooksSaid, runbookFiles, runbookTotal, runbookPerFile,
+  EVIDENCE_WORDS,
 } from './evidence.mjs';
 import {
   shellWords, escapeHtml, sentence, pathName, list, attempt,
@@ -187,11 +188,8 @@ function runbooksLine(read, w, opens) {
   if (!read || (!read.error && !runbooksSaid(read.value || { placeholders: [], phase: null }))) return '';
   return line(w, read,
     (r) => w.runbooks(runbookTotal(r.placeholders), runbookFiles(r.placeholders), r.phase),
-    (r) => {
-      const perFile = new Map();
-      for (const p of r.placeholders) perFile.set(p.path, (perFile.get(p.path) || 0) + p.fields);
-      return `<h3>${escapeHtml(w.headRunbooks)}</h3>\n<ul>${[...perFile].map(([path, n]) => `<li>${pathName(path, opens)}: ${escapeHtml(w.runbookItem('', n).replace(/^: /, ''))}</li>`).join('')}</ul>`;
-    },
+    (r) => `<h3>${escapeHtml(w.headRunbooks)}</h3>\n<ul>${runbookPerFile(r.placeholders)
+      .map(({ path, fields }) => `<li>${pathName(path, opens)}: ${escapeHtml(w.runbookItem(fields))}</li>`).join('')}</ul>`,
     EVIDENCE_PATH, opens);
 }
 

@@ -57,9 +57,20 @@ test('the ones older than a quarter are named with their age and their place', (
   assert.deepEqual(stale.map((s) => s.label), ['C-4 (register)', 'node standards, sources read']);
   assert.equal(stale[0].ageDays, 190);
   const text = formatEvidence({ stamps, stale });
-  assert.equal(text[0], 'evidence: 2 of the 6 dated facts are older than a quarter; re-verify them (comply, maintain) or say why they still hold.');
+  assert.equal(text[0], 'evidence: 2 of the 6 dated facts are older than a quarter, or not a day that has passed; re-verify them (comply, maintain) or say why they still hold.');
   assert.match(text[1], /^  - C-4 \(register\): verified 2026-03-01, 190 days ago \(docs\/compliance\/REGISTER\.md:5\)$/);
   assert.match(text[2], /node standards, sources read: verified 2026-05-05, 125 days ago/);
+  f.clean();
+});
+
+test('a date that is not a day that has passed needs a look too, and is said so', () => {
+  const f = fixture({ 'docs/standards/x.md': '- **Verified:** 2026-13-45\n', 'docs/standards/y.md': '- **Verified:** 2099-01-01\n' });
+  const { stale } = datedEvidence(f.root, TODAY);
+  assert.equal(stale.length, 2);
+  const text = formatEvidence(datedEvidence(f.root, TODAY));
+  assert.match(text[0], /^evidence: 2 of the 2 dated facts/);
+  assert.match(text[1], /x standards, sources read: "2026-13-45" is not a day that has passed/);
+  assert.match(text[2], /"2099-01-01" is not a day that has passed/);
   f.clean();
 });
 

@@ -29,7 +29,7 @@ export function thirdPartyForRoot(root) {
 
 // The one shape a hook command may take in the committed adapter file: this repository's own
 // checks, addressed through the project directory. Anything else is code a clone runs on trust.
-const ADAPTER_HOOK = /^node "\$CLAUDE_PROJECT_DIR\/checks\/[a-z0-9-]+\.mjs"( [^"|;&]*)?$/;
+const ADAPTER_HOOK = /^node "\$CLAUDE_PROJECT_DIR\/checks\/[a-z0-9-]+\.mjs"( --?[a-z0-9-]+)*$/;
 
 export const configChecks = ({ root, cfg, fail }) => ({
   // The committed Claude adapter is config that runs code: a hook it names executes on a fresh
@@ -68,9 +68,12 @@ export const configChecks = ({ root, cfg, fail }) => ({
           }
         }
         for (const rule of settings.permissions?.allow || []) {
-          if (rule === '*' || /^Bash\(\*?\)$/.test(rule)) {
+          if (rule === '*' || rule === 'Bash' || /^Bash\(\*?\)$/.test(rule)) {
             fail(`.claude/settings.json permissions.allow holds "${rule}": that switches the tool's permission checks off for every clone, which AGENTS.md forbids.`);
           }
+        }
+        if (settings.permissions?.defaultMode === 'bypassPermissions') {
+          fail('.claude/settings.json permissions.defaultMode is bypassPermissions: the committed adapter never switches the tool\'s permission checks off for every clone (AGENTS.md).');
         }
       }
     }

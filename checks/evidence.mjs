@@ -21,20 +21,24 @@ export const QUARTER_DAYS = 92;
 export const EVIDENCE_WORDS = {
   en: {
     allFresh: (n) => `evidence: all ${n} dated facts were verified within the last quarter.`,
-    staleOf: (k, n) => `evidence: ${k} of the ${n} dated facts are older than a quarter; re-verify them (comply, maintain) or say why they still hold.`,
-    staleItem: (s) => `${s.label}: verified ${s.date}, ${s.ageDays} days ago`,
+    staleOf: (k, n) => `evidence: ${k} of the ${n} dated facts are older than a quarter, or not a day that has passed; re-verify them (comply, maintain) or say why they still hold.`,
+    staleItem: (s) => (Number.isFinite(s.ageDays) && s.ageDays >= 0
+      ? `${s.label}: verified ${s.date}, ${s.ageDays} days ago`
+      : `${s.label}: "${s.date}" is not a day that has passed`),
     headStale: 'Older than a quarter',
     runbooks: (total, files, phase) => `runbooks: ${total} fields still hold the template's placeholders in ${files.join(', ')} while the phase is ${phase}; deliver fills them before a release, maintain keeps them true.`,
-    runbookItem: (path, n) => `${path}: ${n} field${n === 1 ? '' : 's'}`,
+    runbookItem: (n) => `${n} field${n === 1 ? '' : 's'}`,
     headRunbooks: 'Still the template\'s',
   },
   nl: {
     allFresh: (n) => `bewijs: alle ${n} gedateerde feiten zijn het afgelopen kwartaal geverifieerd.`,
-    staleOf: (k, n) => `bewijs: ${k} van de ${n} gedateerde feiten zijn ouder dan een kwartaal; verifieer ze opnieuw (comply, maintain) of zeg waarom ze nog gelden.`,
-    staleItem: (s) => `${s.label}: geverifieerd ${s.date}, ${s.ageDays} dagen geleden`,
+    staleOf: (k, n) => `bewijs: ${k} van de ${n} gedateerde feiten zijn ouder dan een kwartaal, of geen dag die al voorbij is; verifieer ze opnieuw (comply, maintain) of zeg waarom ze nog gelden.`,
+    staleItem: (s) => (Number.isFinite(s.ageDays) && s.ageDays >= 0
+      ? `${s.label}: geverifieerd ${s.date}, ${s.ageDays} dagen geleden`
+      : `${s.label}: "${s.date}" is geen dag die al voorbij is`),
     headStale: 'Ouder dan een kwartaal',
     runbooks: (total, files, phase) => `draaiboeken: ${total} velden zijn nog de sjabloontekst in ${files.join(', ')} terwijl de fase ${phase} is; deliver vult ze voor een release, maintain houdt ze waar.`,
-    runbookItem: (path, n) => `${path}: ${n} veld${n === 1 ? '' : 'en'}`,
+    runbookItem: (n) => `${n} veld${n === 1 ? '' : 'en'}`,
     headRunbooks: 'Nog sjabloontekst',
   },
 };
@@ -102,12 +106,14 @@ export function datedStamps(root) {
 
 const days = (from, to) => Math.floor((to - from) / 86400000);
 
-// The stamps, and the ones older than a quarter on the given day, each with its age.
+// The stamps, and the ones that need a look on the given day, each with its age: older than a
+// quarter, or a date that is not a day that has passed (unreadable, or in the future), which is
+// not evidence of anything and would otherwise count as fresh.
 export function datedEvidence(root, today = new Date()) {
   const stamps = datedStamps(root);
   const stale = stamps
     .map((s) => ({ ...s, ageDays: days(new Date(`${s.date}T00:00:00Z`), today) }))
-    .filter((s) => s.ageDays > QUARTER_DAYS);
+    .filter((s) => !Number.isFinite(s.ageDays) || s.ageDays < 0 || s.ageDays > QUARTER_DAYS);
   return { stamps, stale };
 }
 
@@ -158,6 +164,11 @@ export function runbookPlaceholders(root) {
 // not a hole. A count, never a block: which value goes in a field is the owner's to know.
 export const runbooksSaid = ({ placeholders, phase }) => ['deliver', 'maintain'].includes(phase) && placeholders.length > 0;
 export const runbookFiles = (placeholders) => [...new Set(placeholders.map((p) => p.path.replace('docs/operations/', '')))];
+export const runbookPerFile = (placeholders) => {
+  const per = new Map();
+  for (const p of placeholders) per.set(p.path, (per.get(p.path) || 0) + p.fields);
+  return [...per].map(([path, fields]) => ({ path, fields }));
+};
 export const runbookTotal = (placeholders) => placeholders.reduce((n, p) => n + p.fields, 0);
 export function formatRunbooks(root, placeholders = runbookPlaceholders(root), phase = phaseOf(root)) {
   if (!runbooksSaid({ placeholders, phase })) return [];

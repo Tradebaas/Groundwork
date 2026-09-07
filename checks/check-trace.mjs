@@ -6,7 +6,7 @@
 import { existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
-import { isSpecPath } from './progress.mjs';
+import { isSpecPath, parseSpec } from './progress.mjs';
 import { forTerminal } from './links.mjs';
 
 // The value half of a trace, shared by the three artifacts that carry one: spec files, ticket
@@ -35,6 +35,22 @@ function tracesTo(body) {
 function unknownScopeIds(body, known) {
   return traceUnknownIds(traceLine(body), known);
 }
+
+// The style rule, once: the characters an assistant leaves behind and the phrases config bans, as
+// findings on one line. Read by the prose-style gate over every text file (check.mjs) and by the
+// commit-message gate below, so the two cannot disagree about what a tell is. A line that carries
+// checks:allow-style is the writer's declared exception. With `citation`, a double-quoted span is
+// read as naming a phrase rather than using it: the commit gate asks for that, because a commit
+// that adds a ban has to be able to say which phrase, while the file gate has its skip lists.
+export function styleHits(line, { chars = [], phrases = [] }, { citation = false } = {}) {
+  if (line.includes('checks:allow-style')) return [];
+  const hits = [];
+  for (const [ch, what, fix] of chars) if (line.includes(ch)) hits.push({ kind: 'char', what, fix });
+  const spoken = citation ? line.replace(/"[^"]*"/g, '""') : line;
+  for (const e of phrases) if (e.re.test(spoken)) hits.push({ kind: 'phrase', pattern: e.pattern, why: e.why });
+  return hits;
+}
+export const compilePhrases = (bans) => (bans || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
 
 // The commit message is the only artifact that survives into the shipped history, so the trace
 // has to be on it: given a sha, the SC-id resolves back through the brief to the requirement it
@@ -65,22 +81,14 @@ export function checkCommitMessage(message, known, style = null) {
     fail('commit-subject', `subject "${subject}" is not a Conventional Commit. Shape: "type(scope): what changed", e.g. "fix(checks): reject empty scopes" - lowercase type (feat, fix, docs, chore, ...), scope optional, "!" before ":" for a breaking change.`);
   }
 
-  // The same style rule every text file gets (prose-style in check.mjs): the characters an
-  // assistant leaves behind and the phrases config bans. The runner hands both in, so the two
-  // gates cannot disagree about what a tell is. A deliberate case, a quoted source say, escapes
-  // the way it does in a file: checks:allow-style on that line. Naming a phrase is not using it:
-  // the file gate skips VOICE.md and the decision records for that reason, and a commit that adds
-  // a ban has to be able to say which phrase, so a phrase inside double quotes is a citation here.
+  // The same style rule every text file gets, through the one function above; the runner hands
+  // the lists in. A quoted source escapes the way it does in a file: checks:allow-style on the line.
   if (style) {
-    const phrases = (style.phrases || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
+    const compiled = { chars: style.chars || [], phrases: compilePhrases(style.phrases) };
     body.split('\n').forEach((line, i) => {
-      if (line.includes('checks:allow-style')) return;
-      for (const [ch, what, fix] of style.chars || []) {
-        if (line.includes(ch)) fail('commit-style', `line ${i + 1} carries an AI tell (${what}): ${fix}. Quoting a source? Append "checks:allow-style" to that line.`);
-      }
-      const spoken = line.replace(/"[^"]*"/g, '""');
-      for (const e of phrases) {
-        if (e.re.test(spoken)) fail('commit-style', `line ${i + 1} reads as AI boilerplate (/${e.pattern}/): ${e.why}`);
+      for (const h of styleHits(line, compiled, { citation: true })) {
+        if (h.kind === 'char') fail('commit-style', `line ${i + 1} carries an AI tell (${h.what}): ${h.fix}. Quoting a source? Append "checks:allow-style" to that line.`);
+        else fail('commit-style', `line ${i + 1} reads as AI boilerplate (/${h.pattern}/): ${h.why}`);
       }
     });
   }
@@ -163,8 +171,7 @@ export const traceChecks = ({ root, tree, known, fail, read, rel }) => ({
       // A spec that calls itself done is what the overview counts as done, and the word alone is
       // the model's own claim. The claim names its evidence (decision 0013, option 3): the
       // artifact verify produced, so a reader opens it instead of trusting it.
-      const status = ((body.match(/^- \*\*Status:\*\*\s*(\S+)/m) || [])[1] || '').toLowerCase();
-      if (status === 'done') {
+      if (parseSpec(body).status === 'done') {
         const verified = (body.match(/^- \*\*Verified by:\*\*\s*(.+)$/m) || [])[1];
         if (!traceFilled(verified)) {
           fail(`${r}: status is done, but "- **Verified by:**" is missing or unfilled. Name the artifact that proves the criteria hold (the suite and its count, the dated walk of the running app, the STATE.md log entry), or set the status back to building. Skill: verify.`);
