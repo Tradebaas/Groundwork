@@ -59,7 +59,7 @@ jobs:
 
   # The first mechanical check this framework has ever had on what an interface renders
   # (spec 011). The design method is installed per project and gitignored like a dependency, so
-  # this job fetches it at its current release instead of reading it out of the tree. A project
+  # this job fetches it at the pinned version instead of reading it out of the tree. A project
   # on Groundwork with no interface deletes this job; one with more surfaces adds them to the
   # scan. `stack-gates` reads this stage: while .impeccable/config.json declares the method, a
   # workflow has to actually run the detector.
@@ -80,7 +80,7 @@ jobs:
       # Nothing here falls back to green: a detector that cannot install fails the job, because
       # a green tick standing for a scan that never ran is worse than no scan at all.
       - name: The published page carries none of the tells this framework refuses
-        run: npx -y impeccable@latest detect index.html
+        run: npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect index.html
 
   # Every adoption claim Groundwork makes rests on one walk: a fresh copy reaches a governed
   # first commit without the maintainer. Proving it once by hand dates the evidence; proving it

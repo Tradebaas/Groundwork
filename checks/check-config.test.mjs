@@ -4,14 +4,15 @@
 // here more than anywhere: it must fail on a weakening, and it must stay quiet on a legitimate
 // tune. Run: node checks/check-config.test.mjs
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { thirdPartyMatcher } from './check-config.mjs';
-import { PAYLOAD_PATH } from './design-method.mjs';
+import { PAYLOAD_PATH, pinnedVersion } from './design-method.mjs';
+import { enforcementReport } from './enforcement.mjs';
 import {
-  expectClean, expectFail, withConfig, BASE_BUDGETS, tally, report,
+  fixture, expectClean, expectFail, withConfig, BASE_BUDGETS, tally, report,
 } from './check-fixture.mjs';
 
 // adapter-invariants: the committed Claude adapter runs only this repository's checks, enables
@@ -122,6 +123,44 @@ expectFail('config-invariants', withConfig({
       `checks/config.json must declare ${PAYLOAD_PATH} as third-party: that is where the install route puts the design method.`);
     tally.passed++;
   } catch (e) { tally.failed.push(`third-party-declares-the-design-method: ${e.message}`); }
+}
+
+
+// The design method's version is a config fact, so it is tested where the config is. The pin is
+// only worth having if a payload that is not the pinned one says so where the owner already
+// looks: same fixture twice, one version apart is reported, the same version is quiet.
+const pinnedTo = (v) => ({ put }) => {
+  put('.agents/skills/impeccable/SKILL.md', '---\nname: impeccable\nversion: 9.9.9\n---\n');
+  put('checks/config.json', JSON.stringify({
+    thirdParty: [{ path: '.agents/skills/impeccable/', version: v, why: 'the design method' }],
+  }));
+};
+for (const [label, pin, drifted] of [['drifted', '9.9.8', true], ['at-the-pin', '9.9.9', false]]) {
+  const fx = fixture();
+  pinnedTo(pin)(fx);
+  const signal = enforcementReport(fx.root).find((x) => x.signal === 'design method');
+  rmSync(fx.root, { recursive: true, force: true });
+  try {
+    assert.equal(Boolean(signal.drifted), drifted,
+      `design-method-pin-${label}: expected drifted=${drifted}, got: ${signal.detail}`);
+    if (drifted) {
+      assert.ok(signal.detail.includes(`pinned at ${pin}`),
+        `design-method-pin-${label}: the line names the pin, got: ${signal.detail}`);
+    }
+    tally.passed++;
+  } catch (e) { tally.failed.push(`design-method-pin-${label}: ${e.message}`); }
+}
+
+{ // The install refuses before it fetches when no pin is declared: an unpinned install is the
+  // defect this change exists to remove, so it fails loudly rather than falling back to latest.
+  const fx = fixture();
+  fx.put('checks/config.json', JSON.stringify({ thirdParty: [] }));
+  try {
+    assert.throws(() => pinnedVersion(fx.root), /declares no version/,
+      'pinnedVersion must refuse a config that declares no pin');
+    tally.passed++;
+  } catch (e) { tally.failed.push(`design-method-pin-required: ${e.message}`); }
+  rmSync(fx.root, { recursive: true, force: true });
 }
 
 report('config-gate');

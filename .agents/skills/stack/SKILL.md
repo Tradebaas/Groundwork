@@ -84,7 +84,7 @@ cover at least:
 
     ```yaml
     - name: The shipped surfaces carry none of the tells this framework refuses
-      run: npx -y impeccable@latest detect <the paths this project ships>
+      run: npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the paths this project ships>
     ```
 
     No `continue-on-error` and no fallback: a detector that cannot install is a red job, because

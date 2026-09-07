@@ -56,7 +56,7 @@ cell both have to run.
 | `analyzed` | **command** `tsc --noEmit` and `eslint .` | **command** the `PowerPlatformChecker@2` task - static analysis against Microsoft's rule set, emitting SARIF |
 | `dependencies` | **command** `npm audit --audit-level=high` and `npm sbom --sbom-format=cyclonedx` | **not applicable** - a solution declares dependencies on other solutions and connectors, and no vulnerability feed exists for those. Connector governance through DLP policies is the control instead, and it is a policy, not a build step |
 | `secrets` | Groundwork's own gate, with this stack's file extensions added to `extraCodeExtensions` in `checks/config.json` | Groundwork's own gate over the unpacked solution, with environment variables and Key Vault references as the pattern that replaces embedded values |
-| `renders` | **command** `npx -y impeccable@latest detect <the surfaces this project ships>` | **manual** - the accessibility checker in the studio, run per app before release, with a `defer:` marker naming it |
+| `renders` | **command** `npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>` | **manual** - the accessibility checker in the studio, run per app before release, with a `defer:` marker naming it |
 
 Sources, read 2026-08-26, primary only: `npm sbom` and its `cyclonedx` format from the npm CLI
 docs (docs.npmjs.com/cli/v11/commands/npm-sbom); the Test Engine deprecation, effective April 2026,
