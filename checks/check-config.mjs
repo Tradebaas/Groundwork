@@ -3,7 +3,7 @@
 // itself here. This file also owns the declaration the rest of the checks read: which paths this
 // project did not write. Composed into the registry by check.mjs, like the other gate families.
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 // Paths a project declares as somebody else's work: an installed methodology, a vendored SDK.
@@ -27,7 +27,60 @@ export function thirdPartyForRoot(root) {
   }
 }
 
-export const configChecks = ({ cfg, fail }) => ({
+// The one shape a hook command may take in the committed adapter file: this repository's own
+// checks, addressed through the project directory. Anything else is code a clone runs on trust.
+const ADAPTER_HOOK = /^node "\$CLAUDE_PROJECT_DIR\/checks\/[a-z0-9-]+\.mjs"( [^"|;&]*)?$/;
+
+export const configChecks = ({ root, cfg, fail }) => ({
+  // The committed Claude adapter is config that runs code: a hook it names executes on a fresh
+  // clone once the workspace is trusted, and an MCP server it enables speaks to the model as a
+  // tool. That is the vector behind CVE-2025-59536 (repository-shipped hooks and MCP auto-enable
+  // running before the trust dialog), so the file is held to the shape decision 0001 gave it: a
+  // thin adapter whose hooks are this repository's checks and nothing else, no server enabled
+  // for everyone, no provider redirected, no credential set. A project that removed the adapter
+  // has no file here and nothing to gate; the enforcement line reports that on its own.
+  'adapter-invariants'() {
+    const settingsPath = join(root, '.claude', 'settings.json');
+    if (existsSync(settingsPath)) {
+      let settings;
+      try {
+        settings = JSON.parse(readFileSync(settingsPath, 'utf8'));
+      } catch (e) {
+        fail(`.claude/settings.json is not valid JSON (${e.message.split('\n')[0]}): the adapter's hooks and guard run only when the file parses.`);
+        settings = null;
+      }
+      if (settings) {
+        for (const [event, matchers] of Object.entries(settings.hooks || {})) {
+          for (const m of Array.isArray(matchers) ? matchers : []) {
+            for (const h of m.hooks || []) {
+              if (!ADAPTER_HOOK.test(h.command || '')) {
+                fail(`.claude/settings.json ${event} hook runs "${h.command}": a committed hook may only run this repository's own checks, as node "$CLAUDE_PROJECT_DIR/checks/<file>.mjs", because a clone runs it on trust.`);
+              }
+            }
+          }
+        }
+        if (settings.enableAllProjectMcpServers === true) {
+          fail('.claude/settings.json sets enableAllProjectMcpServers: an MCP server is a dependency that is reviewed and recorded (GLOBAL.md), never enabled for every clone by a flag.');
+        }
+        for (const key of ['ANTHROPIC_BASE_URL', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_API_KEY']) {
+          if (settings.env && key in settings.env) {
+            fail(`.claude/settings.json env sets ${key}: a committed adapter never redirects the provider or carries a credential; that belongs to the machine (settings.local.json, gitignored) or the environment.`);
+          }
+        }
+        for (const rule of settings.permissions?.allow || []) {
+          if (rule === '*' || /^Bash\(\*?\)$/.test(rule)) {
+            fail(`.claude/settings.json permissions.allow holds "${rule}": that switches the tool's permission checks off for every clone, which AGENTS.md forbids.`);
+          }
+        }
+      }
+    }
+    // An MCP configuration at the root is a dependency like any installed skill, so it is
+    // declared with its reason where the other third-party code is.
+    if (existsSync(join(root, '.mcp.json')) && !((cfg.thirdParty || []).some((e) => e && e.path === '.mcp.json'))) {
+      fail('.mcp.json is present but not declared in checks/config.json thirdParty: an MCP server is a dependency; record its source and why it is enabled, or remove the file.');
+    }
+  },
+
   'config-invariants'() {
     // Both invariants come from a rule written down elsewhere, never from taste.
     const cap = cfg.budgets?.agentFileHardCapLines;
