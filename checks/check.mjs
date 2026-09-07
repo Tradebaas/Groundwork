@@ -18,7 +18,7 @@ import { parseBrief, parseManifest, manifestMatcher, isSpecPath, BRIEF_PATH, MAN
 // read here and by the board.
 import { parseLinks, linkTargets, readDocuments, forTerminal, SKIP_DIRS } from './links.mjs';
 import { enforcementReport, formatReport, formatFloor } from './enforcement.mjs';
-import { datedEvidence, formatEvidence } from './evidence.mjs';
+import { datedEvidence, formatEvidence, formatRunbooks } from './evidence.mjs';
 // Gate families live in their own files, composed into the registry below: what a source file
 // may contain and how long it may be, the trace chain from brief to commit, whether a stack's
 // own gates are wired, and the config's self-gate, which also owns the third-party declaration.
@@ -444,6 +444,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       // And how old the dated facts are: a compliance stamp, the stack file's source date or the
       // last proven restore is true on its day and rots silently after. Counted, never blocked.
       for (const line of formatEvidence(datedEvidence(root))) console.log(line);
+      // And whether the runbooks a shipped product runs on still hold the template's placeholders,
+      // said only once the phase is deliver or maintain.
+      for (const line of formatRunbooks(root)) console.log(line);
     } catch (e) {
       console.log(`enforcement: self-report crashed (${e.message}); the checks below still decide.`);
     }
