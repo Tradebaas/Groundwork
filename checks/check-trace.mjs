@@ -68,7 +68,9 @@ export function checkCommitMessage(message, known, style = null) {
   // The same style rule every text file gets (prose-style in check.mjs): the characters an
   // assistant leaves behind and the phrases config bans. The runner hands both in, so the two
   // gates cannot disagree about what a tell is. A deliberate case, a quoted source say, escapes
-  // the way it does in a file: checks:allow-style on that line.
+  // the way it does in a file: checks:allow-style on that line. Naming a phrase is not using it:
+  // the file gate skips VOICE.md and the decision records for that reason, and a commit that adds
+  // a ban has to be able to say which phrase, so a phrase inside double quotes is a citation here.
   if (style) {
     const phrases = (style.phrases || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
     body.split('\n').forEach((line, i) => {
@@ -76,8 +78,9 @@ export function checkCommitMessage(message, known, style = null) {
       for (const [ch, what, fix] of style.chars || []) {
         if (line.includes(ch)) fail('commit-style', `line ${i + 1} carries an AI tell (${what}): ${fix}. Quoting a source? Append "checks:allow-style" to that line.`);
       }
+      const spoken = line.replace(/"[^"]*"/g, '""');
       for (const e of phrases) {
-        if (e.re.test(line)) fail('commit-style', `line ${i + 1} reads as AI boilerplate (/${e.pattern}/): ${e.why}`);
+        if (e.re.test(spoken)) fail('commit-style', `line ${i + 1} reads as AI boilerplate (/${e.pattern}/): ${e.why}`);
       }
     });
   }
