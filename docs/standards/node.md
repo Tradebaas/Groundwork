@@ -16,7 +16,7 @@ this file adds only what is true of this stack. How the project is built and gov
 | `analyzed` | Defects a machine can see are shipped because no machine looked | command | `node checks/check.mjs` |
 | `dependencies` | Third-party code arrives with known holes, unknown licences, or unrecorded | not applicable | There is no package manifest and no third-party code, so there is nothing to audit, licence or list in a bill of materials |
 | `secrets` | Keys, tokens and passwords ship inside the product | command | `node checks/check.mjs` |
-| `renders` | What a person actually sees is broken, unreadable or unusable | command | `npx -y impeccable@latest detect index.html` |
+| `renders` | What a person actually sees is broken, unreadable or unusable | command | `npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect index.html` |
 
 On `behaves`: the drill unpacks a fresh copy, runs every gate suite inside it and walks it to a
 governed first commit. The suites also run one by one in the gate job, ahead of the checks

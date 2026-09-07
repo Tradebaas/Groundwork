@@ -188,7 +188,7 @@ export const stackChecks = ({ root, fail, lines }) => ({
     // the tracked artifact the method writes, never by looking for the payload on disk.
     if (!existsSync(join(root, '.impeccable', 'config.json'))) return;
     if (!live.some(runsDetector)) {
-      fail(`.impeccable/config.json declares the design method for this project, but no workflow in .github/workflows/ runs its detector, so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y impeccable@latest detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing.`);
+      fail(`.impeccable/config.json declares the design method for this project, but no workflow in .github/workflows/ runs its detector, so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing.`);
     }
   },
 });

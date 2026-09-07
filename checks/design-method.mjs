@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// The design method: impeccable, installed per project at its current release and never vendored
-// into this repo (spec 011). The payload is gitignored like a dependency, so this file is both the
-// route that puts it there and the reader that says whether it is there.
-// Run: node checks/design-method.mjs --install
+// The design method: impeccable, installed per project at the version pinned in checks/config.json
+// and never vendored into this repo (spec 011). The payload is gitignored like a dependency, so this
+// file is both the route that puts it there and the reader that says whether it is there.
+// Run: node checks/design-method.mjs --install (--pinned prints the pin, for a workflow that needs it)
 //
 // The install lands in .claude/skills, which is a symlink into .agents/skills here (decision
 // 0002), and upstream deliberately drops such a link so each harness gets its own build. So the
@@ -29,6 +29,19 @@ const LANDING_PATH = '.claude/skills/impeccable';
 const SKILLS_LINK = '.claude/skills';
 const PACKAGE = 'impeccable';
 
+// The pin: one number, in tracked config, beside the declaration that the payload is third-party.
+// An unpinned install is what let a one-maintainer upstream change the method between two sessions
+// of the same project; refreshing it is `maintain`'s job, never an install's side effect.
+export function pinnedVersion(root) {
+  const cfg = JSON.parse(readFileSync(join(root, 'checks', 'config.json'), 'utf8'));
+  const entry = (cfg.thirdParty || []).find((e) => e && e.path === `${PAYLOAD_PATH}/`);
+  const pin = entry && typeof entry.version === 'string' ? entry.version.trim() : '';
+  if (!pin) {
+    throw new Error(`checks/config.json declares no version for ${PAYLOAD_PATH}/: the design method installs at a pinned version, so the pin has to exist before anything is fetched.`);
+  }
+  return pin;
+}
+
 // The installed version is the skill's own frontmatter, which is where impeccable states it too.
 // Reading the payload rather than asking the network keeps this a zero-token, offline reader.
 export function designMethod(root) {
@@ -42,11 +55,19 @@ export function designMethod(root) {
 // payload (it is gitignored), so the state is reported rather than assumed.
 export function designMethodSignal(root) {
   const { installed, version } = designMethod(root);
+  let pin = null;
+  try { pin = pinnedVersion(root); } catch { pin = null; }
   if (installed) {
+    // A payload that is not the pinned one is reported, not silently accepted: the pin is only
+    // worth having if the difference is visible where the owner already looks.
+    const drift = pin && version && version !== pin
+      ? `, pinned at ${pin}: re-install or move the pin through \`maintain\``
+      : '';
     return {
       signal: 'design method',
       armed: true,
-      detail: `impeccable ${version || 'installed'} at ${PAYLOAD_PATH}`,
+      detail: `impeccable ${version || 'installed'} at ${PAYLOAD_PATH}${drift}`,
+      drifted: Boolean(drift),
     };
   }
   return {
@@ -74,8 +95,8 @@ const below = (have, want) => {
 // The Node floor comes out of the package that sets it, never out of a number typed here: a
 // version read from a note instead of from the source is exactly what `stack` forbids, and it
 // would go stale the first time upstream raises it.
-function requiredNode() {
-  const range = run('npm', ['view', `${PACKAGE}@latest`, 'engines.node']);
+function requiredNode(want) {
+  const range = run('npm', ['view', `${PACKAGE}@${want}`, 'engines.node']);
   const min = range.match(/\d+(\.\d+)*/);
   return { range, min: min ? min[0] : null };
 }
@@ -103,25 +124,33 @@ function adopt(root) {
 // One line per outcome, and a refusal before anything is written: a half-install is worse than
 // none, because the checks would then measure a payload nobody can run.
 export function install(root) {
+  const pin = pinnedVersion(root);
   let want;
   try {
-    want = requiredNode();
+    want = requiredNode(pin);
   } catch (e) {
-    throw new Error(`cannot read what Node version ${PACKAGE} needs (${e.message.split('\n')[0]}): the design method is unavailable until npm is reachable.`);
+    throw new Error(`cannot read what Node version ${PACKAGE}@${pin} needs (${e.message.split('\n')[0]}): the design method is unavailable until npm is reachable. The degraded route in the design skill says how to build without it.`);
   }
   if (want.min && below(process.versions.node, want.min)) {
     throw new Error(`Node ${process.versions.node} is below ${PACKAGE}'s requirement (${want.range}): upgrade Node first, nothing was written.`);
   }
-  console.log(`Node ${process.versions.node} meets ${PACKAGE} ${want.range || '(no stated range)'}. Installing...`);
-  run('npx', ['-y', `${PACKAGE}@latest`, 'install', '--providers=claude', '--scope=project', '--yes'],
+  console.log(`Node ${process.versions.node} meets ${PACKAGE}@${pin} ${want.range || '(no stated range)'}. Installing...`);
+  run('npx', ['-y', `${PACKAGE}@${pin}`, 'install', '--providers=claude', '--scope=project', '--yes'],
     { cwd: root, stdio: ['ignore', 'inherit', 'inherit'] });
   const what = adopt(root);
   const { version } = designMethod(root);
-  return `impeccable ${version || '(version unstated)'} installed: ${what}.`;
+  if (version && version !== pin) {
+    throw new Error(`asked npm for ${PACKAGE}@${pin} and the payload says ${version}: the install did not land on the pinned version, so what is on disk is not what this project verified.`);
+  }
+  return `impeccable ${version || '(version unstated)'} installed at the pin: ${what}.`;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+  if (process.argv.includes('--pinned')) {
+    console.log(pinnedVersion(root));
+    process.exit(0);
+  }
   if (!process.argv.includes('--install')) {
     const s = designMethodSignal(root);
     console.log(`design method: ${s.armed ? s.detail : `NOT armed. ${s.detail}`}`);

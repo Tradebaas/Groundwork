@@ -28,13 +28,18 @@ First maintenance session: confirm the minimum exists, or create it and record i
    solutions and store apps, plugins and custom code registered in the instance, and the
    vendor's own release and deprecation notices. Those last ones move on the vendor's schedule
    rather than yours, which is what makes a platform go stale while every project file sits
-   untouched. The installed design method is a dependency too, and the only one that is not in a
-   manifest: re-run `node checks/design-method.mjs --install` to take its current release (it
-   reports the installed version and changes nothing when that is already the newest), read the
-   version back from the enforcement line at the top of `node checks/check.mjs`, and note it in
-   STATE.md when it moved. Read the release notes for a rule that was dropped: decision 0020
-   credits rules to that method, and one that disappears upstream comes back into a Groundwork
-   file rather than being forked there.
+   untouched. The installed design method is a dependency too, and the only one whose manifest is
+   Groundwork's own config: **this is the only place its pin moves.** Compare
+   `node checks/design-method.mjs --pinned` with `npm view impeccable version`; to take a newer
+   one, edit `version` in the `thirdParty` entry of `checks/config.json`, re-run
+   `node checks/design-method.mjs --install`, then run the checks and exercise one interface
+   change end to end before the bump is committed. The install refuses when the payload that
+   lands is not the pin, and the enforcement line at the top of `node checks/check.mjs` reports a
+   payload that drifted from it, so a version nobody chose cannot become the version this project
+   builds on. Note the move in STATE.md. Read the release notes for a rule that was dropped:
+   decision 0020 credits rules to that method, and one that disappears upstream comes back into a
+   Groundwork file rather than being forked there. A major bump is its own unit of work, verified
+   like any other, never folded into a routine batch.
 3. **Debt harvest**: `grep -rn "defer:" --exclude-dir=.git .` → reconcile with DEBT.md. Flag
    markers whose upgrade trigger has fired, and `no-trigger` markers (those rot silently).
    Paying debt is a proposed, owner-approved task like any other.
