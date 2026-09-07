@@ -1,10 +1,12 @@
-// The two lines at the foot of the board: how many gates are armed on this machine, and how much of this
-// project's own code any of them actually looks at. Each says its answer in one sentence and folds
-// the detail the reader behind it produces, so the board ends with two facts rather than two pages.
-// Every sentence is a reader's own (checks/enforcement.mjs, checks/check-stack.mjs), quoted rather
-// than reworded: the terminal and the board must never word one fact differently. The floor line
-// reads the same derivation the enforcement line prints, so a waiver cannot show up in one place
-// and not the other (E-02/F-01/S-03).
+// The lines at the foot of the board: how many gates are armed on this machine, how much of this
+// project's own code any of them actually looks at, how many of its dated facts are older than a
+// quarter, and how many runbook fields are still the template's. Each says its answer in one
+// sentence and folds the detail the reader behind it produces, so the board ends with a few facts
+// rather than a few pages. Every sentence is a reader's own (checks/enforcement.mjs,
+// checks/check-stack.mjs, checks/evidence.mjs), quoted rather than reworded: the terminal and the
+// board must never word one fact differently. Each line reads the same derivation the terminal
+// prints, so a waiver or a stale stamp cannot show up in one place and not the other
+// (E-02/F-01/S-03).
 // Moved here when the four shelves took the board and /overview was retired (E-01/F-04/S-04);
 // until then these were two of the six cards in checks/board-document.mjs. A third line, the
 // document graph, stood here until E-01/F-04/S-08: it was half of the page's words and a
@@ -13,6 +15,9 @@
 import { enforcementReport } from './enforcement.mjs';
 import { floorReport } from './check-stack.mjs';
 import {
+  datedEvidence, runbookPlaceholders, phaseOf, runbooksSaid, runbookFiles, runbookTotal, EVIDENCE_WORDS,
+} from './evidence.mjs';
+import {
   shellWords, escapeHtml, sentence, pathName, list, attempt,
 } from './board-shell.mjs';
 
@@ -20,6 +25,7 @@ import {
 // names is the one that does the looking.
 const ENFORCEMENT_PATH = 'checks/enforcement.mjs';
 const FLOOR_PATH = 'checks/check-stack.mjs';
+const EVIDENCE_PATH = 'checks/evidence.mjs';
 
 // The gates line's own framing. What is armed and what is not comes from the report.
 // The answer comes in two, because a gate is armed somewhere. Served, that somewhere is the
@@ -81,17 +87,21 @@ const FLOOR_WORDS = {
   },
 };
 
-// The two reads this strip needs. Done before anything renders, so the page can ask git once
+// The four reads this strip needs. Done before anything renders, so the page can ask git once
 // which of the names below it is allowed to open.
 export const readStrip = (root) => ({
   gates: attempt(() => enforcementReport(root)),
   floor: attempt(() => floorReport(root)),
+  evidence: attempt(() => datedEvidence(root)),
+  runbooks: attempt(() => ({ placeholders: runbookPlaceholders(root), phase: phaseOf(root) })),
 });
 
 // Every file name these lines will show, for that one ignore lookup.
 export const stripPaths = (facts) => [
-  ENFORCEMENT_PATH, FLOOR_PATH,
+  ENFORCEMENT_PATH, FLOOR_PATH, EVIDENCE_PATH,
   ...(facts.floor?.value?.files || []),
+  ...(facts.evidence?.value?.stale || []).map((s) => s.path),
+  ...(facts.runbooks?.value?.placeholders || []).map((p) => p.path),
 ];
 
 // ---------------------------------------------------------------- one line
@@ -158,6 +168,33 @@ function floorLine(read, w, opens) {
     FLOOR_PATH, opens);
 }
 
+// The evidence line exists once a stamp does: a copy that has verified nothing yet has nothing to
+// say about how old its evidence is. The stale stamps fold behind the count, each opening where
+// the file route serves it.
+function evidenceLine(read, w, opens) {
+  if (!read || (!read.error && !read.value?.stamps?.length)) return '';
+  return line(w, read,
+    (e) => (e.stale.length ? w.staleOf(e.stale.length, e.stamps.length) : w.allFresh(e.stamps.length)),
+    (e) => (e.stale.length
+      ? `<h3>${escapeHtml(w.headStale)}</h3>\n<ul>${e.stale.map((s) => `<li>${escapeHtml(w.staleItem(s))} (${pathName(s.path, opens)})</li>`).join('')}</ul>`
+      : ''),
+    EVIDENCE_PATH, opens);
+}
+
+// The runbooks line exists once the phase is deliver or maintain and a field is still the
+// template's: before that, an unfilled runbook is the plan and not a hole.
+function runbooksLine(read, w, opens) {
+  if (!read || (!read.error && !runbooksSaid(read.value || { placeholders: [], phase: null }))) return '';
+  return line(w, read,
+    (r) => w.runbooks(runbookTotal(r.placeholders), runbookFiles(r.placeholders), r.phase),
+    (r) => {
+      const perFile = new Map();
+      for (const p of r.placeholders) perFile.set(p.path, (perFile.get(p.path) || 0) + p.fields);
+      return `<h3>${escapeHtml(w.headRunbooks)}</h3>\n<ul>${[...perFile].map(([path, n]) => `<li>${pathName(path, opens)}: ${escapeHtml(w.runbookItem('', n).replace(/^: /, ''))}</li>`).join('')}</ul>`;
+    },
+    EVIDENCE_PATH, opens);
+}
+
 // The lines, in the project's own language. The word sets are gathered here rather than
 // handed in, so a caller cannot hand this file a set that words a gate differently than the
 // terminal does. `made` is the moment a printed board was made, and null on a served one: the
@@ -165,6 +202,7 @@ function floorLine(read, w, opens) {
 export function renderStrip(facts, lang, opens = () => false, made = null) {
   const w = { ...shellWords(lang), ...(GATE_WORDS[lang] || GATE_WORDS.en) };
   const fw = { ...shellWords(lang), ...(FLOOR_WORDS[lang] || FLOOR_WORDS.en) };
+  const ew = { ...shellWords(lang), ...(EVIDENCE_WORDS[lang] || EVIDENCE_WORDS.en) };
   const armed = made ? w.armedThere : w.armedOf;
   return '<div class="strip">'
     + line(w, facts.gates, (s) => `${armed(s.filter((x) => x.armed).length, s.length)}.`,
@@ -172,5 +210,9 @@ export function renderStrip(facts, lang, opens = () => false, made = null) {
     // Directly under the gates, because it is the question the gates line invites: they are
     // armed, and this is how much of this project's own code any of them looks at.
     + floorLine(facts.floor, fw, opens)
+    // Under the floor, the two counts the terminal prints there too: how old the dated facts are,
+    // and how many runbook fields are still the template's.
+    + evidenceLine(facts.evidence, ew, opens)
+    + runbooksLine(facts.runbooks, ew, opens)
     + '</div>';
 }

@@ -126,7 +126,8 @@ records the reasoning.
   answer opens as a small board on this machine only: the way in (the goal, the stand, the next
   step), the six lanes with the cards in them, the round and its features, and every document the
   project holds, each on its own page behind one sidebar. It also says whether the gates are
-  armed on this clone and how many of the six risk classes a command in CI actually proves. Every card is read from the file that
+  armed on this clone, how many of the six risk classes a command in CI actually proves, how old
+  the dated evidence is, and how many runbook fields are still the template's. Every card is read from the file that
   owns it at the moment you open the page, and nothing is stored. `--page` prints the whole of it
   as one self-contained HTML file, for someone who has to look but has no repository, no server
   and no checkout: it says when it was made, it names every file without linking to any, it

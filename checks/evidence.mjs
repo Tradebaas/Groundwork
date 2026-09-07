@@ -5,11 +5,9 @@
 // is true on the day it was written and rots silently after; the skills say "quarterly" in prose,
 // and prose does not count days. This does, and reports the number where the owner already reads
 // the floor. Report, never block: a stale stamp is information, and re-verifying is a session
-// (`comply`, `maintain`), not a fix a gate can demand at commit time.
-//
-// defer: the terminal prints this line and the board does not yet. ceiling: a stale stamp shows in
-// one place and not the other, the shape E-02/F-01/S-03 removed for waivers. upgrade-when: the next
-// board story, which adds the line under the floor the way the floor was added under the gates.
+// (`comply`, `maintain`), not a fix a gate can demand at commit time. The board renders the same
+// two lines from the same reads (checks/board-strip.mjs), in the words below, so a stale stamp
+// cannot show in one place and not the other.
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -17,6 +15,29 @@ import { HANDOFF_PATHS } from './progress.mjs';
 
 // A quarter, in days, with the slack a calendar quarter needs.
 export const QUARTER_DAYS = 92;
+
+// The words, once, for the terminal (English) and the board (the project's language). Content
+// always comes from the files; only these connectors are translated.
+export const EVIDENCE_WORDS = {
+  en: {
+    allFresh: (n) => `evidence: all ${n} dated facts were verified within the last quarter.`,
+    staleOf: (k, n) => `evidence: ${k} of the ${n} dated facts are older than a quarter; re-verify them (comply, maintain) or say why they still hold.`,
+    staleItem: (s) => `${s.label}: verified ${s.date}, ${s.ageDays} days ago`,
+    headStale: 'Older than a quarter',
+    runbooks: (total, files, phase) => `runbooks: ${total} fields still hold the template's placeholders in ${files.join(', ')} while the phase is ${phase}; deliver fills them before a release, maintain keeps them true.`,
+    runbookItem: (path, n) => `${path}: ${n} field${n === 1 ? '' : 's'}`,
+    headRunbooks: 'Still the template\'s',
+  },
+  nl: {
+    allFresh: (n) => `bewijs: alle ${n} gedateerde feiten zijn het afgelopen kwartaal geverifieerd.`,
+    staleOf: (k, n) => `bewijs: ${k} van de ${n} gedateerde feiten zijn ouder dan een kwartaal; verifieer ze opnieuw (comply, maintain) of zeg waarom ze nog gelden.`,
+    staleItem: (s) => `${s.label}: geverifieerd ${s.date}, ${s.ageDays} dagen geleden`,
+    headStale: 'Ouder dan een kwartaal',
+    runbooks: (total, files, phase) => `draaiboeken: ${total} velden zijn nog de sjabloontekst in ${files.join(', ')} terwijl de fase ${phase} is; deliver vult ze voor een release, maintain houdt ze waar.`,
+    runbookItem: (path, n) => `${path}: ${n} veld${n === 1 ? '' : 'en'}`,
+    headRunbooks: 'Nog sjabloontekst',
+  },
+};
 
 const ISO = /\d{4}-\d{2}-\d{2}/;
 const read = (p) => readFileSync(p, 'utf8');
@@ -135,21 +156,21 @@ export function runbookPlaceholders(root) {
 
 // Said only once the phase is deliver or maintain: before that, an unfilled runbook is the plan,
 // not a hole. A count, never a block: which value goes in a field is the owner's to know.
+export const runbooksSaid = ({ placeholders, phase }) => ['deliver', 'maintain'].includes(phase) && placeholders.length > 0;
+export const runbookFiles = (placeholders) => [...new Set(placeholders.map((p) => p.path.replace('docs/operations/', '')))];
+export const runbookTotal = (placeholders) => placeholders.reduce((n, p) => n + p.fields, 0);
 export function formatRunbooks(root, placeholders = runbookPlaceholders(root), phase = phaseOf(root)) {
-  if (!['deliver', 'maintain'].includes(phase) || !placeholders.length) return [];
-  const total = placeholders.reduce((n, p) => n + p.fields, 0);
-  const files = [...new Set(placeholders.map((p) => p.path.replace('docs/operations/', '')))];
-  return [`runbooks: ${total} fields still hold the template's placeholders in ${files.join(', ')} while the phase is ${phase}; deliver fills them before a release, maintain keeps them true.`];
+  if (!runbooksSaid({ placeholders, phase })) return [];
+  return [EVIDENCE_WORDS.en.runbooks(runbookTotal(placeholders), runbookFiles(placeholders), phase)];
 }
 
 // One line the owner reads beside the floor, then one per stale stamp. A project with no stamp
 // yet (a fresh copy, before comply and stack have run) has nothing to say, and says nothing.
 export function formatEvidence({ stamps, stale }) {
+  const w = EVIDENCE_WORDS.en;
   if (!stamps.length) return [];
-  if (!stale.length) return [`evidence: all ${stamps.length} dated facts were verified within the last quarter.`];
-  const out = [`evidence: ${stale.length} of the ${stamps.length} dated facts are older than a quarter; re-verify them (comply, maintain) or say why they still hold.`];
-  for (const s of stale) {
-    out.push(`  - ${s.label}: verified ${s.date}, ${s.ageDays} days ago (${s.path}:${s.line})`);
-  }
+  if (!stale.length) return [w.allFresh(stamps.length)];
+  const out = [w.staleOf(stale.length, stamps.length)];
+  for (const s of stale) out.push(`  - ${w.staleItem(s)} (${s.path}:${s.line})`);
   return out;
 }
