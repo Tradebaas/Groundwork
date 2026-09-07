@@ -12,14 +12,16 @@ import assert from 'node:assert/strict';
 import { visible } from './board-fixture.mjs';
 import { renderStrip } from './board-strip.mjs';
 import { formatFloor } from './enforcement.mjs';
+import { formatEvidence, formatRunbooks } from './evidence.mjs';
 
 // The strip renders from its reads, each of which either produced a value or threw. A test hands
 // them in directly, so no fixture on disk stands between an assertion and what it is about.
 // The floor read is left out entirely unless a test names one, which is also how a project that
 // has not chosen a stack reaches this function.
-const facts = (gates, floor) => ({
+const facts = (gates, floor, more = {}) => ({
   gates: gates instanceof Error ? { error: gates } : { value: gates },
   ...(floor === undefined ? {} : { floor: floor instanceof Error ? { error: floor } : { value: floor } }),
+  ...more,
 });
 const ARMED = [{ signal: 'hooks', armed: true, detail: 'core.hooksPath -> checks/hooks' }];
 
@@ -148,6 +150,53 @@ test('nothing a stack file says can execute as markup', () => {
   });
   assert.doesNotMatch(html, /<script>alert|<img src=x/);
   assert.match(html, /&lt;script&gt;/);
+});
+
+// ---------------------------------------------------------------- the evidence and runbooks lines
+
+const STAMP = (label, date, ageDays, path = 'docs/compliance/REGISTER.md') => ({ label, date, ageDays, path, line: 9 });
+const EVIDENCE = {
+  stamps: [STAMP('C-4 (register)', '2026-03-01', 190), STAMP('GDPR / AVG (regimes table)', '2026-07-22', 47, 'docs/compliance/COMPLIANCE.md')],
+  stale: [STAMP('C-4 (register)', '2026-03-01', 190)],
+};
+const stripE = (evidence, runbooks, opens = () => false) => renderStrip(facts(ARMED, undefined, {
+  ...(evidence === undefined ? {} : { evidence: { value: evidence } }),
+  ...(runbooks === undefined ? {} : { runbooks: { value: runbooks } }),
+}), 'en', opens);
+
+test('the evidence line leads with the count and folds the stale stamps, each opening where the route serves it', () => {
+  const html = lineOf(stripE(EVIDENCE, undefined, (p) => p === 'docs/compliance/REGISTER.md'), 2);
+  assert.match(html, /<summary><span class="ttl">evidence: 1 of the 2 dated facts are older than a quarter/);
+  assert.match(visible(html), /C-4 \(register\): verified 2026-03-01, 190 days ago/);
+  assert.match(html, /<a href="\/file\?path=docs%2Fcompliance%2FREGISTER\.md">/);
+  assert.match(html, /From <code>checks\/evidence\.mjs<\/code>/);
+  // All fresh is one sentence with nothing to fold; no stamp at all is no line.
+  const fresh = lineOf(stripE({ stamps: EVIDENCE.stamps, stale: [] }), 2);
+  assert.match(visible(fresh), /all 2 dated facts were verified within the last quarter/);
+  assert.doesNotMatch(fresh, /<details>/);
+  assert.equal(stripE({ stamps: [], stale: [] }).split('<section class="line">').length - 1, 1);
+});
+
+test('the board and the terminal carry one reading of the evidence and of the runbooks', () => {
+  const board = visible(lineOf(stripE(EVIDENCE), 2));
+  const terminal = formatEvidence(EVIDENCE).join('\n');
+  assert.ok(terminal.startsWith('evidence: 1 of the 2 dated facts'));
+  assert.ok(board.startsWith(terminal.split('\n')[0]), 'the summary is the terminal\'s first line');
+  assert.match(terminal, /C-4 \(register\): verified 2026-03-01, 190 days ago/);
+  const runbooks = { placeholders: [{ path: 'docs/operations/backup-restore.md', line: 5, fields: 2 }, { path: 'docs/operations/access.md', line: 3, fields: 1 }], phase: 'maintain' };
+  // The board escapes the apostrophe the terminal prints; the words are otherwise the same.
+  const line = visible(lineOf(stripE(undefined, runbooks), 2)).replace(/&#39;/g, "'");
+  assert.ok(line.startsWith(formatRunbooks('/nowhere', runbooks.placeholders, runbooks.phase)[0]), 'the summary is the terminal\'s line');
+  assert.match(line, /backup-restore\.md ?: 2 fields/);
+  assert.match(line, /access\.md ?: 1 field\b/);
+  // Before delivery an unfilled runbook is the plan, not a hole: no line.
+  assert.equal(stripE(undefined, { ...runbooks, phase: 'build' }).split('<section class="line">').length - 1, 1);
+});
+
+test('the evidence line speaks the language the project set', () => {
+  const html = renderStrip(facts(ARMED, undefined, { evidence: { value: EVIDENCE } }), 'nl');
+  assert.match(visible(html), /bewijs: 1 van de 2 gedateerde feiten zijn ouder dan een kwartaal/);
+  assert.match(visible(html), /geverifieerd 2026-03-01, 190 dagen geleden/);
 });
 
 // ---------------------------------------------------------------- what the strip carries
