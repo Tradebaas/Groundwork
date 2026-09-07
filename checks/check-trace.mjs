@@ -40,7 +40,7 @@ function unknownScopeIds(body, known) {
 // has to be on it: given a sha, the SC-id resolves back through the brief to the requirement it
 // served. Without this the chain runs BRIEF -> spec -> ticket and then goes dark, and no
 // system-generated list of "what changed, serving what" can be produced after the fact.
-export function checkCommitMessage(message, known) {
+export function checkCommitMessage(message, known, style = null) {
   const failures = [];
   // The message is somebody's own text and the failure quotes it back into a terminal, so it
   // passes the same sink rule as every other finding (checks/links.mjs).
@@ -63,6 +63,23 @@ export function checkCommitMessage(message, known) {
   // "scoped small" need judgment and stay with review.
   if (!/^[a-z]+(\([^\s()]+\))?!?: \S/.test(subject)) {
     fail('commit-subject', `subject "${subject}" is not a Conventional Commit. Shape: "type(scope): what changed", e.g. "fix(checks): reject empty scopes" - lowercase type (feat, fix, docs, chore, ...), scope optional, "!" before ":" for a breaking change.`);
+  }
+
+  // The same style rule every text file gets (prose-style in check.mjs): the characters an
+  // assistant leaves behind and the phrases config bans. The runner hands both in, so the two
+  // gates cannot disagree about what a tell is. A deliberate case, a quoted source say, escapes
+  // the way it does in a file: checks:allow-style on that line.
+  if (style) {
+    const phrases = (style.phrases || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
+    body.split('\n').forEach((line, i) => {
+      if (line.includes('checks:allow-style')) return;
+      for (const [ch, what, fix] of style.chars || []) {
+        if (line.includes(ch)) fail('commit-style', `line ${i + 1} carries an AI tell (${what}): ${fix}. Quoting a source? Append "checks:allow-style" to that line.`);
+      }
+      for (const e of phrases) {
+        if (e.re.test(line)) fail('commit-style', `line ${i + 1} reads as AI boilerplate (/${e.pattern}/): ${e.why}`);
+      }
+    });
   }
 
   // Git decides what a trailer is: the last block of the message, on one line, with nothing but

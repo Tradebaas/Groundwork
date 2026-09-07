@@ -30,6 +30,19 @@ import { configChecks, thirdPartyMatcher } from './check-config.mjs';
 // check-trace.mjs with the rest of the chain, and stays reachable at its published address.
 export { checkCommitMessage };
 
+// The typography an assistant leaves behind and a person rarely types (decision 0008). One list,
+// read by the prose-style gate over every text file and by the commit-message gate, because the
+// commit message is the one artifact that ships and was the one text this list never reached.
+export const AI_TYPOGRAPHY = [
+  ['—', 'em dash', 'rewrite with a period, comma, colon, or parentheses'],
+  ['–', 'en dash', 'use a hyphen, or "to" for a number range'],
+  ['…', 'ellipsis character', 'type three periods (...)'],
+  ['‘', 'curly quote', 'use a straight quote'],
+  ['’', 'curly quote', 'use a straight quote'],
+  ['“', 'curly quote', 'use a straight quote'],
+  ['”', 'curly quote', 'use a straight quote'],
+];
+
 const TEXT_EXT = new Set([
   '.md', '.json', '.yml', '.yaml', '.txt', '.toml', '.xml', '.svg', '.html', '.css',
   '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.sh', '.py', '.cs', '.java', '.go',
@@ -191,15 +204,7 @@ export function runChecks(root) {
       // AI-tell typography that may never appear in any text (AGENTS.md Language rule, decision 0008).
       // Deterministic characters only; judgment tells (cliche phrasing) live in VOICE.md + design-guard.
       // checks:allow-style on a line is the escape hatch (e.g. a spec quoting source text verbatim).
-      const chars = [
-        ['—', 'em dash', 'rewrite with a period, comma, colon, or parentheses'],
-        ['–', 'en dash', 'use a hyphen, or "to" for a number range'],
-        ['…', 'ellipsis character', 'type three periods (...)'],
-        ['‘', 'curly quote', 'use a straight quote'],
-        ['’', 'curly quote', 'use a straight quote'],
-        ['“', 'curly quote', 'use a straight quote'],
-        ['”', 'curly quote', 'use a straight quote'],
-      ];
+      const chars = AI_TYPOGRAPHY;
       const phrases = (cfg.styleBans || []).map((e) => ({ ...e, re: new RegExp(e.pattern, 'i') }));
       // The phrase bans skip the files that legitimately name the tells (VOICE.md defines them,
       // decision records and archives may quote them), same idiom as the denylist. Typography is
@@ -414,7 +419,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       console.error('FAIL [commit-msg] --commit-msg needs the path to the message file.');
       process.exit(1);
     }
-    const found = checkCommitMessage(read(path), scopeIds(root));
+    // The message gets the style rule every other text gets: the same characters, the same
+    // phrases from config, so a tell cannot ship in the one place the prose-style gate never read.
+    const style = { chars: AI_TYPOGRAPHY, phrases: JSON.parse(read(join(root, 'checks', 'config.json'))).styleBans || [] };
+    const found = checkCommitMessage(read(path), scopeIds(root), style);
     if (found.length) {
       for (const f of found) console.error(`FAIL [${f.check}] ${f.msg}`);
       console.error('\nThe commit is not lost: git kept your message, fix it and commit again.');

@@ -139,9 +139,11 @@ expectClean('tickets-archive-skipped', ({ put }) => {
 // Same two directions as every gate above: it must block a commit that names no scope item,
 // and stay silent on the shapes git composes itself.
 const SCOPED = new Set(['SC-1']);
+// The style the runner hands the gate: one character and one phrase stand in for the lists.
+const STYLE = { chars: [['\u2014', 'em dash', 'rewrite it']], phrases: [{ pattern: '\\bdelve(s|d|ing)?\\b', why: 'AI-tell verb' }] };
 
 function expectMsgFail(label, message, known = SCOPED, check = null) {
-  const found = checkCommitMessage(message, known);
+  const found = checkCommitMessage(message, known, STYLE);
   try {
     assert.ok(found.length, `expected "${label}" to be blocked, but it passed`);
     // Pin the failing check when named, so a case cannot silently pass for another reason.
@@ -151,7 +153,7 @@ function expectMsgFail(label, message, known = SCOPED, check = null) {
 }
 
 function expectMsgClean(label, message, known = SCOPED) {
-  const found = checkCommitMessage(message, known);
+  const found = checkCommitMessage(message, known, STYLE);
   try {
     assert.equal(found.length, 0, `"${label}" should pass, got: ${JSON.stringify(found)}`);
     tally.passed++;
@@ -159,6 +161,11 @@ function expectMsgClean(label, message, known = SCOPED) {
 }
 
 expectMsgFail('commit-trace-missing', 'feat(checks): add a thing\n\nA body that explains why.\n');
+// The message is the one text the style gate never read, and the one artifact that ships.
+expectMsgFail('commit-style-typography', 'feat(checks): add a thing\n\nA body \u2014 with an em dash.\n\nTraces-to: SC-1\n', SCOPED, 'commit-style');
+expectMsgFail('commit-style-phrase', 'feat(checks): add a thing\n\nLet us delve into why.\n\nTraces-to: SC-1\n', SCOPED, 'commit-style');
+expectMsgClean('commit-style-quoted-source', 'feat(checks): add a thing\n\nThe owner wrote "done \u2014 ship it" checks:allow-style\n\nTraces-to: SC-1\n');
+expectMsgClean('commit-style-plain', 'feat(checks): add a thing\n\nA plain body that says why, with no tells.\n\nTraces-to: SC-1\n');
 expectMsgFail('commit-trace-empty', 'feat(checks): add a thing\n\nTraces-to:\n');
 expectMsgFail('commit-trace-placeholder', 'feat(checks): add a thing\n\nTraces-to: <SC-id>\n');
 expectMsgFail('commit-trace-tbd', 'feat(checks): add a thing\n\nTraces-to: TBD\n');
