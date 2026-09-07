@@ -18,6 +18,7 @@ import { parseBrief, parseManifest, manifestMatcher, isSpecPath, BRIEF_PATH, MAN
 // read here and by the board.
 import { parseLinks, linkTargets, readDocuments, forTerminal, SKIP_DIRS } from './links.mjs';
 import { enforcementReport, formatReport, formatFloor } from './enforcement.mjs';
+import { datedEvidence, formatEvidence } from './evidence.mjs';
 // Gate families live in their own files, composed into the registry below: what a source file
 // may contain and how long it may be, the trace chain from brief to commit, whether a stack's
 // own gates are wired, and the config's self-gate, which also owns the third-party declaration.
@@ -440,6 +441,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       // The floor beside the signals: armed gates say nothing about how much of this project's
       // own code any of them looks at. Silent until a stack is declared (E-02/F-01/S-03).
       for (const line of formatFloor(floorReport(root))) console.log(line);
+      // And how old the dated facts are: a compliance stamp, the stack file's source date or the
+      // last proven restore is true on its day and rots silently after. Counted, never blocked.
+      for (const line of formatEvidence(datedEvidence(root))) console.log(line);
     } catch (e) {
       console.log(`enforcement: self-report crashed (${e.message}); the checks below still decide.`);
     }

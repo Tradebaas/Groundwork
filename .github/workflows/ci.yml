@@ -42,6 +42,7 @@ jobs:
           node checks/board-strip.test.mjs
           node checks/board-file.test.mjs
           node checks/guard.test.mjs
+          node checks/evidence.test.mjs
 
       - name: Groundwork checks
         run: node checks/check.mjs
