@@ -59,7 +59,10 @@ jobs:
 
   # The first mechanical check this framework has ever had on what an interface renders
   # (spec 011). The design method is installed per project and gitignored like a dependency, so
-  # this job fetches it at the pinned version instead of reading it out of the tree. A project
+  # this job fetches it at the package version recorded in checks/config.json (--pinned prints it)
+  # instead of reading it out of the tree. That fixes the launcher and its engine binary; the
+  # method's content is downloaded at whatever the current release is, which is why the enforcement
+  # line reports the content version rather than this job asserting one. A project
   # on Groundwork with no interface deletes this job; one with more surfaces adds them to the
   # scan. `stack-gates` reads this stage: while .impeccable/config.json declares the method, a
   # workflow has to actually run the detector.

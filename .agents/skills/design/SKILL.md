@@ -149,8 +149,10 @@ The owner decides at three points, in this order. This is the order of work:
    names if it can be spawned here. If it cannot, spawn a fresh subagent, hand it the method's own
    finish-reviewer brief (look it up in the payload rather than from a path written here) plus the
    input packet that brief asks for, and disclose in one line at finish which of the two ran.
-   Measured on the pinned release, 2026-08-07: a Claude Code install wrote no agent definitions, so
-   the second route is the live one here.
+   Measured 2026-09-07: the install now writes four `impeccable-*` agents into `.claude/agents/`,
+   `impeccable-finish-reviewer` among them, so the first route is the live one here. It was the
+   second route a month earlier, on a payload that wrote none, which is the reason this paragraph
+   states the requirement and checks what is installed instead of naming one of them.
 
 An addition inside a surface that already exists inherits that surface: it is not a new identity
 exercise, and it does not run this round again.
@@ -170,7 +172,7 @@ updated. Owner answers captured verbatim where wording matters.
 ## 5. When the method is unavailable: the degraded route
 
 The method is one package from one maintainer, so it can genuinely be missing: npm unreachable,
-the pinned version gone, a Node floor this machine cannot meet, an install that refuses. The
+the release gone, a Node floor this machine cannot meet, an install that refuses. The
 brief's rule is that a capability which cannot degrade visibly does not get built, so this is
 that degradation, written down before it is needed. Say in one line that you are on this route
 and why, record it in STATE.md, and build on:

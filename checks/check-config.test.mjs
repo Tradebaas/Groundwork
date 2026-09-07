@@ -9,7 +9,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { thirdPartyMatcher } from './check-config.mjs';
-import { PAYLOAD_PATH, pinnedVersion } from './design-method.mjs';
+import { PAYLOAD_PATH, pinnedVersion, verifiedContent } from './design-method.mjs';
 import { enforcementReport } from './enforcement.mjs';
 import {
   fixture, expectClean, expectFail, withConfig, BASE_BUDGETS, tally, report,
@@ -126,40 +126,45 @@ expectFail('config-invariants', withConfig({
 }
 
 
-// The design method's version is a config fact, so it is tested where the config is. The pin is
-// only worth having if a payload that is not the pinned one says so where the owner already
-// looks: same fixture twice, one version apart is reported, the same version is quiet.
-const pinnedTo = (v) => ({ put }) => {
+// The design method's two version lines are config facts, so they are tested where the config is.
+// The install downloads the current content whatever package version it is given, so the payload
+// can change under a project without anyone asking; the report is what makes that impossible to
+// miss. Same fixture twice: content one version off the verified one is reported, equal is quiet.
+const verifiedAt = (v) => ({ put }) => {
   put('.agents/skills/impeccable/SKILL.md', '---\nname: impeccable\nversion: 9.9.9\n---\n');
   put('checks/config.json', JSON.stringify({
-    thirdParty: [{ path: '.agents/skills/impeccable/', version: v, why: 'the design method' }],
+    thirdParty: [{
+      path: '.agents/skills/impeccable/', version: '1.0.0', contentVersion: v, why: 'the design method',
+    }],
   }));
 };
-for (const [label, pin, drifted] of [['drifted', '9.9.8', true], ['at-the-pin', '9.9.9', false]]) {
+for (const [label, content, drifted] of [['drifted', '9.9.8', true], ['as-verified', '9.9.9', false]]) {
   const fx = fixture();
-  pinnedTo(pin)(fx);
+  verifiedAt(content)(fx);
   const signal = enforcementReport(fx.root).find((x) => x.signal === 'design method');
   rmSync(fx.root, { recursive: true, force: true });
   try {
     assert.equal(Boolean(signal.drifted), drifted,
-      `design-method-pin-${label}: expected drifted=${drifted}, got: ${signal.detail}`);
+      `design-method-content-${label}: expected drifted=${drifted}, got: ${signal.detail}`);
     if (drifted) {
-      assert.ok(signal.detail.includes(`pinned at ${pin}`),
-        `design-method-pin-${label}: the line names the pin, got: ${signal.detail}`);
+      assert.ok(signal.detail.includes(`${content} is the version this project verified`),
+        `design-method-content-${label}: the line names the verified content, got: ${signal.detail}`);
     }
     tally.passed++;
-  } catch (e) { tally.failed.push(`design-method-pin-${label}: ${e.message}`); }
+  } catch (e) { tally.failed.push(`design-method-content-${label}: ${e.message}`); }
 }
 
-{ // The install refuses before it fetches when no pin is declared: an unpinned install is the
-  // defect this change exists to remove, so it fails loudly rather than falling back to latest.
+{ // The install refuses before it fetches when no package version is declared: falling back to
+  // latest is what let the launcher change without anyone choosing it.
   const fx = fixture();
   fx.put('checks/config.json', JSON.stringify({ thirdParty: [] }));
   try {
     assert.throws(() => pinnedVersion(fx.root), /declares no version/,
-      'pinnedVersion must refuse a config that declares no pin');
+      'pinnedVersion must refuse a config that declares no package version');
+    assert.equal(verifiedContent(fx.root), null,
+      'a config with no contentVersion reads null: nobody has verified a payload yet');
     tally.passed++;
-  } catch (e) { tally.failed.push(`design-method-pin-required: ${e.message}`); }
+  } catch (e) { tally.failed.push(`design-method-version-required: ${e.message}`); }
   rmSync(fx.root, { recursive: true, force: true });
 }
 
