@@ -13,6 +13,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { HANDOFF_PATHS } from './progress.mjs';
 
 // A quarter, in days, with the slack a calendar quarter needs.
 export const QUARTER_DAYS = 92;
@@ -87,6 +88,58 @@ export function datedEvidence(root, today = new Date()) {
     .map((s) => ({ ...s, ageDays: days(new Date(`${s.date}T00:00:00Z`), today) }))
     .filter((s) => s.ageDays > QUARTER_DAYS);
   return { stamps, stale };
+}
+
+// ---------------------------------------------------------------- the runbooks
+
+// The phase the handoff declares, in one word, from the file that owns it.
+export function phaseOf(root) {
+  for (const rel of HANDOFF_PATHS) {
+    const p = join(root, rel);
+    if (!existsSync(p)) continue;
+    const m = read(p).match(/^- \*\*Phase:\*\*\s*([a-z]+)/mi);
+    return m ? m[1].toLowerCase() : null;
+  }
+  return null;
+}
+
+// The runbooks a shipped product runs on, and how many fields in them are still the template's
+// angle-bracket placeholders. Only the runbooks every product needs count: the deploy template is
+// Groundwork's own until `deliver` fills it, the drill runbook is the framework's, and the
+// agent-security runbook is filled only where an organization asks for it. A placeholder inside
+// backticks is an instruction that quotes one, not a field.
+const RUNBOOKS = ['deploy.md', 'backup-restore.md', 'incident-response.md', 'monitoring.md', 'access.md'];
+export function runbookPlaceholders(root) {
+  const out = [];
+  for (const f of RUNBOOKS) {
+    const p = join(root, 'docs', 'operations', f);
+    if (!existsSync(p)) continue;
+    let inComment = false;
+    lines(p).forEach((l, i) => {
+      // Placeholders inside an HTML comment are the template's own explanation, not a field.
+      let text = l;
+      if (inComment) {
+        if (!text.includes('-->')) return;
+        text = text.slice(text.indexOf('-->') + 3);
+        inComment = false;
+      }
+      text = text.replace(/<!--[\s\S]*?-->/g, '');
+      if (text.includes('<!--')) { text = text.slice(0, text.indexOf('<!--')); inComment = true; }
+      text = text.replace(/`[^`]*`/g, '').replace(/`[^`]*$/, '');
+      const n = (text.match(/<[^<>]+>/g) || []).length;
+      if (n) out.push({ path: `docs/operations/${f}`, line: i + 1, fields: n });
+    });
+  }
+  return out;
+}
+
+// Said only once the phase is deliver or maintain: before that, an unfilled runbook is the plan,
+// not a hole. A count, never a block: which value goes in a field is the owner's to know.
+export function formatRunbooks(root, placeholders = runbookPlaceholders(root), phase = phaseOf(root)) {
+  if (!['deliver', 'maintain'].includes(phase) || !placeholders.length) return [];
+  const total = placeholders.reduce((n, p) => n + p.fields, 0);
+  const files = [...new Set(placeholders.map((p) => p.path.replace('docs/operations/', '')))];
+  return [`runbooks: ${total} fields still hold the template's placeholders in ${files.join(', ')} while the phase is ${phase}; deliver fills them before a release, maintain keeps them true.`];
 }
 
 // One line the owner reads beside the floor, then one per stale stamp. A project with no stamp
