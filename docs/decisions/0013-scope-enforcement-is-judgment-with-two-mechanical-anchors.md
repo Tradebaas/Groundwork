@@ -33,7 +33,8 @@ ones that were rejected matter more than the one that was built.
    spec status, so a model writing `Status: done` makes the overview report the scope item done
    with no evidence. Requiring a done spec to name its verification artifact has real teeth
    against that, but it touches the spec template and every existing spec. Queued in intake
-   rather than folded into this change.
+   rather than folded into this change. Built 2026-09-07: the template carries a `Verified by:`
+   line, and `spec-traces` refuses a spec at `done` that leaves it unfilled.
 4. **Make `scope-guard` leave a mechanical trace (rejected).** A marker the agent writes itself
    proves nothing about the thinking the same agent may have skipped. It would convert an honest
    judgment step into a checkbox and buy false confidence. This is precisely why it is a skill.

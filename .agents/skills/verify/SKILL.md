@@ -43,7 +43,7 @@ STATE.md". Unverifiable-and-silent is how "works on my machine" ships.
   any status flips: findings must land while they can still change the work. Blocker fixes come
   back through §1-2. Trivial tier: record "code-review: skipped (trivial)" in STATE.md instead.
 - Reconcile docs the verified change made stale; retired wording → denylist
-  (`checks/config.json`). Spec status → `done`, folder → archive (see `spec`).
+  (`checks/config.json`). Spec: `Verified by:` names this run's artifact (the suite and its count, the walk, the log entry), status → `done`, folder → archive (see `spec`).
 - STATE.md: gates line updated with the evidence summary ("checks green, tests 61/61, criteria
   4/4 exercised"), Now ▶ next step.
 
