@@ -29,7 +29,11 @@ about mechanism, not about who may adopt.
    It costs the flank that the nearest comparable system leads with, and it contradicts the
    principle in the vision that names the retrofit story as part of distribution.
 4. **A script that installs Groundwork into an existing repo:** not on the table. The out-of-scope
-   line rules it out, and decision 0017 just ruled the same way for updates.
+   line rules it out, and decision 0017 just ruled the same way for updates. Amended 2026-09-25:
+   the brief now allows a few zero-dependency scripts (decision 0022), so adoption runs through
+   `init --adopt` plus `begin`. The script lays the framework files down and measures the
+   starting position; `begin` still owns the interview and the brownfield branch below. Until
+   `init` is built, the route below is the whole route.
 
 ## Decision & consequences
 
