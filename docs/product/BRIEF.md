@@ -125,7 +125,7 @@ Copy before the project exists (GitHub template or degit), then say "begin". A p
 exists takes the same route with its own history kept: `begin` asks which of the two it is and
 adapts (decision 0018). The explainer page is the front door, English first. Each release is tagged
 and carries a changelog, so a copy can tell which Groundwork it holds and what has moved since
-(decision 0017).
+(decision 0022).
 
 ## Success criteria
 
