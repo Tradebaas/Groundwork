@@ -5,8 +5,9 @@ generated from commits.
 
 Your copy carries the framework as it was on the day you took it. To take a later improvement,
 read from your version forward, copy in the files you want, and keep everything you have made your
-own. There is no updater, on purpose:
-[decision 0017](docs/decisions/0017-copies-take-improvements-by-hand-from-tagged-releases.md).
+own. That is the whole route today; a report-first upgrade that lists what is behind and asks
+per file is planned, not built:
+[decision 0022](docs/decisions/0022-a-copy-takes-improvements-through-a-report-first-upgrade.md).
 
 Versions follow [semantic versioning](https://semver.org). Below 1.0 the shape is still settling,
 so a minor version may move a file or rename a check; each entry says so when it does.
@@ -52,6 +53,16 @@ fire on a copy of v0.2.0, each on purpose: a bare TODO or a lint suppression in 
 of the four new phrase bans, a real value in `.env.example`, a spec at `done` without its
 `Verified by:` line, and a stack file whose `command` answers no pipeline runs, on a project whose
 CI was never on GitHub and was therefore never asked.
+
+The scope changed on 2026-09-25, before anything is built against it. The brief now allows a few
+zero-dependency scripts in the product (`init`, `assess`, `status`) that you may run and your
+project never needs to keep working, and an optional plugin that may scaffold, report and copy
+framework files, only with your yes per file and never deleting anything. A package manager stays
+out of scope. Decision 0022 replaces 0017 and records the planned report-first upgrade; decision
+0018 now names `init --adopt` plus `begin` as the adoption route. None of it is built yet, so
+improvements still travel by hand. The two old promises, that a copy has no scripts and will never
+get an upgrade, joined the denylist in their retired wording, so a copy that still carries that
+wording sees the denylist gate fire on it.
 
 ## v0.2.0 - 2026-08-01
 

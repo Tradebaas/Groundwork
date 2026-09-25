@@ -83,11 +83,12 @@ Why one route and not a separate installer:
 ## Version, and taking later improvements
 
 Every release is tagged and described in [CHANGELOG.md](CHANGELOG.md), so a copy can tell which
-Groundwork it holds. Improvements travel by hand and on purpose: read the changelog from your
-version forward, copy in the files you want, and keep everything you have made your own. There is
-no updater, and there will not be one: your copy has edited skills, tuned checks and its own rules
-by then, and merging that safely is a package manager, not a framework.
-[Decision 0017](docs/decisions/0017-copies-take-improvements-by-hand-from-tagged-releases.md)
+Groundwork it holds. Today improvements travel by hand: read the changelog from your version
+forward, copy in the files you want, and keep everything you have made your own. A report-first
+upgrade is planned and not built yet: it will list which framework files are behind, which ones
+you changed yourself and which ones collide, and write nothing without your yes per file. It will
+never merge on its own, because your copy has edited skills, tuned checks and its own rules by then.
+[Decision 0022](docs/decisions/0022-a-copy-takes-improvements-through-a-report-first-upgrade.md)
 records the reasoning.
 
 ## How it works
