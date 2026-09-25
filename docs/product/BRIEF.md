@@ -72,15 +72,18 @@ Four situations the framework is built for:
 
 ## Out of scope, explicitly
 
-- An IDE, a CLI, an installer or a scaffolder. Groundwork is copied into place, whether or not a
-  project is already there; there is nothing to run.
-- A mechanism that pulls later framework changes into an existing copy. Improvements travel as a
-  versioned release, a changelog and a written route the owner follows by hand (decision 0017);
-  merging them safely into a project that has edited its own copy is a package manager, which is a
-  second product.
+- An IDE, and any tooling a project needs in order to keep working. Groundwork is copied into
+  place, whether or not a project is already there. The product carries a few zero-dependency
+  scripts (init, assess, status) that a person or agent may run; the project never needs them to
+  keep working.
+- A package manager. An optional plugin may scaffold, report and copy framework files, never
+  without a per-file yes, never deleting, never resolving dependencies, never touching project or
+  merge files. Merging later framework changes into a copy that has made them its own is what a
+  package manager does, and a package manager stays out of scope: it is a second product.
 - A code generator or a component library. It carries method, not implementation.
 - Prebuilt stack, design or legal knowledge frozen into the repo. That knowledge is researched
-  live at the moment of decision and written down with a date and a source. This is what keeps
+  live at the moment of decision and written down with a date and a source; platform packs are
+  dated, sourced fact registers. This is what keeps
   one small repo current without a rewrite.
 - Team or organization features for the framework itself: shared dashboards, role management,
   multi-user workflow. One person is at the wheel.
