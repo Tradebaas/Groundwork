@@ -607,11 +607,13 @@ window.GW={
     <p><b>Every release is tagged.</b> Each version carries a git tag and a section in the
       changelog, so a copy can say which Groundwork it holds and what has happened since:
       <a href="https://github.com/Tradebaas/Groundwork/releases">releases and changelog</a>.</p>
-    <p><b>Improvements travel by hand.</b> Read the changelog from your version forward, copy in
-      the files you want, and keep everything you have made your own. There is no updater, and
-      there will not be one: by then your copy has edited skills, tuned checks and rules of its
-      own, and merging that safely is a package manager rather than a framework.
-      <a href="https://github.com/Tradebaas/Groundwork/blob/main/docs/decisions/0017-copies-take-improvements-by-hand-from-tagged-releases.md">The
+    <p><b>Improvements travel by hand, for now.</b> Read the changelog from your version forward,
+      copy in the files you want, and keep everything you have made your own. A report-first
+      upgrade is planned and not built yet: it will list which framework files are behind, which
+      ones you changed yourself and which ones collide, and write nothing without your yes per
+      file. It will never merge on its own, because by then your copy has edited skills, tuned
+      checks and rules of its own.
+      <a href="https://github.com/Tradebaas/Groundwork/blob/main/docs/decisions/0022-a-copy-takes-improvements-through-a-report-first-upgrade.md">The
       reasoning is recorded as a decision</a>.</p>
   </div>
 </section>
