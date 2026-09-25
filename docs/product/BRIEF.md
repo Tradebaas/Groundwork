@@ -72,8 +72,7 @@ Four situations the framework is built for:
 
 ## Out of scope, explicitly
 
-- An IDE, and any tooling a project needs in order to keep working. Groundwork is copied into
-  place, whether or not a project is already there. The product carries a few zero-dependency
+- An IDE, and any install step a project depends on. Groundwork is copied into place, whether or not a project is already there. The product carries a few zero-dependency
   scripts (init, assess, status) that a person or agent may run; the project never needs them to
   keep working.
 - A package manager. An optional plugin may scaffold, report and copy framework files, never
@@ -83,8 +82,7 @@ Four situations the framework is built for:
 - A code generator or a component library. It carries method, not implementation.
 - Prebuilt stack, design or legal knowledge frozen into the repo. That knowledge is researched
   live at the moment of decision and written down with a date and a source; platform packs are
-  dated, sourced fact registers. This is what keeps
-  one small repo current without a rewrite.
+  dated, sourced fact registers. This is what keeps one small repo current without a rewrite.
 - Team or organization features for the framework itself: shared dashboards, role management,
   multi-user workflow. One person is at the wheel.
 - A paid tier, a license gate or a marketplace. MIT, free, no friction.

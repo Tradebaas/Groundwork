@@ -5,7 +5,8 @@
 <!-- Superseded 2026-09-25 by decision 0022: the brief now allows a few zero-dependency scripts and
      a report-first upgrade from an optional plugin, so the route below is no longer the only one.
      Releases and the changelog stay as set up here. The reasoning below stays readable as the
-     record of why a hand route was the right answer while nothing measured against it. -->
+     record of why a hand route was the right answer until drift in real copies was measured
+     (0022). -->
 
 ## Context
 

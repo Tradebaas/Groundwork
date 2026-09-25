@@ -60,9 +60,9 @@ project never needs to keep working, and an optional plugin that may scaffold, r
 framework files, only with your yes per file and never deleting anything. A package manager stays
 out of scope. Decision 0022 replaces 0017 and records the planned report-first upgrade; decision
 0018 now names `init --adopt` plus `begin` as the adoption route. None of it is built yet, so
-improvements still travel by hand. The two old promises, that a copy has no scripts and will never
-get an upgrade, joined the denylist in their retired wording, so a copy that still carries that
-wording sees the denylist gate fire on it.
+improvements still travel by hand. The two old promises, that Groundwork ships nothing to run
+and that no upgrade will ever come, joined the denylist in their retired wording, so a copy that
+takes in this `checks/config.json` and still carries that wording sees the denylist gate fire.
 
 ## v0.2.0 - 2026-08-01
 
