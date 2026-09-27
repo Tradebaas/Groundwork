@@ -5,6 +5,8 @@
 // against the tracked snapshot an adopter actually receives.
 // Run: node checks/drill.mjs            (--ref <sha> drills another snapshot with today's begin
 //                                        bullets, --keep leaves the copy on disk to look at)
+//      node checks/drill.mjs --adopt    (the brownfield route over three existing repositories,
+//                                        red until it is built: checks/drill-adopt.mjs)
 // Self-test: node checks/drill.test.mjs (every step must fail when the copy is broken).
 //
 // What this is not. It is not a gate on anyone's work: it inspects a copy of this repository and
@@ -46,7 +48,7 @@ const must = (ok, message) => { if (!ok) throw new Error(message); };
 
 // git in the copy runs with no global or system config: the drill must measure the shipped repo,
 // not whatever templates, hooks or signing key the machine running it happens to carry.
-function gitEnv(copy) {
+export function gitEnv(copy) {
   return {
     ...process.env,
     GIT_CONFIG_GLOBAL: join(copy, 'no-global-gitconfig'),
@@ -325,10 +327,18 @@ export async function runDrill({ ref = 'HEAD', keep = false, requireWalk = false
 if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const args = process.argv.slice(2);
   const refAt = args.indexOf('--ref');
-  const { ok } = await runDrill({
+  const options = {
     ref: refAt === -1 ? 'HEAD' : args[refAt + 1],
     keep: args.includes('--keep'),
     requireWalk: args.includes('--require-walk'),
-  });
+  };
+  // Its own process, because drill-adopt.mjs imports this module, and importing it back from
+  // here while this module is still evaluating would never settle.
+  if (args.includes('--adopt')) {
+    const adopt = join(dirname(fileURLToPath(import.meta.url)), 'drill-adopt.mjs');
+    process.exit(spawnSync(process.execPath, [adopt, ...args.filter((a) => a !== '--adopt')],
+      { stdio: 'inherit' }).status ?? 2);
+  }
+  const { ok } = await runDrill(options);
   process.exit(ok ? 0 : 1);
 }
