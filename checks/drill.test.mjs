@@ -14,7 +14,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { STEPS, freshCopy, isFramework, runDrill } from './drill.mjs';
+import { STEPS, runDrill } from './drill.mjs';
+import { freshCopy, isFramework } from './drill-core.mjs';
 
 const step = (id) => STEPS.find((s) => s.id === id);
 
