@@ -72,8 +72,7 @@ evidence, and it is a real repository at the exact point the walk stopped.
 
 The `drill` job in `.github/workflows/ci.yml` runs the self-test and then the drill on every push
 and every pull request. A green `drill` job beside a commit means the copy route was walked on that
-commit, so the evidence carries the commit rather than a date. It is the job's tick that says so,
-not the commit's overall one: the adoption walk below is red by design until its route is built. There is no stored report to keep
+commit, so the evidence carries the commit rather than a date. There is no stored report to keep
 up to date, in line with the rule that what the code can prove is not restated in prose.
 
 ## The adoption walk
@@ -86,7 +85,7 @@ an adopted repository must show. The fixtures and what each one plants are in
 builds it, are in `checks/drill-adopt.mjs`. They change as those packages land, so they are not
 listed here.
 
-It is red by design until the route is built. Reading its report:
+Its report is red by design until the route is built. Reading it:
 
 | Line | Meaning |
 |---|---|
@@ -97,7 +96,8 @@ It is red by design until the route is built. Reading its report:
 | `DEFECT` | The drill itself is broken (a fixture did not build, a step crashed): fix the drill |
 
 Exit codes: 0 green, 1 something built fails, 2 a defect of the drill, 3 only steps not built yet
-stand in the way. The `adopt-drill` CI job fails on anything but 0, and it is not a required check
-until the walk is green, when it becomes one. Its self-test runs in the `drill` job, which is
+stand in the way. The `adopt-drill` CI job passes on 0 and 3 and fails on 1 and 2, so it turns red
+when something already built fails or the drill breaks, while the steps not built yet stay listed in
+its log. It is not a required check until the walk exits 0, when it becomes one. Its self-test runs in the `drill` job, which is
 otherwise green, so a broken fixture shows there. A read-only run on a real repository each quarter
 comes with the packages that build the route, not before.
