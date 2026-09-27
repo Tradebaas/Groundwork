@@ -6,7 +6,7 @@
 
 import { mkdtempSync, mkdirSync, rmSync, existsSync, realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
+import { tmpdir, devNull } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,18 +18,22 @@ export const FIRST_COMMIT = ['chore: initialize project on Groundwork',
   'Traces-to: explicit request: project initialization (begin)'];
 
 // git in the copy runs with no global or system config: the drill must measure the shipped repo,
-// not whatever templates, hooks or signing key the machine running it happens to carry.
-export function gitEnv(copy) {
+// not whatever templates, hooks or signing key the machine running it happens to carry. The null
+// device reads as empty and refuses a write, so nothing a tool under test sets globally lands
+// anywhere. Every inherited GIT_* variable goes too: git exports GIT_DIR and GIT_INDEX_FILE to
+// its hooks, and a drill started from inside one would otherwise commit into that repository.
+export function gitEnv() {
+  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('GIT_')));
   return {
-    ...process.env,
-    GIT_CONFIG_GLOBAL: join(copy, 'no-global-gitconfig'),
-    GIT_CONFIG_SYSTEM: join(copy, 'no-system-gitconfig'),
+    ...env,
+    GIT_CONFIG_GLOBAL: devNull,
+    GIT_CONFIG_SYSTEM: devNull,
     GIT_AUTHOR_NAME: 'Groundwork drill', GIT_AUTHOR_EMAIL: 'drill@example.invalid',
     GIT_COMMITTER_NAME: 'Groundwork drill', GIT_COMMITTER_EMAIL: 'drill@example.invalid',
   };
 }
-export const git = (copy, args) => spawnSync('git', args, { cwd: copy, encoding: 'utf8', env: gitEnv(copy) });
-export const node = (copy, args) => spawnSync(process.execPath, args, { cwd: copy, encoding: 'utf8', env: gitEnv(copy) });
+export const git = (cwd, args) => spawnSync('git', args, { cwd, encoding: 'utf8', env: gitEnv() });
+export const node = (cwd, args) => spawnSync(process.execPath, args, { cwd, encoding: 'utf8', env: gitEnv() });
 
 // The drill is the framework's evidence about its own copy route, and a project built on
 // Groundwork inherits this file the way it inherits the CI job: present, and not about it.
@@ -46,11 +50,12 @@ export function freshCopy(ref = 'HEAD', source = SOURCE) {
   const copy = join(box, 'copy');
   mkdirSync(copy);
   const tarball = join(box, 'snapshot.tar');
+  const fail = (message) => { rmSync(box, { recursive: true, force: true }); throw new Error(message); };
   const made = spawnSync('git', ['archive', '--format=tar', '-o', tarball, ref],
-    { cwd: source, encoding: 'utf8' });
-  if (made.status !== 0) throw new Error(`git archive ${ref} failed: ${made.stderr || made.stdout}`);
+    { cwd: source, encoding: 'utf8', env: gitEnv() });
+  if (made.status !== 0) fail(`git archive ${ref} failed: ${made.stderr || made.stdout}`);
   const untarred = spawnSync('tar', ['-xf', tarball, '-C', copy], { encoding: 'utf8' });
-  if (untarred.status !== 0) throw new Error(`tar failed: ${untarred.stderr}`);
+  if (untarred.status !== 0) fail(`tar failed: ${untarred.stderr}`);
   rmSync(tarball);
   return { box, copy };
 }
