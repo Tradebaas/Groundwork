@@ -108,6 +108,27 @@ jobs:
       - name: A fresh copy still reaches a governed first commit
         run: node checks/drill.mjs --require-walk
 
+  # The brownfield route, walked over three existing repositories (decision 0018, E-03/F-02/S-01).
+  # Red on purpose until phase 5 of the recovery plan: each step names the package that builds it,
+  # so the red is the work still to do. That is why this job is not a required check, and it
+  # becomes one in phase 5, when the walk is green. The first step must stay green: it proves the
+  # fixtures are what they claim, so the second step's red is about the route and never about them.
+  # Runbook: docs/operations/evidence-drill.md.
+  adopt-drill:
+    if: github.repository == 'Tradebaas/Groundwork'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: The fixtures are what they claim, and the drill tells red from broken
+        run: node checks/drill-adopt.test.mjs
+
+      - name: Three existing repositories adopt Groundwork (red until phase 5)
+        run: node checks/drill.mjs --adopt --require-walk
+
   # The local commit-msg hook can be skipped (--no-verify, or a clone that never ran
   # --install-hooks), so the message gate is re-proven here, where it cannot be bypassed.
   trace:
