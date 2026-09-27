@@ -115,10 +115,12 @@ jobs:
         run: node checks/drill.mjs --require-walk
 
   # The brownfield route, walked over three existing repositories (decision 0018, E-03/F-02/S-01).
-  # Red by design until the route is built: each step names the package that builds it, so the red
-  # is the work still to do, and it is not a required check until the walk is green. Before it
-  # becomes one, drop the repository condition: GitHub reports a job skipped by `if` as a success,
-  # even for a required check, so a renamed repository would turn the walk green without running it.
+  # Until the route is built the walk exits 3: only steps not built yet stand in the way, and its
+  # log lists each with the package that builds it. Exit 3 passes (the owner's choice, 2026-09-27),
+  # so this job turns red only when something already built fails (1) or the drill breaks (2). It
+  # is not a required check until the walk exits 0. Before it becomes one, drop the repository
+  # condition: GitHub reports a job skipped by `if` as a success, even for a required check, so a
+  # renamed repository would turn the walk green without running it.
   # Runbook: docs/operations/evidence-drill.md.
   adopt-drill:
     if: github.repository == 'Tradebaas/Groundwork'
@@ -129,8 +131,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Three existing repositories adopt Groundwork (red until the route is built)
-        run: node checks/drill.mjs --adopt --require-walk
+      - name: Three existing repositories adopt Groundwork, as far as the route is built
+        run: node checks/drill.mjs --adopt --require-walk || [ $? -eq 3 ]
 
   # The local commit-msg hook can be skipped (--no-verify, or a clone that never ran
   # --install-hooks), so the message gate is re-proven here, where it cannot be bypassed.

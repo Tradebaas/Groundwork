@@ -70,8 +70,8 @@ Python: their own hooks, agent file and CI, a file far over the length cap, em d
 build output, and a secret that was committed once and removed) and walks the adoption route over
 each: assess, overlay, init, baseline, chained hooks, commit. It is red by design until that route
 is built, and every step and check that is not green names the package that turns it green. Its CI
-job runs only in Groundwork's own repository and is not a required check, so while it is red the
-workflow shows a red cross that blocks no merge.
+job runs only in Groundwork's own repository and turns red only when something already built fails
+or the drill itself breaks; the steps not built yet are listed in its log, not failed.
 
 ## v0.2.0 - 2026-08-01
 
