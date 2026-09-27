@@ -7,6 +7,7 @@
 //                                        bullets, --keep leaves the copy on disk to look at)
 //      node checks/drill.mjs --adopt    (the brownfield route over three existing repositories,
 //                                        red until it is built: checks/drill-adopt.mjs)
+// Shared with that walk: checks/drill-core.mjs.
 // Self-test: node checks/drill.test.mjs (every step must fail when the copy is broken).
 //
 // What this is not. It is not a gate on anyone's work: it inspects a copy of this repository and
@@ -17,18 +18,13 @@
 // says which `begin` bullets are covered here and which stay a person's job.
 
 import {
-  mkdtempSync, mkdirSync, rmSync, readdirSync, readFileSync, writeFileSync,
+  rmSync, readdirSync, readFileSync, writeFileSync,
   existsSync, lstatSync, readlinkSync, copyFileSync, realpathSync,
 } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
-import { join, relative, dirname } from 'node:path';
+import { join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-
-export const SOURCE = resolveSource();
-function resolveSource() {
-  return dirname(dirname(fileURLToPath(import.meta.url)));
-}
+import { SOURCE, FIRST_COMMIT, git, node, isFramework, freshCopy } from './drill-core.mjs';
+import { runAdoptDrill } from './drill-adopt.mjs';
 
 // The suites CI proves before it trusts any gate, run here inside the copy so it is the copy's
 // own code under test and never this working tree's. Keep in step with the `gate` job in
@@ -40,25 +36,7 @@ const SUITES = [
   'board-strip.test.mjs', 'board-file.test.mjs', 'guard.test.mjs', 'evidence.test.mjs',
 ];
 
-// begin's exact first commit, subject and trailer, from .agents/skills/begin/SKILL.md.
-const FIRST_COMMIT = ['chore: initialize project on Groundwork',
-  'Traces-to: explicit request: project initialization (begin)'];
-
 const must = (ok, message) => { if (!ok) throw new Error(message); };
-
-// git in the copy runs with no global or system config: the drill must measure the shipped repo,
-// not whatever templates, hooks or signing key the machine running it happens to carry.
-export function gitEnv(copy) {
-  return {
-    ...process.env,
-    GIT_CONFIG_GLOBAL: join(copy, 'no-global-gitconfig'),
-    GIT_CONFIG_SYSTEM: join(copy, 'no-system-gitconfig'),
-    GIT_AUTHOR_NAME: 'Groundwork drill', GIT_AUTHOR_EMAIL: 'drill@example.invalid',
-    GIT_COMMITTER_NAME: 'Groundwork drill', GIT_COMMITTER_EMAIL: 'drill@example.invalid',
-  };
-}
-const git = (copy, args) => spawnSync('git', args, { cwd: copy, encoding: 'utf8', env: gitEnv(copy) });
-const node = (copy, args) => spawnSync(process.execPath, args, { cwd: copy, encoding: 'utf8', env: gitEnv(copy) });
 
 // The copy reports on itself: its own enforcement.mjs, not this tree's, so a drift between the
 // two shows up as a failure instead of being papered over.
@@ -93,30 +71,6 @@ const numberedSpecs = (copy) => {
 };
 
 const sameBytes = (a, b) => readFileSync(a).equals(readFileSync(b));
-
-// The drill is the framework's evidence about its own copy route, and a project built on
-// Groundwork inherits this file the way it inherits the CI job: present, and not about it.
-// `begin` deletes the baseline folder holding what the framework itself had already shipped,
-// which makes its absence the honest signal that this repository is a project now.
-export const isFramework = (copy) => existsSync(join(copy, 'docs', 'specs', 'archive', '000-baseline'));
-
-// A tar snapshot of one ref is exactly what the ZIP and degit routes hand an adopter: tracked
-// files only, so every *.local.md and the whole .git go nowhere near it.
-export function freshCopy(ref = 'HEAD', source = SOURCE) {
-  // realpath first: on macOS the temp directory sits behind /var -> /private/var, and a step that
-  // compares its own path against the copy's would quietly compare two spellings of one place.
-  const box = realpathSync(mkdtempSync(join(tmpdir(), 'groundwork-drill-')));
-  const copy = join(box, 'copy');
-  mkdirSync(copy);
-  const tarball = join(box, 'snapshot.tar');
-  const made = spawnSync('git', ['archive', '--format=tar', '-o', tarball, ref],
-    { cwd: source, encoding: 'utf8' });
-  must(made.status === 0, `git archive ${ref} failed: ${made.stderr || made.stdout}`);
-  const untarred = spawnSync('tar', ['-xf', tarball, '-C', copy], { encoding: 'utf8' });
-  must(untarred.status === 0, `tar failed: ${untarred.stderr}`);
-  rmSync(tarball);
-  return { box, copy };
-}
 
 export const STEPS = [
   {
@@ -332,13 +286,7 @@ if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToP
     keep: args.includes('--keep'),
     requireWalk: args.includes('--require-walk'),
   };
-  // Its own process, because drill-adopt.mjs imports this module, and importing it back from
-  // here while this module is still evaluating would never settle.
-  if (args.includes('--adopt')) {
-    const adopt = join(dirname(fileURLToPath(import.meta.url)), 'drill-adopt.mjs');
-    process.exit(spawnSync(process.execPath, [adopt, ...args.filter((a) => a !== '--adopt')],
-      { stdio: 'inherit' }).status ?? 2);
-  }
+  if (args.includes('--adopt')) process.exit((await runAdoptDrill(options)).code);
   const { ok } = await runDrill(options);
   process.exit(ok ? 0 : 1);
 }

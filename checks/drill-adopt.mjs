@@ -1,8 +1,7 @@
 // The adoption drill: Groundwork's brownfield route, walked over three existing repositories on
 // every push. Decision 0018 names the route and says it is the one path this repo cannot dogfood;
-// this walk is how it gets dogfooded. The fixtures are built by checks/adopt-fixture.mjs.
-// Run: node checks/drill.mjs --adopt   (--ref <sha>, --keep, --require-walk as for the drill;
-//                                      node checks/drill-adopt.mjs takes the same flags)
+// this walk is how it gets dogfooded. The fixtures are built by checks/drill-adopt-fixture.mjs.
+// Run: node checks/drill.mjs --adopt   (--ref <sha>, --keep, --require-walk as for the drill)
 // Self-test: node checks/drill-adopt.test.mjs
 //
 // Red on purpose until phase 5 of the recovery plan (E-03/F-02/S-01). The route's steps are built
@@ -16,9 +15,8 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { freshCopy, isFramework } from './drill.mjs';
-import { FIXTURES, SENTINEL, buildFixture, fixtureProblems, git, hooksDir } from './adopt-fixture.mjs';
+import { freshCopy, isFramework } from './drill-core.mjs';
+import { FIXTURES, SENTINEL, buildFixture, fixtureProblems, git, hooksDir } from './drill-adopt-fixture.mjs';
 
 export const MAX_OWNER_ACTIONS = 3;
 export const MAX_MS = 60_000;
@@ -270,15 +268,4 @@ export async function runAdoptDrill({
   else rmSync(box, { recursive: true, force: true });
   rmSync(frameworkBox, { recursive: true, force: true });
   return { code, skipped: false, results };
-}
-
-if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
-  const args = process.argv.slice(2);
-  const refAt = args.indexOf('--ref');
-  const { code } = await runAdoptDrill({
-    ref: refAt === -1 ? 'HEAD' : args[refAt + 1],
-    keep: args.includes('--keep'),
-    requireWalk: args.includes('--require-walk'),
-  });
-  process.exit(code);
 }

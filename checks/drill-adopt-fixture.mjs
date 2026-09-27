@@ -14,7 +14,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
-import { gitEnv } from './drill.mjs';
+import { gitEnv } from './drill-core.mjs';
 
 // Assembled from parts so no key-shaped literal sits in tracked source for a scanner or for push
 // protection to find. In a fixture's history it is a whole AWS access key id, as a scanner sees it.

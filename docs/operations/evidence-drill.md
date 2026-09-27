@@ -79,7 +79,7 @@ up to date, in line with the rule that what the code can prove is not restated i
 
 `node checks/drill.mjs --adopt` walks the other route, the one decision 0018 names for a project
 that already exists: assess, overlay, init, baseline, chained hooks, commit. It builds three
-repositories for it with `checks/adopt-fixture.mjs` (TypeScript with React, .NET, Python), each
+repositories for it with `checks/drill-adopt-fixture.mjs` (TypeScript with React, .NET, Python), each
 with a history, its own pre-commit hook, `CLAUDE.md` and `ci.yml`, a 600-line file, em dashes,
 gitignored `bin/`, `obj/` and `.venv/`, and a secret committed once and then removed. After the
 route it checks seven things per repository: a governed commit on top of the owner's history, no

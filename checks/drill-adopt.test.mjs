@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Self-test for the adoption drill (checks/drill-adopt.mjs) and its fixtures
-// (checks/adopt-fixture.mjs). Two things must hold before the drill's red means anything: each
+// (checks/drill-adopt-fixture.mjs). Two things must hold before the drill's red means anything: each
 // fixture is what it claims to be, so a knocked-out property is caught, and the drill tells
 // "not built yet", "built and red" and "the drill is broken" apart.
 // This suite is green while the drill itself is red by design; CI runs it first for that reason.
@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FIXTURES, PLANTED_SECRET, SENTINEL, BIG_FILE_LINES, buildFixture, fixtureProblems, git } from './adopt-fixture.mjs';
+import { FIXTURES, PLANTED_SECRET, SENTINEL, BIG_FILE_LINES, buildFixture, fixtureProblems, git } from './drill-adopt-fixture.mjs';
 import { ROUTE, CHECKS, StepFailure, recordBefore, walkFixture, runAdoptDrill } from './drill-adopt.mjs';
 
 const NAMES = Object.keys(FIXTURES);
