@@ -64,6 +64,15 @@ improvements still travel by hand. The two old promises, that Groundwork ships n
 and that no upgrade will ever come, joined the denylist in their retired wording, so a copy that
 takes in this `checks/config.json` and still carries that wording sees the denylist gate fire.
 
+The route for an existing project now has a finish line that runs. `node checks/drill.mjs --adopt`
+builds three small repositories that look like what adopters bring (TypeScript with React, .NET,
+Python: their own hooks, agent file and CI, a file far over the length cap, em dashes, and a secret
+that was committed once and removed) and walks the adoption route over each: assess, overlay,
+init, baseline, chained hooks, commit. It is red on purpose until that route is built, and each
+red step names the package that builds it. A project built on Groundwork inherits the drill dead,
+as it does the existing one, so there is nothing to clear. Its CI job is not a required check, so
+while it is red the workflow shows a red cross that blocks no merge.
+
 ## v0.2.0 - 2026-08-01
 
 The claim this framework makes about itself now runs on every push. `checks/drill.mjs` unpacks a

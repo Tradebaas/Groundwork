@@ -74,3 +74,31 @@ The `drill` job in `.github/workflows/ci.yml` runs the self-test and then the dr
 and every pull request. A green tick beside a commit means the copy route was walked on that
 commit, so the evidence carries the commit rather than a date. There is no stored report to keep
 up to date, in line with the rule that what the code can prove is not restated in prose.
+
+## The adoption walk
+
+`node checks/drill.mjs --adopt` walks the other route, the one decision 0018 names for a project
+that already exists: assess, overlay, init, baseline, chained hooks, commit. It builds three
+repositories for it with `checks/adopt-fixture.mjs` (TypeScript with React, .NET, Python), each
+with a history, its own pre-commit hook, `CLAUDE.md` and `ci.yml`, a 600-line file, em dashes,
+gitignored `bin/`, `obj/` and `.venv/`, and a secret committed once and then removed. After the
+route it checks seven things per repository: a governed commit on top of the owner's history, no
+inline suppression added to the owner's files, a baseline holding exactly the planted entries, the
+owner's own hook fired, the owner's `ci.yml` unchanged, at most three owner actions, and under a
+minute.
+
+It is **red on purpose until phase 5** of the recovery plan (E-03/F-02/S-01), because the route's
+steps are built by later packages. Reading its report:
+
+| Line | Meaning |
+|---|---|
+| `STOP ... not built (PKG)` | The step's entry file does not exist yet; the package in brackets builds it |
+| `STOP ... red (PKG): ...` | The step exists and failed; the package in brackets owns the fix |
+| `not reached` | A check whose step never passed, so it has nothing honest to say yet |
+| `DEFECT` | The drill itself is broken (a fixture did not build, a step crashed): fix the drill |
+
+Exit codes: 0 green, 1 red for a package, 2 a defect of the drill. The `adopt-drill` CI job runs
+`node checks/drill-adopt.test.mjs` first, which must stay green: it proves the fixtures are what
+they claim and that the drill tells those three answers apart. The job is not a required check
+until the walk is green, when it becomes one. A read-only run on a real repository each quarter
+comes with phase 5, not before.
