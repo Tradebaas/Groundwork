@@ -4,7 +4,7 @@
 // hold: each fixture is what it claims to be, so a knocked-out property is caught; the drill tells
 // "not built yet", "built and failing" and "the drill is broken" apart, each with its own exit
 // code; and every check fails when the thing it checks is wrong.
-// This suite is green while the walk itself is red by design; CI runs it in the `drill` job.
+// This suite is green while the walk itself is red by design; CI runs it first in `adopt-drill`.
 // Run: node checks/drill-adopt.test.mjs
 
 import { writeFileSync, readFileSync, rmSync, unlinkSync, mkdtempSync, mkdirSync, realpathSync, chmodSync, existsSync, renameSync } from 'node:fs';
