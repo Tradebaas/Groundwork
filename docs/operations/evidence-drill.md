@@ -22,7 +22,7 @@ half of that walk on demand and on every push, against the snapshot an adopter a
 node checks/drill.mjs               # the current tracked snapshot, about 2 seconds
 node checks/drill.mjs --ref <sha>   # another snapshot, most usefully a release candidate
 node checks/drill.mjs --keep        # leave the throwaway copy on disk to look at
-node checks/drill.test.mjs          # prove the drill can still fail (11 tests)
+node checks/drill.test.mjs          # prove the drill can still fail
 ```
 
 Run against a project begun from scratch, where `begin` has deleted the baseline folder, the drill

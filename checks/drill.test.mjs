@@ -8,10 +8,11 @@
 // other direction only.
 // Run: node checks/drill.test.mjs
 
-import { writeFileSync, rmSync, unlinkSync, symlinkSync, mkdtempSync } from 'node:fs';
+import { writeFileSync, rmSync, unlinkSync, symlinkSync, mkdtempSync, mkdirSync, copyFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { STEPS, runDrill } from './drill.mjs';
@@ -123,4 +124,22 @@ test('a commit gate that is not biting is caught', async () => {
   spawnSync('git', ['config', '--unset', 'core.hooksPath'], { cwd: c.copy });
   await assert.rejects(step('bite').run(c), /accepted/);
   c.clean();
+});
+
+// `--adopt` hands over to the adoption walk. A walk that cannot even load is the drill's own
+// defect, exit 2, never the 1 that says something built fails.
+test('--adopt with an adoption walk that cannot load is a defect, exit 2', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'groundwork-drill-cli-'));
+  try {
+    mkdirSync(join(dir, 'checks'));
+    for (const f of ['drill.mjs', 'drill-core.mjs']) {
+      copyFileSync(fileURLToPath(new URL(f, import.meta.url)), join(dir, 'checks', f));
+    }
+    writeFileSync(join(dir, 'checks', 'drill-adopt.mjs'), "throw new Error('broken on load');\n");
+    const r = spawnSync(process.execPath, [join(dir, 'checks', 'drill.mjs'), '--adopt'], { encoding: 'utf8' });
+    assert.equal(r.status, 2, `${r.stdout}${r.stderr}`);
+    assert.match(r.stdout, /DEFECT in the adoption drill itself/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
