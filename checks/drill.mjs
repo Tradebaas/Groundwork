@@ -24,7 +24,6 @@ import {
 import { join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { SOURCE, FIRST_COMMIT, git, node, isFramework, freshCopy } from './drill-core.mjs';
-import { runAdoptDrill } from './drill-adopt.mjs';
 
 // The suites CI proves before it trusts any gate, run here inside the copy so it is the copy's
 // own code under test and never this working tree's. Keep in step with the `gate` job in
@@ -286,7 +285,10 @@ if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToP
     keep: args.includes('--keep'),
     requireWalk: args.includes('--require-walk'),
   };
-  if (args.includes('--adopt')) process.exit((await runAdoptDrill(options)).code);
+  if (args.includes('--adopt')) {
+    const { runAdoptDrill } = await import('./drill-adopt.mjs');
+    process.exit((await runAdoptDrill(options)).code);
+  }
   const { ok } = await runDrill(options);
   process.exit(ok ? 0 : 1);
 }

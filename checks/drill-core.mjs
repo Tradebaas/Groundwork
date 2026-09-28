@@ -1,8 +1,8 @@
 // What the two evidence drills share: where the framework is, how git runs inside a throwaway
 // directory, how a fresh copy is unpacked, and how the framework is told apart from a project
 // built on it. The walk to a first commit is checks/drill.mjs; the walk over an existing
-// repository is checks/drill-adopt.mjs. Both import this, and neither imports the other's walk,
-// so `drill.mjs --adopt` can call the adoption walk directly.
+// repository is checks/drill-adopt.mjs. Both import this, and `drill.mjs` loads the adoption walk
+// only for `--adopt`, so a break in one walk cannot stop the other.
 
 import { mkdtempSync, mkdirSync, rmSync, existsSync, realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
