@@ -31,7 +31,7 @@ const CI = '.github/workflows/ci.yml';
 const PROBE = 'drill-probe.md';
 const count = (repo) => Number(git(repo, ['rev-list', '--count', 'HEAD']).stdout);
 const head = (repo) => git(repo, ['rev-parse', 'HEAD']).stdout.trim();
-const sentinelLines = (repo) => {
+export const sentinelLines = (repo) => {
   const path = join(repo, '.git', SENTINEL);
   return existsSync(path) ? readFileSync(path, 'utf8').split('\n').filter(Boolean).length : 0;
 };
@@ -128,6 +128,7 @@ export const ROUTE = [
       must(git(ctx.repo, ['add', '-A']).status === 0, 'git add failed');
       const r = git(ctx.repo, ['commit', '-q', '-m', FIRST_COMMIT[0], '-m', FIRST_COMMIT[1]]);
       must(r.status === 0, `the adoption commit was rejected:\n${r.stdout}${r.stderr}`);
+      ctx.sentinelAfter = sentinelLines(ctx.repo);
     },
   },
 ];
@@ -193,8 +194,9 @@ export const CHECKS = [
   },
   {
     id: 'sentinel', title: "the owner's own hook ran on the adoption commit", pkg: 'ADP-4', needs: 'commit',
+    // Counted when the commit step made the commit: the governed check's refused commit fires the hook again.
     run(ctx) {
-      must(sentinelLines(ctx.repo) > (ctx.sentinelBefore ?? 0), "the owner's pre-commit hook did not run on the adoption commit");
+      must((ctx.sentinelAfter ?? 0) > (ctx.sentinelBefore ?? 0), "the owner's pre-commit hook did not run on the adoption commit");
     },
   },
   {

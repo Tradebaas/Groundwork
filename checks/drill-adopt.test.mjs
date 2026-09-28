@@ -7,14 +7,14 @@
 // This suite is green while the walk itself is red by design; CI runs it in the `drill` job.
 // Run: node checks/drill-adopt.test.mjs
 
-import { writeFileSync, readFileSync, rmSync, unlinkSync, mkdtempSync, mkdirSync, realpathSync, chmodSync, existsSync } from 'node:fs';
+import { writeFileSync, readFileSync, rmSync, unlinkSync, mkdtempSync, mkdirSync, realpathSync, chmodSync, existsSync, renameSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { SOURCE, git } from './drill-core.mjs';
-import { FIXTURES, PLANTED_SECRET, SENTINEL, BIG_FILE_LINES, buildFixture, fixtureProblems } from './drill-adopt-fixture.mjs';
-import { ROUTE, CHECKS, EXIT, StepFailure, MAX_MS, recordBefore, walkFixture, runAdoptDrill, suppressionPattern } from './drill-adopt.mjs';
+import { FIXTURES, PLANTED_SECRET, SENTINEL, BIG_FILE_LINES, buildFixture, fixtureProblems, hooksDir } from './drill-adopt-fixture.mjs';
+import { ROUTE, CHECKS, EXIT, StepFailure, MAX_MS, recordBefore, walkFixture, runAdoptDrill, suppressionPattern, sentinelLines } from './drill-adopt.mjs';
 
 const NAMES = Object.keys(FIXTURES);
 const boxes = [];
@@ -218,6 +218,7 @@ function adopted(name, change) {
   change(repo);
   const made = commitAll(repo, 'chore: adopt');
   assert.equal(made.status, 0, made.stderr);
+  ctx.sentinelAfter = sentinelLines(repo);
   return ctx;
 }
 const put = (repo, path, content) => {
@@ -289,6 +290,17 @@ test('sentinel: the owner\'s hook ran on the adoption commit, and only a commit 
   const repo = buildFixture('ts-react', box());
   assert.throws(() => check('sentinel').run({ repo, sentinelBefore: 0 }), StepFailure);
   check('sentinel').run(adopted('ts-react', (r) => put(r, 'NOTES.md', 'x\n')));
+});
+
+test('sentinel: a hook fired after the adoption commit does not count for it', () => {
+  const repo = buildFixture('ts-react', box());
+  const hook = join(hooksDir(repo), 'pre-commit');
+  const ctx = { name: 'ts-react', repo, framework: SOURCE, route: ROUTE, before: recordBefore(repo) };
+  renameSync(hook, `${hook}.off`);
+  routeStep('commit').run(ctx);
+  renameSync(`${hook}.off`, hook);
+  assert.throws(() => check('governed').run(ctx), StepFailure);
+  assert.throws(() => check('sentinel').run(ctx), /did not run on the adoption commit/);
 });
 
 test('owner-ci: a changed ci.yml of the owner fails', () => {
