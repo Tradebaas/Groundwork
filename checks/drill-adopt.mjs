@@ -64,8 +64,8 @@ export function suppressionPattern(framework) {
 // that exists once it has (`entry`, in the framework copy, the product or the repository), the
 // steps it needs, and whether it costs the owner an action. A step not built is reported and never
 // run. Its entry existing while it is still marked not built, or missing while it is marked built,
-// is red, so the flag and the tree cannot drift apart unnoticed. `hooks` has no entry: its packages
-// add no file of their own, so its flag is the one nothing checks.
+// is red, so the flag and the tree cannot drift apart unnoticed. `hooks` has no entry: the chaining
+// edits the owner's own hook rather than adding a file, so its flag is the one nothing checks.
 // defer: the command shapes of steps not built yet are this drill's reading of the plan. ceiling: a
 // package whose real interface differs sees its step red for the drill's guess, not for its own
 // work. upgrade-when: the package that builds a step replaces the guess and flips `built` in the
