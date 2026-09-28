@@ -278,7 +278,7 @@ export async function walkFixture(name, { framework, box, route = ROUTE, checks 
     }
     const waits = (step.needs || []).filter((id) => !passed.has(id));
     if (waits.length) { report(step, 'not reached', `: waits for ${waits.join(', ')}`); continue; }
-    if (entry && !entry.present) { report(step, 'red', `: ${entry.path} is gone from the ${entry.where}, though the step is marked built`); continue; }
+    if (entry && !entry.present) { report(step, 'red', `: ${entry.path} is not in the ${entry.where}, though the step is marked built`); continue; }
     try {
       await step.run(ctx);
       passed.add(step.id);

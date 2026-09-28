@@ -142,10 +142,12 @@ test('a built flag that disagrees with the tree is red, in both directions', asy
   const r = await walkFixture('python', { framework, box: box(), checks: [], route: [
     step('a', { built: false, entry: ['framework', 'checks/here.mjs'] }),
     step('b', { entry: ['framework', 'checks/gone.mjs'] }),
+    step('c', { built: false, entry: ['repo', 'README.md'] }),
   ] });
-  assert.deepEqual(states(r), ['red', 'red']);
+  assert.deepEqual(states(r), ['red', 'red', 'red']);
   assert.match(r.steps[0].note, /still marked not built/);
-  assert.match(r.steps[1].note, /is gone from the framework copy/);
+  assert.match(r.steps[1].note, /checks\/gone\.mjs is not in the framework copy, though the step is marked built/);
+  assert.match(r.steps[2].note, /README\.md is in the repository, but the step is still marked not built/);
 });
 
 test('a built step that finds the route wanting is red for its own package', async () => {
