@@ -286,8 +286,15 @@ if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToP
     requireWalk: args.includes('--require-walk'),
   };
   if (args.includes('--adopt')) {
-    const { runAdoptDrill } = await import('./drill-adopt.mjs');
-    process.exit((await runAdoptDrill(options)).code);
+    // A walk that cannot load or crashes is the drill's own defect: exit 2, as drill-adopt.mjs
+    // promises, and never the 1 that says something built fails.
+    try {
+      const { runAdoptDrill } = await import('./drill-adopt.mjs');
+      process.exit((await runAdoptDrill(options)).code);
+    } catch (error) {
+      console.log(`DEFECT in the adoption drill itself: ${error.stack || error}`);
+      process.exit(2);
+    }
   }
   const { ok } = await runDrill(options);
   process.exit(ok ? 0 : 1);
