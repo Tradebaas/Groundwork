@@ -1,7 +1,7 @@
 # Evidence drill runbook
 
 <!-- MAINTAINERS OF GROUNDWORK ITSELF. This runbook is about the framework's own copy route, not
-     about any project built on it. A project inherits both the drill and its CI job dead: the
+     about any project built on it. A fresh copy inherits both the drill and its CI job dead: the
      drill reports that it has nothing to walk and exits green, and the workflow condition never
      matches. Nothing to clear at `begin`. -->
 
