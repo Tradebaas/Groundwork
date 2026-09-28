@@ -128,6 +128,13 @@ test('a step that needs one that did not pass is not reached; a fallback counts 
   assert.match(r.steps[0].note, /used the fallback/);
 });
 
+test('a check whose step was never reached says so instead of passing', async () => {
+  const r = await walkFixture('python', { framework: SOURCE, box: box(), route: [step('commit', { built: false })] });
+  assert.equal(r.defect, null);
+  assert.deepEqual(Object.fromEntries(r.checks.map((c) => [c.id, c.state])),
+    Object.fromEntries(CHECKS.map((c) => [c.id, 'not reached'])));
+});
+
 test('a built flag that disagrees with the tree is red, in both directions', async () => {
   const framework = box();
   mkdirSync(join(framework, 'checks'));
@@ -174,6 +181,7 @@ test('exit 1: something built fails', async () => {
 });
 test('exit 2: the drill is broken', async () => {
   assert.equal(await exitOf([step('a', { run() { throw new TypeError('boom'); } })]), EXIT.defect);
+  assert.equal(await exitOf([step('a')], [{ ...passing, run() { throw new TypeError('boom'); } }]), EXIT.defect);
   assert.equal((await quietly(() => runAdoptDrill({ ref: 'no-such-ref', names: [] }))).code, EXIT.defect);
 });
 test('exit 3: only steps not built yet stand in the way', async () => {
