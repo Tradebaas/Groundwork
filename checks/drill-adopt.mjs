@@ -47,6 +47,9 @@ function readFrom(path, what) {
 // the one list the gates enforce, plus what that ban does not list: forms that are not comments
 // (a pragma, an attribute), Groundwork's own escape markers, which the gates allow and adoption must
 // not add, and two comment forms the ban lacks today.
+// defer: `@ts-expect-error` and `NOSONAR` are comment forms, kept here because the ban lacks them.
+// ceiling: the gates still let both through in every copy. upgrade-when: the comment ban in
+// checks/config.json lists them; drop them from this list in that change.
 const EXTRA_SUPPRESSIONS = ['checks:allow-', '#pragma warning disable', 'SuppressMessage', '@ts-expect-error', 'NOSONAR'];
 export function suppressionPattern(framework) {
   const config = JSON.parse(readFileSync(join(framework, 'checks', 'config.json'), 'utf8'));
