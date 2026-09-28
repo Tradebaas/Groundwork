@@ -61,7 +61,8 @@ export function suppressionPattern(framework) {
 // that exists once it has (`entry`, in the framework copy, the product or the repository), the
 // steps it needs, and whether it costs the owner an action. A step not built is reported and never
 // run. Its entry existing while it is still marked not built, or missing while it is marked built,
-// is red, so the flag and the tree cannot drift apart unnoticed.
+// is red, so the flag and the tree cannot drift apart unnoticed. `hooks` has no entry: its packages
+// add no file of their own, so its flag is the one nothing checks.
 // defer: the command shapes of steps not built yet are this drill's reading of the plan. ceiling: a
 // package whose real interface differs sees its step red for the drill's guess, not for its own
 // work. upgrade-when: the package that builds a step replaces the guess and flips `built` in the
@@ -101,10 +102,9 @@ export const ROUTE = [
     },
   },
   {
-    id: 'baseline', pkg: 'ADP-3, AX-4b', built: false, owner: false, needs: ['init'],
-    run(ctx) {
-      must(existsSync(join(ctx.repo, 'checks', 'baseline.json')), 'no checks/baseline.json after init --adopt');
-    },
+    // Its entry is its proof; the baseline check reads what the file holds.
+    id: 'baseline', pkg: 'ADP-3, AX-4b', built: false, owner: false, needs: ['init'], entry: ['repo', 'checks/baseline.json'],
+    run() {},
   },
   {
     // The chain is proven by what it does: a staged file that breaks a gate is refused, and the
