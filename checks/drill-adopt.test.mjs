@@ -306,10 +306,11 @@ test('sentinel: the commit step counts the owner\'s hook at the adoption commit'
   check('sentinel').run(ctx);
 });
 
-test('sentinel: a hook fired after the adoption commit does not count for it', () => {
+test('sentinel: a hook fired before or after the adoption commit does not count for it', () => {
   const repo = buildFixture('ts-react', box());
   const hook = join(hooksDir(repo), 'pre-commit');
   const ctx = { name: 'ts-react', repo, framework: SOURCE, route: ROUTE, before: recordBefore(repo) };
+  writeFileSync(join(repo, '.git', SENTINEL), 'pre-commit\n');
   renameSync(hook, `${hook}.off`);
   routeStep('commit').run(ctx);
   renameSync(`${hook}.off`, hook);
