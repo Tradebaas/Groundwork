@@ -192,6 +192,10 @@ test('exit 3: only steps not built yet stand in the way', async () => {
 
 const routeStep = (id) => ROUTE.find((s) => s.id === id);
 
+test('every step not built names the file that shows it landed, except hooks, whose packages add none', () => {
+  assert.deepEqual(ROUTE.filter((s) => !s.built && !s.entry).map((s) => s.id), ['hooks']);
+});
+
 test('the hooks step is red when a staged file that breaks a gate gets committed, and cleans up', () => {
   const repo = buildFixture('python', box());
   const before = git(repo, ['rev-parse', 'HEAD']).stdout;
