@@ -98,6 +98,7 @@ Its report is red by design until the route is built. Reading it:
 Exit codes: 0 green, 1 something built fails, 2 a defect of the drill, 3 only steps not built yet
 stand in the way. The `adopt-drill` CI job passes on 0 and 3 and fails on 1 and 2, so it turns red
 when something already built fails or the drill breaks, while the steps not built yet stay listed in
-its log. It is not a required check until the walk exits 0, when it becomes one. Its self-test runs in the `drill` job, which is
-otherwise green, so a broken fixture shows there. A read-only run on a real repository each quarter
-comes with the packages that build the route, not before.
+its log. It is not a required check until the walk exits 0, when it becomes one. Its self-test
+runs first in the same job, so a broken fixture or a drill that no longer tells its answers apart
+turns it red. A read-only run on a real repository each quarter comes with the packages that build
+the route, not before.

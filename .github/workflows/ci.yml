@@ -103,12 +103,6 @@ jobs:
       - name: The drill must prove it can fail
         run: node checks/drill.test.mjs
 
-      # The adoption walk's own proof lives here and not in its job below, which is red by design:
-      # a broken fixture or a drill that no longer tells red from broken has to turn a job red
-      # that is otherwise green.
-      - name: The adoption drill's fixtures are what they claim, and it tells red from broken
-        run: node checks/drill-adopt.test.mjs
-
       # --require-walk: on this repository the drill has no business skipping, so a skip is red
       # here rather than a green tick standing for a walk that never happened.
       - name: A fresh copy still reaches a governed first commit
@@ -130,6 +124,9 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
+
+      - name: The adoption drill's fixtures are what they claim, and it tells red from broken
+        run: node checks/drill-adopt.test.mjs
 
       - name: Three existing repositories adopt Groundwork, as far as the route is built
         run: node checks/drill.mjs --adopt --require-walk || [ $? -eq 3 ]
