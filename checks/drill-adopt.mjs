@@ -17,7 +17,7 @@ import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { FIRST_COMMIT, freshCopy, isFramework, git, node } from './drill-core.mjs';
-import { FIXTURES, PLANTED_SECRET, SENTINEL, buildFixture, fixtureProblems, hooksDir } from './drill-adopt-fixture.mjs';
+import { FIXTURES, PLANTED_SECRET, SENTINEL, buildFixture, fixtureProblems } from './drill-adopt-fixture.mjs';
 
 export const MAX_OWNER_ACTIONS = 3;
 export const MAX_MS = 60_000;
@@ -231,7 +231,6 @@ export function recordBefore(repo) {
     head: head(repo),
     count: count(repo),
     files: git(repo, ['ls-files']).stdout.split('\n').filter(Boolean),
-    hooks: hooksDir(repo),
     ci: sha(join(repo, CI)),
   };
 }
