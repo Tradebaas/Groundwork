@@ -2,7 +2,7 @@
 // directory, how a fresh copy is unpacked, and how the framework is told apart from a project
 // built on it. The walk to a first commit is checks/drill.mjs; the walk over an existing
 // repository is checks/drill-adopt.mjs. Both import this, and `drill.mjs` loads the adoption walk
-// only for `--adopt`, so a break in one walk cannot stop the other.
+// only for `--adopt`, so a break in the adoption walk cannot stop the greenfield one.
 
 import { mkdtempSync, mkdirSync, rmSync, existsSync, realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -37,8 +37,9 @@ export const node = (cwd, args) => spawnSync(process.execPath, args, { cwd, enco
 
 // The drill is the framework's evidence about its own copy route, and a project built on
 // Groundwork inherits this file the way it inherits the CI job: present, and not about it.
-// `begin` deletes the baseline folder holding what the framework itself had already shipped,
-// which makes its absence the honest signal that this repository is a project now.
+// `begin` deletes the baseline folder holding what the framework itself had already shipped, so
+// in a project begun from scratch its absence is the signal that this is a project now. An
+// existing project gets the folder back from `begin`, and there this reads as the framework.
 export const isFramework = (copy) => existsSync(join(copy, 'docs', 'specs', 'archive', '000-baseline'));
 
 // A tar snapshot of one ref is exactly what the ZIP and degit routes hand an adopter: tracked

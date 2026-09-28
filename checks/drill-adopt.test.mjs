@@ -192,7 +192,7 @@ test('exit 3: only steps not built yet stand in the way', async () => {
 
 const routeStep = (id) => ROUTE.find((s) => s.id === id);
 
-test('every step not built names the file that shows it landed, except hooks, whose packages add none', () => {
+test('every step not built names the file that shows it landed, except hooks, whose chaining edits the owner\'s hook', () => {
   assert.deepEqual(ROUTE.filter((s) => !s.built && !s.entry).map((s) => s.id), ['hooks']);
 });
 
