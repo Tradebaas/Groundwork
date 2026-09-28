@@ -1,11 +1,9 @@
 # Evidence drill runbook
 
 <!-- MAINTAINERS OF GROUNDWORK ITSELF. This runbook is about the framework's own copy route, not
-     about any project built on it. Every project inherits the CI job dead (the workflow condition
-     never matches), and a project begun from scratch inherits the drill dead too: once `begin` has
-     deleted the baseline folder, the drill reports that it has nothing to walk and exits green. An
-     existing project gets that folder back from `begin`, so a local run there walks. Nothing to
-     clear at `begin`. -->
+     about any project built on it. Both drill jobs in CI are dead in every project (their workflow
+     condition never matches); when a local run walks is under "Running it". Nothing to clear at
+     `begin`. -->
 
 ## The claim this backs
 
@@ -28,8 +26,9 @@ node checks/drill.test.mjs          # prove the drill can still fail (11 tests)
 ```
 
 Run against a project begun from scratch, where `begin` has deleted the baseline folder, the drill
-says it has nothing to walk and exits green. CI passes `--require-walk`, which turns that answer red: on this repository a skip would be
-a green tick standing for a walk that never happened.
+says it has nothing to walk and exits green. An existing project gets that folder back from `begin`,
+so a local run there walks. CI passes `--require-walk`, which turns that answer red: on this
+repository a skip would be a green tick standing for a walk that never happened.
 
 `--ref` walks **today's** `begin` bullets against the snapshot named, which is the right question
 for a commit about to be tagged and the wrong one for an old tag. Drilling the v0.1.0 tag stops
