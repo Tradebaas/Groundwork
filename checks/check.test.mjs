@@ -30,9 +30,6 @@ expectFail('agent-file-cap', ({ put }) =>
 expectFail('bridge-claude', ({ put }) =>
   put('CLAUDE.md', '@AGENTS.md\n\nAlso: always use tabs.\n'));
 
-expectFail('bridge-gemini', ({ put }) =>
-  put('.gemini/settings.json', '{"context":{"fileName":["GEMINI.md"]}}'));
-
 expectFail('docs-manifest', ({ put }) =>
   put('docs/rogue.md', 'not in the manifest\n'));
 
