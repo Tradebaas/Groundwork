@@ -150,13 +150,6 @@ export function runChecks(root) {
       }
     },
 
-    'bridge-gemini'() {
-      const p = join(root, '.gemini', 'settings.json');
-      if (!existsSync(p) || !JSON.stringify(JSON.parse(read(p))).includes('AGENTS.md')) {
-        fail('.gemini/settings.json must point context at AGENTS.md (decision 0001).');
-      }
-    },
-
     'docs-manifest'() {
       // The manifest is read in exactly one place, and matched by the one rule the board reads
       // its rows through: two readers of one table drift, and a row the gate cannot see is a
@@ -268,9 +261,6 @@ export function runChecks(root) {
         descTotal += (desc || '').length;
         if ((desc || '').length > longest.chars) longest = { name: entry.name, chars: desc.length };
         const bodyLines = body.split('\n').length;
-      // A project without a skills directory of its own loads the library from the plugin and has
-      // nothing to link; the gate only holds where .agents/skills exists.
-      if (!existsSync(join(root, '.agents', 'skills'))) return;
         if (bodyLines > cfg.budgets.skillMdLines) fail(`skill "${entry.name}": ${bodyLines} lines (budget ${cfg.budgets.skillMdLines}): move reference material to files next to SKILL.md`);
       }
       const totalBudget = cfg.budgets.skillDescriptionTotalChars;
@@ -281,6 +271,9 @@ export function runChecks(root) {
 
     'skills-symlink'() {
       if (cfg.skipSymlinkCheck) return;
+      // A project without a skills directory of its own loads the library from the plugin and has
+      // nothing to link; the gate only holds where .agents/skills exists.
+      if (!existsSync(join(root, '.agents', 'skills'))) return;
       const p = join(root, '.claude', 'skills');
       try {
         if (readlinkSync(p).split('\\').join('/').replace(/\/+$/, '') !== '../.agents/skills') {

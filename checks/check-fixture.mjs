@@ -24,7 +24,6 @@ export function fixture() {
   }));
   put('AGENTS.md', '# rules\n\nskills: `demo`\n');
   put('CLAUDE.md', '@AGENTS.md\n');
-  put('.gemini/settings.json', '{"context":{"fileName":["AGENTS.md"]}}');
   put('docs/README.md', '# manifest\n\n| `state/STATE.md` | LIVE | state |\n');
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ demo\n');
   put('.agents/skills/demo/SKILL.md', '---\nname: demo\ndescription: Demo skill for the self-test.\n---\n\n# demo\n');

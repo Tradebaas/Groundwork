@@ -56,7 +56,7 @@ export function enforcementReport(root) {
   // 3. Adapter hooks, both halves: the Stop hooks (progress line, handoff nudge) that suggest,
   //    and the PreToolUse guard (checks/guard.mjs) that refuses what the rulebook forbids. Both
   //    live in .claude/settings.json; a clone that lost the file has neither. The rulebook
-  //    bridges (CLAUDE.md, .gemini) are blocking gates in check.mjs already and need no report.
+  //    bridge (CLAUDE.md) is a blocking gate in check.mjs already and needs no report.
   let stopWired = false;
   let guardWired = false;
   try {

@@ -164,7 +164,7 @@ records the reasoning.
 
 | Path | What it is |
 |---|---|
-| `AGENTS.md` | Always-on rules + routing table (the front door for agents) |
+| `AGENTS.md` | Always-on rules and the map of where everything lives (the front door for agents) |
 | `README.md` | This file (the front door for humans) |
 | `plugins/vibe/` | The library as a plugin: skills, review agents, guard (`.agents/skills/` links into it) |
 | `docs/` | Project memory: state, scope, specs, decisions, standards, design, compliance |
