@@ -8,8 +8,8 @@ domain, updated when the domain changes; **ARCHIVE** = frozen, never cite as cur
 | File | Tier | What it owns |
 |---|---|---|
 | `README.md` | LIVE | This manifest |
-| `DESIGN.md` | REF | Design system: principles, the owner's standing direction, this project's tokens. In `docs/` because the design method reads it there without configuration |
-| `PRODUCT.md` | REF | Product record for the design method: platform, brand commitments, evidence on hand, accessibility. Points at `product/BRIEF.md` for scope, users and purpose. Written by the method's own init; absent until then, and `begin` removes Groundwork's own |
+| `DESIGN.md` | REF | Design system: principles, the owner's standing direction, this project's tokens. Read by the `design` skill before any interface work |
+| `PRODUCT.md` | REF | Product record beside the design system: platform, brand commitments, evidence on hand, accessibility. Points at `product/BRIEF.md` for scope, users and purpose. Written by `design`; `begin` removes Groundwork's own |
 | `state/STATE.md` | LIVE | Live state, session handoff, the single "what's next" |
 | `state/DEBT.md` | LIVE | Technical debt ledger (with `defer:` site markers) |
 | `state/TEMPLATE-DEBT.md` | REF | Blank debt ledger; `begin` puts it in place of Groundwork's own |

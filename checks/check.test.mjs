@@ -299,21 +299,14 @@ expectSignal('enforcement-adapter-wired', ({ put }) =>
   } })),
 'adapter hooks', true);
 
-// The design method's payload is gitignored, so a clone starts without it and the report says so
-// rather than assuming it. Installed, it reports the version it found.
-expectSignal('enforcement-design-method-absent', () => {}, 'design method', false, '--install');
-expectSignal('enforcement-design-method-installed', ({ put }) =>
-  put('.agents/skills/impeccable/SKILL.md', '---\nname: impeccable\nversion: 9.9.9\n---\n'),
-'design method', true, '9.9.9');
-
-{ // a bare directory still yields all four signals, formatted with a fix line per degraded one
+{ // a bare directory still yields all three signals, formatted with a fix line per degraded one
   const bare = mkdtempSync(join(tmpdir(), 'groundwork-bare-'));
   try {
     const report = enforcementReport(bare);
-    assert.equal(report.length, 4, 'always exactly four signals');
+    assert.equal(report.length, 3, 'always exactly three signals');
     const lines = formatReport(report);
     assert.ok(lines[0].startsWith('enforcement: '), 'summary line names the tier');
-    assert.equal(lines.length, 5, 'four degraded signals get four fix lines under the summary');
+    assert.equal(lines.length, 4, 'three degraded signals get three fix lines under the summary');
     tally.passed++;
   } catch (e) { tally.failed.push(`enforcement-bare-dir: ${e.message}`); }
   rmSync(bare, { recursive: true, force: true });

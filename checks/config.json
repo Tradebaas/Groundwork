@@ -1,88 +1,285 @@
 {
   "_doc": "Configuration for checks/check.mjs. denylist: retired facts that may never return in any scanned text file, add the OLD wording whenever a fact changes (see AGENTS.md conflict rule). Each entry: pattern (JS regex source, case-insensitive), why (shown on failure), optional exclude (path substrings to skip). docs/decisions/, archives and checks/ are never scanned by the denylist (decision records may quote retired wording). styleBans: AI-boilerplate phrases banned in all text (prose-style check, decision 0008); same shape as denylist, seeded with tells measured to fire on no legitimate prose, extend per project. The prose-style check also bans AI typography (em dash, en dash, ellipsis and curly quotes) with no config needed; escape a deliberate case with checks:allow-style on the line. commentBans: the deferral-apology set, the negative image of the defer: contract - scanned by defer-markers on comment lines in code files only, because 'for now' is legitimate in a string or a UI label and only a comment can apologise for a simplification. The same list bans the bare TODO marker and the lint/type suppressions, since both defer without saying until when; a suppression that must stay carries a defer: marker on its line, which the gate reads as the documented case. thirdParty: paths this project did not write, each { path, why, and for an installed payload both version and contentVersion }: an installed methodology, a vendored SDK. version is the package version the install route fetches; contentVersion is the payload version this project actually verified, which for a launcher-style package is a different number that the package version does not determine. The enforcement line compares what is on disk against contentVersion and reports a payload that is not the verified one. Both move only through `maintain`. The gates that measure this project's own writing (prose style, denylist, agent-file cap, code-file cap, the deferral contract, zombie code, the skills registry, the document map) skip them; every other gate, secrets included, still applies. Matching is by path prefix, so an upstream rename inside the payload changes nothing here. extraTextExtensions/extraCodeExtensions: the stack skill adds this ecosystem's file types here. codeFileCapExclude: path prefixes/suffixes that hold generated or vendored code, skipped by code-file-cap and commentBans, since neither this project's length budget nor its deferral contract governs code it did not write; a comment in the file that opens with checks:allow-length: <reason> works too for the length cap, while a mention of that marker in prose or inside a string does not, because the exemption is a declaration a file makes about itself. Exclusion lists are themselves gated by config-invariants: none of them may hide docs/standards/, and only secretScanExclude may name checks/. skipSymlinkCheck: false, or the reason as a string on a checkout without symlink support (Windows without Developer Mode) - config-invariants rejects a bare true, because retiring a whole check states its case like every other exemption here.",
   "denylist": [
-    { "pattern": "0001-0008 are Groundwork's own", "why": "retired manifest wording; the decision-record note no longer carries a number range (it went stale at 0009)" },
-    { "pattern": "\\b(14 controles|19 skills)\\b", "why": "retired explainer heading counts; headings stay numberless, the hero stat strip owns live counts (drifted once: heading said 14 while check.mjs had 17)" },
-    { "pattern": "\\b14 (vastgelegde )?besluiten\\b|>14</div><div class=\"l\">Vastgelegde", "why": "retired stat-strip count: 15 recorded decisions exist since 0015; bump the strip when a decision lands, until the counts are derived (GAP Phase 3)" },
-    { "pattern": "\\b2027-06-28\\b", "why": "wrong EAA date that once stood in the register: pre-2025 service contracts run until 2030-06-28 at the latest (EAA Art 32(2), verified 2026-07-22), no EU/NL deadline exists on 2027-06-28" },
-    { "pattern": "NL still pending", "why": "retired NIS2 register wording; the Cyberbeveiligingswet is in force 2026-08-15, the register row owns the current status" },
-    { "pattern": "Omnibus June 2026", "why": "retired AI Act citation; the omnibus is Regulation (EU) 2026/1744, in force 2026-07-27, and the register row owns the current citation" },
-    { "pattern": "OJ publication pending", "why": "retired AI Act register wording; the omnibus is no longer pending publication and the register row owns the current citation" },
-    { "pattern": "ensure that the people operating them have a level of AI literacy", "why": "retired AI Act Art 4 wording; the Digital Omnibus softened it to taking measures that support AI literacy, with no level to guarantee in any individual (AI-LITERACY.md owns the current statement). Pre-omnibus training data says otherwise, so this one returns by itself" },
-    { "pattern": "hard (budget|cap|limit) (of )?(≤|<=)? ?150", "why": "retired 0001 claim; since agent-file-cap the scheme is two-tier: working budget 150 for AGENTS.md, hard cap 200 for every agent rulebook file" },
-    { "pattern": "pip install ['\"]?markitdown|from markitdown import", "why": "retired ingest snippets; install/CLI/API syntax is read from the markitdown README at use time (skill-author: no code snippets that go stale)" },
-    { "pattern": "Groundwork is itself software placed on the EU market", "why": "retired brief claim; unmonetised free and open-source software sits outside both the CRA (Art 2(1) with recital 18) and the PLD (Art 2(2)), verified 2026-07-31. REGISTER.md rows C-1 to C-4 own the current answer, and monetising is what would change it" },
-    { "pattern": "Lucide icons \\(MIT\\)", "why": "wrong licence for the inlined icon set: Lucide is ISC and descends from Feather (MIT), and index.html now names both" },
-    { "pattern": "skipSymlinkCheck\"?\\s*:\\s*true", "why": "retired instruction; skipSymlinkCheck takes the reason as a string value and config-invariants rejects a bare true, so an exemption states its case (INTAKE row 58)" },
-    { "pattern": "COMPLIANCE\\.md.{0,4}§ ?[12]|§ ?[12].{0,40}COMPLIANCE\\.md", "why": "retired pointer; COMPLIANCE.md is one table of regimes with no numbered sections, and this project's register moved to docs/compliance/REGISTER.md, which begin copies from TEMPLATE-REGISTER.md" },
-    { "pattern": "clear §2 back to its skeleton", "why": "retired begin instruction; the register is a cp from docs/compliance/TEMPLATE-REGISTER.md now, like the brief, the deploy runbook and the debt ledger" },
-    { "pattern": "definitions cover language|no implementation detail in this file", "why": "retired glossary rule; a CONTEXT.md entry may now settle how a term is measured (which period, which basis, who counts) and stops at the threshold value and the branching, which belong in a spec where a test can execute them (decision 0019)" },
-    { "pattern": "\\btaste dials\\b|VARIANCE ?/ ?MOTION ?/ ?DENSITY", "why": "retired taste-skill machinery; a page is no longer configured by three numeric knobs set before the owner sees anything. The installed design method commits a direction contract, a color strategy and one authored motion instead (decision 0020)" },
-    { "pattern": "leonxlnx/taste-skill", "why": "retired upstream pointer; the frontend rulebook this repo adapted from it is gone and the installed design method owns that ground now (decision 0020 supersedes 0012)" },
-    { "pattern": "docs/design/DESIGN\\.md", "why": "retired path; the design system is docs/DESIGN.md since 2026-08-07, beside docs/PRODUCT.md, because that is where the installed design method reads both without configuration (decision 0020). docs/design/ still owns VOICE.md and reference/", "exclude": ["011-design-on-impeccable/"] },
-    { "pattern": "skill `taste`|\\.agents/skills/taste", "why": "retired skill; taste was removed on 2026-08-07 and nothing may point at it again. What each of its rules became is the table in decision 0020", "exclude": ["011-design-on-impeccable/"] },
-    { "pattern": "\\bcockpit\\b", "why": "retired name for the local board: the page is the board (decision 0021), and since 2026-08-24 the modules that build, serve and guard it are checks/board-*.mjs. A document, a workflow or a page that still says it points at a module that is gone (E-01/F-04/S-06)" },
-    { "pattern": "WCAG 2\\.1 AA (is the legal (baseline|floor)|as the working floor)", "why": "retired wording; the WCAG level is written in one place, the EAA row of docs/compliance/COMPLIANCE.md (2.2 AA for new interfaces since 2026-07-22), and every other file points there instead of repeating a number that drifts (2026-09-06)" },
-    { "pattern": "Node(\\.js)? ?((≥|>=) ?20\\b|20 or (newer|later|higher))|node-version: 20\\b", "why": "retired floor; Node 20 reached end of life on 2026-04-30 and the design method needs 22.18 or newer, so since 2026-09-06 the floor is Node 22 everywhere (README, begin, BRIEF, ci.yml)" },
-    { "pattern": "there is nothing to run", "why": "retired scope line; since 2026-09-25 the brief allows a few zero-dependency scripts a person or agent may run (docs/product/BRIEF.md, out of scope; decision 0022)" },
-    { "pattern": "\\bno (updater|update mechanism)\\b", "why": "retired promise; since 2026-09-25 a report-first upgrade is planned (decision 0022). Improvements still travel by hand today, so say that, and link 0022 for what is coming" },
-    { "pattern": "inherits both the drill and its CI job dead|against a project rather than the framework", "why": "retired wording; a project begun from scratch has nothing to walk once begin deletes the baseline folder, and an existing project gets the folder back and walks, so say which project (docs/operations/evidence-drill.md, Running it; isFramework in checks/drill-core.mjs)" }
-  ],
-  "styleBans": [
-    { "pattern": "\\bdelve(s|d|ing)?\\b", "why": "AI-tell verb; say 'look at', 'go into' or just state the point" },
-    { "pattern": "\\bseamless(ly)?\\b", "why": "marketing filler; describe what actually happens" },
-    { "pattern": "\\bin today's [a-z-]+ (world|landscape|era)\\b", "why": "empty scene-setting; delete it" },
-    { "pattern": "\\bit'?s (important|worth) (to )?not(e|ing) that\\b", "why": "filler throat-clearing; state the fact directly" },
-    { "pattern": "\\bat the end of the day\\b", "why": "filler; cut it or say what you mean" },
-    { "pattern": "\\bgame[- ]?changer\\b", "why": "hype word; state the concrete effect" },
-    { "pattern": "\\ba testament to\\b", "why": "AI-tell flourish; say what it shows" },
-    { "pattern": "\\bunlock(s|ing)? the (power|potential)\\b", "why": "hype phrasing; describe the capability plainly" },
-
-    { "pattern": "\\bas an AI\\b|\\bas a language model\\b", "why": "chat residue: an assistant introducing itself has no place in a committed file" },
-    { "pattern": "\\bI hope (this|that) helps\\b", "why": "chat residue: a document is not a reply, delete the sign-off" },
-    { "pattern": "\\blet me know if (you|there|I)\\b|\\bfeel free to (ask|reach out)\\b", "why": "chat residue: a document has no reader to answer, delete the offer" },
-    { "pattern": "\\b(great|excellent) (question|point|catch)\\b", "why": "chat residue: boilerplate enthusiasm aimed at a conversation partner" },
-    { "pattern": "^\\s*(certainly|absolutely)[!,]", "why": "chat residue: an answer opener, not a sentence in a document" },
-    { "pattern": "\\byou'?re absolutely right\\b", "why": "chat residue: agreement addressed to a person, not content" },
-    { "pattern": "\\bmy (knowledge|training) cutoff\\b", "why": "chat residue: the model's own limits are not a fact about this project" },
-
-    { "pattern": "oaicite|oai_citation|contentReference\\[", "why": "citation artifact pasted from an assistant's output; keep the source, drop the marker" },
-    { "pattern": "\\bturn\\d+(search|view|news|image|forecast)\\d+\\b", "why": "search-tool citation artifact; cite the real URL instead" },
-    { "pattern": "utm_source=(chatgpt|openai|claude|perplexity)", "why": "tracking parameter from an assistant's link; paste the clean URL" },
-    { "pattern": "【[^】]{0,40}†[^】]{0,40}】", "why": "citation artifact pasted from an assistant's output; keep the source, drop the marker" },
-    { "pattern": "\\[citation needed\\]", "why": "unresolved claim: verify it and cite the source, or delete the claim" },
-
-    { "pattern": "\\bin conclusion\\b|\\bto sum up\\b|\\ball in all\\b", "why": "closing summary that restates what was just said; end on the last real point" },
-    { "pattern": "\\bunderscor(e|es|ing) the\\b", "why": "AI-tell flourish; say what it shows" },
-    { "pattern": "\\b(tapestry|plethora|treasure trove)\\b", "why": "ornamental noun; name the thing and its number" },
-    { "pattern": "\\b(cutting[- ]edge|state[- ]of[- ]the[- ]art|best[- ]in[- ]class)\\b", "why": "unfalsifiable superlative; state the version or the measurement" },
-    { "pattern": "\\b(revolutioniz|supercharg)(e|es|ed|ing)\\b", "why": "hype verb; describe the actual change" },
-    { "pattern": "\\bboasts?\\b", "why": "hype verb for a feature list; say 'has', or state the number" },
-    { "pattern": "\\bwhether you'?re a\\b", "why": "landing-page filler that addresses everyone and no one; name the actual user" },
-    { "pattern": "\\bwhen it comes to\\b", "why": "empty run-up; start the sentence at the point" },
-    { "pattern": "\\bplease note\\b", "why": "public-announcement opener; state the fact" },
-    { "pattern": "\\b(experts|studies|research) (argue|show|suggest)s?\\b", "why": "a claim with no owner; name the source and the number, or drop the claim" },
-    { "pattern": "\\b(serves|stands) as an?\\b", "why": "inflated copula; write 'is'" },
-    { "pattern": "lorem ipsum", "why": "placeholder copy; write the real words or leave the slot visibly empty" }
-  ],
-
-  "commentBans": [
-    { "pattern": "\\bfor now\\b", "why": "an unmarked deferral rots silently; use the defer: marker with its ceiling and upgrade-when trigger" },
-    { "pattern": "\\bfor (brevity|simplicity)\\b|\\bsimplified for\\b", "why": "a simplification the reader cannot audit; use the defer: marker so it stays grep-recoverable" },
-    { "pattern": "\\bin a real (implementation|app|application|system|project)\\b|\\bin production,? you\\b", "why": "code that admits it is not the real thing; either build it or mark it with defer:" },
-    { "pattern": "\\bleft as an exercise\\b|\\bfor demonstration purposes\\b", "why": "tutorial phrasing in shipped code; finish it or mark it with defer:" },
-    { "pattern": "\\byou would (typically|normally|want to)\\b", "why": "advice to an imaginary reader instead of a decision; state what this code does, or defer: it" },
-    { "pattern": "\\b(TODO|FIXME|HACK|XXX)\\b", "why": "a bare marker is a deferral nobody will find again; use the defer: contract (what, ceiling, upgrade-when) or finish it" },
-    { "pattern": "@ts-ignore|@ts-nocheck|eslint-disable|\\bnoqa\\b|type:\\s*ignore|pylint:\\s*disable|rubocop:disable|\\bnolint\\b", "why": "a check switched off at the call site is a deferral; keep the check on, or carry a defer: marker on the same line that says why and until when" }
-  ],
-  "thirdParty": [
     {
-      "path": ".agents/skills/impeccable/",
-      "version": "4.0.4",
-      "contentVersion": "4.2.2",
-      "why": "impeccable, the design methodology this project builds interfaces with (Apache-2.0), installed per project and gitignored like a dependency. Measured 2026-09-07: the npm package is an 8 KB launcher that downloads the skill payload from GitHub releases at install time, so the package version pins the launcher and its engine binary but NOT the method content: 4.0.3 and 4.0.4 both install skill content 4.2.2 today, while the same 4.0.4 installed content 4.0.4 in August. contentVersion is therefore a record of what was verified, not a lock, and the enforcement line reports when the payload stops matching it. Preventing the change outright would mean vendoring the payload, which spec 011 rules out; this makes the change impossible to miss instead. This repo's house style governs what this repo writes, so its own gates skip the payload; every other gate still applies to it."
+      "pattern": "0001-0008 are Groundwork's own",
+      "why": "retired manifest wording; the decision-record note no longer carries a number range (it went stale at 0009)"
+    },
+    {
+      "pattern": "\\b(14 controles|19 skills)\\b",
+      "why": "retired explainer heading counts; headings stay numberless, the hero stat strip owns live counts (drifted once: heading said 14 while check.mjs had 17)"
+    },
+    {
+      "pattern": "\\b14 (vastgelegde )?besluiten\\b|>14</div><div class=\"l\">Vastgelegde",
+      "why": "retired stat-strip count: 15 recorded decisions exist since 0015; bump the strip when a decision lands, until the counts are derived (GAP Phase 3)"
+    },
+    {
+      "pattern": "\\b2027-06-28\\b",
+      "why": "wrong EAA date that once stood in the register: pre-2025 service contracts run until 2030-06-28 at the latest (EAA Art 32(2), verified 2026-07-22), no EU/NL deadline exists on 2027-06-28"
+    },
+    {
+      "pattern": "NL still pending",
+      "why": "retired NIS2 register wording; the Cyberbeveiligingswet is in force 2026-08-15, the register row owns the current status"
+    },
+    {
+      "pattern": "Omnibus June 2026",
+      "why": "retired AI Act citation; the omnibus is Regulation (EU) 2026/1744, in force 2026-07-27, and the register row owns the current citation"
+    },
+    {
+      "pattern": "OJ publication pending",
+      "why": "retired AI Act register wording; the omnibus is no longer pending publication and the register row owns the current citation"
+    },
+    {
+      "pattern": "ensure that the people operating them have a level of AI literacy",
+      "why": "retired AI Act Art 4 wording; the Digital Omnibus softened it to taking measures that support AI literacy, with no level to guarantee in any individual (AI-LITERACY.md owns the current statement). Pre-omnibus training data says otherwise, so this one returns by itself"
+    },
+    {
+      "pattern": "hard (budget|cap|limit) (of )?(≤|<=)? ?150",
+      "why": "retired 0001 claim; since agent-file-cap the scheme is two-tier: working budget 150 for AGENTS.md, hard cap 200 for every agent rulebook file"
+    },
+    {
+      "pattern": "pip install ['\"]?markitdown|from markitdown import",
+      "why": "retired ingest snippets; install/CLI/API syntax is read from the markitdown README at use time (skill-author: no code snippets that go stale)"
+    },
+    {
+      "pattern": "Groundwork is itself software placed on the EU market",
+      "why": "retired brief claim; unmonetised free and open-source software sits outside both the CRA (Art 2(1) with recital 18) and the PLD (Art 2(2)), verified 2026-07-31. REGISTER.md rows C-1 to C-4 own the current answer, and monetising is what would change it"
+    },
+    {
+      "pattern": "Lucide icons \\(MIT\\)",
+      "why": "wrong licence for the inlined icon set: Lucide is ISC and descends from Feather (MIT), and index.html now names both"
+    },
+    {
+      "pattern": "skipSymlinkCheck\"?\\s*:\\s*true",
+      "why": "retired instruction; skipSymlinkCheck takes the reason as a string value and config-invariants rejects a bare true, so an exemption states its case (INTAKE row 58)"
+    },
+    {
+      "pattern": "COMPLIANCE\\.md.{0,4}§ ?[12]|§ ?[12].{0,40}COMPLIANCE\\.md",
+      "why": "retired pointer; COMPLIANCE.md is one table of regimes with no numbered sections, and this project's register moved to docs/compliance/REGISTER.md, which begin copies from TEMPLATE-REGISTER.md"
+    },
+    {
+      "pattern": "clear §2 back to its skeleton",
+      "why": "retired begin instruction; the register is a cp from docs/compliance/TEMPLATE-REGISTER.md now, like the brief, the deploy runbook and the debt ledger"
+    },
+    {
+      "pattern": "definitions cover language|no implementation detail in this file",
+      "why": "retired glossary rule; a CONTEXT.md entry may now settle how a term is measured (which period, which basis, who counts) and stops at the threshold value and the branching, which belong in a spec where a test can execute them (decision 0019)"
+    },
+    {
+      "pattern": "\\btaste dials\\b|VARIANCE ?/ ?MOTION ?/ ?DENSITY",
+      "why": "retired taste-skill machinery; a page is no longer configured by three numeric knobs set before the owner sees anything. The installed design method commits a direction contract, a color strategy and one authored motion instead (decision 0020)"
+    },
+    {
+      "pattern": "leonxlnx/taste-skill",
+      "why": "retired upstream pointer; the frontend rulebook this repo adapted from it is gone and the installed design method owns that ground now (decision 0020 supersedes 0012)"
+    },
+    {
+      "pattern": "docs/design/DESIGN\\.md",
+      "why": "retired path; the design system is docs/DESIGN.md since 2026-08-07, beside docs/PRODUCT.md, because that is where the installed design method reads both without configuration (decision 0020). docs/design/ still owns VOICE.md and reference/",
+      "exclude": [
+        "011-design-on-impeccable/"
+      ]
+    },
+    {
+      "pattern": "skill `taste`|\\.agents/skills/taste",
+      "why": "retired skill; taste was removed on 2026-08-07 and nothing may point at it again. What each of its rules became is the table in decision 0020",
+      "exclude": [
+        "011-design-on-impeccable/"
+      ]
+    },
+    {
+      "pattern": "\\bcockpit\\b",
+      "why": "retired name for the local board: the page is the board (decision 0021), and since 2026-08-24 the modules that build, serve and guard it are checks/board-*.mjs. A document, a workflow or a page that still says it points at a module that is gone (E-01/F-04/S-06)"
+    },
+    {
+      "pattern": "WCAG 2\\.1 AA (is the legal (baseline|floor)|as the working floor)",
+      "why": "retired wording; the WCAG level is written in one place, the EAA row of docs/compliance/COMPLIANCE.md (2.2 AA for new interfaces since 2026-07-22), and every other file points there instead of repeating a number that drifts (2026-09-06)"
+    },
+    {
+      "pattern": "Node(\\.js)? ?((≥|>=) ?20\\b|20 or (newer|later|higher))|node-version: 20\\b",
+      "why": "retired floor; Node 20 reached end of life on 2026-04-30 and the design method needs 22.18 or newer, so since 2026-09-06 the floor is Node 22 everywhere (README, begin, BRIEF, ci.yml)"
+    },
+    {
+      "pattern": "\\bimpeccable\\b|design-method\\.mjs|the (installed )?design method",
+      "why": "retired dependency; impeccable left the project layer on 2026-10-10 (decision 0023 supersedes 0020). The design skill carries the direction round, the rendered compositions, the finish verdict and the render judgment itself, with nothing installed and no detector to keep current",
+      "exclude": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "pattern": "there is nothing to run",
+      "why": "retired scope line; since 2026-09-25 the brief allows a few zero-dependency scripts a person or agent may run (docs/product/BRIEF.md, out of scope; decision 0022)"
+    },
+    {
+      "pattern": "\\bno (updater|update mechanism)\\b",
+      "why": "retired promise; since 2026-09-25 a report-first upgrade is planned (decision 0022). Improvements still travel by hand today, so say that, and link 0022 for what is coming"
+    },
+    {
+      "pattern": "inherits both the drill and its CI job dead|against a project rather than the framework",
+      "why": "retired wording; a project begun from scratch has nothing to walk once begin deletes the baseline folder, and an existing project gets the folder back and walks, so say which project (docs/operations/evidence-drill.md, Running it; isFramework in checks/drill-core.mjs)"
     }
   ],
+  "styleBans": [
+    {
+      "pattern": "\\bdelve(s|d|ing)?\\b",
+      "why": "AI-tell verb; say 'look at', 'go into' or just state the point"
+    },
+    {
+      "pattern": "\\bseamless(ly)?\\b",
+      "why": "marketing filler; describe what actually happens"
+    },
+    {
+      "pattern": "\\bin today's [a-z-]+ (world|landscape|era)\\b",
+      "why": "empty scene-setting; delete it"
+    },
+    {
+      "pattern": "\\bit'?s (important|worth) (to )?not(e|ing) that\\b",
+      "why": "filler throat-clearing; state the fact directly"
+    },
+    {
+      "pattern": "\\bat the end of the day\\b",
+      "why": "filler; cut it or say what you mean"
+    },
+    {
+      "pattern": "\\bgame[- ]?changer\\b",
+      "why": "hype word; state the concrete effect"
+    },
+    {
+      "pattern": "\\ba testament to\\b",
+      "why": "AI-tell flourish; say what it shows"
+    },
+    {
+      "pattern": "\\bunlock(s|ing)? the (power|potential)\\b",
+      "why": "hype phrasing; describe the capability plainly"
+    },
+    {
+      "pattern": "\\bas an AI\\b|\\bas a language model\\b",
+      "why": "chat residue: an assistant introducing itself has no place in a committed file"
+    },
+    {
+      "pattern": "\\bI hope (this|that) helps\\b",
+      "why": "chat residue: a document is not a reply, delete the sign-off"
+    },
+    {
+      "pattern": "\\blet me know if (you|there|I)\\b|\\bfeel free to (ask|reach out)\\b",
+      "why": "chat residue: a document has no reader to answer, delete the offer"
+    },
+    {
+      "pattern": "\\b(great|excellent) (question|point|catch)\\b",
+      "why": "chat residue: boilerplate enthusiasm aimed at a conversation partner"
+    },
+    {
+      "pattern": "^\\s*(certainly|absolutely)[!,]",
+      "why": "chat residue: an answer opener, not a sentence in a document"
+    },
+    {
+      "pattern": "\\byou'?re absolutely right\\b",
+      "why": "chat residue: agreement addressed to a person, not content"
+    },
+    {
+      "pattern": "\\bmy (knowledge|training) cutoff\\b",
+      "why": "chat residue: the model's own limits are not a fact about this project"
+    },
+    {
+      "pattern": "oaicite|oai_citation|contentReference\\[",
+      "why": "citation artifact pasted from an assistant's output; keep the source, drop the marker"
+    },
+    {
+      "pattern": "\\bturn\\d+(search|view|news|image|forecast)\\d+\\b",
+      "why": "search-tool citation artifact; cite the real URL instead"
+    },
+    {
+      "pattern": "utm_source=(chatgpt|openai|claude|perplexity)",
+      "why": "tracking parameter from an assistant's link; paste the clean URL"
+    },
+    {
+      "pattern": "【[^】]{0,40}†[^】]{0,40}】",
+      "why": "citation artifact pasted from an assistant's output; keep the source, drop the marker"
+    },
+    {
+      "pattern": "\\[citation needed\\]",
+      "why": "unresolved claim: verify it and cite the source, or delete the claim"
+    },
+    {
+      "pattern": "\\bin conclusion\\b|\\bto sum up\\b|\\ball in all\\b",
+      "why": "closing summary that restates what was just said; end on the last real point"
+    },
+    {
+      "pattern": "\\bunderscor(e|es|ing) the\\b",
+      "why": "AI-tell flourish; say what it shows"
+    },
+    {
+      "pattern": "\\b(tapestry|plethora|treasure trove)\\b",
+      "why": "ornamental noun; name the thing and its number"
+    },
+    {
+      "pattern": "\\b(cutting[- ]edge|state[- ]of[- ]the[- ]art|best[- ]in[- ]class)\\b",
+      "why": "unfalsifiable superlative; state the version or the measurement"
+    },
+    {
+      "pattern": "\\b(revolutioniz|supercharg)(e|es|ed|ing)\\b",
+      "why": "hype verb; describe the actual change"
+    },
+    {
+      "pattern": "\\bboasts?\\b",
+      "why": "hype verb for a feature list; say 'has', or state the number"
+    },
+    {
+      "pattern": "\\bwhether you'?re a\\b",
+      "why": "landing-page filler that addresses everyone and no one; name the actual user"
+    },
+    {
+      "pattern": "\\bwhen it comes to\\b",
+      "why": "empty run-up; start the sentence at the point"
+    },
+    {
+      "pattern": "\\bplease note\\b",
+      "why": "public-announcement opener; state the fact"
+    },
+    {
+      "pattern": "\\b(experts|studies|research) (argue|show|suggest)s?\\b",
+      "why": "a claim with no owner; name the source and the number, or drop the claim"
+    },
+    {
+      "pattern": "\\b(serves|stands) as an?\\b",
+      "why": "inflated copula; write 'is'"
+    },
+    {
+      "pattern": "lorem ipsum",
+      "why": "placeholder copy; write the real words or leave the slot visibly empty"
+    }
+  ],
+  "commentBans": [
+    {
+      "pattern": "\\bfor now\\b",
+      "why": "an unmarked deferral rots silently; use the defer: marker with its ceiling and upgrade-when trigger"
+    },
+    {
+      "pattern": "\\bfor (brevity|simplicity)\\b|\\bsimplified for\\b",
+      "why": "a simplification the reader cannot audit; use the defer: marker so it stays grep-recoverable"
+    },
+    {
+      "pattern": "\\bin a real (implementation|app|application|system|project)\\b|\\bin production,? you\\b",
+      "why": "code that admits it is not the real thing; either build it or mark it with defer:"
+    },
+    {
+      "pattern": "\\bleft as an exercise\\b|\\bfor demonstration purposes\\b",
+      "why": "tutorial phrasing in shipped code; finish it or mark it with defer:"
+    },
+    {
+      "pattern": "\\byou would (typically|normally|want to)\\b",
+      "why": "advice to an imaginary reader instead of a decision; state what this code does, or defer: it"
+    },
+    {
+      "pattern": "\\b(TODO|FIXME|HACK|XXX)\\b",
+      "why": "a bare marker is a deferral nobody will find again; use the defer: contract (what, ceiling, upgrade-when) or finish it"
+    },
+    {
+      "pattern": "@ts-ignore|@ts-nocheck|eslint-disable|\\bnoqa\\b|type:\\s*ignore|pylint:\\s*disable|rubocop:disable|\\bnolint\\b",
+      "why": "a check switched off at the call site is a deferral; keep the check on, or carry a defer: marker on the same line that says why and until when"
+    }
+  ],
+  "thirdParty": [],
   "extraTextExtensions": [],
   "extraCodeExtensions": [],
   "codeFileCapExclude": [],

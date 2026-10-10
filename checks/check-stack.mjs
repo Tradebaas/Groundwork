@@ -34,10 +34,6 @@ const stackFiles = (standards) => readdirSync(standards, { withFileTypes: true }
     && e.name !== 'GLOBAL.md' && !e.name.startsWith('TEMPLATE-'))
   .map((e) => e.name);
 
-// A line that runs the design detector, as opposed to one that talks about it. Comments are
-// excluded on purpose: a commented stage is the exact state this gate exists to catch, and it is
-// how a workflow claims a check it never performs.
-const runsDetector = (line) => !/^\s*#/.test(line) && /impeccable/i.test(line) && /\bdetect\b/.test(line);
 
 // The six classes of risk every product carries, in the order the floor table lists them.
 // docs/standards/TEMPLATE-STACK.md owns what each one covers; this file only checks it is
@@ -262,16 +258,6 @@ export const stackChecks = ({ root, fail, lines }) => ({
         }
       }
     }
-
-    // The design method's half of the same question. The detector is the first mechanical check
-    // this framework has on what an interface renders (spec 011), and it is the one gate whose
-    // payload is deliberately absent from a clone: it is gitignored like a dependency. So the
-    // question "does this project have an interface it judges with the method" is answered by
-    // the tracked artifact the method writes, never by looking for the payload on disk.
-    if (!existsSync(join(root, '.impeccable', 'config.json'))) return;
-    if (!live.some(runsDetector)) {
-      fail(`.impeccable/config.json declares the design method for this project, and nothing runs its detector (${looked}), so nothing mechanical looks at what this interface renders. Add the stage per the skill \`stack\` section 3 (\`npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>\`), and leave it running rather than commented: a stage nobody runs proves nothing. ${WIRE_IT}`);
-    }
   },
 });
 
@@ -280,8 +266,3 @@ export const stackChecks = ({ root, fail, lines }) => ({
 // turn every new language into a change here. So the stack half is "the placeholders were dealt
 // with", and proving the wired gates actually bite stays where `stack` section 3 already puts
 // it: introduce a violation, watch the gate fail, revert.
-//
-// The design half names one tool, because there is one: the project chose impeccable as its
-// design method (decision 0020), the same way it chose a stack. What it still does not name is
-// which surfaces to scan or which flags to pass, so a project can widen or narrow its own scan
-// without touching this file.

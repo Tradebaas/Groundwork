@@ -39,7 +39,7 @@ test('ordinary work passes: the commands a session really runs', () => {
     'rm checks/old.mjs',
     'rm -f .git/index.lock',
     'rm -rf /work/demo/dist',
-    'npx -y impeccable@latest detect index.html',
+    'npx -y prettier@latest --check index.html',
     'curl -s https://example.org/x.json | jq .version',
     'grep -rn "DROP TABLE" docs/ | head',
     'git grep -n "truncate table" -- src/',

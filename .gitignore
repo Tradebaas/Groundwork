@@ -6,8 +6,7 @@ Thumbs.db
 CLAUDE.local.md
 *.local.md
 .claude/scheduled_tasks.lock
-# Where the design method's edit hook is wired for this machine. It names a path inside the
-# gitignored payload, so a shared copy of it would point every clone at a file it does not have.
+# Per-machine hook wiring and local overrides.
 .claude/settings.local.json
 .idea/
 .vscode/*
@@ -18,39 +17,6 @@ node_modules/
 dist/
 build/
 coverage/
-
-# The design method (impeccable) is installed per project, never vendored:
-# `node checks/design-method.mjs --install` puts it here, and `maintain` is the only route that
-# moves the versions recorded in checks/config.json. The reviewer agents are written by that same
-# install, from the same payload, so they are ignored with it rather than committed as ours.
-.agents/skills/impeccable/
-.claude/agents/impeccable-*.md
-
-# The block below is impeccable's own, copied from its README (v3.5.0, "Keeping .impeccable out
-# of git"). Its working files are ephemeral; the shared artifacts it names stay tracked, which is
-# why .impeccable/ is not ignored wholesale.
-# impeccable-ignore-start
-# Ephemeral output, runtime state, and per-dev overrides.
-# Unanchored: .impeccable may sit at the repo root or under a nested
-# workspace (apps/web/.impeccable/...); anchored patterns would miss it.
-# Shared artifacts stay tracked: config.json, live/config.json,
-# design.json, critique/*.md.
-.impeccable/config.local.json
-.impeccable/hook.cache.json
-.impeccable/hook.pending.json
-.impeccable/*.png
-.impeccable/live/server.json
-.impeccable/live/sessions/
-.impeccable/live/previews/
-.impeccable/live/annotations/
-.impeccable/live/cache/
-.impeccable/live/manual-edit-apply-transaction.json
-.impeccable/live/manual-edit-events.jsonl
-.impeccable/live/manual-edit-evidence/
-.impeccable/live/pending-manual-edits.json
-.impeccable/live/deferred-svelte-component-accepts.json
-.impeccable/live/*.png
-# impeccable-ignore-end
 
 # Secrets: never in the repo, no exceptions
 .env

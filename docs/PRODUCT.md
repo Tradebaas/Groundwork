@@ -1,14 +1,12 @@
 # Product
 
 
-<!-- This is Groundwork's OWN product record: the durable answers the installed design method
-     reads before it designs anything, in the shape that method asks for. Scope, users and
-     purpose are not repeated here: `docs/product/BRIEF.md` owns them and this file points at them.
-     It sits in `docs/`, beside `docs/DESIGN.md`, because that is where the method looks for
-     both, with no configuration.
+<!-- This is Groundwork's OWN product record: the durable answers the `design` skill reads before it
+     designs anything. Scope, users and purpose are not repeated here: `docs/product/BRIEF.md` owns
+     them and this file points at them. It sits in `docs/`, beside `docs/DESIGN.md`.
 
-     Starting a project from a fresh copy? This file is not your template. `begin` deletes it,
-     and the method's own init writes yours in its place, from what `begin` already captured. -->
+     Starting a project from a fresh copy? This file is not your template. `begin` deletes it, and
+     `design` writes yours in its place, from what `begin` already captured. -->
 
 ## Platform
 
@@ -48,7 +46,7 @@ Three surfaces exist, and they are the whole interface this project has:
   the moment it was made, for a reader who has no repository beside it, so it opens nothing,
   fetches nothing, and carries no navigation, having nowhere inside one file to navigate to.
 - **The gates' own output** (`node checks/check.mjs` and the suites beside it), read in a terminal
-  or in a CI log. `design-guard` section 3 owns how that output has to read.
+  or in a CI log. `design` section 5 owns how that output has to read.
 
 Everything else this framework produces is Markdown, read by an agent or by a human in an editor.
 
