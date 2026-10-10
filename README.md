@@ -16,9 +16,9 @@ Groundwork removes those failure modes by design:
   where the last one stopped instead of re-deriving the project in chat, and those same files
   answer, in plain language, what is done and what is still left.
 - **Discipline built in.** One always-loaded rulebook, an on-demand skill library covering every
-  phase (scope, spec, architecture, design, verification, debugging, code review, delivery,
-  maintenance, compliance, plus session calibration of model and effort), and automated checks
-  that gate every commit at zero token cost.
+  phase (session start, scope, spec, architecture, design, verification, debugging, code review,
+  delivery, maintenance, handoff, compliance), and automated checks that gate every commit at
+  zero token cost.
 - **Token efficiency by design.** Skills load only when needed, large work is cut into
   one-session tickets, and every fact lives in one file that everything else points to.
 - **No lock-in.** Plain Markdown and open standards, readable by any agent, any model, any
@@ -26,6 +26,18 @@ Groundwork removes those failure modes by design:
 
 Want the full story first? An interactive explainer ships with the repo: see it live at
 **https://tradebaas.github.io/Groundwork/**, or open [index.html](index.html) in any browser.
+
+## Install the skills once, use them in any repository
+
+The expert library ships as the Claude Code plugin `vibe` (decision 0024). Installed once per
+machine, it works in every repository you open, with or without the rest of Groundwork:
+
+```
+/plugin install vibe --marketplace Tradebaas/groundwork
+```
+
+Then `/vibe:start` opens a session the cheap way, and `/vibe:begin` lays the full governance
+layer below over a project when you want it. The rest of this README is about that layer.
 
 ## Start a project
 
@@ -94,14 +106,15 @@ records the reasoning.
 ## How it works
 
 - **[AGENTS.md](AGENTS.md)** is the single always-loaded rulebook, written to the open
-  [agents.md](https://agents.md) standard that all major agent tools read. `CLAUDE.md` (Claude
-  Code) and `.gemini/settings.json` (Gemini CLI) are thin bridge files that point to it. Never
-  edit those.
-- **[.agents/skills/](.agents/skills/)** holds the expert methods (scoping, spec, stack choice,
-  design, verification, debugging, code review, delivery, maintenance, compliance, session
-  calibration ...) in the open
-  [Agent Skills](https://agentskills.io) format. They load on demand, so they cost no context
-  until needed. `.claude/skills` is a symlink to this directory.
+  [agents.md](https://agents.md) standard that all major agent tools read. `CLAUDE.md` is the
+  one-line bridge Claude Code reads it through (decision 0024). Never edit that.
+- **[plugins/vibe/](plugins/vibe/)** is the expert library as a Claude Code plugin: the skills
+  (session start, scoping, spec, stack choice, design, verification, debugging, code review,
+  delivery, maintenance, handoff, compliance) in the open
+  [Agent Skills](https://agentskills.io) format, three review agents, and the guard. Installed
+  once per machine, it works in any repository; `begin` lays this governance layer over a project
+  only when its owner asks. `.agents/skills` and `.claude/skills` are symlinks into it, so a tool
+  without plugins still finds the skills here.
 - **[docs/](docs/)** is the project's externalized memory: live state and session handoff,
   scope, specs, decisions, standards, design system, compliance register. Agents read state from
   disk instead of re-deriving it every session. [docs/README.md](docs/README.md) is the manifest.
@@ -153,7 +166,7 @@ records the reasoning.
 |---|---|
 | `AGENTS.md` | Always-on rules + routing table (the front door for agents) |
 | `README.md` | This file (the front door for humans) |
-| `.agents/skills/` | Skill library: expert methods, loaded on demand |
+| `plugins/vibe/` | The library as a plugin: skills, review agents, guard (`.agents/skills/` links into it) |
 | `docs/` | Project memory: state, scope, specs, decisions, standards, design, compliance |
 | `checks/` | Zero-token enforcement: hygiene checks + their self-tests, plus the progress overview |
 | `index.html` + `fonts/` | The interactive explainer of this system (the live version linked above) |

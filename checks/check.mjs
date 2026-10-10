@@ -204,7 +204,7 @@ export function runChecks(root) {
 
     'prose-style'() {
       // AI-tell typography that may never appear in any text (AGENTS.md Language rule, decision 0008).
-      // Deterministic characters only; judgment tells (cliche phrasing) live in VOICE.md + design-guard.
+      // Deterministic characters only; judgment tells (cliche phrasing) live in VOICE.md and the design skill.
       // checks:allow-style on a line is the escape hatch (e.g. a spec quoting source text verbatim).
       const chars = AI_TYPOGRAPHY;
       const phrases = compilePhrases(cfg.styleBans);
@@ -239,9 +239,11 @@ export function runChecks(root) {
     },
 
     'skills'() {
-      const skillsDir = join(root, '.agents', 'skills');
-      const agents = read(join(root, 'AGENTS.md'));
-      const dirs = new Set();
+      // The library lives in the plugin (plugins/vibe/skills, decision 0024); .agents/skills is a
+      // symlink to it so the framework's own sessions and the adoption drill keep one path. A
+      // project that carries neither has no skills of its own to check: the plugin brings them.
+      const skillsDir = ['plugins/vibe/skills', '.agents/skills'].map((p) => join(root, p)).find((p) => existsSync(p));
+      if (!skillsDir) return;
       // Every description is loaded into every session before anything is asked, so together
       // they are a standing cost like the rulebook itself; the total is budgeted for the same
       // reason the rulebook is, and a new skill is paid for by trimming or by raising it on purpose.
@@ -249,11 +251,8 @@ export function runChecks(root) {
       let longest = { name: null, chars: 0 };
       for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
         if (!entry.isDirectory()) continue;
-        dirs.add(entry.name);
         // A declared third-party skill is somebody else's work, installed rather than authored
-        // here: it carries no row in our routing table and is not held to our frontmatter
-        // budgets. It stays in `dirs`, so the reverse direction below still catches a table row
-        // whose directory is gone.
+        // here, and is not held to our frontmatter budgets.
         if (isThirdParty(`.agents/skills/${entry.name}`)) continue;
         const p = join(skillsDir, entry.name, 'SKILL.md');
         if (!existsSync(p)) { fail(`skill "${entry.name}" has no SKILL.md`); continue; }
@@ -269,16 +268,14 @@ export function runChecks(root) {
         descTotal += (desc || '').length;
         if ((desc || '').length > longest.chars) longest = { name: entry.name, chars: desc.length };
         const bodyLines = body.split('\n').length;
+      // A project without a skills directory of its own loads the library from the plugin and has
+      // nothing to link; the gate only holds where .agents/skills exists.
+      if (!existsSync(join(root, '.agents', 'skills'))) return;
         if (bodyLines > cfg.budgets.skillMdLines) fail(`skill "${entry.name}": ${bodyLines} lines (budget ${cfg.budgets.skillMdLines}): move reference material to files next to SKILL.md`);
-        if (!agents.includes(`\`${entry.name}\``)) fail(`skill "${entry.name}" is not registered in the AGENTS.md skills table`);
       }
       const totalBudget = cfg.budgets.skillDescriptionTotalChars;
       if (totalBudget && descTotal > totalBudget) {
         fail(`the skill descriptions total ${descTotal} chars against a budget of ${totalBudget}, and every session loads all of them before it starts; the longest is "${longest.name}" at ${longest.chars}. Trim descriptions to what triggers the skill, or raise budgets.skillDescriptionTotalChars in checks/config.json with the reason in the same change.`);
-      }
-      // reverse direction; only skills-table rows open with a backticked name in the first cell
-      for (const m of agents.matchAll(/^\|\s*`([a-z0-9-]+)`\s*\|/gm)) {
-        if (!dirs.has(m[1])) fail(`the AGENTS.md skills table lists "${m[1]}" but .agents/skills/${m[1]} does not exist: remove the row or restore the skill`);
       }
     },
 

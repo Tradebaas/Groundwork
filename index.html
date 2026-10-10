@@ -112,7 +112,7 @@ window.GW={
     .eyebrow{font-size:13px}}
 
   /* A tracked-caps pill above the headline is the tell every AI landing page shares, and the
-     design method's detector names it. Same words, said quietly: sentence case, no pill. */
+     the design skill refuses it. Same words, said quietly: sentence case, no pill. */
   .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:14px;
     line-height:1.4;color:var(--ink2)}
   .eyebrow svg{color:var(--accent);width:14px;height:14px;transform:translateY(-0.5px)}
@@ -462,9 +462,9 @@ window.GW={
        the owning directory and turns red when this page drifts. The two unmarked stats are
        claims, not counts. Copied this repo to start a product? `begin` drops these markers:
        the numbers then describe the framework you copied, not what you are building. -->
-  <div class="stat"><div class="n" data-derive="skills">20</div><div class="l">Skills on demand</div></div>
-  <div class="stat"><div class="n" data-derive="gates">23</div><div class="l">Automated checks</div></div>
-  <div class="stat"><div class="n" data-derive="decisions">22</div><div class="l">Recorded decisions</div></div>
+  <div class="stat"><div class="n" data-derive="skills">14</div><div class="l">Skills on demand</div></div>
+  <div class="stat"><div class="n" data-derive="gates">22</div><div class="l">Automated checks</div></div>
+  <div class="stat"><div class="n" data-derive="decisions">24</div><div class="l">Recorded decisions</div></div>
   <div class="stat"><div class="n">1</div><div class="l">Rulebook, every tool</div></div>
   <div class="stat"><div class="n"><em>0</em></div><div class="l">Tokens for the checks</div></div>
 </div>
@@ -834,30 +834,23 @@ arrows(tw,selWhy);
 
 var skillGroups=[
   ['Setting course','think first, then build',[
-    ['begin','Starts a fresh project. A pasted PRD or idea is the source and the interview covers only the gaps; then it fills the templates and sets up git.'],
+    ['start','Opens a session the cheap way: reads the handoff, pins one ticket, and picks the session shape (plan mode, goal, loop, advisor, subagent, model) from one table.'],
+    ['begin','Lays the governance layer over a project when you ask for it: the interview, the brief, the state file, checks and CI, the first governed commit. An experiment starts without it.'],
     ['scope','Decides and guards what does and does not get built. New wishes arrive here, not quietly during the building.'],
-    ['spec','Writes exactly enough plan before anything gets built. Not too much, not too little.'],
-    ['critical-thinking','Thinks along critically before an idea gets built: the counterweight to the AI habit of nodding along with everything.']]],
+    ['spec','Writes exactly enough plan before anything gets built, and names the alternative and the assumption behind every recommendation.']]],
   ['Laying the foundation','technology, structure and taste',[
     ['stack','Chooses the technology and looks up live what the right, safe way to use it is today.'],
     ['architect','Designs the system: the boundaries, the data, the integrations and the threats it faces.'],
-    ['design','Sets up the visual system and the writing style, tuned to your taste and your audience, and runs the making of a screen through the installed design method.']]],
+    ['design','Sets up the visual system and the writing style, tuned to your taste and your audience, holds the three points where you decide, and judges every screen and text on what renders.']]],
   ['Guarding quality','fresh eyes on every result',[
-    ['scope-guard','The last check before work is called "done": was nothing extra built that nobody asked for?'],
-    ['design-guard','The last check on screens and texts before they go out the door.'],
     ['verify','Proves that a change really works, end to end. Green tests alone are not proof.'],
-    ['code-review','Reviews the change with fresh eyes, one axis at a time: did this diff weaken a check, does the code meet the standards, does it do exactly what the spec asked. Around logins, payments or personal data a security axis comes on top.']]],
+    ['code-review','Reviews the change with fresh eyes, one axis at a time: did this diff weaken a check, does the code meet the standards, does it do exactly what the spec asked. Around logins, payments and personal data a security axis joins.'],
+    ['debug','Finds the real cause of a stubborn fault: reproduce first, then test hypothesis by hypothesis, and fix the cause once with a test as proof.']]],
   ['Delivering and running','out the door, and after',[
     ['deliver','Ships a release in a controlled, repeatable way. Nothing goes out that has not been verified.'],
     ['maintain','Keeps a live product healthy: updates, incidents, accumulated debt and periodic audits.'],
-    ['handover','Makes the project transferable to another human or AI, with no spoken explanation.'],
-    ['checkpoint','Puts the state of a long session on disk, so you can clear the context and continue fresh and cheaper without losing the thread.']]],
-  ['Tools','for everything around it',[
-    ['debug','Finds the real cause of a stubborn fault: reproduce first, then test hypothesis by hypothesis, and fix the cause once with a test as proof.'],
-    ['skill-author','Writes a new skill, but only when the project genuinely needs one again and again.'],
-    ['comply','Tests against Dutch and European law: privacy, the AI Act, accessibility, product and cyber security duties, and licensing. Every date is verified against the official source, never from memory.'],
-    ['ingest','Turns PDF, Office files and images into compact text, so tokens go to content.'],
-    ['calibrate','Picks the right model and the right thinking effort before a session starts: as cheap as it can be, as heavy as it has to be.']]]
+    ['handoff','Puts the state on disk so the next session, or the next person, continues without this conversation.'],
+    ['comply','Tests against Dutch and European law: privacy, the AI Act, accessibility, product and cyber security duties, and licensing. Every date is verified against the official source, never from memory.']]]
 ];
 var sg=document.getElementById('skillgrid');
 sg.innerHTML=skillGroups.map(function(g){

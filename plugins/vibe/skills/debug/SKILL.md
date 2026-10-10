@@ -1,0 +1,51 @@
+---
+name: debug
+description: Systematic debugging when a failure's cause is unknown: reproduce first, isolate, fix the root cause once, prove it with a regression test. Use when a bug, crash, failing test or wrong output has no obvious cause, when a fix attempt did not work, or before claiming a stubborn bug fixed. For production incidents: stabilize first per `maintain`, then run this loop.
+---
+
+# debug: from symptom to proven root cause
+
+A fix you never saw fail is a guess (`verify`). This loop turns an unknown failure into a
+proven fix at the lowest cost. Production incident? Stabilize first per `maintain` (rollback
+beats diagnosis under fire), then run this loop calmly.
+
+## The loop
+
+1. **Read the actual error.** The message, the stack, the failing line. Capture expected vs
+   actual behavior verbatim before touching anything: the error usually says more than the
+   first theory about it.
+2. **Reproduce before fixing.** A failing automated test at the nearest seam is the goal; a
+   minimal script is the fallback. Shrink the repro until removing anything makes the bug
+   disappear. What you cannot reproduce you cannot fix, only disturb.
+3. **Check what changed.** Most bugs live in the newest diff: recent commits, dependency
+   bumps, config or environment changes. `git bisect` beats rereading the whole system.
+4. **Hypothesize, test one change at a time.** Rank hypotheses by likelihood and cost of
+   testing; each experiment changes exactly one thing and names its predicted outcome before
+   running. Two simultaneous changes make the result unreadable. Read the evidence at arm's
+   length: a failing suite or a log enters the context as its failures and counts (tail, grep, or
+   a subagent), never whole, or the third experiment runs in a context the first two filled. Expect horses, not zebras:
+   the common cause outranks the exotic one until evidence says otherwise.
+5. **Fix the root cause, once.** The fix goes where the cause lives, not where the symptom
+   showed (decision ladder in `docs/standards/GLOBAL.md`: understand, then fix the cause once). A symptom patch that leaves
+   the cause in place is not progress, and per debug hygiene a change that demonstrably fixed
+   nothing gets reverted, not left in.
+6. **Prove and clean.** The repro test passes and stays as the regression test; every debug
+   shim (prints, sleeps, forced branches, commented-out calls) is removed; the full gate
+   chain runs green.
+
+## On a platform stack
+
+When the stack file's header declares a hosted platform, steps 2 and 3 keep their intent and
+change their instrument; the rest of the loop is unchanged. Reproduce in a real dev environment,
+against the platform's own record of the failure - run history, execution logs, the audit trail -
+and with its test tooling where the platform has any. For what changed, the platform keeps its
+own history: solution layers and version history, the audit log of who edited what, and the
+vendor's release notes for the change nobody in the project made. That is the bisect equivalent,
+and it reaches one thing bisect cannot - an edit made directly in the platform editor that never
+became a commit.
+
+## Record
+
+A non-obvious cause is lesson material: one gotcha line in STATE.md's log, so the next
+session skips the dead end. For production incidents, the ten-line post-mortem belongs to
+`maintain`.

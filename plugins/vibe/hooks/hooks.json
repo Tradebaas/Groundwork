@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/checks/guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"$CLAUDE_PROJECT_DIR/docs/state/STATE.md\" ] && sed -n '/^## Handoff/,/^## Log/p' \"$CLAUDE_PROJECT_DIR/docs/state/STATE.md\" || true"
+          }
+        ]
+      }
+    ]
+  }
+}

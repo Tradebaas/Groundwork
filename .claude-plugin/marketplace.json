@@ -1,0 +1,16 @@
+{
+  "name": "groundwork",
+  "owner": { "name": "Remon Panman", "url": "https://github.com/Tradebaas" },
+  "metadata": {
+    "description": "The vibe plugin: the skills, agents and guard that take a project from idea to delivered software, in any repository, with the Groundwork governance layer laid over a project only when its owner asks for it."
+  },
+  "plugins": [
+    {
+      "name": "vibe",
+      "source": "./plugins/vibe",
+      "description": "Fourteen skills (start, begin, scope, spec, stack, architect, design, verify, code-review, debug, deliver, maintain, handoff, comply), three review agents on Sonnet, and the guard that refuses a bypassed gate or a force-push before it runs.",
+      "category": "engineering",
+      "keywords": ["workflow", "review", "verification", "governance", "power-platform"]
+    }
+  ]
+}

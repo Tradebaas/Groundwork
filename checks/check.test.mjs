@@ -74,11 +74,7 @@ expectFail('state-file', ({ put }) =>
 expectFail('skills', ({ put }) =>
   put('.agents/skills/demo/SKILL.md', '---\nname: wrong-name\ndescription: Mismatch.\n---\n'));
 
-expectFail('skills', ({ put }) =>
-  put('.agents/skills/ghost/SKILL.md', '---\nname: ghost\ndescription: Not registered in AGENTS.md.\n---\n'));
 
-expectFail('skills', ({ put }) => // reverse direction: a table row whose skill directory is gone
-  put('AGENTS.md', '# rules\n\nskills: `demo`\n\n| `phantom` | listed in the table, no directory |\n'));
 
 expectFail('skills', (fx) => { // the descriptions together outgrow what a session should pay
   withConfig({ budgets: { agentsMdLines: 150, stateMdLines: 150, skillMdLines: 500, skillDescriptionChars: 1024, skillDescriptionTotalChars: 40 } })(fx);

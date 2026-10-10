@@ -22,7 +22,7 @@
      "robust / powerful / cutting-edge" as filler, "it's important/worth noting that", "in
      today's ... world", "a testament to", "unlock the power/potential", "game-changer", "at the
      end of the day". The unambiguous ones are in `checks/config.json` styleBans; the rest are
-     judgment, caught by `design-guard`.
+     judgment, caught by `design` section 5.
    - **Banned residue:** chat leftovers and citation artifacts have no place in a committed
      file: an assistant introducing itself, "I hope this helps", an offer to answer follow-up
      questions, and the markers a tool leaves behind (oaicite, turn0search, utm_source=chatgpt).
