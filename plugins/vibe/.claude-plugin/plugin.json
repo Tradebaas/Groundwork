@@ -1,0 +1,9 @@
+{
+  "name": "vibe",
+  "description": "Skills, review agents and a guard for building software with Claude Code: open a session cheaply, spec before building, verify before done, review with fresh eyes, deliver and maintain. Works in any repository; lays the Groundwork governance layer over a project only when the owner asks.",
+  "author": { "name": "Remon Panman", "url": "https://github.com/Tradebaas" },
+  "homepage": "https://github.com/Tradebaas/Groundwork",
+  "repository": "https://github.com/Tradebaas/Groundwork",
+  "license": "MIT",
+  "keywords": ["workflow", "review", "verification", "governance", "power-platform"]
+}

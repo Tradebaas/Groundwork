@@ -109,7 +109,7 @@ test('a copy with no manifest, no brief and no work tree reads as not started', 
   // A zero would read as progress on undecided scope, so none is shown; the next step still
   // names the skill that writes one.
   assert.doesNotMatch(text, /0 of the \d+ things/);
-  assert.match(text, /names no next step.*checkpoint skill/);
+  assert.match(text, /names no next step.*handoff skill/);
   // The way in has no lanes on it by design; the page that does has none to show either.
   assert.doesNotMatch(boardOnlyPage(f.root), /<section class="lane[ "]/, 'and no empty lanes');
   f.clean();

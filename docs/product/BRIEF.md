@@ -105,8 +105,8 @@ Four situations the framework is built for:
 
 - Zero runtime dependencies. The checks run on plain Node and test themselves.
 - AGENTS.md stays at most 200 lines, enforced. Past that it silently stops governing.
-- Source files stay well under the agent read window; a session checkpoints at about 15 percent
-  of the context window, and 40 percent is the ceiling.
+- Source files stay well under the agent read window; one ticket per session, handed off through
+  STATE.md before the context is cleared.
 - English throughout the repo. Product-facing language is a per-project choice.
 - MIT licensed, free, no paid tier.
 - Vendor-neutral: never a forked rule set per tool. What only some tools enforce degrades

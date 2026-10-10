@@ -1,7 +1,7 @@
 # BRIEF: what this project is and is not
 
 <!-- TEMPLATE: filled during `begin` / `scope`. This file is the single measuring stick for
-     scope: the scope-guard skill validates all work against it. Keep it decisive and short;
+     scope: `spec` and `code-review` validate all work against it. Keep it decisive and short;
      detail belongs in specs.
      Parts marked "Discovery" - rows, sections, or comment prompts - are the discovery rows,
      filled proportionally to project class: personal, team, or organization. `begin` §2

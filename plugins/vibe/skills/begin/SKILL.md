@@ -1,0 +1,223 @@
+---
+name: begin
+description: Lay the governance layer over a project, only when the owner asks for it: the interview (or the PRD, idea text or existing code as its input), BRIEF, STATE.md, the first decision, checks, CI and the first governed commit. Use when the owner says "begin", "nieuw project" or "adopt" for a client, government or long-lived product; an experiment starts with /init and nothing else.
+disable-model-invocation: true
+---
+
+# begin: from fresh copy to working project
+
+Run this once. When it's done, STATE.md carries real state and this skill never triggers again.
+
+**Which of the two entrances is this?** Read it off the tree before doing anything, and say which
+one you read: a **fresh copy** holds nothing but Groundwork, while an **existing project** has its
+own `.git` history, source files, and a README that is not this one. Both take the route below;
+the existing project keeps everything it already has, and the steps say where the two differ.
+One skill, two doors: decision 0018 records why.
+
+## 1. Clean the copy
+
+Do this housekeeping silently: it is plumbing, not progress. Report on it only if something
+went wrong or needs the owner's action; a list of deleted template files is noise to them.
+
+- **Existing project: check the overlay first, and touch only what came with the copy.** These
+  must exist before anything else happens: `AGENTS.md`, `.agents/skills/` with the `.claude/skills`
+  symlink, `checks/`, `docs/README.md`, `docs/state/STATE.md`, `.github/workflows/ci.yml`, and
+  `.claude/settings.json` (the guard rides in it; an owner's own file that kept the name leaves the
+  enforcement line saying which half is missing). The
+  README's copy command skips any name the project already had, so a missing one means the owner's
+  file kept the name: list those, and merge each by hand under a temporary name before going on.
+  A `README.md`, `LICENSE`, `.gitignore`, `CHANGELOG.md` or `index.html` that was here before the
+  copy is the owner's, and no bullet below edits it. The version this copy came from is read from
+  the copy the owner took, not from a file in the project.
+- If a `MASTER_PROMPT.md` or `MASTER_PROMPT.local.md` exists at the root: it is Groundwork's own
+  origin brief, not part of any project. Delete it. (Fresh copies no longer carry it: it is
+  gitignored at source. This clears it from older copies made while it was still tracked.)
+- `CHANGELOG.md` at the root of a fresh copy is Groundwork's release history, not this project's.
+  Note which version this copy came from (its newest entry) in STATE.md at step 4, then empty the
+  file down to its heading so this project's first release writes into it.
+- Delete any non-archived spec folder: `docs/specs/[0-9]*` directories are in-flight Groundwork
+  maintainer work, never the new owner's. Keep the worked example in
+  `docs/specs/archive/007-pickup-slots/` and the `TEMPLATE*.md` files.
+- `docs/product/VISION.md` does not exist in a fresh copy, because Groundwork keeps its own
+  purpose out of the copy entirely. Put this project's in place
+  (`cp docs/product/TEMPLATE-VISION.md docs/product/VISION.md`); the interview at step 4 fills it,
+  and it is the first document that step writes, because scope serves purpose.
+- `docs/product/BRIEF.md` and `docs/specs/archive/000-baseline/` hold Groundwork's own scope and
+  the record of what the framework itself had already shipped. Counted against this project they
+  would report someone else's work as done here. Put the blank brief back
+  (`cp docs/product/TEMPLATE-BRIEF.md docs/product/BRIEF.md`) and delete the baseline folder.
+- `docs/PRODUCT.md` is Groundwork's own record of the surfaces this framework renders, which the
+  `design` skill reads as this project's product truth. Delete it: `design` writes this project's, in
+  the same place, from what the interview below already captured. `docs/DESIGN.md` stays: sections 1
+  and 2 ship with Groundwork and are input to `design`.
+- `docs/standards/node.md` is Groundwork's own stack and its own floor table, which `stack-gates`
+  would hold this project to. Delete it: a copy has not chosen a stack yet, and the `stack` skill
+  writes this project's own from `docs/standards/TEMPLATE-STACK.md`. `GLOBAL.md` and the template
+  stay - they are the cross-stack floor and the shape, not Groundwork's answers.
+- `docs/operations/deploy.md` holds Groundwork's own release route, which would read as this
+  project's if it stayed. Put the blank runbook back
+  (`cp docs/operations/TEMPLATE-DEPLOY.md docs/operations/deploy.md`). `deliver` fills it at first
+  delivery.
+- `docs/state/DEBT.md` carries Groundwork's own debt rows, which `maintain` would harvest and
+  report as this project's. Put the blank ledger back
+  (`cp docs/state/TEMPLATE-DEBT.md docs/state/DEBT.md`). The first accepted `defer:` marker fills
+  it; on the existing-project door below, the check total lands here as the starting position.
+- `docs/compliance/REGISTER.md` holds Groundwork's own compliance answers, which would read as
+  this project's if they stayed. Put the blank register back
+  (`cp docs/compliance/TEMPLATE-REGISTER.md docs/compliance/REGISTER.md`). Step 4 fills its
+  header from the interview; `comply` fills the rest before first delivery. The two files beside
+  it, `docs/compliance/COMPLIANCE.md` and `docs/compliance/AI-LITERACY.md`, are shared knowledge
+  and stay as they are.
+- Reset `"denylist"` in `checks/config.json` to `[]`: its entries guard the origin repo's
+  retired wording, never this project's. Keep `styleBans` intact (those are generic).
+- Keep the numbered records in `docs/decisions/`: they document the system this project just
+  inherited (why the rulebook, skills and checks work the way they do). This project's own
+  decisions continue from the next free number. Naming a range here would go stale the next time
+  the framework records one.
+- Strip the `data-derive` attributes from the stat strip in `index.html` when that file is the
+  explainer that came with the copy (leave the numbers and the page alone; an owner's own
+  `index.html` has none and is not touched). They tie those numbers to a gate that counts this repo, and in a copy the
+  numbers describe the framework, not the project: the first decision this project records would
+  otherwise turn the gate red.
+- Verify prerequisites: `git --version` and `node --version` at or above the floor the README names. Missing → tell the
+  owner exactly what to install, then stop.
+
+## 2. Interview the owner
+
+**Existing project: the code answers first.** Its README, manifests, directory layout and recent
+commits already hold what the product is, who runs it and what it is built on. Read them, play the
+answers back for a one-line confirmation each, and spend the interview on what only the owner
+knows: why it exists, who it is for, what is deliberately out, and what "done" means from here.
+Asking an owner to describe software they have been running is the fastest way to lose their trust.
+The conventions the code follows (its linter, its test runner, its layout) are the `stack` skill's
+input on this door: recorded as the standards before anything new is proposed.
+
+**Material first.** Ask whether the owner already has anything written: a PRD, project
+description, pitch, notes, or a rough idea dump. Take it now (pasted text or a file; convert
+a non-Markdown file first: Claude reads PDF and images itself, an Office file goes through
+`markitdown` or `pandoc` to Markdown) and treat it as the primary source: extract answers
+to the questions below from it, play each extracted answer back for a one-line confirmation,
+and interview only for the gaps. A vague idea is a valid starting point: capture what the owner
+does know, record the rest in BRIEF.md as explicitly open, and let `scope` sharpen it (step 6
+routes there).
+
+For whatever the material leaves open, interview **one question per message**, never a batch:
+announce upfront how many questions are coming ("question 1 of 5"), keep that counter on every
+question, and go as deep per topic as it takes to make the answer concrete before moving on.
+Capture answers verbatim where wording matters. Only what is genuinely theirs to decide.
+Everything else you decide later, and say so.
+
+1. **Product**: name; one sentence: what it does, for whom, why now.
+2. **Users**: who, in what situation, on which devices.
+3. **Scope**: the 3-7 capabilities version one must have. Then explicitly: what is *not* in it.
+4. **Constraints**: deadline, budget sensitivity, integrations, data residency, personal data
+   (yes/no: feeds the compliance register), any AI features (EU AI Act relevance).
+5. **Success**: how the owner will know it worked.
+6. **Ownership**: who signs off on scope changes (default: the owner you're talking to).
+
+**Discovery, proportional to project class.** The answers above size the project: *personal*
+(the owner is the user), *team* (others inside one organization depend on it), or
+*organization* (a client, systems of record, a compliance regime, or real money involved).
+The class usually becomes clear at questions 2 and 4; extend the announced counter when it
+does. Class names which of BRIEF's discovery rows to ask about - the row comments there
+carry what each row holds, and every row the class does not ask gets `n/a (<class>)` per
+BRIEF's own header rule. Never interrogate a hobby project:
+
+- **Personal**: ask nothing extra.
+- **Team**: ask the current situation and cost of doing nothing, systems & integrations,
+  and rollout & adoption.
+- **Organization**: ask every discovery row, concretely, one topic at a time.
+
+Do **not** ask about stack (that's the `stack` skill, argued on merit) or design details (the
+`design` skill asks those when the time comes).
+
+## 3. Challenge the idea
+
+The interview captured the idea; this step tests it, before any template absorbs it. Whether this
+is the right product to build is the highest-leverage decision of the whole lifecycle, and it gets
+pushback before it gets paperwork: name the strongest different approach (which for a whole
+product includes buying or configuring something that exists, and doing nothing), name the
+load-bearing assumption nobody has checked and the cheapest test that could kill the idea, and
+write the one-sentence premortem. Voice the concern once, with substance; then the owner's call
+stands and is executed well.
+
+Record the outcome in one or two lines: idea confirmed → a dated note in BRIEF.md's Product
+section; idea changed, or the owner overruled a real concern → a decision record in
+`docs/decisions/`.
+
+## 4. Write it down
+
+- Fill `docs/product/BRIEF.md`: numbered SC-items, explicit out-of-scope, constraints, and
+  the discovery rows at the interviewed depth. Write each SC-item in the owner's own words,
+  as something they would recognize without translation: the progress overview quotes these
+  lines back to them (`node checks/progress.mjs`).
+- Existing project: write one baseline record in `docs/specs/archive/000-baseline/spec.md`, from
+  `docs/specs/TEMPLATE.md`, stating what already shipped before the brief existed and which
+  SC-items it covers. Without it the overview quotes a running product back to its owner as
+  nothing done, and the alternative is inventing retroactive specs nobody wrote. Everything from
+  here forward gets a real spec at the size `spec` picks.
+- Seed the glossary `docs/product/CONTEXT.md` with the domain terms the interview surfaced;
+  the file's template comment defines the entry format.
+- Fill the handoff block in `docs/state/STATE.md`: status active, phase `prepare`, Now ▶ next step,
+  and the Groundwork version this copy started from (step 1). Without that line nothing can say
+  which framework this project holds, which is what makes a later improvement findable.
+- Fill the header of `docs/compliance/REGISTER.md`: set "Personal data processed", "AI features"
+  and "Applicable regimes", dated. Either first field a yes → `comply` runs before first
+  delivery.
+- Rewrite `README.md` for *this product*: the top half (what, for whom, how to run once it
+  exists) replaces Groundwork's pitch, and "Start a project" goes with it (that section is
+  copy-the-template onboarding, done by now). Keep "How it works", "Requirements", "What lives
+  where" and "Handing over" intact for successors; the License section is the owner's call
+  (`comply` sets it). Existing project: its README already belongs to the product, so leave the
+  top half alone and add "What lives where" and "Handing over" to it instead.
+
+## 5. Set up the machinery
+
+First, if a `.git/` directory exists the copy still carries Groundwork's commit history (it was
+cloned, not made with "Use this template", `degit`, or a ZIP). The project must start from its own
+root, so remove it: `rm -rf .git`. In an existing project that `.git` is the owner's own history:
+keep it, skip `git init` below, and run the rest on the branch they are on.
+
+If `.claude/skills` is not a symlink to `../.agents/skills` (degit and some ZIP tools break it),
+restore it: `ln -sfn ../.agents/skills .claude/skills`. On Windows without symlink support: set
+`"skipSymlinkCheck": "<why>"` in `checks/config.json`, the reason as the value, and point the tool
+at `.agents/skills/` directly.
+
+```bash
+git init -b main
+node checks/check.mjs --install-hooks   # wires core.hooksPath → checks/hooks (versioned)
+node checks/check.mjs                   # must be green before the first commit
+node checks/progress.mjs --register     # adds this project to the owner's cross-project overview
+git add -A && git commit -m "chore: initialize project on Groundwork" \
+  -m "Traces-to: explicit request: project initialization (begin)"
+```
+
+Existing project: run `node checks/check.mjs` **before** installing the hooks, and read its output
+as a measurement rather than a verdict. Real code turns it red on contact (length caps, typography
+in text the project already had), and adoption cannot mean cleaning a whole codebase before any
+work is possible. Take it in this order: fix what is unsafe to leave, secrets in tracked files
+first; give every file the project already had in `docs/` its row in `docs/README.md`, which is a
+real fix and takes a minute; mark the rest at the site with the escape the check already offers and
+a reason (`checks:allow-length: <reason>` opening a comment, `checks:allow-style`), never by adding paths to an
+exclusion list in `checks/config.json`; and log the total in `docs/state/DEBT.md`. Then
+install the hooks and commit, with `git init` skipped. Report the numbers to the owner: what it
+flagged, what you fixed, what is now marked. If that count is large, it is the finding worth
+discussing before anything else gets built.
+
+If the owner has a remote (GitHub gets CI from `.github/workflows/ci.yml`; another host needs
+its equivalent: port it before first delivery), wire it and push. No remote yet and the owner
+wants one on GitHub: hand them the two literal lines, `gh auth login` once, then from the project
+root `gh repo create <name> --private --source=. --push`, which creates the repository and pushes
+this first commit. If they want none, note in STATE.md that CI is a `deliver` precondition still to
+be wired. On GitHub, also enable private
+vulnerability reporting on day one, so `SECURITY.md`'s reporting channel exists before anyone
+reads the policy: `gh api --method PUT 'repos/{owner}/{repo}/private-vulnerability-reporting'`
+(not on GitHub or no `gh` → skip; `deliver`'s first-release check covers it).
+
+## 6. Hand off
+
+Update STATE.md, then propose exactly one next step, normally:
+- Scope needs sharpening → `scope`
+- Scope is solid → `stack`, then `architect`, then `design`.
+
+Report: what you recorded, what you decided yourself, and that single next step.
