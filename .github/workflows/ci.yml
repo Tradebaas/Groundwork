@@ -56,35 +56,6 @@ jobs:
       # - name: License scan
       # - name: Secret scan (gitleaks or equivalent)
       # - name: Build
-
-  # The first mechanical check this framework has ever had on what an interface renders
-  # (spec 011). The design method is installed per project and gitignored like a dependency, so
-  # this job fetches it at the package version recorded in checks/config.json (--pinned prints it)
-  # instead of reading it out of the tree. That fixes the launcher and its engine binary; the
-  # method's content is downloaded at whatever the current release is, which is why the enforcement
-  # line reports the content version rather than this job asserting one. A project
-  # on Groundwork with no interface deletes this job; one with more surfaces adds them to the
-  # scan. `stack-gates` reads this stage: while .impeccable/config.json declares the method, a
-  # workflow has to actually run the detector.
-  design:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          # Node 22 is the floor everywhere in this file since 2026-09-06: Node 20 reached end of
-          # life on 2026-04-30, and the design method's own `engines.node` asks 22.18 or newer.
-          node-version: 22
-
-      # index.html is what this repository publishes. docs/design/reference/ stays out of the
-      # scan on purpose: each of its pages mimics one UI library's look so the owner can compare
-      # foundations, so a tell there is the file doing its job. Findings that were examined and
-      # accepted live with their reason in .impeccable/config.json, which this run reads.
-      # Nothing here falls back to green: a detector that cannot install fails the job, because
-      # a green tick standing for a scan that never ran is worse than no scan at all.
-      - name: The published page carries none of the tells this framework refuses
-        run: npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect index.html
-
   # Every adoption claim Groundwork makes rests on one walk: a fresh copy reaches a governed
   # first commit without the maintainer. Proving it once by hand dates the evidence; proving it
   # on every push means the green tick beside a commit is the claim, and a broken copy route

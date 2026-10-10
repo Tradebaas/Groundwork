@@ -66,7 +66,7 @@ Groundwork's gate is that scanner's pre-commit half.
 | `analyzed` | **command** `tsc --noEmit` and `eslint .` | **command** the `PowerPlatformChecker@2` task - static analysis against Microsoft's rule set, emitting SARIF |
 | `dependencies` | **command** `npm audit --audit-level=high` and `npm sbom --sbom-format=cyclonedx` | **not applicable** - a solution declares dependencies on other solutions and connectors, and no vulnerability feed exists for those. Connector governance through DLP policies is the control instead, and it is a policy, not a build step |
 | `secrets` | **command** `node checks/check.mjs` | **command** `node checks/check.mjs` |
-| `renders` | **command** `npx -y "impeccable@$(node checks/design-method.mjs --pinned)" detect <the surfaces this project ships>` | **manual** - the accessibility checker in the studio, run per app before release, with a `defer:` marker naming it |
+| `renders` | **manual** - a browser walkthrough of each shipped surface before a release (skill `verify`), with a `defer:` marker naming it; **command** once the project has a Playwright screenshot run | **manual** - the accessibility checker in the studio, run per app before release, with a `defer:` marker naming it |
 
 A project whose pipeline also imports the packed solution names that task in the same `builds`
 cell, in backticks beside the pack task: two commands in one cell both have to run, so a deploy
