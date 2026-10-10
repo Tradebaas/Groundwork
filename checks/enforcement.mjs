@@ -1,8 +1,7 @@
 // Groundwork enforcement self-report: which enforcement tier does this environment run at?
-// A fresh copy silently loses four machine-local layers: git hooks (core.hooksPath is set per
-// clone), CI (a workflow only runs when a GitHub remote exists to push to), the Claude adapter's
-// hooks (.claude/settings.json: the suggest hooks and the guard), and the design method, whose payload is installed per
-// project and gitignored like a dependency. Without this report, a hookless clone with no remote
+// A fresh copy silently loses three machine-local layers: git hooks (core.hooksPath is set per
+// clone), CI (a workflow only runs when a GitHub remote exists to push to), and the Claude adapter's
+// hooks (.claude/settings.json: the suggest hooks and the guard). Without this report, a hookless clone with no remote
 // runs with zero hard gates and no warning (GAP C-2, INTAKE 2026-07-22).
 // Report, never block: a weak environment is information, not a violation. The exit code
 // belongs to the checks alone; checks/check.mjs prints this on every direct run and skips it
@@ -12,9 +11,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
-// Whether the design method is installed, and at which version, is read where its install route
-// lives, so the report and the installer can never disagree about where the payload sits.
-import { designMethodSignal } from './design-method.mjs';
 
 // stderr is swallowed: "not a repo" or "key unset" are expected degraded states, not errors.
 const git = (root, args) => execSync(`git ${args}`, {
@@ -80,9 +76,6 @@ export function enforcementReport(root) {
     signals.push({ signal: 'adapter hooks', armed: false, detail: `Claude adapter half wired (.claude/settings.json): ${stopWired ? 'the guard (checks/guard.mjs) is not a PreToolUse hook, so nothing refuses a bypassed gate or a force-push' : 'no Stop hooks, so the progress line and handoff nudge never fire'}.` });
   }
 
-  // 4. The design method. Its payload is installed per project and gitignored, so a clone starts
-  //    without it and nothing in the repo can tell from the files alone that it should be there.
-  signals.push(designMethodSignal(root));
 
   return signals;
 }

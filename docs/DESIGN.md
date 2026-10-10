@@ -7,8 +7,8 @@
      SSOT). A section 3 written before the build gets defended against reality instead of
      describing it.
 
-     This file sits in `docs/` because that is where the design method looks for it, with no
-     configuration. `PRODUCT.md` beside it is the product record the same method reads. -->
+     This file sits in `docs/`, beside `PRODUCT.md`, the product record the `design` skill reads
+     with it. -->
 
 ## 1. Principles: why things look right
 
@@ -48,9 +48,9 @@
     gradient, and blue or purple as a reflex accent, are banned as defaults; pick the project's
     own accent (seed: the owner's deep teal). A gradient is only ever a small, deliberate,
     owner-approved accent, never the baseline. Any background motion stays subtle and secondary
-    to reading; usability wins over decoration. The full rulebook against the default look is the
-    installed design method's craft floor and its detector, which the skill `design` runs; these
-    ten principles are the floor it builds on top of and may not break.
+    to reading; usability wins over decoration. The skill `design` carries the method that builds
+    on these ten principles; a direction may build any world it likes on top of them and may not
+    break them.
 
 ## 2. Standing default direction (the owner's taste: seed, not straitjacket)
 
