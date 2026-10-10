@@ -1,6 +1,5 @@
 # Product
 
-<!-- impeccable:product-schema 1 -->
 
 <!-- This is Groundwork's OWN product record: the durable answers the installed design method
      reads before it designs anything, in the shape that method asks for. Scope, users and
