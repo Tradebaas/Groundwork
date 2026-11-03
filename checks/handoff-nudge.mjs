@@ -2,7 +2,7 @@
 // Suggest-only handoff reminder, wired as a Stop hook from the Claude adapter (.claude/settings.json)
 // alongside the progress line. It reads the turn just finished and, when that turn advises a fresh
 // session without a paste-ready prompt, prints one line so the resume steps are never left implicit
-// (skill `handoff` owns the hand-back format). It only ever suggests:
+// (AGENTS.md's session rule owns the hand-back format). It only ever suggests:
 // it never blocks a turn and never errors out, so it cannot get in the way of a session.
 //
 // The pure decision (needsHandoffNudge) is vendor-neutral and self-tested in check.test.mjs. Only
@@ -57,8 +57,8 @@ async function main() {
     if (needsHandoffNudge(lastAssistantText(transcriptPath))) {
       console.log(
         'Handoff reminder: this turn advises a fresh session but includes no paste-ready prompt. '
-        + 'Per skill `handoff`, hand back the literal fresh-session command and the resume prompt '
-        + 'in a code block.',
+        + 'Hand back the literal fresh-session command and the resume prompt in a code block, '
+        + 'after the handoff block in STATE.md is current.',
       );
     }
   } catch {

@@ -20,7 +20,8 @@ prompt cache, and a switch re-reads the whole history at full price. What this s
 ## 2. The ticket
 
 One ticket per session. If the owner names more than one, take the first and park the rest in
-STATE.md's `Now ▶` chain or in INTAKE.md. When the ticket is done: `handoff`, then `/clear`.
+STATE.md's `Now ▶` chain or in INTAKE.md. When the ticket is done: write the handoff block in
+STATE.md (AGENTS.md, session rule 3), hand back the resume prompt in a code block, then `/clear`.
 
 ## 3. The shape, from this table
 

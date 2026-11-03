@@ -269,18 +269,23 @@ export function runChecks(root) {
       }
     },
 
-    'skills-symlink'() {
-      if (cfg.skipSymlinkCheck) return;
-      // A project without a skills directory of its own loads the library from the plugin and has
-      // nothing to link; the gate only holds where .agents/skills exists.
-      if (!existsSync(join(root, '.agents', 'skills'))) return;
+    'claude-skills-link'() {
+      // The library reaches Claude Code through the vibe plugin (decision 0024). A .claude/skills
+      // link into it, which the framework carried until 2026-11-03 under the old gate
+      // skills-symlink, loads every skill twice and puts a project skill named `verify` and
+      // `code-review` in front of the bundled Claude Code skills the library leans on (decision
+      // 0025). A real .claude/skills/ directory is the project's own (the recipe the bundled
+      // /verify records, for one); the gate's business is the link, at the top or one level down,
+      // where a single linked skill named after a bundled one shadows it just the same.
       const p = join(root, '.claude', 'skills');
-      try {
-        if (readlinkSync(p).split('\\').join('/').replace(/\/+$/, '') !== '../.agents/skills') {
-          fail('.claude/skills must be a symlink to ../.agents/skills (decision 0002).');
-        }
-      } catch {
-        fail('.claude/skills symlink is missing or not a symlink. Run: ln -sfn ../.agents/skills .claude/skills. No symlink support (Windows without Developer Mode)? Set "skipSymlinkCheck": "<why>" in checks/config.json, with the reason as the value, and point your tool at .agents/skills directly.');
+      const why = 'the skills load through the vibe plugin, and a project skill named verify or code-review hides the bundled Claude Code skill the library runs (decision 0025)';
+      const linkOf = (path) => { try { return readlinkSync(path); } catch { return null; } };
+      const top = linkOf(p);
+      if (top !== null) { fail(`.claude/skills is a symlink (to ${top}): remove it; ${why}.`); return; }
+      if (!existsSync(p)) return;
+      for (const entry of readdirSync(p, { withFileTypes: true })) {
+        const target = linkOf(join(p, entry.name));
+        if (target !== null) fail(`.claude/skills/${entry.name} is a symlink (to ${target}): remove it; ${why}.`);
       }
     },
 
@@ -360,7 +365,7 @@ export function runChecks(root) {
     'empty-dirs'() {
       // A dir with only a .gitkeep is intentionally kept; a truly empty dir is clutter.
       for (const d of tree.dirs) {
-        // An empty .claude/ means the skills symlink is gone; skills-symlink owns that repair.
+        // An empty .claude/ is the adapter's home before any settings land; not clutter.
         if (rel(root, d) === '.claude') continue;
         const entries = readdirSync(d);
         if (entries.length === 0 && !(cfg.allowedEmptyDirs || []).includes(rel(root, d))) {

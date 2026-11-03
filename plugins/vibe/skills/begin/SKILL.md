@@ -20,8 +20,8 @@ Do this housekeeping silently: it is plumbing, not progress. Report on it only i
 went wrong or needs the owner's action; a list of deleted template files is noise to them.
 
 - **Existing project: check the overlay first, and touch only what came with the copy.** These
-  must exist before anything else happens: `AGENTS.md`, `.agents/skills/` with the `.claude/skills`
-  symlink, `checks/`, `docs/README.md`, `docs/state/STATE.md`, `.github/workflows/ci.yml`, and
+  must exist before anything else happens: `AGENTS.md`, `.agents/skills/`, `checks/`,
+  `docs/README.md`, `docs/state/STATE.md`, `.github/workflows/ci.yml`, and
   `.claude/settings.json` (the guard rides in it; an owner's own file that kept the name leaves the
   enforcement line saying which half is missing). The
   README's copy command skips any name the project already had, so a missing one means the owner's
@@ -178,10 +178,10 @@ cloned, not made with "Use this template", `degit`, or a ZIP). The project must 
 root, so remove it: `rm -rf .git`. In an existing project that `.git` is the owner's own history:
 keep it, skip `git init` below, and run the rest on the branch they are on.
 
-If `.claude/skills` is not a symlink to `../.agents/skills` (degit and some ZIP tools break it),
-restore it: `ln -sfn ../.agents/skills .claude/skills`. On Windows without symlink support: set
-`"skipSymlinkCheck": "<why>"` in `checks/config.json`, the reason as the value, and point the tool
-at `.agents/skills/` directly.
+If `.claude/skills` is a symlink (a copy taken before 2026-11-03 carried one into
+`.agents/skills`), remove it: a project skill named `verify` or `code-review` replaces Claude
+Code's bundled one, which the library leans on, and every skill would load twice (decision 0025).
+A real `.claude/skills/` directory is the project's own and stays.
 
 ```bash
 git init -b main

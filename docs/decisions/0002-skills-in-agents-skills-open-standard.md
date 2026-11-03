@@ -1,6 +1,6 @@
 # 0002: Skill library in `.agents/skills/`, Agent Skills open standard
 
-- **Date:** 2026-07-06 · **Status:** accepted · **Decider:** Groundwork build (Claude, per owner brief)
+- **Date:** 2026-07-06 · **Status:** accepted; the `.claude/skills` symlink half superseded by 0025 · **Decider:** Groundwork build (Claude, per owner brief)
 
 ## Context
 

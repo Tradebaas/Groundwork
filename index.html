@@ -462,9 +462,9 @@ window.GW={
        the owning directory and turns red when this page drifts. The two unmarked stats are
        claims, not counts. Copied this repo to start a product? `begin` drops these markers:
        the numbers then describe the framework you copied, not what you are building. -->
-  <div class="stat"><div class="n" data-derive="skills">14</div><div class="l">Skills on demand</div></div>
+  <div class="stat"><div class="n" data-derive="skills">13</div><div class="l">Skills on demand</div></div>
   <div class="stat"><div class="n" data-derive="gates">22</div><div class="l">Automated checks</div></div>
-  <div class="stat"><div class="n" data-derive="decisions">24</div><div class="l">Recorded decisions</div></div>
+  <div class="stat"><div class="n" data-derive="decisions">25</div><div class="l">Recorded decisions</div></div>
   <div class="stat"><div class="n">1</div><div class="l">Rulebook, every tool</div></div>
   <div class="stat"><div class="n"><em>0</em></div><div class="l">Tokens for the checks</div></div>
 </div>
@@ -559,9 +559,8 @@ window.GW={
         <h3>From the command line</h3>
         <p>One command copies the latest snapshot without history:</p>
         <code class="cmd">npx degit Tradebaas/Groundwork my-project</code>
-        <p class="sp-note">degit drops the <code>.claude/skills</code> symlink. Restore it once,
-          or let <b>begin</b> repair it:</p>
-        <code class="cmd">ln -sfn ../.agents/skills .claude/skills</code>
+        <p class="sp-note">The skills come from the <b>vibe</b> plugin, installed once per machine;
+          the copy itself carries no skill links to repair.</p>
       </div>
     </div>
     <div class="startpath">
@@ -569,7 +568,7 @@ window.GW={
       <div>
         <h3>As a ZIP</h3>
         <p>Rather not install tooling? Download the folder with the green <b>Code</b> button and
-          unzip it. Unpacking drops the same symlink, and the same one line above restores it.</p>
+          unzip it. Nothing in the copy needs repairing afterwards.</p>
       </div>
     </div>
     <div class="startpath wide">
@@ -849,7 +848,6 @@ var skillGroups=[
   ['Delivering and running','out the door, and after',[
     ['deliver','Ships a release in a controlled, repeatable way. Nothing goes out that has not been verified.'],
     ['maintain','Keeps a live product healthy: updates, incidents, accumulated debt and periodic audits.'],
-    ['handoff','Puts the state on disk so the next session, or the next person, continues without this conversation.'],
     ['comply','Tests against Dutch and European law: privacy, the AI Act, accessibility, product and cyber security duties, and licensing. Every date is verified against the official source, never from memory.']]]
 ];
 var sg=document.getElementById('skillgrid');

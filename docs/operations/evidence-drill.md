@@ -44,7 +44,7 @@ templates, hooks or signing key cannot change the result.
 
 | Step | What a failure means |
 |---|---|
-| a fresh copy | The tracked snapshot lost something an adopter needs, the `.claude/skills` symlink broke, or a maintainer-only file escaped the gitignore into every copy |
+| a fresh copy | The tracked snapshot lost something an adopter needs, a `.claude/skills` link crept back in, or a maintainer-only file escaped the gitignore into every copy |
 | the gates | The five self-test suites or `checks/check.mjs` do not pass on an untouched copy, or the copy claims its commit gates are armed when there is no git repository yet |
 | the overview | `checks/progress.mjs` does not render for a copy |
 | begin step 1 | One of the clearing commands in the `begin` skill has no template left to copy, leaves Groundwork's own content behind, or produces a repository the checks reject |

@@ -81,12 +81,18 @@ expectFail('skills', (fx) => { // the descriptions together outgrow what a sessi
 expectClean('skills-table-row-backed-by-directory', ({ put }) =>
   put('AGENTS.md', '# rules\n\n| `demo` | the routing row for the demo skill |\n'));
 
-expectFail('skills-symlink', ({ root }) =>
-  unlinkSync(join(root, '.claude', 'skills')));
+// A Claude link into the library hides the bundled /verify and /code-review (decision 0025).
+expectFail('claude-skills-link', ({ root }) =>
+  symlinkSync('../.agents/skills', join(root, '.claude', 'skills')));
 
-{ // a missing symlink leaves .claude/ empty; skills-symlink owns that repair, empty-dirs stays quiet
+// One linked skill inside a real directory shadows a bundled skill just the same.
+expectFail('claude-skills-link', ({ root, put }) => {
+  put('.claude/skills/own/SKILL.md', '---\nname: own\ndescription: The project\'s own skill.\n---\n');
+  symlinkSync('../../.agents/skills/demo', join(root, '.claude', 'skills', 'verify'));
+});
+
+{ // the fixture's .claude/ holds no settings yet and is empty; empty-dirs stays quiet about it
   const fx = fixture();
-  unlinkSync(join(fx.root, '.claude', 'skills'));
   const found = runChecks(fx.root);
   try {
     assert.ok(!found.some((f) => f.check === 'empty-dirs'),
@@ -205,10 +211,12 @@ expectFail('skills', ({ put }) =>
   put('.agents/skills/demo/SKILL.md',
     `---\nname: demo\ndescription: Oversized body.\n---\n${'line\n'.repeat(510)}`));
 
-expectFail('skills-symlink', ({ root }) => {
-  unlinkSync(join(root, '.claude', 'skills'));
-  symlinkSync('../.agents', join(root, '.claude', 'skills'));
-});
+expectFail('claude-skills-link', ({ root }) =>
+  symlinkSync('../.agents', join(root, '.claude', 'skills')));
+
+// The project's own skills directory, such as the recipe the bundled /verify records, is not a link.
+expectClean('skills-own-directory', ({ put }) =>
+  put('.claude/skills/verify/SKILL.md', '---\nname: verify\ndescription: Launch recipe recorded by the bundled /verify.\n---\n'));
 
 expectClean('crlf-tolerance', ({ put }) =>
   put('.agents/skills/demo/SKILL.md',

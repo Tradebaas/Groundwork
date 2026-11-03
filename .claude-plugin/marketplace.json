@@ -8,7 +8,7 @@
     {
       "name": "vibe",
       "source": "./plugins/vibe",
-      "description": "Fourteen skills (start, begin, scope, spec, stack, architect, design, verify, code-review, debug, deliver, maintain, handoff, comply), three review agents on Sonnet, and the guard that refuses a bypassed gate or a force-push before it runs.",
+      "description": "Thirteen skills (start, begin, scope, spec, stack, architect, design, verify, code-review, debug, deliver, maintain, comply) that lean on Claude Code's bundled /verify, /code-review and /security-review for the running and the bug hunt, three review agents on Sonnet, and the guard that refuses a bypassed gate or a force-push before it runs.",
       "category": "engineering",
       "keywords": ["workflow", "review", "verification", "governance", "power-platform"]
     }

@@ -82,16 +82,20 @@ export const STEPS = [
         'docs/state/STATE.md', '.github/workflows/ci.yml']) {
         must(existsSync(join(ctx.copy, needed)), `missing from the copy: ${needed}`);
       }
-      const skills = join(ctx.copy, '.claude', 'skills');
-      must(existsSync(join(ctx.copy, '.claude')) && lstatSync(skills, { throwIfNoEntry: false }),
-        '.claude/skills is missing from the copy: the symlink the skills load through is gone');
-      must(lstatSync(skills).isSymbolicLink(), '.claude/skills is not a symlink in the copy');
-      must(readlinkSync(skills) === '../.agents/skills',
-        `.claude/skills points at ${readlinkSync(skills)}`);
+      // The skills reach Claude Code through the vibe plugin. A .claude/skills link in the copy
+      // would hide the bundled /verify and /code-review the library runs (decision 0025).
+      const agents = join(ctx.copy, '.agents', 'skills');
+      must(lstatSync(agents, { throwIfNoEntry: false })?.isSymbolicLink(),
+        '.agents/skills is missing from the copy or not a symlink: the open-standard route to the library is gone');
+      must(readlinkSync(agents) === '../plugins/vibe/skills',
+        `.agents/skills points at ${readlinkSync(agents)}`);
+      const claude = join(ctx.copy, '.claude', 'skills');
+      must(!lstatSync(claude, { throwIfNoEntry: false })?.isSymbolicLink(),
+        '.claude/skills is a symlink in the copy: it shadows the bundled Claude Code skills the library leans on');
       const local = files.filter((f) => f.endsWith('.local.md'));
       must(local.length === 0, `maintainer-only files reached the copy: ${local.join(', ')}`);
       must(!existsSync(join(ctx.copy, '.git')), 'the copy carries a .git directory');
-      return `${files.length} files, symlink intact`;
+      return `${files.length} files, library linked once`;
     },
   },
   {

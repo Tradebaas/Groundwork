@@ -55,8 +55,9 @@ There is no server and no build step. What ships is the repository itself, on tw
      of the tests while the sentence still said all of them. Expect the self-tests green, the
      checks green, and enforcement reporting hooks and CI **not** armed with the two commands
      that arm them: that is what a fresh copy should say.
-  2. `.claude/skills` is still a symlink to `../.agents/skills` in the unpacked archive. An archive
-     that flattened it would hand every copy a duplicated skill library.
+  2. `.agents/skills` is still a symlink into `plugins/vibe/skills` in the unpacked archive, and
+     there is no `.claude/skills` in it. An archive that flattened the link would hand every copy
+     a duplicated skill library; one that grew the Claude link would hide the bundled `/verify`.
   3. `node checks/progress.mjs` in that copy ends with `now: run begin`.
   4. The explainer answers 200 and its stat strip matches the repo it was built from.
 

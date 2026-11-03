@@ -71,8 +71,8 @@ per slice, numbered in rough build order.
 - **Declare edges.** `Blocked by:` names the sibling tickets that must be `done` first; the
   ticket graph owns the build order.
 - **Build on the frontier.** Work the lowest-numbered ticket whose blockers are all `done`,
-  one ticket per fresh session, clear context between tickets (hand back with the literal
-  command and paste-ready resume prompt from `handoff`). STATE.md `Now ▶` points at the
+  one ticket per fresh session, clear context between tickets (hand back with `/clear` and the
+  paste-ready resume prompt, per AGENTS.md's session rule). STATE.md `Now ▶` points at the
   frontier ticket. Statuses: `ready | building | done`.
 
 ## 5. Sign-off and build

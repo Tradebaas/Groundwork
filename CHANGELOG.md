@@ -14,6 +14,26 @@ so a minor version may move a file or rename a check; each entry says so when it
 
 ## Unreleased, since v0.2.0
 
+The library now leans on what Claude Code ships instead of carrying its own copy of it
+([decision 0025](docs/decisions/0025-the-library-leans-on-the-bundled-claude-code-skills.md)).
+`verify` is the frame around Claude Code's bundled `/verify`: the gates first, a prediction per
+acceptance criterion, then the bundled skill builds and runs the app and drives the change, and
+the frame keeps the edges, what could not be verified and where the evidence lands. `code-review`
+runs the bundled `/code-review` for the bugs before its own gate scan and axes, and
+`/security-review` ahead of the security axis. `debug` points at `/run` for a reproduction that
+needs the app up. The skill named `handoff` is gone: its block shape is in the STATE.md template and in
+AGENTS.md's third session rule, its transfer audit is step 2 of `deliver`, and the eval that
+checked it now grades the outcome in STATE.md alone. Thirteen skills remain.
+
+One thing moved for this to work. The `.claude/skills` link into the library made every skill a
+project skill in a governed copy, and Claude Code lets a project skill named `verify` or
+`code-review` replace the bundled one, so on a governed copy the bug hunt never ran. The link is
+gone from the framework, the gate that demanded it (`skills-symlink`) is replaced by
+`claude-skills-link`, which rejects one at the top or one level down, the drill's
+copy step checks `.agents/skills` instead, and `skipSymlinkCheck` in `checks/config.json` is
+rejected as stale. A real `.claude/skills/` directory is yours and untouched: the bundled `/verify`
+records its launch recipe there. A copy taken before 2026-11-03 removes its own link by hand.
+
 The rulebook now says how the agent talks to you: in your language, with what changed, what it
 decided itself and why, and one next step, in plain words, about ten lines. It decides everything
 that is not scope, money, users, taste or a risk to your data, and asks about those one question at
