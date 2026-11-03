@@ -1,6 +1,6 @@
 # Access and credentials
 
-<!-- Required by the `handoff` skill (transfer handoff): a named list of what access a successor must be granted, so
+<!-- Required by the transfer walk in `deliver` (step 2, milestone handover): a named list of what access a successor must be granted, so
      the project is transferable with zero verbal context. Never put a secret here - this file
      names WHERE credentials live and WHO grants them, never the values. -->
 

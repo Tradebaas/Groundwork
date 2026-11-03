@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Review the diff of substantial work after `verify` and before the commit: a gate-weakening scan, then fresh-eyes axes for standards and for spec plus commit-message fidelity, plus a security axis on auth, payments, PII, external input, crypto or uploads, each reported by severity. Use before committing anything bigger than a trivial fix.
+description: Review the diff of substantial work after `verify` and before the commit: Claude Code's bundled /code-review for the bugs, then a gate-weakening scan and fresh-eyes axes for standards and for spec plus commit-message fidelity, plus a security axis on auth, payments, PII, external input, crypto or uploads, each reported by severity. Use before committing anything bigger than a trivial fix.
 ---
 
 # code-review: fresh eyes on the diff, one axis at a time
@@ -11,6 +11,13 @@ the actual diff about to be committed, not the intention behind it.
 
 ## Ground rules
 
+- **The bugs are Claude Code's job.** Run the bundled `/code-review` first (the `code-review`
+  skill that ships with Claude Code, reached as `Skill code-review`, never `vibe:code-review`;
+  pass the effort level the owner typed last, or `medium`). It hunts correctness bugs, verifies
+  its own findings and can apply them with `--fix`. Fix what it finds, then run the scan and the
+  axes below, which are what it does not do: the gates, the written standards, the spec and the
+  message, and the security floor. An axis that keeps surfacing plain correctness bugs is a sign
+  the bundled review did not run on this diff; check that before reading its findings as standards.
 - **Independent axes, fresh eyes each.** Two axes always run (A and B); a third (C) runs only
   when the diff is security-sensitive, per its own trigger below. Each axis that runs goes to its
   own agent with only the inputs named below: `vibe:review-standards` for A, `vibe:review-fidelity`
@@ -95,10 +102,12 @@ Runs only when the diff touches at least one of these six surfaces. When it touc
   own because it breaks in its own ways).
 
 Inputs: the diff, the security floor in `docs/standards/GLOBAL.md`, and the stack file. The
-secrets scan and the dependency audit already run as gates; this axis is the design judgment they
-cannot make. Question: on the surfaces the diff touches, does it hold the floor and avoid the
-classic breaks? The seven breaks to check by name, drawn from the OWASP Top 10 classes plus
-GDPR/AVG data minimization, are in `references/security-breaks.md`; read it when this axis runs.
+secrets scan and the dependency audit already run as gates, and the bundled `/security-review`
+(Claude Code's own, run first when this axis triggers) finds the generic vulnerability classes;
+this axis is the design judgment neither can make. Question: on the surfaces the diff touches,
+does it hold this project's floor, minimize the personal data it touches, and avoid the classic
+breaks? The seven breaks to check by name, drawn from the OWASP Top 10 classes plus GDPR/AVG data
+minimization, are in `references/security-breaks.md`; read it when this axis runs.
 
 Report at blocker, major, or minor like the other axes, each finding naming the surface, the
 concrete break, and the smallest fix. A security finding sits on the never-simplify-away floor

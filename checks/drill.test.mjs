@@ -56,19 +56,28 @@ test('a skip is green on its own and red when the walk was required', async () =
   rmSync(box, { recursive: true, force: true });
 });
 
-// The one break the ZIP and degit routes actually cause, and the reason README ships a repair.
-test('a broken .claude/skills symlink is caught', async () => {
+// The open-standard route must survive the copy, and the Claude link must not come back
+// (decision 0025: it hid the bundled /verify and /code-review).
+test('a missing .agents/skills symlink is caught', async () => {
   const c = await copyAt();
-  unlinkSync(join(c.copy, '.claude', 'skills'));
+  unlinkSync(join(c.copy, '.agents', 'skills'));
   await assert.rejects(step('copy').run(c), /is missing from the copy/);
   c.clean();
 });
 
-test('a symlink pointing somewhere else is caught', async () => {
+test('a .agents/skills link pointing somewhere else is caught', async () => {
   const c = await copyAt();
-  unlinkSync(join(c.copy, '.claude', 'skills'));
-  symlinkSync('../.agents', join(c.copy, '.claude', 'skills'));
+  unlinkSync(join(c.copy, '.agents', 'skills'));
+  symlinkSync('../plugins', join(c.copy, '.agents', 'skills'));
   await assert.rejects(step('copy').run(c), /points at/);
+  c.clean();
+});
+
+test('a .claude/skills link in the copy is caught', async () => {
+  const c = await copyAt();
+  mkdirSync(join(c.copy, '.claude'), { recursive: true });
+  symlinkSync('../.agents/skills', join(c.copy, '.claude', 'skills'));
+  await assert.rejects(step('copy').run(c), /shadows the bundled/);
   c.clean();
 });
 

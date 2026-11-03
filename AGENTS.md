@@ -11,7 +11,9 @@ with `/vibe:start`. Project not started yet (`docs/state/STATE.md` says NOT STAR
    `docs/state/STATE.local.md`, when present, takes its place.)
 2. One ticket per session. Decide yourself whatever is not scope, money, users, taste or a risk to
    data; those go to the owner, one question per reply, with your recommended answer.
-3. Before the session ends or after significant work: update STATE.md per the `handoff` skill.
+3. Before the session ends or after significant work: make the handoff block at the top of
+   STATE.md literally true (status, gates with the number, `Now ▶` as one exact next action,
+   blocked on), add a dated log entry, and end the reply with the paste-ready resume prompt.
    One fact, one place: update only the file that owns it.
 
 ## Hard rules

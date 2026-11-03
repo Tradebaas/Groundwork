@@ -14,7 +14,10 @@
 
 ## Log
 
-<!-- Newest first. Per session one short dated entry: what changed, what was decided (link the
-     decision), what is next. Keep this file under the stateMdLines budget in checks/config.json
+<!-- Newest first. Per session one short dated entry: Done (a few bullets), Docs touched (links,
+     never restated content), Lessons (only what a fresh session would otherwise rediscover the
+     hard way), Stopped at (mirrors Now ▶). Route facts to their owner: a decision to
+     docs/decisions/, deferred work to DEBT.md, new scope to INTAKE.md. Never a secret or a
+     credential value: name where it lives. Keep this file under the stateMdLines budget in checks/config.json
      (150 by default): when it grows past that, move the oldest entries to
      docs/state/log/YYYY-MM.md (the manifest pattern already covers those). -->

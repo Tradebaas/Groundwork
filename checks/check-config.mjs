@@ -95,15 +95,11 @@ export const configChecks = ({ root, cfg, fail }) => ({
     } else if (cap !== undefined && cap > 200) {
       fail(`checks/config.json budgets.agentFileHardCapLines is ${cap}: the hard cap is 200 lines and may be lowered, never raised. A rulebook past 200 lines stops being loaded in full.`);
     }
-    // A boolean that retires a whole check is the same weakening vector as an exclusion that
-    // hides a path, and no reading of the config can tell the legitimate case (a checkout with
-    // no symlink support) from a gate somebody found inconvenient. So the exemption states its
-    // case in the same diff that takes it, the trade this repo already made for
-    // "checks:allow-length: <reason>" and "checks:allow-style". skills-symlink still reads the
-    // key as a plain flag: which value is honest is this gate's question, and one red is enough.
-    const skip = cfg.skipSymlinkCheck;
-    if (skip !== undefined && skip !== false && !(typeof skip === 'string' && skip.trim())) {
-      fail(`checks/config.json skipSymlinkCheck is ${JSON.stringify(skip)}: retiring the skills-symlink check takes a reason in the same file, as a non-empty string (e.g. "Windows without Developer Mode"). Set false to keep the check on.`);
+    // skipSymlinkCheck switched off the old skills-symlink gate, which demanded the Claude link
+    // that decision 0025 removed. Its successor, claude-skills-link, rejects that link and takes
+    // no exemption, so the key has nothing left to switch off and is stale config.
+    if (cfg.skipSymlinkCheck !== undefined) {
+      fail('checks/config.json skipSymlinkCheck has no gate left to retire: skills-symlink is gone and its successor claude-skills-link takes no exemption, because a .claude/skills link hides the bundled Claude Code skills the library runs (decision 0025). Remove the key.');
     }
     // A third-party declaration stops several gates from measuring a path, so it states its case
     // in the entry, like every other exemption here. The path itself is bounded below, by the

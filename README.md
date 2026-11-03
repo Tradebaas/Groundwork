@@ -17,7 +17,7 @@ Groundwork removes those failure modes by design:
   answer, in plain language, what is done and what is still left.
 - **Discipline built in.** One always-loaded rulebook, an on-demand skill library covering every
   phase (session start, scope, spec, architecture, design, verification, debugging, code review,
-  delivery, maintenance, handoff, compliance), and automated checks that gate every commit at
+  delivery, maintenance, compliance), and automated checks that gate every commit at
   zero token cost.
 - **Token efficiency by design.** Skills load only when needed, large work is cut into
   one-session tickets, and every fact lives in one file that everything else points to.
@@ -47,10 +47,8 @@ its own first commit, not ours. Pick one:
 - **On GitHub (best):** click **Use this template**, then **Create a new repository**. You get a
   fresh repo with a single initial commit and no Groundwork history.
 - **From the CLI:** `npx degit Tradebaas/Groundwork my-project` copies the latest snapshot with no
-  history. degit breaks the `.claude/skills` symlink; restore it once with
-  `ln -sfn ../.agents/skills .claude/skills` (the `begin` skill also repairs it).
-- **Or:** download the ZIP from the green **Code** button and unzip it (see the symlink note under
-  Requirements).
+  history.
+- **Or:** download the ZIP from the green **Code** button and unzip it.
 
 Avoid a plain `git clone` for this: it drags Groundwork's entire commit history, and our
 development choices, into your project. If you cloned anyway, `begin` resets git so your first
@@ -78,8 +76,7 @@ rsync -a --ignore-existing --exclude .git --exclude README.md --exclude LICENSE 
 The excluded files describe a product rather than the framework, so yours stay yours: merge
 Groundwork's `.gitignore` entries into your own by hand, and read the explainer from the copy you
 took. (No `rsync`, as on Windows: copy the folder in your file manager and answer "skip" for every
-file that already exists.) If your tool broke the `.claude/skills` symlink on the way, restore it
-with `ln -sfn ../.agents/skills .claude/skills`.
+file that already exists.)
 
 Then say **`begin`** as above. It reads which of the two situations it is and adapts: it first
 checks that the framework landed whole and names any file it still misses because you already had
@@ -110,11 +107,13 @@ records the reasoning.
   one-line bridge Claude Code reads it through (decision 0024). Never edit that.
 - **[plugins/vibe/](plugins/vibe/)** is the expert library as a Claude Code plugin: the skills
   (session start, scoping, spec, stack choice, design, verification, debugging, code review,
-  delivery, maintenance, handoff, compliance) in the open
+  delivery, maintenance, compliance) in the open
   [Agent Skills](https://agentskills.io) format, three review agents, and the guard. Installed
   once per machine, it works in any repository; `begin` lays this governance layer over a project
-  only when its owner asks. `.agents/skills` and `.claude/skills` are symlinks into it, so a tool
-  without plugins still finds the skills here.
+  only when its owner asks. `.agents/skills` is a symlink into it, so a tool that reads the Agent
+  Skills standard still finds the skills here. There is deliberately no `.claude/skills` link: a
+  project skill named `verify` or `code-review` would replace Claude Code's bundled one, and the
+  library leans on those (decision 0025).
 - **[docs/](docs/)** is the project's externalized memory: live state and session handoff,
   scope, specs, decisions, standards, design system, compliance register. Agents read state from
   disk instead of re-deriving it every session. [docs/README.md](docs/README.md) is the manifest.
@@ -153,10 +152,6 @@ records the reasoning.
 - Any AI coding agent. No vendor lock-in: one rulebook, open standards, plain Markdown.
 - Node.js ≥ 22 for `checks/` (the only tooling dependency until you choose a stack; the design
   method installed by `begin` needs the same floor).
-- On Windows: enable Developer Mode so the `.claude/skills` symlink survives
-  `git clone -c core.symlinks=true` or ZIP extraction. No symlink support? Set
-  `"skipSymlinkCheck": "<why>"` in `checks/config.json`, with your reason as the value, and point
-  your tool at `.agents/skills/` directly.
 - After every fresh clone: `node checks/check.mjs --install-hooks` (wires the versioned
   pre-commit and commit-msg gates).
 

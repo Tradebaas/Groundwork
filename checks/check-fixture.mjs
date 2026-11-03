@@ -3,7 +3,7 @@
 // that built its own fixture would drift from the others and prove less than it claims.
 // Used by check.test.mjs, check-code.test.mjs and check-trace.test.mjs.
 
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import assert from 'node:assert/strict';
@@ -28,7 +28,6 @@ export function fixture() {
   put('docs/state/STATE.md', '# STATE\n\n## Handoff\n\n- Now ▶ demo\n');
   put('.agents/skills/demo/SKILL.md', '---\nname: demo\ndescription: Demo skill for the self-test.\n---\n\n# demo\n');
   mkdirSync(join(root, '.claude'), { recursive: true });
-  symlinkSync('../.agents/skills', join(root, '.claude', 'skills'));
   return { root, put };
 }
 

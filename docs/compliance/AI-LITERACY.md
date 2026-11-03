@@ -23,7 +23,7 @@ The working system is the literacy program: nobody operates an agent here outsid
 | Awareness of AI limits | Skills `spec` (the strongest different approach and the load-bearing assumption, before committing), `verify` and `debug` (output is proven, not trusted), `code-review` (fresh-eyes axes) |
 | Human oversight | Owner signs off on scope and merges; decisions recorded in `docs/decisions/` |
 | Output controls | `checks/` gates, git hooks and CI: agent output never ships unchecked |
-| Onboarding | Read `AGENTS.md`, then this note; the `handoff` skill keeps the repo cold-start complete |
+| Onboarding | Read `AGENTS.md`, then this note; the handoff block in `docs/state/STATE.md` and the transfer walk in `deliver` keep the repo cold-start complete |
 
 The failure modes these measures target, by name: models state wrong things confidently,
 agree with the user too readily, drift on long sessions, and produce plausible-looking code

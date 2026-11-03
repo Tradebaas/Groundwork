@@ -15,7 +15,8 @@ beats diagnosis under fire), then run this loop calmly.
    actual behavior verbatim before touching anything: the error usually says more than the
    first theory about it.
 2. **Reproduce before fixing.** A failing automated test at the nearest seam is the goal; a
-   minimal script is the fallback. Shrink the repro until removing anything makes the bug
+   minimal script is the fallback, and the bundled `/run` launches the app when the repro needs
+   it running. Shrink the repro until removing anything makes the bug
    disappear. What you cannot reproduce you cannot fix, only disturb.
 3. **Check what changed.** Most bugs live in the newest diff: recent commits, dependency
    bumps, config or environment changes. `git bisect` beats rereading the whole system.

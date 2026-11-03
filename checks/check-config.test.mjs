@@ -62,19 +62,14 @@ expectFail('config-invariants', withConfig({
 expectFail('config-invariants', withConfig({
   denylist: [{ pattern: 'no-such-text-anywhere', why: 'x', exclude: ['checks/'] }],
 }));
-// A boolean that retires the whole skills-symlink check is the same weakening vector as an
-// exclusion that hides a path, and nothing in the config tells the legitimate case (no symlink
-// support) from the illegitimate one. So the exemption states its case, as allow-length does.
+// skipSymlinkCheck switched off a gate that no longer exists (decision 0025); any value is stale.
 expectFail('config-invariants', withConfig({ skipSymlinkCheck: true }));
-expectFail('config-invariants', withConfig({ skipSymlinkCheck: '   ' }));
-expectFail('config-invariants', withConfig({ skipSymlinkCheck: 1 }));
+expectFail('config-invariants', withConfig({ skipSymlinkCheck: 'Windows without Developer Mode' }));
+expectFail('config-invariants', withConfig({ skipSymlinkCheck: false }));
 // Lowering the cap is allowed; only raising it is a weakening. And the shipped secretScanExclude
 // names checks/ by construction, which the clean fixture in check.test.mjs proves stays green.
 expectClean('config-invariants-allows-a-lower-cap', withConfig({
   budgets: { ...BASE_BUDGETS, agentFileHardCapLines: 120 },
-}));
-expectClean('config-invariants-allows-a-stated-reason', withConfig({
-  skipSymlinkCheck: 'Windows without Developer Mode',
 }));
 
 // The third-party declaration stops several gates from measuring a path, so it is bounded the

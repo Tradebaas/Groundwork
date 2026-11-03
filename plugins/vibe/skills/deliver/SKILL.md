@@ -50,8 +50,24 @@ disable-model-invocation: true
 
 ## 2. Milestone handover
 
-Deliverable milestone for a client/owner → run `handoff` in transfer mode so the repo is cold-start complete,
-and demo against BRIEF's success criteria: per SC-item in this milestone, show it working.
+Deliverable milestone for a client/owner → the repo must be cold-start complete: a stranger
+continues in ten minutes from the repo alone. Walk it as that stranger would, and fix everything
+fixable now; what you cannot fix becomes a named gap in STATE.md, because a named gap is
+transferable and a hidden one is not. If a separate "handover document" feels needed, the repo is
+failing this step; fix the repo instead.
+
+1. `README.md`: do the start instructions still hold for this project?
+2. The STATE.md handoff block: literally true, gates line included. A stale handoff is the most
+   damaging lie in the system.
+3. `docs/product/BRIEF.md`: does it still describe the product that exists?
+4. Can the stranger run it? Setup steps, `.env.example` complete, seed data, runbooks in
+   `docs/operations/`. Follow them literally; fix what is wrong, do not annotate around it.
+5. Secrets and access: nothing secret in the repo; who grants what is named in
+   `docs/operations/access.md`.
+6. Open threads: in-flight specs at their real status, INTAKE triaged or queued, DEBT.md
+   reconciled with the `defer:` markers in the code.
+
+Then demo against BRIEF's success criteria: per SC-item in this milestone, show it working.
 
 A demo proves capability, not value: it works, and nobody has measured yet whether the promised
 value arrived. So before the milestone closes, every shipped SC-item's measurement plan in BRIEF
@@ -66,5 +82,5 @@ STATE.md: phase (`maintain` after first production release), release line (versi
 environment), Now ▶. Deferred-but-shipped debt: DEBT.md rows checked against what shipped.
 New operational facts (URLs, dashboards, schedules) → `docs/operations/`, listed in the
 manifest. What this release cycle taught, a missing runbook step included, routes to INTAKE.md
-as a candidate like any session lesson (`handoff` owns that rule).
+as a candidate like any session lesson.
 Report: version, where it now runs, evidence of the smoke checks, one next step.

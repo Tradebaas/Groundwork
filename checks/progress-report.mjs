@@ -27,7 +27,7 @@ export const WORDS = {
     now: 'now',
     next: 'next',
     nextStep: 'Next step',
-    noNextStep: 'The handoff names no next step. Run the `handoff` skill to write down where the work stands.',
+    noNextStep: 'The handoff names no next step. Write one after Now ▶ in the handoff block of STATE.md.',
     noScope: 'Scope is not defined yet. Run the `scope` skill to write down what this project '
       + 'will do, then this overview can report on it.',
     heads: 'Heads up',
@@ -59,7 +59,7 @@ export const WORDS = {
     now: 'nu',
     next: 'daarna',
     nextStep: 'Volgende stap',
-    noNextStep: 'De handoff noemt geen volgende stap. Draai de `handoff`-skill om vast te leggen waar het werk staat.',
+    noNextStep: 'De handoff noemt geen volgende stap. Zet er een achter Now ▶ in het handoff-blok van STATE.md.',
     noScope: 'De scope is nog niet bepaald. Draai de `scope`-skill om vast te leggen wat dit '
       + 'project gaat doen, dan kan dit overzicht erover rapporteren.',
     heads: 'Let op',
